@@ -1,1 +1,1 @@
-# dhis2-android-sdk
+# dhis2-android-eventcapture
