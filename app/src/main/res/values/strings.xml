@@ -4,5 +4,6 @@
     <string name="app_name">DHIS 2 Event Capture</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="register_event">Register Event</string>
 
 </resources>

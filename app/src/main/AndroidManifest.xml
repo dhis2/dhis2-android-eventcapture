@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
-        android:name="org.hisp.dhis2.android.sdk.persistence.Dhis2Application"
+        android:name="org.hisp.dhis2.android.eventcapture.EventCaptureApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
