@@ -45,6 +45,7 @@ import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
@@ -56,6 +57,7 @@ public class MainActivity extends ActionBarActivity {
 
     private SelectProgramFragment selectProgramFragment;
     private RegisterEventFragment registerEventFragment;
+    private FailedItemsFragment failedItemsFragment;
 
     private int currentPosition = 0;
 
@@ -104,6 +106,16 @@ public class MainActivity extends ActionBarActivity {
         } else if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
             showSelectProgramFragment();
         }
+    }
+
+    public void showFailedItemsFragment() {
+        setTitle("Failed Items");
+        if(failedItemsFragment == null) failedItemsFragment = new FailedItemsFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, registerEventFragment);
+        fragmentTransaction.commit();
+        currentPosition = 2;
     }
 
     public void showRegisterEventFragment() {
