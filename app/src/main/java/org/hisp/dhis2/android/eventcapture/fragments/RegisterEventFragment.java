@@ -31,7 +31,6 @@ package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,20 +39,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.views.BoolDataElementView;
-import org.hisp.dhis2.android.eventcapture.views.DataElementAdapterViewAbstract;
-import org.hisp.dhis2.android.eventcapture.views.DatePickerDataElementView;
-import org.hisp.dhis2.android.eventcapture.views.NumberDataElementView;
-import org.hisp.dhis2.android.eventcapture.views.OptionSetDataElementView;
-import org.hisp.dhis2.android.eventcapture.views.TextDataElementView;
-import org.hisp.dhis2.android.eventcapture.views.TrueOnlyDataElementView;
-import org.hisp.dhis2.android.sdk.controllers.DataValueController;
+import org.hisp.dhis2.android.sdk.utils.views.BoolDataElementView;
+import org.hisp.dhis2.android.sdk.utils.views.DataElementAdapterViewAbstract;
+import org.hisp.dhis2.android.sdk.utils.views.DatePickerDataElementView;
+import org.hisp.dhis2.android.sdk.utils.views.NumberDataElementView;
+import org.hisp.dhis2.android.sdk.utils.views.OptionSetDataElementView;
+import org.hisp.dhis2.android.sdk.utils.views.TextDataElementView;
+import org.hisp.dhis2.android.sdk.utils.views.TrueOnlyDataElementView;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.MetaDataController;
-import org.hisp.dhis2.android.sdk.controllers.tasks.RegisterEventTask;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
-import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -148,41 +144,41 @@ public class RegisterEventFragment extends Fragment {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.getOptionSet());
             if ( optionSet == null )
             {
-                dataElementViewAbstract = new TextDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new TextDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
             else
             {
-                dataElementViewAbstract = new OptionSetDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new OptionSetDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
         }
         else
         {
             if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_BOOL ) )
             {
-                dataElementViewAbstract = new BoolDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new BoolDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
             else if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_DATE ) )
             {
-                dataElementViewAbstract = new DatePickerDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new DatePickerDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
             else if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_TRUE_ONLY ) )
             {
-                dataElementViewAbstract = new TrueOnlyDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new TrueOnlyDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
             else if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_NUMBER ) || dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_INT ) )
             {
-                dataElementViewAbstract = new NumberDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new NumberDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
             else
             {
-                dataElementViewAbstract = new TextDataElementView( getActivity(), programStageDataElement,
-                        dataElement, dataValue );
+                dataElementViewAbstract = new TextDataElementView( getActivity(),
+                        dataElement, dataValue, programStageDataElement.isCompulsory() );
             }
         }
         return dataElementViewAbstract.getView();
