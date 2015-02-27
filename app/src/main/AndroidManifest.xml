@@ -83,6 +83,9 @@
         <service
             android:name="org.hisp.dhis2.android.sdk.services.StartPeriodicSynchronizerService"
             android:enabled="true" />
+
+        <!-- Specify the next screen after SplashScreen if user already logged in -->
+        <meta-data android:name="nextClassName" android:value="org.hisp.dhis2.android.eventcapture.MainActivity" />
     </application>
 
 </manifest>
