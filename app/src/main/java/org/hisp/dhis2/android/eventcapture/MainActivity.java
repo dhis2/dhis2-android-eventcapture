@@ -29,11 +29,13 @@
 
 package org.hisp.dhis2.android.eventcapture;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +47,7 @@ import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.fragments.EditItemFragment;
 import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
@@ -53,13 +56,15 @@ import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
 public class MainActivity extends ActionBarActivity {
 
+    public final static String CLASS_TAG = "MainActivity";
+
     private CharSequence title;
 
+    private Fragment currentFragment = null;
     private SelectProgramFragment selectProgramFragment;
     private RegisterEventFragment registerEventFragment;
     private FailedItemsFragment failedItemsFragment;
-
-    private int currentPosition = 0;
+    private EditItemFragment editItemFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +92,8 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if(id == R.id.failed_items) {
+            showFailedItemsFragment();
         }
 
         return super.onOptionsItemSelected(item);
@@ -101,10 +108,15 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
+        Log.e(CLASS_TAG, "onreceivemessage");
         if(event.eventType == BaseEvent.EventType.showRegisterEventFragment) {
             showRegisterEventFragment();
         } else if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
             showSelectProgramFragment();
+        } else if(event.eventType == BaseEvent.EventType.showEditItemFragment) {
+            showEditItemFragment();
+        } else if(event.eventType == BaseEvent.EventType.showFailedItemsFragment ) {
+            showFailedItemsFragment();
         }
     }
 
@@ -113,14 +125,14 @@ public class MainActivity extends ActionBarActivity {
         if(failedItemsFragment == null) failedItemsFragment = new FailedItemsFragment();
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, registerEventFragment);
+        fragmentTransaction.replace(R.id.fragment_container, failedItemsFragment);
         fragmentTransaction.commit();
-        currentPosition = 2;
+        currentFragment = failedItemsFragment;
     }
 
     public void showRegisterEventFragment() {
         setTitle("Register Event");
-        if(registerEventFragment == null) registerEventFragment = new RegisterEventFragment();
+        registerEventFragment = new RegisterEventFragment();
         OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
         Program program = selectProgramFragment.getSelectedProgram();
         registerEventFragment.setSelectedOrganisationUnit(organisationUnit);
@@ -129,7 +141,7 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, registerEventFragment);
         fragmentTransaction.commit();
-        currentPosition = 1;
+        currentFragment = registerEventFragment;
     }
 
     public void showSelectProgramFragment() {
@@ -139,8 +151,20 @@ public class MainActivity extends ActionBarActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, selectProgramFragment);
         fragmentTransaction.commit();
-        registerEventFragment = null;
-        currentPosition = 0;
+        currentFragment = selectProgramFragment;
+    }
+
+    public void showEditItemFragment() {
+        Log.e(CLASS_TAG, "showedititemfragment");
+        setTitle("Edit Item");
+        editItemFragment = new EditItemFragment();
+        if(failedItemsFragment == null) return;
+        editItemFragment.setItem(failedItemsFragment.getSelectedFailedItem());
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, editItemFragment);
+        fragmentTransaction.commit();
+        currentFragment = editItemFragment;
     }
 
     @Override
@@ -148,7 +172,7 @@ public class MainActivity extends ActionBarActivity {
     {
         if ( (keyCode == KeyEvent.KEYCODE_BACK) )
         {
-            if ( currentPosition == 0 )
+            if ( currentFragment == selectProgramFragment )
             {
                 Dhis2.getInstance().showConfirmDialog(this, getString(R.string.confirm),
                         getString(R.string.exit_confirmation), getString(R.string.yes_option),
@@ -163,7 +187,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 } );
             }
-            else
+            else if ( currentFragment == registerEventFragment)
             {
                 Dhis2.getInstance().showConfirmDialog(this, getString(R.string.discard),
                         getString(R.string.discard_confirm), getString(R.string.yes_option),
@@ -177,6 +201,9 @@ public class MainActivity extends ActionBarActivity {
                                 registerEventFragment = null;
                             }
                         } );
+            }
+            else if ( currentFragment == failedItemsFragment ) {
+                showSelectProgramFragment();
             }
             return true;
         }
