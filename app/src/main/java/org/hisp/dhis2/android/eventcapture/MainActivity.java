@@ -33,6 +33,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,11 +45,14 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.eventcapture.fragments.RegisterEventFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
+import org.hisp.dhis2.android.sdk.activities.LoginActivity;
+import org.hisp.dhis2.android.sdk.activities.SplashActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.EditItemFragment;
 import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
@@ -65,6 +69,7 @@ public class MainActivity extends ActionBarActivity {
     private RegisterEventFragment registerEventFragment;
     private FailedItemsFragment failedItemsFragment;
     private EditItemFragment editItemFragment;
+    private SettingsFragment settingsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +96,7 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            showSettingsFragment();
         } else if(id == R.id.failed_items) {
             showFailedItemsFragment();
         }
@@ -117,7 +122,20 @@ public class MainActivity extends ActionBarActivity {
             showEditItemFragment();
         } else if(event.eventType == BaseEvent.EventType.showFailedItemsFragment ) {
             showFailedItemsFragment();
+        } else if(event.eventType == BaseEvent.EventType.logout) {
+            logout();
         }
+    }
+
+    public void logout() {
+        Dhis2.logout(this);
+        showLoginActivity();
+    }
+
+    public void showLoginActivity() {
+        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(i);
+        finish();
     }
 
     public void showFailedItemsFragment() {
@@ -165,6 +183,16 @@ public class MainActivity extends ActionBarActivity {
         fragmentTransaction.replace(R.id.fragment_container, editItemFragment);
         fragmentTransaction.commit();
         currentFragment = editItemFragment;
+    }
+
+    public void showSettingsFragment() {
+        setTitle("Settings");
+        if( settingsFragment == null ) settingsFragment = new SettingsFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
+        fragmentTransaction.commit();
+        currentFragment = settingsFragment;
     }
 
     @Override
