@@ -29,9 +29,37 @@
 
 <resources>
 
+    <!--
+
+    Theme.Light : Android 3.0
+    Theme.Holo.Light : Android API 11
+    Theme.Holo.Light.DarkActionBar : Android API 14
+     -->
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!-- Android API 10 and lower -->
+    </style>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="android:actionBarStyle">@style/Dhis2ActionBar</item>
+    </style>
+
+    <style name="Dhis2ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
+        <item name="android:background">#276696</item>
+        <item name="android:titleTextStyle">@style/titleStyle</item>
+    </style>
+
+    <style name="titleStyle" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="buttonStyle" parent="@android:style/Widget.Holo.Light.Button">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
     </style>
 
 </resources>
