@@ -32,7 +32,6 @@
     package="org.hisp.dhis2.android.eventcapture" >
 
     <uses-sdk
-        android:minSdkVersion="11"
         android:targetSdkVersion="21" />
 
     <uses-permission android:name="android.permission.INTERNET" />
