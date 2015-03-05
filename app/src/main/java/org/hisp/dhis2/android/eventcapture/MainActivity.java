@@ -29,7 +29,6 @@
 
 package org.hisp.dhis2.android.eventcapture;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -59,7 +58,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 
     public final static String CLASS_TAG = "MainActivity";
 
@@ -109,7 +108,7 @@ public class MainActivity extends Activity {
     public void setTitle( CharSequence title )
     {
         this.title = title;
-        //getSupportActionBar().setTitle( this.title );
+        getSupportActionBar().setTitle( this.title );
     }
 
     @Subscribe
