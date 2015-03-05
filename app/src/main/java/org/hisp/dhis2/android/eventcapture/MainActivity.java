@@ -77,7 +77,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         Dhis2Application.bus.register(this);
         setContentView(R.layout.activity_main);
-        showSelectProgramFragment();
+        if(Dhis2.hasLoadedInitialData(this))
+            showSelectProgramFragment();
+        else
+            Dhis2.loadInitialData(this);
     }
 
 
@@ -109,12 +112,16 @@ public class MainActivity extends Activity {
     public void setTitle( CharSequence title )
     {
         this.title = title;
-        //getSupportActionBar().setTitle( this.title );
+        runOnUiThread(new Runnable() {
+            public void run() {
+                //getSupportActionBar().setTitle( MainActivity.this.title );
+            }
+        });
     }
 
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
-        Log.e(CLASS_TAG, "onreceivemessage");
+        Log.d(CLASS_TAG, "onreceivemessage");
         if(event.eventType == BaseEvent.EventType.showRegisterEventFragment) {
             showRegisterEventFragment();
         } else if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
@@ -125,6 +132,12 @@ public class MainActivity extends Activity {
             showFailedItemsFragment();
         } else if(event.eventType == BaseEvent.EventType.logout) {
             logout();
+        } else if(event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
+            if(Dhis2.hasLoadedInitialData(this)) {
+                showSelectProgramFragment();
+            } else {
+                //todo: notify the user that data is missing and request to try to re-load.
+            }
         }
     }
 
@@ -174,7 +187,6 @@ public class MainActivity extends Activity {
     }
 
     public void showEditItemFragment() {
-        Log.e(CLASS_TAG, "showedititemfragment");
         setTitle("Edit Item");
         editItemFragment = new EditItemFragment();
         if(failedItemsFragment == null) return;

@@ -31,6 +31,7 @@ package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.utils.views.BoolDataElementView;
 import org.hisp.dhis2.android.sdk.utils.views.DataElementAdapterViewAbstract;
 import org.hisp.dhis2.android.sdk.utils.views.DatePickerDataElementView;
@@ -47,7 +49,6 @@ import org.hisp.dhis2.android.sdk.utils.views.OptionSetDataElementView;
 import org.hisp.dhis2.android.sdk.utils.views.TextDataElementView;
 import org.hisp.dhis2.android.sdk.utils.views.TrueOnlyDataElementView;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.controllers.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
@@ -62,11 +63,14 @@ import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Simen Skogly Russnes on 20.02.15.
  */
 public class RegisterEventFragment extends Fragment {
+
+    private static final String CLASS_TAG = "RegisterEventFragment";
 
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
@@ -114,7 +118,8 @@ public class RegisterEventFragment extends Fragment {
         programStageDataElements =
                 selectedProgram.getProgramStages().get(0).getProgramStageDataElements();
         event = new Event();
-        event.id = Dhis2.QUEUED + System.currentTimeMillis();
+        event.event = Dhis2.QUEUED + UUID.randomUUID().toString();
+        event.fromServer = false;
         event.dueDate = Utils.getCurrentDate();
         event.eventDate = Utils.getCurrentDate();
         event.organisationUnitId = selectedOrganisationUnit.getId();
@@ -125,7 +130,7 @@ public class RegisterEventFragment extends Fragment {
         for(int i = 0; i<programStageDataElements.size(); i++) {
 
             ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
-            dataValues.add(new DataValue(event.id, "",
+            dataValues.add(new DataValue(event.event, "",
                     programStageDataElement.dataElement, false,
                     Dhis2.getInstance().getUsername(getActivity())));
             View view = createDataElementView(programStageDataElement, dataValues.get(i));
