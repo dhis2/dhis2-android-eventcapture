@@ -30,17 +30,21 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.utils.views.BoolDataElementView;
 import org.hisp.dhis2.android.sdk.utils.views.DataElementAdapterViewAbstract;
 import org.hisp.dhis2.android.sdk.utils.views.DatePickerDataElementView;
@@ -68,17 +72,22 @@ import java.util.UUID;
 /**
  * @author Simen Skogly Russnes on 20.02.15.
  */
-public class RegisterEventFragment extends Fragment {
+public class DataEntryFragment extends Fragment {
 
     private static final String CLASS_TAG = "RegisterEventFragment";
 
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
+    private ProgramStage selectedProgramStage;
 
     private TextView organisationUnitLabel;
     private TextView programLabel;
     private Button submitButton;
+    private Button captureCoordinateButton;
+    private EditText latitudeEditText;
+    private EditText longitudeEditText;
     private Event event;
+    private String editingEvent;
     private List<DataValue> dataValues;
     private List<ProgramStageDataElement> programStageDataElements;
 
@@ -96,6 +105,9 @@ public class RegisterEventFragment extends Fragment {
         organisationUnitLabel = (TextView) rootView.findViewById(R.id.dataentry_orgunitlabel);
         programLabel = (TextView) rootView.findViewById(R.id.dataentry_programlabel);
         submitButton = (Button) rootView.findViewById(R.id.dataentry_submitbutton);
+        captureCoordinateButton = (Button) rootView.findViewById(R.id.dataentry_getcoordinatesbutton);
+        latitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_latitudeedit);
+        longitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_longitudeedit);
 
         if(selectedOrganisationUnit == null || selectedProgram == null) return;
 
@@ -115,8 +127,40 @@ public class RegisterEventFragment extends Fragment {
     }
 
     public void setupDataEntryForm(LinearLayout dataElementContainer) {
-        programStageDataElements =
-                selectedProgram.getProgramStages().get(0).getProgramStageDataElements();
+        selectedProgramStage = selectedProgram.getProgramStages().get(0); //since this is event capture, there will only be 1 stage.
+        programStageDataElements = selectedProgramStage.getProgramStageDataElements();
+
+        if(editingEvent == null) {
+            createNewEvent();
+        } else {
+            loadEvent();
+        }
+
+
+        if(!selectedProgramStage.captureCoordinates) {
+            disableCaptureCoordinates();
+        } else {
+            Dhis2.activateGps(getActivity());
+            captureCoordinateButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getCoordinates();
+                }
+            });
+        }
+
+        for(int i = 0; i<programStageDataElements.size(); i++) {
+            View view = createDataElementView(programStageDataElements.get(i), dataValues.get(i));
+            dataElementContainer.addView(view);
+        }
+    }
+
+    public void loadEvent() {
+        event = DataValueController.getEvent(editingEvent);
+        dataValues = event.getDataValues();
+    }
+
+    public void createNewEvent() {
         event = new Event();
         event.event = Dhis2.QUEUED + UUID.randomUUID().toString();
         event.fromServer = false;
@@ -128,14 +172,28 @@ public class RegisterEventFragment extends Fragment {
         event.status = Event.STATUS_COMPLETED;
         dataValues = new ArrayList<DataValue>();
         for(int i = 0; i<programStageDataElements.size(); i++) {
-
             ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
             dataValues.add(new DataValue(event.event, "",
                     programStageDataElement.dataElement, false,
                     Dhis2.getInstance().getUsername(getActivity())));
-            View view = createDataElementView(programStageDataElement, dataValues.get(i));
-            dataElementContainer.addView(view);
         }
+    }
+
+    /**
+     * Gets coordinates from the device GPS if possible and stores in the current Event.
+     */
+    public void getCoordinates() {
+        Location location = Dhis2.getLocation(getActivity());
+        event.latitude = location.getLatitude();
+        event.longitude = location.getLongitude();
+        latitudeEditText.setText(""+event.latitude);
+        longitudeEditText.setText(""+event.longitude);
+    }
+
+    public void disableCaptureCoordinates() {
+        longitudeEditText.setVisibility(View.GONE);
+        latitudeEditText.setVisibility(View.GONE);
+        captureCoordinateButton.setVisibility(View.GONE);
     }
 
     public View createDataElementView(ProgramStageDataElement programStageDataElement,
@@ -216,6 +274,7 @@ public class RegisterEventFragment extends Fragment {
     }
 
     public void saveEvent() {
+        event.fromServer = false;
         event.save(false);
         for(DataValue dataValue: dataValues) {
             dataValue.save(false);
@@ -241,5 +300,15 @@ public class RegisterEventFragment extends Fragment {
 
     public void setSelectedProgram(Program selectedProgram) {
         this.selectedProgram = selectedProgram;
+    }
+
+    public void setEditingEvent(String event) {
+        this.editingEvent = event;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Dhis2.disableGps();
     }
 }

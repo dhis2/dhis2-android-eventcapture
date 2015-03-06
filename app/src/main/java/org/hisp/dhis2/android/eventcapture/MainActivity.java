@@ -43,10 +43,9 @@ import android.view.MenuItem;
 
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis2.android.eventcapture.fragments.RegisterEventFragment;
+import org.hisp.dhis2.android.eventcapture.fragments.DataEntryFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
-import org.hisp.dhis2.android.sdk.activities.SplashActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
@@ -57,6 +56,8 @@ import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
+import java.util.UUID;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -66,7 +67,7 @@ public class MainActivity extends ActionBarActivity {
 
     private Fragment currentFragment = null;
     private SelectProgramFragment selectProgramFragment;
-    private RegisterEventFragment registerEventFragment;
+    private DataEntryFragment dataEntryFragment;
     private FailedItemsFragment failedItemsFragment;
     private EditItemFragment editItemFragment;
     private SettingsFragment settingsFragment;
@@ -74,6 +75,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_EVENTCAPTURE);
         Dhis2Application.bus.register(this);
         setContentView(R.layout.activity_main);
         if(Dhis2.hasLoadedInitialData(this))
@@ -137,6 +139,13 @@ public class MainActivity extends ActionBarActivity {
             } else {
                 //todo: notify the user that data is missing and request to try to re-load.
             }
+        } else if(event.eventType == BaseEvent.EventType.showEditEventFragment) {
+            if(event.item != null) {
+                if(event.item instanceof String) {
+                    String eventId = (String) event.item;
+                    showEditEventFragment(eventId);
+                }
+            }
         }
     }
 
@@ -163,16 +172,16 @@ public class MainActivity extends ActionBarActivity {
 
     public void showRegisterEventFragment() {
         setTitle("Register Event");
-        registerEventFragment = new RegisterEventFragment();
+        dataEntryFragment = new DataEntryFragment();
         OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
         Program program = selectProgramFragment.getSelectedProgram();
-        registerEventFragment.setSelectedOrganisationUnit(organisationUnit);
-        registerEventFragment.setSelectedProgram(program);
+        dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
+        dataEntryFragment.setSelectedProgram(program);
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, registerEventFragment);
+        fragmentTransaction.replace(R.id.fragment_container, dataEntryFragment);
         fragmentTransaction.commit();
-        currentFragment = registerEventFragment;
+        currentFragment = dataEntryFragment;
     }
 
     public void showSelectProgramFragment() {
@@ -207,6 +216,21 @@ public class MainActivity extends ActionBarActivity {
         currentFragment = settingsFragment;
     }
 
+    public void showEditEventFragment(String event) {
+        setTitle("Edit Event");
+        dataEntryFragment = new DataEntryFragment();
+        OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
+        Program program = selectProgramFragment.getSelectedProgram();
+        dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
+        dataEntryFragment.setSelectedProgram(program);
+        dataEntryFragment.setEditingEvent(event);
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, dataEntryFragment);
+        fragmentTransaction.commit();
+        currentFragment = dataEntryFragment;
+    }
+
     @Override
     public boolean onKeyDown( int keyCode, KeyEvent event )
     {
@@ -227,7 +251,7 @@ public class MainActivity extends ActionBarActivity {
                     }
                 } );
             }
-            else if ( currentFragment == registerEventFragment)
+            else if ( currentFragment == dataEntryFragment)
             {
                 Dhis2.getInstance().showConfirmDialog(this, getString(R.string.discard),
                         getString(R.string.discard_confirm), getString(R.string.yes_option),
@@ -238,7 +262,7 @@ public class MainActivity extends ActionBarActivity {
                             public void onClick( DialogInterface dialog, int which )
                             {
                                 showSelectProgramFragment();
-                                registerEventFragment = null;
+                                dataEntryFragment = null;
                             }
                         } );
             }
