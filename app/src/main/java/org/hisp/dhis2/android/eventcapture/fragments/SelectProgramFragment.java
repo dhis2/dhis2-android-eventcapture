@@ -37,9 +37,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
@@ -47,6 +48,7 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
@@ -58,6 +60,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.AttributeListAdapter;
+import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,10 +78,12 @@ public class SelectProgramFragment extends Fragment {
     private List<Program> programsForSelectedOrganisationUnit;
     private List<Event> displayedExistingEvents;
 
-    private Spinner organisationUnitSpinner;
-    private Spinner programSpinner;
-    private Button registerButton;
+    private CardSpinner organisationUnitSpinner;
+    private CardSpinner programSpinner;
+    //private Button registerButton;
     private ListView existingEventsListView;
+    private LinearLayout attributeNameContainer;
+    private LinearLayout rowContainer;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -91,10 +96,12 @@ public class SelectProgramFragment extends Fragment {
     }
 
     public void setupUi(View rootView) {
-        organisationUnitSpinner = (Spinner) rootView.findViewById(R.id.selectprogram_orgunit_spinner);
-        programSpinner = (Spinner) rootView.findViewById(R.id.selectprogram_program_spinner);
-        registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
+        organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
+        programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
+        //registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
         existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
+        attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
+        rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
         assignedOrganisationUnits = Dhis2.getInstance().
                 getMetaDataController().getAssignedOrganisationUnits();
         if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
@@ -150,12 +157,12 @@ public class SelectProgramFragment extends Fragment {
             }
         });
 
-        registerButton.setOnClickListener(new View.OnClickListener() {
+        /*registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showRegisterEventFragment();
             }
-        });
+        });*/
     }
 
     public void editEvent(int position) {
@@ -185,11 +192,24 @@ public class SelectProgramFragment extends Fragment {
                 }
             }
 
+            attributeNameContainer.removeAllViews();
+            for(String s: dataElementsToShowInList) {
+                TextView tv = new TextView(getActivity());
+                tv.setWidth(0);
+                tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
+                tv.setText(MetaDataController.getDataElement(s).getName());
+                attributeNameContainer.addView(tv);
+            }
+
+
             //get values and show in list
             HashMap<String, String[]> rows = new HashMap<>();
             ArrayList<String[]> values = new ArrayList<>(); //for displaying in listview
-            for(Event event: displayedExistingEvents) {
+            rowContainer.removeAllViews();
+            for(int j = 0; j<displayedExistingEvents.size(); j++) {
+                Event event = displayedExistingEvents.get(j);
                 String[] row = new String[dataElementsToShowInList.size()];
+                LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.linearlayout_empty, null);
                 for(int i = 0; i<dataElementsToShowInList.size(); i++) {
                     String dataElement = dataElementsToShowInList.get(i);
                     List<DataValue> result = Select.all(DataValue.class,
@@ -198,20 +218,39 @@ public class SelectProgramFragment extends Fragment {
                     if(result != null && !result.isEmpty() ) {
                         row[i] = result.get(0).value;
                     } else row[i] = " ";
+
+                    TextView tv = new TextView(getActivity());
+                    tv.setWidth(0);
+                    tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
+
+                    tv.setText(row[i]);
+                    v.addView(tv);
                 }
                 rows.put(event.event, row);
                 values.add(rows.get(event.event));
+
+                if( (1 & j) == 0) v.setBackgroundColor(getActivity().getResources().getColor(org.hisp.dhis2.android.sdk.R.color.Light_Blue));
+                v.setContentDescription(""+j);
+                v.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        int position = Integer.parseInt(v.getContentDescription().toString());
+                        editEvent(position);
+                    }
+                });
+                rowContainer.addView(v);
             }
-            existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), values));
+
+            //existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), values));
         } else {
-            existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
+            //existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
         }
     }
 
-    public void populateSpinner( Spinner spinner, List<String> list )
+    public void populateSpinner( CardSpinner spinner, List<String> list )
     {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>( getActivity(),
-                android.R.layout.simple_spinner_dropdown_item, list );
+                R.layout.spinner_item, list );
         spinner.setAdapter( adapter );
     }
 
@@ -227,6 +266,7 @@ public class SelectProgramFragment extends Fragment {
     }
 
     public Program getSelectedProgram() {
+        if(programSpinner.getSelectedItemPosition()<0) return null;
         Program selectedProgram = programsForSelectedOrganisationUnit.
                 get(programSpinner.getSelectedItemPosition());
         return selectedProgram;

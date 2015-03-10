@@ -64,7 +64,6 @@
         </activity>
         <activity
             android:name="org.hisp.dhis2.android.eventcapture.MainActivity"
-
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_main" >
         </activity>

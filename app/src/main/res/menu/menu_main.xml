@@ -33,5 +33,9 @@
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 
-    <item android:id="@+id/failed_items" android:title="@string/failed_items"></item>
+    <item android:id="@+id/action_new_event"
+        android:icon="@drawable/ic_menu_send"
+        android:title="@string/new_event"
+        app:showAsAction="always" />
+
 </menu>
