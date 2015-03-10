@@ -36,6 +36,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -48,15 +49,14 @@ import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
+import org.hisp.dhis2.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
-import org.hisp.dhis2.android.sdk.fragments.EditItemFragment;
 import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
+import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
-
-import java.util.UUID;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -69,19 +69,27 @@ public class MainActivity extends ActionBarActivity {
     private SelectProgramFragment selectProgramFragment;
     private DataEntryFragment dataEntryFragment;
     private FailedItemsFragment failedItemsFragment;
-    private EditItemFragment editItemFragment;
     private SettingsFragment settingsFragment;
+    private LoadingFragment loadingFragment;
+    private Fragment previousFragment; //workaround for back button since the backstack sucks
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setContentView(R.layout.activity_main_sdk);
         super.onCreate(savedInstanceState);
         Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_EVENTCAPTURE);
         Dhis2Application.bus.register(this);
-        setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         if(Dhis2.hasLoadedInitialData(this))
             showSelectProgramFragment();
+        else if(Dhis2.isLoadingInitial()) {
+            showLoadingFragment();
+        }
         else
-            Dhis2.loadInitialData(this);
+            loadInitialData();
     }
 
 
@@ -102,11 +110,22 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             showSettingsFragment();
-        } else if(id == R.id.failed_items) {
-            showFailedItemsFragment();
+        } else if(id == R.id.action_new_event) {
+            registerEvent();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void registerEvent() {
+        if(currentFragment == selectProgramFragment) {
+            if( selectProgramFragment.getSelectedOrganisationUnit() != null
+                    && selectProgramFragment.getSelectedProgram() != null)
+            showRegisterEventFragment();
+        } else if (currentFragment == dataEntryFragment ) {
+            dataEntryFragment.submit();
+        }
+
     }
 
     @Override
@@ -120,6 +139,16 @@ public class MainActivity extends ActionBarActivity {
         });
     }
 
+    public void loadInitialData() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showLoadingFragment();
+            }
+        });
+        Dhis2.loadInitialData(this);
+    }
+
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
         Log.d(CLASS_TAG, "onreceivemessage");
@@ -127,8 +156,6 @@ public class MainActivity extends ActionBarActivity {
             showRegisterEventFragment();
         } else if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
             showSelectProgramFragment();
-        } else if(event.eventType == BaseEvent.EventType.showEditItemFragment) {
-            showEditItemFragment();
         } else if(event.eventType == BaseEvent.EventType.showFailedItemsFragment ) {
             showFailedItemsFragment();
         } else if(event.eventType == BaseEvent.EventType.logout) {
@@ -149,6 +176,8 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+
+
     public void logout() {
         Dhis2.logout(this);
         showLoginActivity();
@@ -160,14 +189,16 @@ public class MainActivity extends ActionBarActivity {
         finish();
     }
 
+    public void showLoadingFragment() {
+        setTitle("Please wait");
+        if(loadingFragment == null) loadingFragment = new LoadingFragment();
+        showFragment(loadingFragment);
+    }
+
     public void showFailedItemsFragment() {
         setTitle("Failed Items");
         if(failedItemsFragment == null) failedItemsFragment = new FailedItemsFragment();
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, failedItemsFragment);
-        fragmentTransaction.commit();
-        currentFragment = failedItemsFragment;
+        showFragment(failedItemsFragment);
     }
 
     public void showRegisterEventFragment() {
@@ -177,43 +208,19 @@ public class MainActivity extends ActionBarActivity {
         Program program = selectProgramFragment.getSelectedProgram();
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
         dataEntryFragment.setSelectedProgram(program);
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, dataEntryFragment);
-        fragmentTransaction.commit();
-        currentFragment = dataEntryFragment;
+        showFragment(dataEntryFragment);
     }
 
     public void showSelectProgramFragment() {
         setTitle("Event Capture");
         if(selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, selectProgramFragment);
-        fragmentTransaction.commit();
-        currentFragment = selectProgramFragment;
-    }
-
-    public void showEditItemFragment() {
-        setTitle("Edit Item");
-        editItemFragment = new EditItemFragment();
-        if(failedItemsFragment == null) return;
-        editItemFragment.setItem(failedItemsFragment.getSelectedFailedItem());
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, editItemFragment);
-        fragmentTransaction.commit();
-        currentFragment = editItemFragment;
+        showFragment(selectProgramFragment);
     }
 
     public void showSettingsFragment() {
         setTitle("Settings");
         if( settingsFragment == null ) settingsFragment = new SettingsFragment();
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, settingsFragment);
-        fragmentTransaction.commit();
-        currentFragment = settingsFragment;
+        showFragment(settingsFragment);
     }
 
     public void showEditEventFragment(String event) {
@@ -224,11 +231,18 @@ public class MainActivity extends ActionBarActivity {
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
         dataEntryFragment.setSelectedProgram(program);
         dataEntryFragment.setEditingEvent(event);
+        showFragment(dataEntryFragment);
+    }
+
+    public void showFragment(Fragment fragment) {
+        if(MainActivity.this.isFinishing()) return;
+        //if(MainActivity.this.isDestroyed()) return;
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, dataEntryFragment);
-        fragmentTransaction.commit();
-        currentFragment = dataEntryFragment;
+        fragmentTransaction.replace(R.id.fragment_container, fragment);
+        fragmentTransaction.commitAllowingStateLoss();
+        previousFragment = currentFragment;
+        currentFragment = fragment;
     }
 
     @Override
@@ -268,10 +282,19 @@ public class MainActivity extends ActionBarActivity {
             }
             else if ( currentFragment == failedItemsFragment ) {
                 showSelectProgramFragment();
+            } else if ( currentFragment == settingsFragment ) {
+                if(previousFragment == null) showSelectProgramFragment();
+                else showFragment(previousFragment);
             }
             return true;
         }
 
         return super.onKeyDown( keyCode, event );
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Dhis2Application.bus.unregister(this);
     }
 }

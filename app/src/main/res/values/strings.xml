@@ -34,5 +34,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="register_event">Register Event</string>
+    <string name="new_event">New event</string>
 
 </resources>

@@ -30,9 +30,12 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Fragment;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,13 +48,18 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
-import org.hisp.dhis2.android.sdk.utils.views.BoolDataElementView;
-import org.hisp.dhis2.android.sdk.utils.views.DataElementAdapterViewAbstract;
-import org.hisp.dhis2.android.sdk.utils.views.DatePickerDataElementView;
-import org.hisp.dhis2.android.sdk.utils.views.NumberDataElementView;
-import org.hisp.dhis2.android.sdk.utils.views.OptionSetDataElementView;
-import org.hisp.dhis2.android.sdk.utils.views.TextDataElementView;
-import org.hisp.dhis2.android.sdk.utils.views.TrueOnlyDataElementView;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.AutoCompleteRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.BooleanRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.CheckBoxRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.DatePickerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.IntegerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.LongTextRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.NegativeIntegerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.NumberRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.PosIntegerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.PosOrZeroIntegerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.Row;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.TextRow;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
@@ -74,7 +82,7 @@ import java.util.UUID;
  */
 public class DataEntryFragment extends Fragment {
 
-    private static final String CLASS_TAG = "RegisterEventFragment";
+    private static final String CLASS_TAG = "DataEntryFragment";
 
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
@@ -82,7 +90,6 @@ public class DataEntryFragment extends Fragment {
 
     private TextView organisationUnitLabel;
     private TextView programLabel;
-    private Button submitButton;
     private Button captureCoordinateButton;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
@@ -104,7 +111,6 @@ public class DataEntryFragment extends Fragment {
     public void setupUi(View rootView) {
         organisationUnitLabel = (TextView) rootView.findViewById(R.id.dataentry_orgunitlabel);
         programLabel = (TextView) rootView.findViewById(R.id.dataentry_programlabel);
-        submitButton = (Button) rootView.findViewById(R.id.dataentry_submitbutton);
         captureCoordinateButton = (Button) rootView.findViewById(R.id.dataentry_getcoordinatesbutton);
         latitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_latitudeedit);
         longitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_longitudeedit);
@@ -117,13 +123,6 @@ public class DataEntryFragment extends Fragment {
         LinearLayout dataElementContainer = (LinearLayout) rootView.
                 findViewById(R.id.dataentry_dataElementContainer);
         setupDataEntryForm(dataElementContainer);
-
-        submitButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                submit();
-            }
-        });
     }
 
     public void setupDataEntryForm(LinearLayout dataElementContainer) {
@@ -135,7 +134,6 @@ public class DataEntryFragment extends Fragment {
         } else {
             loadEvent();
         }
-
 
         if(!selectedProgramStage.captureCoordinates) {
             disableCaptureCoordinates();
@@ -150,9 +148,44 @@ public class DataEntryFragment extends Fragment {
         }
 
         for(int i = 0; i<programStageDataElements.size(); i++) {
-            View view = createDataElementView(programStageDataElements.get(i), dataValues.get(i));
-            dataElementContainer.addView(view);
+            View view = createDataEntryView(programStageDataElements.get(i),
+                    getDataValue(programStageDataElements.get(i).dataElement, dataValues));
+            CardView cardView = new CardView(getActivity());
+
+            Resources r = getActivity().getResources();
+            int px = (int) TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    6,
+                    r.getDisplayMetrics());
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(px, px, px, 0);
+            cardView.setLayoutParams(params);
+            cardView.addView(view);
+            dataElementContainer.addView(cardView);
         }
+    }
+
+    /**
+     * Returns the DataValue associated with the given programStageDataElement from a list of DataValues
+     * @param dataValues
+     * @return
+     */
+    public DataValue getDataValue(String dataElement, List<DataValue> dataValues) {
+        for(DataValue dataValue: dataValues) {
+            if(dataValue.dataElement.equals(dataElement))
+                return dataValue;
+        }
+
+        //the datavalue didnt exist for some reason. Create a new one.
+        DataValue dataValue = new DataValue(event.event, "",
+                dataElement, false,
+                Dhis2.getInstance().getUsername(getActivity()));
+        dataValues.add(dataValue);
+        return dataValue;
     }
 
     public void loadEvent() {
@@ -175,7 +208,7 @@ public class DataEntryFragment extends Fragment {
             ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
             dataValues.add(new DataValue(event.event, "",
                     programStageDataElement.dataElement, false,
-                    Dhis2.getInstance().getUsername(getActivity())));
+                    Dhis2.getUsername(getActivity())));
         }
     }
 
@@ -196,55 +229,41 @@ public class DataEntryFragment extends Fragment {
         captureCoordinateButton.setVisibility(View.GONE);
     }
 
-    public View createDataElementView(ProgramStageDataElement programStageDataElement,
-                                      DataValue dataValue) {
-        DataElement dataElement = MetaDataController.
-                getDataElement(programStageDataElement.getDataElement());
-        DataElementAdapterViewAbstract dataElementViewAbstract = null;
-        String dataType = dataElement.getType();
-        if ( dataElement.getOptionSet() != null )
-        {
-            OptionSet optionSet = MetaDataController.getOptionSet(dataElement.getOptionSet());
-            if ( optionSet == null )
-            {
-                dataElementViewAbstract = new TextDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
+    public View createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
+        DataElement dataElement = MetaDataController.getDataElement(programStageDataElement.dataElement);
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        Row row = null;
+        if (dataElement.getOptionSet() != null) {
+            OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
+            if(optionSet == null)
+                row = new TextRow(inflater, programStageDataElement, dataValue);
             else
-            {
-                dataElementViewAbstract = new OptionSetDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
+                row = new AutoCompleteRow(inflater, programStageDataElement, optionSet, dataValue, getActivity());
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
+            row = new TextRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
+            row = new LongTextRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
+            row = new NumberRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
+            row = new IntegerRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
+            row = new PosOrZeroIntegerRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
+            row = new PosIntegerRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
+            row = new NegativeIntegerRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
+            row = new BooleanRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
+            row = new CheckBoxRow(inflater, programStageDataElement, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
+            row = new DatePickerRow(inflater, programStageDataElement, getActivity(), dataValue);
+        } else {
+            Log.d(CLASS_TAG, "type is: " + dataElement.getType());
         }
-        else
-        {
-            if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_BOOL ) )
-            {
-                dataElementViewAbstract = new BoolDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
-            else if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_DATE ) )
-            {
-                dataElementViewAbstract = new DatePickerDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
-            else if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_TRUE_ONLY ) )
-            {
-                dataElementViewAbstract = new TrueOnlyDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
-            else if ( dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_NUMBER ) || dataType.equalsIgnoreCase( DataElement.VALUE_TYPE_INT ) )
-            {
-                dataElementViewAbstract = new NumberDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
-            else
-            {
-                dataElementViewAbstract = new TextDataElementView( getActivity(),
-                        dataElement, dataValue, programStageDataElement.isCompulsory() );
-            }
-        }
-        return dataElementViewAbstract.getView();
+        if( row==null) return new View(getActivity());
+        return row.getView(null);
     }
 
     /**
