@@ -50,11 +50,13 @@ import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
+import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
@@ -79,6 +81,8 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main_sdk);
         super.onCreate(savedInstanceState);
         Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_EVENTCAPTURE);
+        NetworkManager.getInstance().setCredentials(Dhis2.getCredentials(this));
+        NetworkManager.getInstance().setServerUrl(Dhis2.getServer(this));
         Dhis2Application.bus.register(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -237,13 +241,35 @@ public class MainActivity extends ActionBarActivity {
 
     public void showFragment(Fragment fragment) {
         if(MainActivity.this.isFinishing()) return;
-        //if(MainActivity.this.isDestroyed()) return;
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment);
         fragmentTransaction.commitAllowingStateLoss();
         previousFragment = currentFragment;
         currentFragment = fragment;
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem item = menu.findItem(R.id.action_new_event);
+        item.setVisible(true);
+        if(currentFragment == settingsFragment)
+            item.setVisible(false);
+        else if(currentFragment == selectProgramFragment)
+            item.setIcon(getResources().getDrawable(R.drawable.ic_new));
+        else if(currentFragment == dataEntryFragment)
+            item.setIcon(getResources().getDrawable(R.drawable.ic_save));
+        else if(currentFragment == loadingFragment)
+            item.setVisible(false);
+
+        return true;
+    }
+
+    @Subscribe
+    public void invalidtemsg(InvalidateEvent event) {
+        Log.d(CLASS_TAG, "got invalidate");
     }
 
     @Override
