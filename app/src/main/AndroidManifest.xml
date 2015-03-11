@@ -69,7 +69,6 @@
         </activity>
 
         <receiver
-            android:process=":remote"
             android:name="org.hisp.dhis2.android.sdk.services.PeriodicSynchronizer">
         </receiver>
         <receiver

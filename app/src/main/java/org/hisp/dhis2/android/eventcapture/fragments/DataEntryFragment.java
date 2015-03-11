@@ -37,8 +37,11 @@ import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -114,6 +117,8 @@ public class DataEntryFragment extends Fragment {
         captureCoordinateButton = (Button) rootView.findViewById(R.id.dataentry_getcoordinatesbutton);
         latitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_latitudeedit);
         longitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_longitudeedit);
+        programLabel.setVisibility(View.GONE);
+        organisationUnitLabel.setVisibility(View.GONE);
 
         if(selectedOrganisationUnit == null || selectedProgram == null) return;
 
@@ -139,6 +144,10 @@ public class DataEntryFragment extends Fragment {
             disableCaptureCoordinates();
         } else {
             Dhis2.activateGps(getActivity());
+            if(event.latitude!=null)
+                latitudeEditText.setText(event.latitude+"");
+            if(event.longitude!=null)
+                longitudeEditText.setText(event.longitude+"");
             captureCoordinateButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -148,15 +157,14 @@ public class DataEntryFragment extends Fragment {
         }
 
         for(int i = 0; i<programStageDataElements.size(); i++) {
-            View view = createDataEntryView(programStageDataElements.get(i),
+            Row row = createDataEntryView(programStageDataElements.get(i),
                     getDataValue(programStageDataElements.get(i).dataElement, dataValues));
+            View view = row.getView(null);
+
             CardView cardView = new CardView(getActivity());
 
             Resources r = getActivity().getResources();
-            int px = (int) TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    6,
-                    r.getDisplayMetrics());
+            int px = Utils.getDpPx(6, r.getDisplayMetrics());
 
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -166,6 +174,12 @@ public class DataEntryFragment extends Fragment {
             cardView.setLayoutParams(params);
             cardView.addView(view);
             dataElementContainer.addView(cardView);
+
+            //set done button for last element to hide keyboard
+            if(i==programStageDataElements.size()-1) {
+                TextView textView = row.getEntryView();
+                if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+            }
         }
     }
 
@@ -203,6 +217,7 @@ public class DataEntryFragment extends Fragment {
         event.programId = selectedProgram.id;
         event.programStageId = selectedProgram.getProgramStages().get(0).id;
         event.status = Event.STATUS_COMPLETED;
+        event.lastUpdated = Utils.getCurrentTime();
         dataValues = new ArrayList<DataValue>();
         for(int i = 0; i<programStageDataElements.size(); i++) {
             ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
@@ -229,7 +244,7 @@ public class DataEntryFragment extends Fragment {
         captureCoordinateButton.setVisibility(View.GONE);
     }
 
-    public View createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
+    public Row createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
         DataElement dataElement = MetaDataController.getDataElement(programStageDataElement.dataElement);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         Row row = null;
@@ -262,8 +277,8 @@ public class DataEntryFragment extends Fragment {
         } else {
             Log.d(CLASS_TAG, "type is: " + dataElement.getType());
         }
-        if( row==null) return new View(getActivity());
-        return row.getView(null);
+        if( row==null) return null;
+        return row;
     }
 
     /**
@@ -294,10 +309,12 @@ public class DataEntryFragment extends Fragment {
 
     public void saveEvent() {
         event.fromServer = false;
+        event.lastUpdated = Utils.getCurrentTime();
         event.save(false);
         for(DataValue dataValue: dataValues) {
             dataValue.save(false);
         }
+        Dhis2.sendLocalData(getActivity().getApplicationContext());
     }
 
     public void showSelectProgramFragment() {

@@ -52,6 +52,7 @@
 
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="6dp"
             android:orientation="horizontal">
 
 
@@ -80,14 +81,16 @@
 
             </EditText>
 
+            <Button
+                android:id="@+id/dataentry_getcoordinatesbutton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text=""
+                android:background="@drawable/ic_menu_mylocation" />
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/dataentry_getcoordinatesbutton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="@string/get_coordinates"
-            android:layout_gravity="center_horizontal" />
+
 
         <LinearLayout
             android:id="@+id/dataentry_dataElementContainer"
