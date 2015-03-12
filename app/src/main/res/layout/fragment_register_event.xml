@@ -36,19 +36,12 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
-        <TextView
+        <ProgressBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
-            android:id="@+id/dataentry_orgunitlabel" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
-            android:id="@+id/dataentry_programlabel" />
+            android:layout_marginTop="40dp"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/register_progress" />
 
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,7 +58,8 @@
                 android:editable="false"
                 android:inputType="numberDecimal"
                 android:ems="10"
-                android:singleLine="true" >
+                android:singleLine="true"
+                android:visibility="gone">
 
             </EditText>
 
@@ -77,7 +71,8 @@
                 android:editable="false"
                 android:inputType="numberDecimal"
                 android:ems="10"
-                android:singleLine="true" >
+                android:singleLine="true"
+                android:visibility="gone">
 
             </EditText>
 
@@ -86,7 +81,8 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:text=""
-                android:background="@drawable/ic_menu_mylocation" />
+                android:background="@drawable/ic_menu_mylocation"
+                android:visibility="gone" />
 
         </LinearLayout>
 

@@ -90,6 +90,8 @@ public class SelectProgramFragment extends Fragment {
     private ListView existingEventsListView;
     private LinearLayout attributeNameContainer;
     private LinearLayout rowContainer;
+    private int programSelection;
+    private int orgunitSelection;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -162,6 +164,14 @@ public class SelectProgramFragment extends Fragment {
                 editEvent(position);
             }
         });
+
+        Log.e(CLASS_TAG, "setting orgunit " + orgunitSelection);
+        if(assignedOrganisationUnits != null && assignedOrganisationUnits.size()>orgunitSelection)
+            organisationUnitSpinner.setSelection(orgunitSelection);
+        Log.e(CLASS_TAG, "sat orgunit " + orgunitSelection);
+        if(programsForSelectedOrganisationUnit != null && programsForSelectedOrganisationUnit.size()>programSelection)
+            programSpinner.setSelection(programSelection);
+        Log.e(CLASS_TAG, "sat program " + programSelection);
     }
 
     public void editEvent(int position) {
@@ -217,6 +227,7 @@ public class SelectProgramFragment extends Fragment {
                 Event event = displayedExistingEvents.get(j);
                 String[] row = new String[dataElementsToShowInList.size()];
                 LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
+                v.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.getDpPx(50, getResources().getDisplayMetrics())));
                 for(int i = 0; i<dataElementsToShowInList.size(); i++) {
                     String dataElement = dataElementsToShowInList.get(i);
                     List<DataValue> result = Select.all(DataValue.class,
@@ -224,7 +235,9 @@ public class SelectProgramFragment extends Fragment {
                             Condition.column(DataValue$Table.DATAELEMENT).is(dataElement));
                     if(result != null && !result.isEmpty() ) {
                         row[i] = result.get(0).value;
-                    } else row[i] = " ";
+                    } else {
+                        row[i] = " ";
+                    }
 
                     TextView tv = new TextView(getActivity());
                     tv.setWidth(0);
@@ -298,7 +311,6 @@ public class SelectProgramFragment extends Fragment {
 
     @Subscribe
     public void onReceiveInvalidateMessage(InvalidateEvent event) {
-        Log.d(CLASS_TAG, "got invalidatemsg");
         if(event.eventType == InvalidateEvent.EventType.event) {
             getActivity().runOnUiThread(new Thread() {
                 @Override
@@ -307,6 +319,30 @@ public class SelectProgramFragment extends Fragment {
                 }
             });
         }
+    }
+
+    public int getSelectedOrganisationUnitIndex() {
+        if(organisationUnitSpinner!=null) {
+            return organisationUnitSpinner.getSelectedItemPosition();
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public int getSelectedProgramIndex() {
+        if(programSpinner!=null) {
+            return programSpinner.getSelectedItemPosition();
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public void setSelection(int orgunit, int program) {
+        Log.d(CLASS_TAG, "¤¤¤ settings selection: " + orgunit +", " + program);
+        orgunitSelection = orgunit;
+        programSelection = program;
     }
 
     @Override
