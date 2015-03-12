@@ -30,6 +30,7 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -45,6 +46,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
@@ -90,9 +92,6 @@ public class DataEntryFragment extends Fragment {
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
     private ProgramStage selectedProgramStage;
-
-    private TextView organisationUnitLabel;
-    private TextView programLabel;
     private Button captureCoordinateButton;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
@@ -100,87 +99,145 @@ public class DataEntryFragment extends Fragment {
     private String editingEvent;
     private List<DataValue> dataValues;
     private List<ProgramStageDataElement> programStageDataElements;
+    private boolean editing;
+    private List<DataValue> originalDataValues;
+    private ProgressBar progressBar;
+    private LayoutInflater inflater;
+    private Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
-        View rootView = inflater.inflate(R.layout.fragment_register_event,
+        final View rootView = inflater.inflate(R.layout.fragment_register_event,
                 container, false);
+        this.inflater = inflater;
+        this.context = getActivity();
+
+        progressBar = (ProgressBar) rootView.findViewById(R.id.register_progress);
         setupUi(rootView);
         return rootView;
     }
 
     public void setupUi(View rootView) {
-        organisationUnitLabel = (TextView) rootView.findViewById(R.id.dataentry_orgunitlabel);
-        programLabel = (TextView) rootView.findViewById(R.id.dataentry_programlabel);
         captureCoordinateButton = (Button) rootView.findViewById(R.id.dataentry_getcoordinatesbutton);
         latitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_latitudeedit);
         longitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_longitudeedit);
-        programLabel.setVisibility(View.GONE);
-        organisationUnitLabel.setVisibility(View.GONE);
 
         if(selectedOrganisationUnit == null || selectedProgram == null) return;
 
-        organisationUnitLabel.setText(selectedOrganisationUnit.getLabel());
-        programLabel.setText(selectedProgram.getName());
-
-        LinearLayout dataElementContainer = (LinearLayout) rootView.
+        final LinearLayout dataElementContainer = (LinearLayout) rootView.
                 findViewById(R.id.dataentry_dataElementContainer);
-        setupDataEntryForm(dataElementContainer);
+        new Thread() {
+            @Override
+            public void run() {
+                setupDataEntryForm(dataElementContainer);
+            }
+        }.start();
+
     }
 
-    public void setupDataEntryForm(LinearLayout dataElementContainer) {
+    /**
+     * returns true if the DataEntryFragment is currently editing an existing event. False if
+     * it is creating a new Event.
+     * @return
+     */
+    public boolean isEditing() {
+        return editing;
+    }
+
+    /**
+     * returns true if there have been made changes to an editing event.
+     * @return
+     */
+    public boolean hasEdited() {
+        if(originalDataValues==null || dataValues == null) return false;
+        for(int i = 0; i<dataValues.size(); i++) {
+            if(!originalDataValues.get(i).value.equals(dataValues.get(i).value)) return true;
+        }
+        return false;
+    }
+
+    public void setupDataEntryForm(final LinearLayout dataElementContainer) {
         selectedProgramStage = selectedProgram.getProgramStages().get(0); //since this is event capture, there will only be 1 stage.
         programStageDataElements = selectedProgramStage.getProgramStageDataElements();
 
         if(editingEvent == null) {
+            editing = false;
             createNewEvent();
         } else {
+            editing = true;
             loadEvent();
         }
 
+
         if(!selectedProgramStage.captureCoordinates) {
-            disableCaptureCoordinates();
+
         } else {
-            Dhis2.activateGps(getActivity());
-            if(event.latitude!=null)
-                latitudeEditText.setText(event.latitude+"");
-            if(event.longitude!=null)
-                longitudeEditText.setText(event.longitude+"");
-            captureCoordinateButton.setOnClickListener(new View.OnClickListener() {
+            if(getActivity()==null) return;
+            getActivity().runOnUiThread(new Thread() {
                 @Override
-                public void onClick(View v) {
-                    getCoordinates();
+                public void run() {
+                    Dhis2.activateGps(getActivity());
+                    if(event.latitude!=null)
+                        latitudeEditText.setText(event.latitude+"");
+                    if(event.longitude!=null)
+                        longitudeEditText.setText(event.longitude+"");
+                    captureCoordinateButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            getCoordinates();
+                        }
+                    });
+                    enableCaptureCoordinates();
                 }
             });
         }
 
+        final List<Row> rows = new ArrayList<>();
+
         for(int i = 0; i<programStageDataElements.size(); i++) {
             Row row = createDataEntryView(programStageDataElements.get(i),
                     getDataValue(programStageDataElements.get(i).dataElement, dataValues));
-            View view = row.getView(null);
-
-            CardView cardView = new CardView(getActivity());
-
-            Resources r = getActivity().getResources();
-            int px = Utils.getDpPx(6, r.getDisplayMetrics());
-
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            params.setMargins(px, px, px, 0);
-            cardView.setLayoutParams(params);
-            cardView.addView(view);
-            dataElementContainer.addView(cardView);
-
-            //set done button for last element to hide keyboard
-            if(i==programStageDataElements.size()-1) {
-                TextView textView = row.getEntryView();
-                if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-            }
+            rows.add(row);
         }
+
+        originalDataValues = new ArrayList<>();
+        for(DataValue dv: dataValues)
+            originalDataValues.add(dv.clone());
+        if(getActivity() == null) return;
+        getActivity().runOnUiThread(new Thread() {
+            final Context context = getActivity();
+            @Override
+            public void run() {
+                if(context == null) return;
+                progressBar.setVisibility(View.GONE);
+                for(int i = 0; i<rows.size(); i++) {
+                    Row row = rows.get(i);
+                    View view = row.getView(null);
+
+                    CardView cardView = new CardView(context);
+
+                    Resources r = getActivity().getResources();
+                    int px = Utils.getDpPx(6, r.getDisplayMetrics());
+
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    params.setMargins(px, px, px, 0);
+                    cardView.setLayoutParams(params);
+                    cardView.addView(view);
+                    dataElementContainer.addView(cardView);
+
+                    //set done button for last element to hide keyboard
+                    if(i==programStageDataElements.size()-1) {
+                        TextView textView = row.getEntryView();
+                        if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -238,22 +295,21 @@ public class DataEntryFragment extends Fragment {
         longitudeEditText.setText(""+event.longitude);
     }
 
-    public void disableCaptureCoordinates() {
-        longitudeEditText.setVisibility(View.GONE);
-        latitudeEditText.setVisibility(View.GONE);
-        captureCoordinateButton.setVisibility(View.GONE);
+    public void enableCaptureCoordinates() {
+        longitudeEditText.setVisibility(View.VISIBLE);
+        latitudeEditText.setVisibility(View.VISIBLE);
+        captureCoordinateButton.setVisibility(View.VISIBLE);
     }
 
     public Row createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
         DataElement dataElement = MetaDataController.getDataElement(programStageDataElement.dataElement);
-        LayoutInflater inflater = getActivity().getLayoutInflater();
         Row row = null;
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
             if(optionSet == null)
                 row = new TextRow(inflater, programStageDataElement, dataValue);
             else
-                row = new AutoCompleteRow(inflater, programStageDataElement, optionSet, dataValue, getActivity());
+                row = new AutoCompleteRow(inflater, programStageDataElement, optionSet, dataValue, context);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
             row = new TextRow(inflater, programStageDataElement, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
@@ -273,7 +329,7 @@ public class DataEntryFragment extends Fragment {
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
             row = new CheckBoxRow(inflater, programStageDataElement, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
-            row = new DatePickerRow(inflater, programStageDataElement, getActivity(), dataValue);
+            row = new DatePickerRow(inflater, programStageDataElement, context, dataValue);
         } else {
             Log.d(CLASS_TAG, "type is: " + dataElement.getType());
         }
@@ -310,9 +366,10 @@ public class DataEntryFragment extends Fragment {
     public void saveEvent() {
         event.fromServer = false;
         event.lastUpdated = Utils.getCurrentTime();
-        event.save(false);
+        event.save(true);
         for(DataValue dataValue: dataValues) {
-            dataValue.save(false);
+            Log.e(CLASS_TAG, "saving event " + dataValue.dataElement + ": " + dataValue.value);
+            dataValue.save(true);
         }
         Dhis2.sendLocalData(getActivity().getApplicationContext());
     }

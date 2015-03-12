@@ -59,6 +59,7 @@ import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.services.PeriodicSynchronizer;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -74,6 +75,8 @@ public class MainActivity extends ActionBarActivity {
     private SettingsFragment settingsFragment;
     private LoadingFragment loadingFragment;
     private Fragment previousFragment; //workaround for back button since the backstack sucks
+    private int lastSelectedOrgUnit = 0;
+    private int lastSelectedProgram = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +90,8 @@ public class MainActivity extends ActionBarActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Dhis2.activatePeriodicSynchronizer(this);
+
         if(Dhis2.hasLoadedInitialData(this))
             showSelectProgramFragment();
         else if(Dhis2.isLoadingInitial()) {
@@ -94,6 +99,7 @@ public class MainActivity extends ActionBarActivity {
         }
         else
             loadInitialData();
+
     }
 
 
@@ -194,7 +200,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void showLoadingFragment() {
-        setTitle("Please wait");
+        setTitle("Loading initial data");
         if(loadingFragment == null) loadingFragment = new LoadingFragment();
         showFragment(loadingFragment);
     }
@@ -212,6 +218,8 @@ public class MainActivity extends ActionBarActivity {
         Program program = selectProgramFragment.getSelectedProgram();
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
         dataEntryFragment.setSelectedProgram(program);
+        lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
+        lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
         showFragment(dataEntryFragment);
     }
 
@@ -219,11 +227,16 @@ public class MainActivity extends ActionBarActivity {
         setTitle("Event Capture");
         if(selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
         showFragment(selectProgramFragment);
+        selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
     public void showSettingsFragment() {
         setTitle("Settings");
         if( settingsFragment == null ) settingsFragment = new SettingsFragment();
+        if(selectProgramFragment!=null) {
+            lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
+            lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
+        }
         showFragment(settingsFragment);
     }
 
@@ -235,6 +248,8 @@ public class MainActivity extends ActionBarActivity {
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
         dataEntryFragment.setSelectedProgram(program);
         dataEntryFragment.setEditingEvent(event);
+        lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
+        lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
         showFragment(dataEntryFragment);
     }
 
@@ -266,11 +281,6 @@ public class MainActivity extends ActionBarActivity {
         return true;
     }
 
-    @Subscribe
-    public void invalidtemsg(InvalidateEvent event) {
-        Log.d(CLASS_TAG, "got invalidate");
-    }
-
     @Override
     public boolean onKeyDown( int keyCode, KeyEvent event )
     {
@@ -293,18 +303,26 @@ public class MainActivity extends ActionBarActivity {
             }
             else if ( currentFragment == dataEntryFragment)
             {
-                Dhis2.getInstance().showConfirmDialog(this, getString(R.string.discard),
-                        getString(R.string.discard_confirm), getString(R.string.yes_option),
-                        getString(R.string.no_option),
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick( DialogInterface dialog, int which )
-                            {
-                                showSelectProgramFragment();
-                                dataEntryFragment = null;
-                            }
-                        } );
+                String message = null;
+                if(dataEntryFragment.isEditing()) {
+                    message = getString(R.string.discard_confirm_changes);
+                } else {
+                    message = getString(R.string.discard_confirm);
+                }
+                if(dataEntryFragment.hasEdited()) {
+                    Dhis2.getInstance().showConfirmDialog(this, getString(R.string.discard),
+                            message, getString(R.string.yes_option),
+                            getString(R.string.no_option),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    showSelectProgramFragment();
+                                }
+                            });
+                } else {
+                    showSelectProgramFragment();
+                    dataEntryFragment = null;
+                }
             }
             else if ( currentFragment == failedItemsFragment ) {
                 showSelectProgramFragment();
