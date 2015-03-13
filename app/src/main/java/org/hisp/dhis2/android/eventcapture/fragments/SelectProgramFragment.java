@@ -227,7 +227,7 @@ public class SelectProgramFragment extends Fragment {
                 Event event = displayedExistingEvents.get(j);
                 String[] row = new String[dataElementsToShowInList.size()];
                 LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
-                v.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.getDpPx(50, getResources().getDisplayMetrics())));
+                //v.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.getDpPx(50, getResources().getDisplayMetrics())));
                 for(int i = 0; i<dataElementsToShowInList.size(); i++) {
                     String dataElement = dataElementsToShowInList.get(i);
                     List<DataValue> result = Select.all(DataValue.class,
@@ -242,6 +242,7 @@ public class SelectProgramFragment extends Fragment {
                     TextView tv = new TextView(getActivity());
                     tv.setWidth(0);
                     tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
+                    tv.setMaxLines(2);
 
                     tv.setText(row[i]);
                     v.addView(tv);
