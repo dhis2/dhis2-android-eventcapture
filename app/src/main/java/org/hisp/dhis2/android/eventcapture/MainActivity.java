@@ -92,7 +92,7 @@ public class MainActivity extends ActionBarActivity {
 
         Dhis2.activatePeriodicSynchronizer(this);
 
-        if(Dhis2.hasLoadedInitialData(this))
+        if(Dhis2.isInitialDataLoaded(this))
             showSelectProgramFragment();
         else if(Dhis2.isLoadingInitial()) {
             showLoadingFragment();
@@ -171,7 +171,7 @@ public class MainActivity extends ActionBarActivity {
         } else if(event.eventType == BaseEvent.EventType.logout) {
             logout();
         } else if(event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
-            if(Dhis2.hasLoadedInitialData(this)) {
+            if(Dhis2.isInitialDataLoaded(this)) {
                 showSelectProgramFragment();
             } else {
                 //todo: notify the user that data is missing and request to try to re-load.
@@ -183,6 +183,8 @@ public class MainActivity extends ActionBarActivity {
                     showEditEventFragment(eventId);
                 }
             }
+        } else if(event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
+            showLoginActivity();
         }
     }
 
