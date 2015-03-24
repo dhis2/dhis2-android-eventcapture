@@ -307,31 +307,34 @@ public class DataEntryFragment extends Fragment {
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
             if(optionSet == null)
-                row = new TextRow(inflater, programStageDataElement, dataValue);
+                row = new TextRow(inflater, dataElement.name, dataValue);
             else
-                row = new AutoCompleteRow(inflater, programStageDataElement, optionSet, dataValue, context);
+                row = new AutoCompleteRow(inflater, dataElement.name, optionSet, dataValue, context);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
-            row = new TextRow(inflater, programStageDataElement, dataValue);
+            row = new TextRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
-            row = new LongTextRow(inflater, programStageDataElement, dataValue);
+            row = new LongTextRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
-            row = new NumberRow(inflater, programStageDataElement, dataValue);
+            row = new NumberRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
-            row = new IntegerRow(inflater, programStageDataElement, dataValue);
+            row = new IntegerRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
-            row = new PosOrZeroIntegerRow(inflater, programStageDataElement, dataValue);
+            row = new PosOrZeroIntegerRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
-            row = new PosIntegerRow(inflater, programStageDataElement, dataValue);
+            row = new PosIntegerRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
-            row = new NegativeIntegerRow(inflater, programStageDataElement, dataValue);
+            row = new NegativeIntegerRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
-            row = new BooleanRow(inflater, programStageDataElement, dataValue);
+            row = new BooleanRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
-            row = new CheckBoxRow(inflater, programStageDataElement, dataValue);
+            row = new CheckBoxRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
-            row = new DatePickerRow(inflater, programStageDataElement, context, dataValue);
+            row = new DatePickerRow(inflater, dataElement.name, context, dataValue);
+        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
+            row = new LongTextRow(inflater, dataElement.name, dataValue);
         } else {
             Log.d(CLASS_TAG, "type is: " + dataElement.getType());
+            row = new LongTextRow(inflater, dataElement.name, dataValue);
         }
         if( row==null) return null;
         return row;
@@ -366,10 +369,9 @@ public class DataEntryFragment extends Fragment {
     public void saveEvent() {
         event.fromServer = false;
         event.lastUpdated = Utils.getCurrentTime();
-        event.save(true);
+        event.save(false);
         for(DataValue dataValue: dataValues) {
-            Log.e(CLASS_TAG, "saving event " + dataValue.dataElement + ": " + dataValue.value);
-            dataValue.save(true);
+            dataValue.save(false);
         }
         Dhis2.sendLocalData(getActivity().getApplicationContext());
     }
