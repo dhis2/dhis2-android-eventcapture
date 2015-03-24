@@ -176,7 +176,7 @@ public class SelectProgramFragment extends Fragment {
 
     public void editEvent(int position) {
         Event event = displayedExistingEvents.get(position);
-        MessageEvent message = new MessageEvent(BaseEvent.EventType.showEditEventFragment);
+        MessageEvent message = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
         message.item = displayedExistingEvents.get(position).event;
         Dhis2Application.bus.post(message);
     }
@@ -197,7 +197,7 @@ public class SelectProgramFragment extends Fragment {
             List<String> dataElementsToShowInList = new ArrayList<>();
             for(ProgramStageDataElement programStageDataElement: programStageDataElements) {
                 if(programStageDataElement.displayInReports) {
-                    dataElementsToShowInList.add(programStageDataElement.getDataElement());
+                    dataElementsToShowInList.add(programStageDataElement.dataElement);
                 }
             }
 

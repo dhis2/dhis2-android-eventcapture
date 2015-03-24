@@ -177,7 +177,7 @@ public class MainActivity extends ActionBarActivity {
             } else {
                 //todo: notify the user that data is missing and request to try to re-load.
             }
-        } else if(event.eventType == BaseEvent.EventType.showEditEventFragment) {
+        } else if(event.eventType == BaseEvent.EventType.showDataEntryFragment) {
             if(event.item != null) {
                 if(event.item instanceof String) {
                     String eventId = (String) event.item;
