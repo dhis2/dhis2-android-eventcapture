@@ -177,7 +177,7 @@ public class SelectProgramFragment extends Fragment {
     public void editEvent(int position) {
         Event event = displayedExistingEvents.get(position);
         MessageEvent message = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
-        message.item = displayedExistingEvents.get(position).event;
+        message.item = displayedExistingEvents.get(position).localId;
         Dhis2Application.bus.post(message);
     }
 
