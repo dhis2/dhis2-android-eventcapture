@@ -96,7 +96,7 @@ public class DataEntryFragment extends Fragment {
     private EditText latitudeEditText;
     private EditText longitudeEditText;
     private Event event;
-    private String editingEvent;
+    private long editingEvent = -1;
     private List<DataValue> dataValues;
     private List<ProgramStageDataElement> programStageDataElements;
     private boolean editing;
@@ -162,7 +162,7 @@ public class DataEntryFragment extends Fragment {
         selectedProgramStage = selectedProgram.getProgramStages().get(0); //since this is event capture, there will only be 1 stage.
         programStageDataElements = selectedProgramStage.getProgramStageDataElements();
 
-        if(editingEvent == null) {
+        if(editingEvent < 0) {
             editing = false;
             createNewEvent();
         } else {
@@ -369,10 +369,8 @@ public class DataEntryFragment extends Fragment {
     public void saveEvent() {
         event.fromServer = false;
         event.lastUpdated = Utils.getCurrentTime();
-        event.save(false);
-        for(DataValue dataValue: dataValues) {
-            dataValue.save(false);
-        }
+        event.dataValues = dataValues;
+        event.save(true);
         Dhis2.sendLocalData(getActivity().getApplicationContext());
     }
 
@@ -397,7 +395,7 @@ public class DataEntryFragment extends Fragment {
         this.selectedProgram = selectedProgram;
     }
 
-    public void setEditingEvent(String event) {
+    public void setEditingEvent(long event) {
         this.editingEvent = event;
     }
 

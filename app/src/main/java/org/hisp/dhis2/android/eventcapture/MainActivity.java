@@ -50,17 +50,13 @@ import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
-import org.hisp.dhis2.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
-import org.hisp.dhis2.android.sdk.fragments.FailedItemsFragment;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.services.PeriodicSynchronizer;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -72,7 +68,6 @@ public class MainActivity extends ActionBarActivity {
     private Fragment currentFragment = null;
     private SelectProgramFragment selectProgramFragment;
     private DataEntryFragment dataEntryFragment;
-    private FailedItemsFragment failedItemsFragment;
     private SettingsFragment settingsFragment;
     private LoadingFragment loadingFragment;
     private Fragment previousFragment; //workaround for back button since the backstack sucks
@@ -167,8 +162,6 @@ public class MainActivity extends ActionBarActivity {
             showRegisterEventFragment();
         } else if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
             showSelectProgramFragment();
-        } else if(event.eventType == BaseEvent.EventType.showFailedItemsFragment ) {
-            showFailedItemsFragment();
         } else if(event.eventType == BaseEvent.EventType.logout) {
             logout();
         } else if(event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
@@ -179,10 +172,8 @@ public class MainActivity extends ActionBarActivity {
             }
         } else if(event.eventType == BaseEvent.EventType.showDataEntryFragment) {
             if(event.item != null) {
-                if(event.item instanceof String) {
-                    String eventId = (String) event.item;
-                    showEditEventFragment(eventId);
-                }
+                long localEventId = (long) event.item;
+                showEditEventFragment(localEventId);
             }
         } else if(event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
             showLoginActivity();
@@ -206,12 +197,6 @@ public class MainActivity extends ActionBarActivity {
         setTitle("Loading initial data");
         if(loadingFragment == null) loadingFragment = new LoadingFragment();
         showFragment(loadingFragment);
-    }
-
-    public void showFailedItemsFragment() {
-        setTitle("Failed Items");
-        if(failedItemsFragment == null) failedItemsFragment = new FailedItemsFragment();
-        showFragment(failedItemsFragment);
     }
 
     public void showRegisterEventFragment() {
@@ -243,14 +228,14 @@ public class MainActivity extends ActionBarActivity {
         showFragment(settingsFragment);
     }
 
-    public void showEditEventFragment(String event) {
+    public void showEditEventFragment(long localEventId) {
         setTitle("Edit Event");
         dataEntryFragment = new DataEntryFragment();
         OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
         Program program = selectProgramFragment.getSelectedProgram();
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
         dataEntryFragment.setSelectedProgram(program);
-        dataEntryFragment.setEditingEvent(event);
+        dataEntryFragment.setEditingEvent(localEventId);
         lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
         lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
         showFragment(dataEntryFragment);
@@ -326,9 +311,6 @@ public class MainActivity extends ActionBarActivity {
                     showSelectProgramFragment();
                     dataEntryFragment = null;
                 }
-            }
-            else if ( currentFragment == failedItemsFragment ) {
-                showSelectProgramFragment();
             } else if ( currentFragment == settingsFragment ) {
                 if(previousFragment == null) showSelectProgramFragment();
                 else showFragment(previousFragment);
