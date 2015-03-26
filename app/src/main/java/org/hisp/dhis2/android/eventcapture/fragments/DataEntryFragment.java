@@ -36,10 +36,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -53,6 +50,7 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.AutoCompleteRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.BooleanRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.CheckBoxRow;
@@ -79,7 +77,9 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -99,6 +99,7 @@ public class DataEntryFragment extends Fragment {
     private long editingEvent = -1;
     private List<DataValue> dataValues;
     private List<ProgramStageDataElement> programStageDataElements;
+    private List<ProgramStageSection> programStageSections;
     private boolean editing;
     private List<DataValue> originalDataValues;
     private ProgressBar progressBar;
@@ -160,7 +161,16 @@ public class DataEntryFragment extends Fragment {
 
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {
         selectedProgramStage = selectedProgram.getProgramStages().get(0); //since this is event capture, there will only be 1 stage.
-        programStageDataElements = selectedProgramStage.getProgramStageDataElements();
+        programStageSections = selectedProgramStage.getProgramStageSections();
+        if(programStageSections == null || programStageSections.isEmpty()) {
+            programStageDataElements = selectedProgramStage.getProgramStageDataElements();
+        } else {
+            programStageDataElements = new ArrayList<>();
+            for(ProgramStageSection section: programStageSections) {
+                programStageDataElements.addAll(section.getProgramStageDataElements());
+            }
+        }
+
 
         if(editingEvent < 0) {
             editing = false;
@@ -195,11 +205,23 @@ public class DataEntryFragment extends Fragment {
         }
 
         final List<Row> rows = new ArrayList<>();
-
-        for(int i = 0; i<programStageDataElements.size(); i++) {
-            Row row = createDataEntryView(programStageDataElements.get(i),
-                    getDataValue(programStageDataElements.get(i).dataElement, dataValues));
-            rows.add(row);
+        final Map<String ,List<Row>> sectionsRows = new HashMap<>();
+        if(programStageSections==null || programStageSections.isEmpty()) {
+            for(int i = 0; i<programStageDataElements.size(); i++) {
+                Row row = createDataEntryView(programStageDataElements.get(i),
+                        getDataValue(programStageDataElements.get(i).dataElement, dataValues));
+                rows.add(row);
+            }
+        } else {
+            for(ProgramStageSection section: programStageSections) {
+                List<Row> sectionRows = new ArrayList<>();
+                for(ProgramStageDataElement programStageDataElement: section.getProgramStageDataElements()) {
+                    Row row = createDataEntryView(programStageDataElement,
+                            getDataValue(programStageDataElement.dataElement, dataValues));
+                    sectionRows.add(row);
+                }
+                sectionsRows.put(section.id, sectionRows);
+            }
         }
 
         originalDataValues = new ArrayList<>();
@@ -212,28 +234,68 @@ public class DataEntryFragment extends Fragment {
             public void run() {
                 if(context == null) return;
                 progressBar.setVisibility(View.GONE);
-                for(int i = 0; i<rows.size(); i++) {
-                    Row row = rows.get(i);
-                    View view = row.getView(null);
 
-                    CardView cardView = new CardView(context);
+                if(programStageSections == null || programStageSections.isEmpty()) {
+                    for(int i = 0; i<rows.size(); i++) {
+                        Row row = rows.get(i);
+                        View view = row.getView(null);
 
-                    Resources r = getActivity().getResources();
-                    int px = Utils.getDpPx(6, r.getDisplayMetrics());
+                        CardView cardView = new CardView(context);
 
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    );
-                    params.setMargins(px, px, px, 0);
-                    cardView.setLayoutParams(params);
-                    cardView.addView(view);
-                    dataElementContainer.addView(cardView);
+                        Resources r = getActivity().getResources();
+                        int px = Utils.getDpPx(6, r.getDisplayMetrics());
 
-                    //set done button for last element to hide keyboard
-                    if(i==programStageDataElements.size()-1) {
-                        TextView textView = row.getEntryView();
-                        if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        params.setMargins(px, px, px, 0);
+                        cardView.setLayoutParams(params);
+                        cardView.addView(view);
+                        dataElementContainer.addView(cardView);
+
+                        //set done button for last element to hide keyboard
+                        if(i==programStageDataElements.size()-1) {
+                            TextView textView = row.getEntryView();
+                            if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                        }
+                    }
+                } else {
+                    for(int i = 0; i<programStageSections.size(); i++) {
+                        ProgramStageSection section = programStageSections.get(i);
+                        List<Row> sectionRows = sectionsRows.get(section.id);
+                        CardView sectionCardView = new CardView(context);
+                        LinearLayout container = (LinearLayout) inflater.inflate(R.layout.dataentrysectionlayout, dataElementContainer, false);
+
+                        sectionCardView.addView(container);
+                        TextView sectionLabel = (TextView) container.findViewById(R.id.sectionlabel);
+                        sectionLabel.setText(section.name);
+
+                        for(int j = 0; j<sectionRows.size(); j++) {
+                            Row row = sectionRows.get(j);
+                            View view = row.getView(null);
+                            CardView dataEntryCardView = new CardView(context);
+
+                            Resources r = getActivity().getResources();
+                            int px = Utils.getDpPx(6, r.getDisplayMetrics());
+
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                            );
+                            params.setMargins(px, px, px, 0);
+                            sectionCardView.setLayoutParams(params);
+                            dataEntryCardView.addView(view);
+                            container.addView(dataEntryCardView);
+
+                            //set done button for last element to hide keyboard
+                            if(i==programStageSections.size()-1 && j==sectionsRows.size()-1) {
+                            TextView textView = row.getEntryView();
+                            if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                            }
+                        }
+
+                        dataElementContainer.addView(sectionCardView);
                     }
                 }
             }
@@ -303,7 +365,7 @@ public class DataEntryFragment extends Fragment {
 
     public Row createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
         DataElement dataElement = MetaDataController.getDataElement(programStageDataElement.dataElement);
-        Row row = null;
+        Row row;
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
             if(optionSet == null)
