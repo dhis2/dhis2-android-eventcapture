@@ -33,8 +33,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -60,6 +58,7 @@ import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
@@ -71,11 +70,15 @@ import org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static android.text.TextUtils.isEmpty;
 
 /**
  * @author Simen Skogly Russnes on 20.02.15.
  */
-public class SelectProgramFragment extends Fragment {
+public class SelectProgramFragment extends Fragment
+        implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
 
     private static final String CLASS_TAG = "SelectProgramFragment";
 
@@ -84,107 +87,176 @@ public class SelectProgramFragment extends Fragment {
     private List<Program> programsForSelectedOrganisationUnit;
     private List<Event> displayedExistingEvents;
 
+    //private Button registerButton;
     private CardSpinner organisationUnitSpinner;
     private CardSpinner programSpinner;
-    //private Button registerButton;
     private ListView existingEventsListView;
     private LinearLayout attributeNameContainer;
     private LinearLayout rowContainer;
+
     private int programSelection;
     private int orgunitSelection;
 
+    private Map<String, String> mOptionToNameMap;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
-        View rootView = inflater.inflate(R.layout.fragment_select_program,
-                container, false);
-        setupUi(rootView);
-        return rootView;
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
+        Dhis2Application.bus.register(this);
     }
 
-    public void setupUi(View rootView) {
-        organisationUnitSpinner = (CardSpinner) rootView.findViewById(R.id.org_unit_spinner);
-        programSpinner = (CardSpinner) rootView.findViewById(R.id.program_spinner);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Dhis2Application.bus.unregister(this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_select_program, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        organisationUnitSpinner = (CardSpinner) view.findViewById(R.id.org_unit_spinner);
+
+        programSpinner = (CardSpinner) view.findViewById(R.id.program_spinner);
         //registerButton = (Button) rootView.findViewById(R.id.selectprogram_register_button);
-        existingEventsListView = (ListView) rootView.findViewById(R.id.selectprogram_resultslistview);
-        attributeNameContainer = (LinearLayout) rootView.findViewById(R.id.attributenameslayout);
-        rowContainer = (LinearLayout) rootView.findViewById(R.id.eventrowcontainer);
+        existingEventsListView = (ListView) view.findViewById(R.id.selectprogram_resultslistview);
+        attributeNameContainer = (LinearLayout) view.findViewById(R.id.attributenameslayout);
+        rowContainer = (LinearLayout) view.findViewById(R.id.eventrowcontainer);
         assignedOrganisationUnits = Dhis2.getInstance().
                 getMetaDataController().getAssignedOrganisationUnits();
-        if( assignedOrganisationUnits==null || assignedOrganisationUnits.size() <= 0 ) {
+        if (assignedOrganisationUnits == null || assignedOrganisationUnits.size() <= 0) {
             existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
             return;
         }
 
-        List<String> organisationUnitNames = new ArrayList<String>();
-        for( OrganisationUnit ou: assignedOrganisationUnits )
+        mOptionToNameMap = new HashMap<>();
+        List<Option> options = Select.all(Option.class);
+        for (Option option : options) {
+            mOptionToNameMap.put(option.getCode(), option.getName());
+        }
+
+        List<String> organisationUnitNames = new ArrayList<>();
+        for (OrganisationUnit ou : assignedOrganisationUnits) {
             organisationUnitNames.add(ou.getLabel());
+        }
+
         populateSpinner(organisationUnitSpinner, organisationUnitNames);
+        organisationUnitSpinner.setOnItemSelectedListener(this);
+        programSpinner.setOnItemSelectedListener(this);
+        existingEventsListView.setOnItemClickListener(this);
 
-        organisationUnitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedOrganisationUnit = assignedOrganisationUnits.get(position); //displaying first as default
-                programsForSelectedOrganisationUnit = Dhis2.getInstance().getMetaDataController().
-                        getProgramsForOrganisationUnit(selectedOrganisationUnit.getId(),
-                                Program.SINGLE_EVENT_WITHOUT_REGISTRATION);
-                if(programsForSelectedOrganisationUnit == null ||
-                        programsForSelectedOrganisationUnit.size() <= 0) {
-                    populateSpinner(programSpinner, new ArrayList<String>());
-                    existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
-                } else {
-                    List<String> programNames = new ArrayList<String>();
-                    for( Program p: programsForSelectedOrganisationUnit )
-                        programNames.add(p.getName());
-                    populateSpinner(programSpinner, programNames);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-        programSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                onProgramSelected(position);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        existingEventsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                editEvent(position);
-            }
-        });
-
-        Log.e(CLASS_TAG, "setting orgunit " + orgunitSelection);
-        if(assignedOrganisationUnits != null && assignedOrganisationUnits.size()>orgunitSelection)
+        Log.e(CLASS_TAG, "Setting orgUnit " + orgunitSelection);
+        if (assignedOrganisationUnits != null && assignedOrganisationUnits.size() > orgunitSelection) {
             organisationUnitSpinner.setSelection(orgunitSelection);
-        Log.e(CLASS_TAG, "sat orgunit " + orgunitSelection);
-        if(programsForSelectedOrganisationUnit != null && programsForSelectedOrganisationUnit.size()>programSelection)
+        }
+        Log.e(CLASS_TAG, "Sat orgUnit " + orgunitSelection);
+        if (programsForSelectedOrganisationUnit != null &&
+                programsForSelectedOrganisationUnit.size() > programSelection) {
             programSpinner.setSelection(programSelection);
-        Log.e(CLASS_TAG, "sat program " + programSelection);
+        }
+        Log.e(CLASS_TAG, "Sat program " + programSelection);
     }
 
     public void editEvent(int position) {
-        Event event = displayedExistingEvents.get(position);
         MessageEvent message = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
         message.item = displayedExistingEvents.get(position).localId;
         Dhis2Application.bus.post(message);
     }
 
+    public void populateSpinner(CardSpinner spinner, List<String> list) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getActivity(), R.layout.spinner_item, list
+        );
+        spinner.setAdapter(adapter);
+    }
+
+    public void invalidate() {
+        onProgramSelected(programSpinner.getSelectedItemPosition());
+    }
+
+    public void showRegisterEventFragment() {
+        if (selectedOrganisationUnit == null ||
+                programSpinner.getSelectedItemPosition() < 0) {
+            return;
+        }
+        MessageEvent event = new MessageEvent(BaseEvent.EventType.showRegisterEventFragment);
+        Dhis2Application.bus.post(event);
+    }
+
+    public OrganisationUnit getSelectedOrganisationUnit() {
+        return selectedOrganisationUnit;
+    }
+
+    public Program getSelectedProgram() {
+        if (programSpinner.getSelectedItemPosition() < 0) {
+            return null;
+        }
+        Program selectedProgram = programsForSelectedOrganisationUnit.
+                get(programSpinner.getSelectedItemPosition());
+        return selectedProgram;
+    }
+
+    @Subscribe
+    public void onReceiveInvalidateMessage(InvalidateEvent event) {
+        if (event.eventType == InvalidateEvent.EventType.event) {
+            getActivity().runOnUiThread(new Thread() {
+                @Override
+                public void run() {
+                    invalidate();
+                }
+            });
+        }
+    }
+
+    public int getSelectedOrganisationUnitIndex() {
+        if (organisationUnitSpinner != null) {
+            return organisationUnitSpinner.getSelectedItemPosition();
+        } else {
+            return 0;
+        }
+    }
+
+    public int getSelectedProgramIndex() {
+        if (programSpinner != null) {
+            return programSpinner.getSelectedItemPosition();
+        } else {
+            return 0;
+        }
+    }
+
+    public void setSelection(int orgUnit, int program) {
+        Log.d(CLASS_TAG, "¤¤¤ settings selection: " + orgUnit + ", " + program);
+        orgunitSelection = orgUnit;
+        programSelection = program;
+    }
+
+    private void onUnitSelected(int position) {
+        selectedOrganisationUnit = assignedOrganisationUnits.get(position); //displaying first as default
+        programsForSelectedOrganisationUnit = Dhis2.getInstance().getMetaDataController().
+                getProgramsForOrganisationUnit(selectedOrganisationUnit.getId(),
+                        Program.SINGLE_EVENT_WITHOUT_REGISTRATION);
+        if (programsForSelectedOrganisationUnit == null ||
+                programsForSelectedOrganisationUnit.size() <= 0) {
+            populateSpinner(programSpinner, new ArrayList<String>());
+            existingEventsListView.setAdapter(new AttributeListAdapter(getActivity(), new ArrayList<String[]>()));
+        } else {
+            List<String> programNames = new ArrayList<>();
+            for (Program p : programsForSelectedOrganisationUnit) {
+                programNames.add(p.getName());
+            }
+            populateSpinner(programSpinner, programNames);
+        }
+    }
+
     public void onProgramSelected(int position) {
-        if(position < 0) return;
-        Log.d(CLASS_TAG, "onprogramselected");
-        if(programsForSelectedOrganisationUnit!=null) {
+        if (position < 0) {
+            return;
+        }
+        Log.d(CLASS_TAG, "onProgramSelected");
+        if (programsForSelectedOrganisationUnit != null) {
             Program program = programsForSelectedOrganisationUnit.get(position);
             ProgramStage programStage = program.getProgramStages().get(0);
             //since this is single event its only 1 stage
@@ -193,16 +265,17 @@ public class SelectProgramFragment extends Fragment {
             displayedExistingEvents = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
 
             //get data elements to show in list:
-            List<ProgramStageDataElement> programStageDataElements = programStage.getProgramStageDataElements();
+            List<ProgramStageDataElement> programStageDataElements =
+                    programStage.getProgramStageDataElements();
             List<String> dataElementsToShowInList = new ArrayList<>();
-            for(ProgramStageDataElement programStageDataElement: programStageDataElements) {
-                if(programStageDataElement.displayInReports) {
+            for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+                if (programStageDataElement.displayInReports) {
                     dataElementsToShowInList.add(programStageDataElement.dataElement);
                 }
             }
 
             attributeNameContainer.removeAllViews();
-            for(String s: dataElementsToShowInList) {
+            for (String s : dataElementsToShowInList) {
                 TextView tv = new TextView(getActivity());
                 tv.setWidth(0);
                 tv.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f));
@@ -223,18 +296,23 @@ public class SelectProgramFragment extends Fragment {
             //get values and show in list
             HashMap<String, String[]> rows = new HashMap<>();
             rowContainer.removeAllViews();
-            for(int j = 0; j<displayedExistingEvents.size(); j++) {
+            for (int j = 0; j < displayedExistingEvents.size(); j++) {
                 Event event = displayedExistingEvents.get(j);
                 String[] row = new String[dataElementsToShowInList.size()];
                 LinearLayout v = (LinearLayout) getActivity().getLayoutInflater().inflate(org.hisp.dhis2.android.sdk.R.layout.eventlistlinearlayoutitem, rowContainer, false);
                 //v.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.getDpPx(50, getResources().getDisplayMetrics())));
-                for(int i = 0; i<dataElementsToShowInList.size(); i++) {
+                for (int i = 0; i < dataElementsToShowInList.size(); i++) {
                     String dataElement = dataElementsToShowInList.get(i);
                     List<DataValue> result = Select.all(DataValue.class,
                             Condition.column(DataValue$Table.EVENT).is(event.event),
                             Condition.column(DataValue$Table.DATAELEMENT).is(dataElement));
-                    if(result != null && !result.isEmpty() ) {
-                        row[i] = result.get(0).value;
+                    if (result != null && !result.isEmpty()) {
+                        String code = result.get(0).value;
+                        if (!isEmpty(mOptionToNameMap.get(code))) {
+                            row[i] = mOptionToNameMap.get(code);
+                        } else {
+                            row[i] = code;
+                        }
                     } else {
                         row[i] = " ";
                     }
@@ -260,12 +338,12 @@ public class SelectProgramFragment extends Fragment {
                 });
                 v.addView(iv);
 
-                if(event.fromServer) {
+                if (event.fromServer) {
                     iv.setVisibility(View.INVISIBLE);
                 }
                 rows.put(event.event, row);
 
-                v.setContentDescription(""+j);
+                v.setContentDescription("" + j);
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -281,80 +359,28 @@ public class SelectProgramFragment extends Fragment {
         }
     }
 
-    public void populateSpinner( CardSpinner spinner, List<String> list )
-    {
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>( getActivity(),
-                R.layout.spinner_item, list );
-        spinner.setAdapter( adapter );
-    }
-
-    public void invalidate() {
-        onProgramSelected(programSpinner.getSelectedItemPosition());
-    }
-
-    public void showRegisterEventFragment() {
-        if( selectedOrganisationUnit == null || programSpinner.getSelectedItemPosition() < 0)
-            return;
-        MessageEvent event = new MessageEvent(BaseEvent.EventType.showRegisterEventFragment);
-        Dhis2Application.bus.post(event);
-    }
-
-    public OrganisationUnit getSelectedOrganisationUnit() {
-        return selectedOrganisationUnit;
-    }
-
-    public Program getSelectedProgram() {
-        if(programSpinner.getSelectedItemPosition()<0) return null;
-        Program selectedProgram = programsForSelectedOrganisationUnit.
-                get(programSpinner.getSelectedItemPosition());
-        return selectedProgram;
-    }
-
-    @Subscribe
-    public void onReceiveInvalidateMessage(InvalidateEvent event) {
-        if(event.eventType == InvalidateEvent.EventType.event) {
-            getActivity().runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    invalidate();
-                }
-            });
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        int spinnerId = ((View) parent.getParent()).getId();
+        switch (spinnerId) {
+            case R.id.org_unit_spinner:
+                onUnitSelected(position);
+                return;
+            case R.id.program_spinner:
+                onProgramSelected(position);
+                return;
+            default:
+                throw new IllegalArgumentException("No such spinner");
         }
-    }
-
-    public int getSelectedOrganisationUnitIndex() {
-        if(organisationUnitSpinner!=null) {
-            return organisationUnitSpinner.getSelectedItemPosition();
-        }
-        else {
-            return 0;
-        }
-    }
-
-    public int getSelectedProgramIndex() {
-        if(programSpinner!=null) {
-            return programSpinner.getSelectedItemPosition();
-        }
-        else {
-            return 0;
-        }
-    }
-
-    public void setSelection(int orgunit, int program) {
-        Log.d(CLASS_TAG, "¤¤¤ settings selection: " + orgunit +", " + program);
-        orgunitSelection = orgunit;
-        programSelection = program;
     }
 
     @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        Dhis2Application.bus.register(this);
+    public void onNothingSelected(AdapterView<?> parent) {
+        // stub implementation
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Dhis2Application.bus.unregister(this);
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        editEvent(position);
     }
 }

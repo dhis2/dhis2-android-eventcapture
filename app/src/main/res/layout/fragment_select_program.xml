@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ * Copyright (c) 2015, University of Oslo
   ~  * All rights reserved.
   ~  *
@@ -27,12 +26,10 @@
   ~  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   ~  */
   -->
-
-
-
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -40,57 +37,64 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
 
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner
-        android:id="@+id/org_unit_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="6dp"
-        app:hint="@string/select_org" />
-
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner
-        android:id="@+id/program_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="6dp"
-        app:hint="@string/select_program" />
-
-    <android.support.v7.widget.CardView android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="6dp">
-
-        <LinearLayout android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView android:text="Registered Events:"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="6dp"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-            <LinearLayout
-            android:id="@+id/attributenameslayout"
-            android:orientation="horizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp">
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/eventrowcontainer"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="6dp"
-                android:orientation="vertical"></LinearLayout>
-
-        <ListView
+        <org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner
+            android:id="@+id/org_unit_spinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:id="@+id/selectprogram_resultslistview" />
-        </LinearLayout>
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            app:hint="@string/select_org" />
 
-    </android.support.v7.widget.CardView>
+        <org.hisp.dhis2.android.sdk.utils.ui.views.CardSpinner
+            android:id="@+id/program_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginBottom="6dp"
+            app:hint="@string/select_program" />
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:text="Registered Events:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <LinearLayout
+                    android:id="@+id/attributenameslayout"
+                    android:orientation="horizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"></LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/eventrowcontainer"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:orientation="vertical"></LinearLayout>
+
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="6dp"
+                    android:id="@+id/selectprogram_resultslistview" />
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
 
     </LinearLayout>
 </ScrollView>

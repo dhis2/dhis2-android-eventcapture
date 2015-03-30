@@ -47,10 +47,22 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.events.BaseEvent;
+import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
+import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
+import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
+import org.hisp.dhis2.android.sdk.utils.Utils;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.AutoCompleteRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.BooleanRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.CheckBoxRow;
@@ -63,18 +75,6 @@ import org.hisp.dhis2.android.sdk.utils.ui.rows.PosIntegerRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.PosOrZeroIntegerRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.Row;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.TextRow;
-import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.MessageEvent;
-import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
-import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
-import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
-import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,8 +108,7 @@ public class DataEntryFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
-    {
+                             Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_register_event,
                 container, false);
         this.inflater = inflater;
@@ -125,7 +124,9 @@ public class DataEntryFragment extends Fragment {
         latitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_latitudeedit);
         longitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_longitudeedit);
 
-        if(selectedOrganisationUnit == null || selectedProgram == null) return;
+        if (selectedOrganisationUnit == null || selectedProgram == null) {
+            return;
+        }
 
         final LinearLayout dataElementContainer = (LinearLayout) rootView.
                 findViewById(R.id.dataentry_dataElementContainer);
@@ -141,6 +142,7 @@ public class DataEntryFragment extends Fragment {
     /**
      * returns true if the DataEntryFragment is currently editing an existing event. False if
      * it is creating a new Event.
+     *
      * @return
      */
     public boolean isEditing() {
@@ -149,12 +151,17 @@ public class DataEntryFragment extends Fragment {
 
     /**
      * returns true if there have been made changes to an editing event.
+     *
      * @return
      */
     public boolean hasEdited() {
-        if(originalDataValues==null || dataValues == null) return false;
-        for(int i = 0; i<dataValues.size(); i++) {
-            if(!originalDataValues.get(i).value.equals(dataValues.get(i).value)) return true;
+        if (originalDataValues == null || dataValues == null) {
+            return false;
+        }
+        for (int i = 0; i < dataValues.size(); i++) {
+            if (!originalDataValues.get(i).value.equals(dataValues.get(i).value)) {
+                return true;
+            }
         }
         return false;
     }
@@ -162,17 +169,17 @@ public class DataEntryFragment extends Fragment {
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {
         selectedProgramStage = selectedProgram.getProgramStages().get(0); //since this is event capture, there will only be 1 stage.
         programStageSections = selectedProgramStage.getProgramStageSections();
-        if(programStageSections == null || programStageSections.isEmpty()) {
+        if (programStageSections == null || programStageSections.isEmpty()) {
             programStageDataElements = selectedProgramStage.getProgramStageDataElements();
         } else {
             programStageDataElements = new ArrayList<>();
-            for(ProgramStageSection section: programStageSections) {
+            for (ProgramStageSection section : programStageSections) {
                 programStageDataElements.addAll(section.getProgramStageDataElements());
             }
         }
 
 
-        if(editingEvent < 0) {
+        if (editingEvent < 0) {
             editing = false;
             createNewEvent();
         } else {
@@ -181,18 +188,18 @@ public class DataEntryFragment extends Fragment {
         }
 
 
-        if(!selectedProgramStage.captureCoordinates) {
+        if (!selectedProgramStage.captureCoordinates) {
 
         } else {
-            if(getActivity()==null) return;
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Thread() {
                 @Override
                 public void run() {
                     Dhis2.activateGps(getActivity());
-                    if(event.latitude!=null)
-                        latitudeEditText.setText(event.latitude+"");
-                    if(event.longitude!=null)
-                        longitudeEditText.setText(event.longitude+"");
+                    if (event.latitude != null)
+                        latitudeEditText.setText(event.latitude + "");
+                    if (event.longitude != null)
+                        longitudeEditText.setText(event.longitude + "");
                     captureCoordinateButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -205,17 +212,17 @@ public class DataEntryFragment extends Fragment {
         }
 
         final List<Row> rows = new ArrayList<>();
-        final Map<String ,List<Row>> sectionsRows = new HashMap<>();
-        if(programStageSections==null || programStageSections.isEmpty()) {
-            for(int i = 0; i<programStageDataElements.size(); i++) {
+        final Map<String, List<Row>> sectionsRows = new HashMap<>();
+        if (programStageSections == null || programStageSections.isEmpty()) {
+            for (int i = 0; i < programStageDataElements.size(); i++) {
                 Row row = createDataEntryView(programStageDataElements.get(i),
                         getDataValue(programStageDataElements.get(i).dataElement, dataValues));
                 rows.add(row);
             }
         } else {
-            for(ProgramStageSection section: programStageSections) {
+            for (ProgramStageSection section : programStageSections) {
                 List<Row> sectionRows = new ArrayList<>();
-                for(ProgramStageDataElement programStageDataElement: section.getProgramStageDataElements()) {
+                for (ProgramStageDataElement programStageDataElement : section.getProgramStageDataElements()) {
                     Row row = createDataEntryView(programStageDataElement,
                             getDataValue(programStageDataElement.dataElement, dataValues));
                     sectionRows.add(row);
@@ -225,18 +232,22 @@ public class DataEntryFragment extends Fragment {
         }
 
         originalDataValues = new ArrayList<>();
-        for(DataValue dv: dataValues)
+        for (DataValue dv : dataValues) {
             originalDataValues.add(dv.clone());
-        if(getActivity() == null) return;
+        }
+        if (getActivity() == null) {
+            return;
+        }
         getActivity().runOnUiThread(new Thread() {
             final Context context = getActivity();
+
             @Override
             public void run() {
-                if(context == null) return;
+                if (context == null) return;
                 progressBar.setVisibility(View.GONE);
 
-                if(programStageSections == null || programStageSections.isEmpty()) {
-                    for(int i = 0; i<rows.size(); i++) {
+                if (programStageSections == null || programStageSections.isEmpty()) {
+                    for (int i = 0; i < rows.size(); i++) {
                         Row row = rows.get(i);
                         View view = row.getView(null);
 
@@ -255,13 +266,14 @@ public class DataEntryFragment extends Fragment {
                         dataElementContainer.addView(cardView);
 
                         //set done button for last element to hide keyboard
-                        if(i==programStageDataElements.size()-1) {
+                        if (i == programStageDataElements.size() - 1) {
                             TextView textView = row.getEntryView();
-                            if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                            if (textView != null)
+                                textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
                         }
                     }
                 } else {
-                    for(int i = 0; i<programStageSections.size(); i++) {
+                    for (int i = 0; i < programStageSections.size(); i++) {
                         ProgramStageSection section = programStageSections.get(i);
                         List<Row> sectionRows = sectionsRows.get(section.id);
                         CardView sectionCardView = new CardView(context);
@@ -271,7 +283,7 @@ public class DataEntryFragment extends Fragment {
                         TextView sectionLabel = (TextView) container.findViewById(R.id.sectionlabel);
                         sectionLabel.setText(section.name);
 
-                        for(int j = 0; j<sectionRows.size(); j++) {
+                        for (int j = 0; j < sectionRows.size(); j++) {
                             Row row = sectionRows.get(j);
                             View view = row.getView(null);
                             CardView dataEntryCardView = new CardView(context);
@@ -289,9 +301,10 @@ public class DataEntryFragment extends Fragment {
                             container.addView(dataEntryCardView);
 
                             //set done button for last element to hide keyboard
-                            if(i==programStageSections.size()-1 && j==sectionsRows.size()-1) {
-                            TextView textView = row.getEntryView();
-                            if(textView!=null) textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                            if (i == programStageSections.size() - 1 && j == sectionsRows.size() - 1) {
+                                TextView textView = row.getEntryView();
+                                if (textView != null)
+                                    textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
                             }
                         }
 
@@ -304,12 +317,13 @@ public class DataEntryFragment extends Fragment {
 
     /**
      * Returns the DataValue associated with the given programStageDataElement from a list of DataValues
+     *
      * @param dataValues
      * @return
      */
     public DataValue getDataValue(String dataElement, List<DataValue> dataValues) {
-        for(DataValue dataValue: dataValues) {
-            if(dataValue.dataElement.equals(dataElement))
+        for (DataValue dataValue : dataValues) {
+            if (dataValue.dataElement.equals(dataElement))
                 return dataValue;
         }
 
@@ -338,7 +352,7 @@ public class DataEntryFragment extends Fragment {
         event.status = Event.STATUS_COMPLETED;
         event.lastUpdated = Utils.getCurrentTime();
         dataValues = new ArrayList<DataValue>();
-        for(int i = 0; i<programStageDataElements.size(); i++) {
+        for (int i = 0; i < programStageDataElements.size(); i++) {
             ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
             dataValues.add(new DataValue(event.event, "",
                     programStageDataElement.dataElement, false,
@@ -353,8 +367,8 @@ public class DataEntryFragment extends Fragment {
         Location location = Dhis2.getLocation(getActivity());
         event.latitude = location.getLatitude();
         event.longitude = location.getLongitude();
-        latitudeEditText.setText(""+event.latitude);
-        longitudeEditText.setText(""+event.longitude);
+        latitudeEditText.setText("" + event.latitude);
+        longitudeEditText.setText("" + event.longitude);
     }
 
     public void enableCaptureCoordinates() {
@@ -368,10 +382,11 @@ public class DataEntryFragment extends Fragment {
         Row row;
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
-            if(optionSet == null)
+            if (optionSet == null) {
                 row = new TextRow(inflater, dataElement.name, dataValue);
-            else
+            } else {
                 row = new AutoCompleteRow(inflater, dataElement.name, optionSet, dataValue, context);
+            }
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
             row = new TextRow(inflater, dataElement.name, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
@@ -398,7 +413,7 @@ public class DataEntryFragment extends Fragment {
             Log.d(CLASS_TAG, "type is: " + dataElement.getType());
             row = new LongTextRow(inflater, dataElement.name, dataValue);
         }
-        if( row==null) return null;
+
         return row;
     }
 
@@ -409,17 +424,17 @@ public class DataEntryFragment extends Fragment {
         boolean valid = true;
         //go through each data element and check that they are valid
         //i.e. all compulsory are not empty
-        for(int i = 0; i<dataValues.size(); i++) {
+        for (int i = 0; i < dataValues.size(); i++) {
             ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
-            if( programStageDataElement.isCompulsory() ) {
+            if (programStageDataElement.isCompulsory()) {
                 DataValue dataValue = dataValues.get(i);
-                if(dataValue.value == null || dataValue.value.length() <= 0) {
+                if (dataValue.value == null || dataValue.value.length() <= 0) {
                     valid = false;
                 }
             }
         }
 
-        if(!valid) {
+        if (!valid) {
             Dhis2.getInstance().showErrorDialog(getActivity(), "Validation error",
                     "Some compulsory fields are empty, please fill them in");
         } else {

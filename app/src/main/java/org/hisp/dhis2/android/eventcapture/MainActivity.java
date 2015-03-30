@@ -29,14 +29,13 @@
 
 package org.hisp.dhis2.android.eventcapture;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -88,12 +87,11 @@ public class MainActivity extends ActionBarActivity {
 
         Dhis2.activatePeriodicSynchronizer(this);
 
-        if(Dhis2.isInitialDataLoaded(this))
+        if (Dhis2.isInitialDataLoaded(this))
             showSelectProgramFragment();
-        else if(Dhis2.isLoadingInitial()) {
+        else if (Dhis2.isLoadingInitial()) {
             showLoadingFragment();
-        }
-        else
+        } else
             loadInitialData();
 
     }
@@ -116,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             showSettingsFragment();
-        } else if(id == R.id.action_new_event) {
+        } else if (id == R.id.action_new_event) {
             registerEvent();
         }
 
@@ -124,19 +122,19 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void registerEvent() {
-        if(currentFragment == selectProgramFragment) {
-            if( selectProgramFragment.getSelectedOrganisationUnit() != null
+        if (currentFragment == selectProgramFragment) {
+            if (selectProgramFragment.getSelectedOrganisationUnit() != null
                     && selectProgramFragment.getSelectedProgram() != null)
-            showRegisterEventFragment();
-        } else if (currentFragment == dataEntryFragment ) {
+                showRegisterEventFragment();
+        } else if (currentFragment == dataEntryFragment) {
             dataEntryFragment.submit();
         }
 
     }
 
+
     @Override
-    public void setTitle( CharSequence title )
-    {
+    public void setTitle(CharSequence title) {
         this.title = title;
         runOnUiThread(new Runnable() {
             public void run() {
@@ -158,28 +156,27 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
         Log.d(CLASS_TAG, "onreceivemessage");
-        if(event.eventType == BaseEvent.EventType.showRegisterEventFragment) {
+        if (event.eventType == BaseEvent.EventType.showRegisterEventFragment) {
             showRegisterEventFragment();
-        } else if(event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
+        } else if (event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
             showSelectProgramFragment();
-        } else if(event.eventType == BaseEvent.EventType.logout) {
+        } else if (event.eventType == BaseEvent.EventType.logout) {
             logout();
-        } else if(event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
-            if(Dhis2.isInitialDataLoaded(this)) {
+        } else if (event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
+            if (Dhis2.isInitialDataLoaded(this)) {
                 showSelectProgramFragment();
             } else {
                 //todo: notify the user that data is missing and request to try to re-load.
             }
-        } else if(event.eventType == BaseEvent.EventType.showDataEntryFragment) {
-            if(event.item != null) {
+        } else if (event.eventType == BaseEvent.EventType.showDataEntryFragment) {
+            if (event.item != null) {
                 long localEventId = (long) event.item;
                 showEditEventFragment(localEventId);
             }
-        } else if(event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
+        } else if (event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
             showLoginActivity();
         }
     }
-
 
 
     public void logout() {
@@ -195,7 +192,7 @@ public class MainActivity extends ActionBarActivity {
 
     public void showLoadingFragment() {
         setTitle("Loading initial data");
-        if(loadingFragment == null) loadingFragment = new LoadingFragment();
+        if (loadingFragment == null) loadingFragment = new LoadingFragment();
         showFragment(loadingFragment);
     }
 
@@ -213,15 +210,15 @@ public class MainActivity extends ActionBarActivity {
 
     public void showSelectProgramFragment() {
         setTitle("Event Capture");
-        if(selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
+        if (selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
         showFragment(selectProgramFragment);
         selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
     public void showSettingsFragment() {
         setTitle("Settings");
-        if( settingsFragment == null ) settingsFragment = new SettingsFragment();
-        if(selectProgramFragment!=null) {
+        if (settingsFragment == null) settingsFragment = new SettingsFragment();
+        if (selectProgramFragment != null) {
             lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
             lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
         }
@@ -242,7 +239,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void showFragment(Fragment fragment) {
-        if(MainActivity.this.isFinishing()) return;
+        if (MainActivity.this.isFinishing()) return;
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, fragment);
@@ -257,47 +254,40 @@ public class MainActivity extends ActionBarActivity {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.action_new_event);
         item.setVisible(true);
-        if(currentFragment == settingsFragment)
+        if (currentFragment == settingsFragment)
             item.setVisible(false);
-        else if(currentFragment == selectProgramFragment)
+        else if (currentFragment == selectProgramFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_new));
-        else if(currentFragment == dataEntryFragment)
+        else if (currentFragment == dataEntryFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_save));
-        else if(currentFragment == loadingFragment)
+        else if (currentFragment == loadingFragment)
             item.setVisible(false);
 
         return true;
     }
 
     @Override
-    public boolean onKeyDown( int keyCode, KeyEvent event )
-    {
-        if ( (keyCode == KeyEvent.KEYCODE_BACK) )
-        {
-            if ( currentFragment == selectProgramFragment )
-            {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+            if (currentFragment == selectProgramFragment) {
                 Dhis2.getInstance().showConfirmDialog(this, getString(R.string.confirm),
                         getString(R.string.exit_confirmation), getString(R.string.yes_option),
                         getString(R.string.no_option),
-                 new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick( DialogInterface dialog, int which )
-                    {
-                        finish();
-                        System.exit( 0 );
-                    }
-                } );
-            }
-            else if ( currentFragment == dataEntryFragment)
-            {
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                                System.exit(0);
+                            }
+                        });
+            } else if (currentFragment == dataEntryFragment) {
                 String message = null;
-                if(dataEntryFragment.isEditing()) {
+                if (dataEntryFragment.isEditing()) {
                     message = getString(R.string.discard_confirm_changes);
                 } else {
                     message = getString(R.string.discard_confirm);
                 }
-                if(dataEntryFragment.hasEdited()) {
+                if (dataEntryFragment.hasEdited()) {
                     Dhis2.getInstance().showConfirmDialog(this, getString(R.string.discard),
                             message, getString(R.string.yes_option),
                             getString(R.string.no_option),
@@ -311,14 +301,14 @@ public class MainActivity extends ActionBarActivity {
                     showSelectProgramFragment();
                     dataEntryFragment = null;
                 }
-            } else if ( currentFragment == settingsFragment ) {
-                if(previousFragment == null) showSelectProgramFragment();
+            } else if (currentFragment == settingsFragment) {
+                if (previousFragment == null) showSelectProgramFragment();
                 else showFragment(previousFragment);
             }
             return true;
         }
 
-        return super.onKeyDown( keyCode, event );
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
