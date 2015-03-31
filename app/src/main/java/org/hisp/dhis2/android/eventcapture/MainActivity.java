@@ -70,13 +70,15 @@ public class MainActivity extends ActionBarActivity {
     private SettingsFragment settingsFragment;
     private LoadingFragment loadingFragment;
     private Fragment previousFragment; //workaround for back button since the backstack sucks
+
     private int lastSelectedOrgUnit = 0;
     private int lastSelectedProgram = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setContentView(R.layout.activity_main_sdk);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
         Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_EVENTCAPTURE);
         NetworkManager.getInstance().setCredentials(Dhis2.getCredentials(this));
         NetworkManager.getInstance().setServerUrl(Dhis2.getServer(this));
@@ -99,19 +101,13 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             showSettingsFragment();
         } else if (id == R.id.action_new_event) {
@@ -123,15 +119,14 @@ public class MainActivity extends ActionBarActivity {
 
     public void registerEvent() {
         if (currentFragment == selectProgramFragment) {
-            if (selectProgramFragment.getSelectedOrganisationUnit() != null
-                    && selectProgramFragment.getSelectedProgram() != null)
+            if (selectProgramFragment.getSelectedOrganisationUnit() != null &&
+                    selectProgramFragment.getSelectedProgram() != null) {
                 showRegisterEventFragment();
+            }
         } else if (currentFragment == dataEntryFragment) {
             dataEntryFragment.submit();
         }
-
     }
-
 
     @Override
     public void setTitle(CharSequence title) {
@@ -155,7 +150,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
-        Log.d(CLASS_TAG, "onreceivemessage");
+        Log.d(CLASS_TAG, "onReceiveMessage");
         if (event.eventType == BaseEvent.EventType.showRegisterEventFragment) {
             showRegisterEventFragment();
         } else if (event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
@@ -177,7 +172,6 @@ public class MainActivity extends ActionBarActivity {
             showLoginActivity();
         }
     }
-
 
     public void logout() {
         Dhis2.logout(this);
