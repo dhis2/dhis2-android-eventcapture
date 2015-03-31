@@ -30,18 +30,15 @@
 package org.hisp.dhis2.android.eventcapture;
 
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
@@ -55,20 +52,17 @@ import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
-import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
 
 public class MainActivity extends ActionBarActivity {
 
     public final static String CLASS_TAG = "MainActivity";
 
-    private CharSequence title;
+    //private CharSequence title;
 
-    private Fragment currentFragment = null;
+    // private Fragment currentFragment = null;
     private SelectProgramFragment selectProgramFragment;
     private DataEntryFragment dataEntryFragment;
-    private SettingsFragment settingsFragment;
     private LoadingFragment loadingFragment;
     private Fragment previousFragment; //workaround for back button since the backstack sucks
 
@@ -112,12 +106,13 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             showSettingsFragment();
         } else if (id == R.id.action_new_event) {
-            registerEvent();
+            showRegisterEventFragment();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    /*
     public void registerEvent() {
         if (currentFragment == selectProgramFragment) {
             if (selectProgramFragment.getSelectedOrganisationUnit() != null &&
@@ -128,8 +123,9 @@ public class MainActivity extends ActionBarActivity {
             dataEntryFragment.submit();
         }
     }
+    */
 
-    @Override
+    /* @Override
     public void setTitle(CharSequence title) {
         this.title = title;
         runOnUiThread(new Runnable() {
@@ -137,7 +133,7 @@ public class MainActivity extends ActionBarActivity {
                 //getSupportActionBar().setTitle( MainActivity.this.title );
             }
         });
-    }
+    } */
 
     public void loadInitialData() {
         runOnUiThread(new Runnable() {
@@ -187,42 +183,60 @@ public class MainActivity extends ActionBarActivity {
 
     public void showLoadingFragment() {
         setTitle("Loading initial data");
-        if (loadingFragment == null) loadingFragment = new LoadingFragment();
-        showFragment(loadingFragment);
+        // if (loadingFragment == null) loadingFragment = new LoadingFragment();
+        switchFragment(new LoadingFragment(), LoadingFragment.TAG);
     }
 
     public void showRegisterEventFragment() {
         setTitle("Register Event");
-        dataEntryFragment = new DataEntryFragment();
+        DataEntryFragment fragment = DataEntryFragment.newInstance(
+                null, null
+        );
+        switchFragment(new DataEntryFragment(), DataEntryFragment.TAG);
+        /* dataEntryFragment = new DataEntryFragment();
         OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
         Program program = selectProgramFragment.getSelectedProgram();
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
         dataEntryFragment.setSelectedProgram(program);
         lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
         lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
-        showFragment(dataEntryFragment);
+        showFragment(dataEntryFragment); */
     }
 
     public void showSelectProgramFragment() {
         setTitle("Event Capture");
-        if (selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
-        showFragment(selectProgramFragment);
-        selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
+        // if (selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
+        //showFragment(selectProgramFragment);
+        switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
+        //selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
     public void showSettingsFragment() {
         setTitle("Settings");
-        if (settingsFragment == null) settingsFragment = new SettingsFragment();
+        switchFragment(new SettingsFragment(), SettingsFragment.TAG);
+        /*
+        if (settingsFragment == null) {
+            settingsFragment = new SettingsFragment();
+        }
+        */
+        /*
         if (selectProgramFragment != null) {
             lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
             lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
         }
-        showFragment(settingsFragment);
+        */
+
     }
 
     public void showEditEventFragment(long localEventId) {
         setTitle("Edit Event");
-        dataEntryFragment = new DataEntryFragment();
+        Fragment fragment = DataEntryFragment.newInstance(
+                selectProgramFragment.getSelectedOrganisationUnit(),
+                selectProgramFragment.getSelectedProgram(),
+                localEventId
+        );
+        switchFragment(fragment, DataEntryFragment.TAG);
+        /* dataEntryFragment = new DataEntryFragment();
         OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
         Program program = selectProgramFragment.getSelectedProgram();
         dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
@@ -230,9 +244,10 @@ public class MainActivity extends ActionBarActivity {
         dataEntryFragment.setEditingEvent(localEventId);
         lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
         lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
-        showFragment(dataEntryFragment);
+        showFragment(dataEntryFragment); */
     }
 
+    /*
     public void showFragment(Fragment fragment) {
         if (MainActivity.this.isFinishing()) return;
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -243,15 +258,17 @@ public class MainActivity extends ActionBarActivity {
         currentFragment = fragment;
         invalidateOptionsMenu();
     }
+    */
 
-    @Override
+    /* @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.action_new_event);
         item.setVisible(true);
-        if (currentFragment == settingsFragment)
+        /* if (currentFragment == settingsFragment)
             item.setVisible(false);
-        else if (currentFragment == selectProgramFragment)
+        else */
+        /* if (currentFragment == selectProgramFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_new));
         else if (currentFragment == dataEntryFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_save));
@@ -259,8 +276,18 @@ public class MainActivity extends ActionBarActivity {
             item.setVisible(false);
 
         return true;
+    } */
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        Toast.makeText(
+                getApplicationContext(), "onBackPressed()", Toast.LENGTH_SHORT
+        ).show();
     }
 
+    /*
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK)) {
@@ -296,15 +323,15 @@ public class MainActivity extends ActionBarActivity {
                     showSelectProgramFragment();
                     dataEntryFragment = null;
                 }
-            } else if (currentFragment == settingsFragment) {
+            } /* else if (currentFragment == settingsFragment) {
                 if (previousFragment == null) showSelectProgramFragment();
                 else showFragment(previousFragment);
-            }
-            return true;
+            } */
+        /*    return true;
         }
 
         return super.onKeyDown(keyCode, event);
-    }
+    }*/
 
     @Override
     protected void onDestroy() {
@@ -312,7 +339,13 @@ public class MainActivity extends ActionBarActivity {
         Dhis2Application.bus.unregister(this);
     }
 
-    private void switchFragment(Fragment fragment) {
-
+    private void switchFragment(Fragment fragment, String fragmentTag) {
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, fragment)
+                    .addToBackStack(fragmentTag)
+                    .commit();
+        }
     }
 }

@@ -80,7 +80,7 @@ import static android.text.TextUtils.isEmpty;
 public class SelectProgramFragment extends Fragment
         implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
 
-    private static final String CLASS_TAG = "SelectProgramFragment";
+    public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
     private List<OrganisationUnit> assignedOrganisationUnits;
     private OrganisationUnit selectedOrganisationUnit;
@@ -148,16 +148,16 @@ public class SelectProgramFragment extends Fragment
         programSpinner.setOnItemSelectedListener(this);
         existingEventsListView.setOnItemClickListener(this);
 
-        Log.e(CLASS_TAG, "Setting orgUnit " + orgunitSelection);
+        Log.e(TAG, "Setting orgUnit " + orgunitSelection);
         if (assignedOrganisationUnits != null && assignedOrganisationUnits.size() > orgunitSelection) {
             organisationUnitSpinner.setSelection(orgunitSelection);
         }
-        Log.e(CLASS_TAG, "Sat orgUnit " + orgunitSelection);
+        Log.e(TAG, "Sat orgUnit " + orgunitSelection);
         if (programsForSelectedOrganisationUnit != null &&
                 programsForSelectedOrganisationUnit.size() > programSelection) {
             programSpinner.setSelection(programSelection);
         }
-        Log.e(CLASS_TAG, "Sat program " + programSelection);
+        Log.e(TAG, "Sat program " + programSelection);
     }
 
     public void editEvent(int position) {
@@ -228,7 +228,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     public void setSelection(int orgUnit, int program) {
-        Log.d(CLASS_TAG, "¤¤¤ settings selection: " + orgUnit + ", " + program);
+        Log.d(TAG, "¤¤¤ settings selection: " + orgUnit + ", " + program);
         orgunitSelection = orgUnit;
         programSelection = program;
     }
@@ -255,7 +255,7 @@ public class SelectProgramFragment extends Fragment
         if (position < 0) {
             return;
         }
-        Log.d(CLASS_TAG, "onProgramSelected");
+        Log.d(TAG, "onProgramSelected");
         if (programsForSelectedOrganisationUnit != null) {
             Program program = programsForSelectedOrganisationUnit.get(position);
             ProgramStage programStage = program.getProgramStages().get(0);

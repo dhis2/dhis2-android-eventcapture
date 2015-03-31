@@ -86,8 +86,7 @@ import java.util.UUID;
  * @author Simen Skogly Russnes on 20.02.15.
  */
 public class DataEntryFragment extends Fragment {
-
-    private static final String CLASS_TAG = "DataEntryFragment";
+    public static final String TAG = DataEntryFragment.class.getSimpleName();
 
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
@@ -105,6 +104,22 @@ public class DataEntryFragment extends Fragment {
     private ProgressBar progressBar;
     private LayoutInflater inflater;
     private Context context;
+
+    public static DataEntryFragment newInstance(OrganisationUnit unit,
+                                                Program program) {
+        DataEntryFragment fragment = new DataEntryFragment();
+        fragment.setSelectedOrganisationUnit(unit);
+        fragment.setSelectedProgram(program);
+        return fragment;
+    }
+
+    public static DataEntryFragment newInstance(OrganisationUnit unit,
+                                                Program program, long eventId) {
+        DataEntryFragment fragment = newInstance(unit, program);
+        fragment.setEditingEvent(eventId);
+        return fragment;
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -410,7 +425,7 @@ public class DataEntryFragment extends Fragment {
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
             row = new LongTextRow(inflater, dataElement.name, dataValue);
         } else {
-            Log.d(CLASS_TAG, "type is: " + dataElement.getType());
+            Log.d(TAG, "type is: " + dataElement.getType());
             row = new LongTextRow(inflater, dataElement.name, dataValue);
         }
 
