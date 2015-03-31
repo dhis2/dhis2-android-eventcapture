@@ -28,6 +28,7 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -54,8 +55,14 @@ public class OrgUnitDialogFragment extends DialogFragment implements AdapterView
 
     public static OrgUnitDialogFragment newInstance(OnOrgUnitSetListener listener) {
         OrgUnitDialogFragment fragment = new OrgUnitDialogFragment();
-        fragment.setOnClickListener(listener);
+        fragment.setListener(listener);
         return fragment;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -88,14 +95,6 @@ public class OrgUnitDialogFragment extends DialogFragment implements AdapterView
         mListView.setAdapter(mAdapter);
     }
 
-    public void setOnClickListener(OnOrgUnitSetListener listener) {
-        mListener = listener;
-    }
-
-    public void show(FragmentManager manager) {
-        show(manager, TAG);
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mListener != null) {
@@ -108,6 +107,15 @@ public class OrgUnitDialogFragment extends DialogFragment implements AdapterView
         }
         dismiss();
     }
+
+    public void setListener(OnOrgUnitSetListener listener) {
+        mListener = listener;
+    }
+
+    public void show(FragmentManager manager) {
+        show(manager, TAG);
+    }
+
 
     public interface OnOrgUnitSetListener {
         public void onUnitSelected(String orgUnitId, String orgUnitLabel);

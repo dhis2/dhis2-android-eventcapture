@@ -53,21 +53,14 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
     private SimpleAdapter<Program> mAdapter;
     private OnProgramSetListener mListener;
 
-    public static ProgramDialogFragment newInstance(String orgUnitId) {
+    public static ProgramDialogFragment newInstance(OnProgramSetListener listener,
+                                                    String orgUnitId) {
         ProgramDialogFragment fragment = new ProgramDialogFragment();
         Bundle args = new Bundle();
         args.putString(OrganisationUnit$Table.ID, orgUnitId);
         fragment.setArguments(args);
+        fragment.setListener(listener);
         return fragment;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof OnProgramSetListener) {
-            mListener = (OnProgramSetListener) activity;
-        }
     }
 
     @Override
@@ -111,16 +104,6 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
         mAdapter.swapData(programs);
     }
 
-    /*
-    public void setOnClickListener(OnProgramSetListener listener) {
-        mListener = listener;
-    }
-    */
-
-    public void show(FragmentManager manager) {
-        show(manager, TAG);
-    }
-
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mListener != null) {
@@ -134,8 +117,16 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
         dismiss();
     }
 
+    public void setListener(OnProgramSetListener listener) {
+        mListener = listener;
+    }
+
+    public void show(FragmentManager manager) {
+        show(manager, TAG);
+    }
+
     public interface OnProgramSetListener {
-        public void onProgramSelected(String dataSetId, String dataSetName);
+        public void onProgramSelected(String programId, String programName);
     }
 
     static class StringExtractor implements SimpleAdapter.ExtractStringCallback<Program> {

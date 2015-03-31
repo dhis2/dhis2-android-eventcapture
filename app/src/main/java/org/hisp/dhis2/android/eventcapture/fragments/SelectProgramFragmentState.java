@@ -61,7 +61,7 @@ public class SelectProgramFragmentState implements Parcelable {
         if (state != null) {
             setSyncInProcess(state.isSyncInProcess());
             setOrgUnit(state.getOrgUnitId(), state.getOrgUnitLabel());
-            setDataSet(state.getProgramId(), state.getProgramName());
+            setProgram(state.getProgramId(), state.getProgramName());
         }
     }
 
@@ -121,17 +121,17 @@ public class SelectProgramFragmentState implements Parcelable {
         return orgUnitId;
     }
 
-    public void setDataSet(String dataSetId, String dataSetLabel) {
-        this.programId = dataSetId;
-        this.programName = dataSetLabel;
+    public void setProgram(String programId, String programLabel) {
+        this.programId = programId;
+        this.programName = programLabel;
     }
 
-    public void resetDataSet() {
+    public void resetProgram() {
         programId = null;
         programName = null;
     }
 
-    public boolean isDataSetEmpty() {
+    public boolean isProgramEmpty() {
         return (programId == null || programName == null);
     }
 
