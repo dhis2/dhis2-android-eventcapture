@@ -28,6 +28,7 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -50,16 +51,29 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
 
     private ListView mListView;
     private SimpleAdapter<Program> mAdapter;
-    private OnDatasetSetListener mListener;
+    private OnProgramSetListener mListener;
 
-    public static ProgramDialogFragment newInstance(OnDatasetSetListener listener,
-                                                    String orgUnitId) {
+    public static ProgramDialogFragment newInstance(String orgUnitId) {
         ProgramDialogFragment fragment = new ProgramDialogFragment();
         Bundle args = new Bundle();
         args.putString(OrganisationUnit$Table.ID, orgUnitId);
-        fragment.setOnClickListener(listener);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof OnProgramSetListener) {
+            mListener = (OnProgramSetListener) activity;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 
     @Override
@@ -97,9 +111,11 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
         mAdapter.swapData(programs);
     }
 
-    public void setOnClickListener(OnDatasetSetListener listener) {
+    /*
+    public void setOnClickListener(OnProgramSetListener listener) {
         mListener = listener;
     }
+    */
 
     public void show(FragmentManager manager) {
         show(manager, TAG);
@@ -110,7 +126,7 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
         if (mListener != null) {
             Program program = mAdapter.getItemSafely(position);
             if (program != null) {
-                mListener.onDataSetSelected(
+                mListener.onProgramSelected(
                         program.getId(), program.getName()
                 );
             }
@@ -118,8 +134,8 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
         dismiss();
     }
 
-    public interface OnDatasetSetListener {
-        public void onDataSetSelected(String dataSetId, String dataSetName);
+    public interface OnProgramSetListener {
+        public void onProgramSelected(String dataSetId, String dataSetName);
     }
 
     static class StringExtractor implements SimpleAdapter.ExtractStringCallback<Program> {
