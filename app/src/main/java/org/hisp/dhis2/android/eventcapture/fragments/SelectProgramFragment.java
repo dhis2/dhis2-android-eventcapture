@@ -88,8 +88,8 @@ public class SelectProgramFragment extends Fragment
 
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
-   private List<OrganisationUnit> assignedOrganisationUnits;
-   // private List<Program> programsForSelectedOrganisationUnit;
+    private List<OrganisationUnit> assignedOrganisationUnits;
+    private List<Program> programsForSelectedOrganisationUnit;
     private List<Event> displayedExistingEvents;
 
     //private Button registerButton;

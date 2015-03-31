@@ -36,4 +36,7 @@
     <string name="register_event">Register Event</string>
     <string name="new_event">New event</string>
 
+    <string name="choose_organisation_unit">Choose organisation unit</string>
+    <string name="choose_program">Choose program</string>
+
 </resources>

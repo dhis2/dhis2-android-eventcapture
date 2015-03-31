@@ -40,7 +40,7 @@ import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
+import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment2;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
@@ -125,7 +125,7 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         setTitle("Event Capture");
         // if (selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
         //showFragment(selectProgramFragment);
-        switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
+        switchFragment(new SelectProgramFragment2(), SelectProgramFragment2.TAG);
         //selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
