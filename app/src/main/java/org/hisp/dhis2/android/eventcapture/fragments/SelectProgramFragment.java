@@ -29,10 +29,15 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -47,6 +52,7 @@ import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
@@ -54,6 +60,7 @@ import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.InvalidateEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
@@ -83,7 +90,6 @@ public class SelectProgramFragment extends Fragment
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
     private List<OrganisationUnit> assignedOrganisationUnits;
-    private OrganisationUnit selectedOrganisationUnit;
     private List<Program> programsForSelectedOrganisationUnit;
     private List<Event> displayedExistingEvents;
 
@@ -97,11 +103,36 @@ public class SelectProgramFragment extends Fragment
     private int programSelection;
     private int orgunitSelection;
 
+    private OrganisationUnit selectedOrganisationUnit;
+    private Program selectedProgram;
+
     private Map<String, String> mOptionToNameMap;
+
+    private INavigationHandler mNavigationHandler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        mNavigationHandler = null;
+    }
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        setHasOptionsMenu(true);
         Dhis2Application.bus.register(this);
     }
 
@@ -109,6 +140,42 @@ public class SelectProgramFragment extends Fragment
     public void onDestroy() {
         super.onDestroy();
         Dhis2Application.bus.unregister(this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_select_program, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG);
+            // showSettingsFragment();
+        } else if (id == R.id.action_new_event) {
+            showRegisterEventFragment();
+            // showRegisterEventFragment();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void showRegisterEventFragment() {
+        // setTitle("Register Event");
+        DataEntryFragment fragment = DataEntryFragment.newInstance(
+                selectedOrganisationUnit, selectedProgram
+        );
+        mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG);
+        /* dataEntryFragment = new DataEntryFragment();
+        OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
+        Program program = selectProgramFragment.getSelectedProgram();
+        dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
+        dataEntryFragment.setSelectedProgram(program);
+        lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
+        lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
+        showFragment(dataEntryFragment); */
     }
 
     @Override
@@ -177,15 +244,16 @@ public class SelectProgramFragment extends Fragment
         onProgramSelected(programSpinner.getSelectedItemPosition());
     }
 
-    public void showRegisterEventFragment() {
+    /* public void showRegisterEventFragment() {
         if (selectedOrganisationUnit == null ||
                 programSpinner.getSelectedItemPosition() < 0) {
             return;
         }
         MessageEvent event = new MessageEvent(BaseEvent.EventType.showRegisterEventFragment);
         Dhis2Application.bus.post(event);
-    }
+    } */
 
+    /*
     public OrganisationUnit getSelectedOrganisationUnit() {
         return selectedOrganisationUnit;
     }
@@ -198,6 +266,7 @@ public class SelectProgramFragment extends Fragment
                 get(programSpinner.getSelectedItemPosition());
         return selectedProgram;
     }
+    */
 
     @Subscribe
     public void onReceiveInvalidateMessage(InvalidateEvent event) {
@@ -211,7 +280,7 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
-    public int getSelectedOrganisationUnitIndex() {
+    /* public int getSelectedOrganisationUnitIndex() {
         if (organisationUnitSpinner != null) {
             return organisationUnitSpinner.getSelectedItemPosition();
         } else {
@@ -225,16 +294,17 @@ public class SelectProgramFragment extends Fragment
         } else {
             return 0;
         }
-    }
+    } */
 
-    public void setSelection(int orgUnit, int program) {
+   /*  public void setSelection(int orgUnit, int program) {
         Log.d(TAG, "¤¤¤ settings selection: " + orgUnit + ", " + program);
         orgunitSelection = orgUnit;
         programSelection = program;
-    }
+    } */
 
     private void onUnitSelected(int position) {
         selectedOrganisationUnit = assignedOrganisationUnits.get(position); //displaying first as default
+        selectedProgram = null;
         programsForSelectedOrganisationUnit = Dhis2.getInstance().getMetaDataController().
                 getProgramsForOrganisationUnit(selectedOrganisationUnit.getId(),
                         Program.SINGLE_EVENT_WITHOUT_REGISTRATION);
@@ -257,12 +327,12 @@ public class SelectProgramFragment extends Fragment
         }
         Log.d(TAG, "onProgramSelected");
         if (programsForSelectedOrganisationUnit != null) {
-            Program program = programsForSelectedOrganisationUnit.get(position);
-            ProgramStage programStage = program.getProgramStages().get(0);
+            selectedProgram = programsForSelectedOrganisationUnit.get(position);
+            ProgramStage programStage = selectedProgram.getProgramStages().get(0);
             //since this is single event its only 1 stage
 
             //get all the events for org unit and program todo: probably should limit it
-            displayedExistingEvents = DataValueController.getEvents(selectedOrganisationUnit.id, program.id);
+            displayedExistingEvents = DataValueController.getEvents(selectedOrganisationUnit.id, selectedProgram.id);
 
             //get data elements to show in list:
             List<ProgramStageDataElement> programStageDataElements =
