@@ -32,7 +32,6 @@ package org.hisp.dhis2.android.eventcapture.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -89,8 +88,8 @@ public class SelectProgramFragment extends Fragment
 
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
-    private List<OrganisationUnit> assignedOrganisationUnits;
-    private List<Program> programsForSelectedOrganisationUnit;
+   private List<OrganisationUnit> assignedOrganisationUnits;
+   // private List<Program> programsForSelectedOrganisationUnit;
     private List<Event> displayedExistingEvents;
 
     //private Button registerButton;
@@ -279,28 +278,6 @@ public class SelectProgramFragment extends Fragment
             });
         }
     }
-
-    /* public int getSelectedOrganisationUnitIndex() {
-        if (organisationUnitSpinner != null) {
-            return organisationUnitSpinner.getSelectedItemPosition();
-        } else {
-            return 0;
-        }
-    }
-
-    public int getSelectedProgramIndex() {
-        if (programSpinner != null) {
-            return programSpinner.getSelectedItemPosition();
-        } else {
-            return 0;
-        }
-    } */
-
-   /*  public void setSelection(int orgUnit, int program) {
-        Log.d(TAG, "¤¤¤ settings selection: " + orgUnit + ", " + program);
-        orgunitSelection = orgUnit;
-        programSelection = program;
-    } */
 
     private void onUnitSelected(int position) {
         selectedOrganisationUnit = assignedOrganisationUnits.get(position); //displaying first as default
