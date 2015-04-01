@@ -40,6 +40,7 @@ import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment2;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;

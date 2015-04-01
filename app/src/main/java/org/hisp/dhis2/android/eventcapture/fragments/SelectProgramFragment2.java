@@ -1,14 +1,20 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
+import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 public class SelectProgramFragment2 extends Fragment
@@ -19,8 +25,30 @@ public class SelectProgramFragment2 extends Fragment
 
     private CardTextViewButton mOrgUnitButton;
     private CardTextViewButton mProgramButton;
+    private Button mRegisterEventButton;
 
     private SelectProgramFragmentState mState;
+
+    private INavigationHandler mNavigationHandler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        mNavigationHandler = null;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,12 +65,14 @@ public class SelectProgramFragment2 extends Fragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mOrgUnitButton = (CardTextViewButton) view.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) view.findViewById(R.id.select_program);
+        mRegisterEventButton = (Button) view.findViewById(R.id.register_new_event);
 
         mOrgUnitButton.setOnClickListener(this);
         mProgramButton.setOnClickListener(this);
 
         mOrgUnitButton.setEnabled(true);
         mProgramButton.setEnabled(false);
+        mRegisterEventButton.setEnabled(false);
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -52,6 +82,8 @@ public class SelectProgramFragment2 extends Fragment
         if (mState == null) {
             mState = new SelectProgramFragmentState();
         }
+
+        onRestoreState(true);
     }
 
     @Override
@@ -61,9 +93,44 @@ public class SelectProgramFragment2 extends Fragment
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG);
+        } else if (id == R.id.action_new_event) {
+            Toast.makeText(getActivity(), "Another button", Toast.LENGTH_SHORT).show();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle out) {
         out.putParcelable(STATE, mState);
         super.onSaveInstanceState(out);
+    }
+
+    public void onRestoreState(boolean hasUnits) {
+        mOrgUnitButton.setEnabled(hasUnits);
+        if (!hasUnits) {
+            return;
+        }
+
+        SelectProgramFragmentState backedUpState = new SelectProgramFragmentState(mState);
+        if (!backedUpState.isOrgUnitEmpty()) {
+            onUnitSelected(
+                    backedUpState.getOrgUnitId(),
+                    backedUpState.getOrgUnitLabel()
+            );
+
+            if (!backedUpState.isProgramEmpty()) {
+                onProgramSelected(
+                        backedUpState.getProgramId(),
+                        backedUpState.getProgramName()
+                );
+            }
+        }
     }
 
     @Override
@@ -73,6 +140,7 @@ public class SelectProgramFragment2 extends Fragment
 
         mState.setOrgUnit(orgUnitId, orgUnitLabel);
         mState.resetProgram();
+        handleViews(0);
     }
 
     @Override
@@ -80,6 +148,7 @@ public class SelectProgramFragment2 extends Fragment
         mProgramButton.setText(programName);
 
         mState.setProgram(programId, programName);
+        handleViews(1);
     }
 
     @Override
@@ -103,6 +172,16 @@ public class SelectProgramFragment2 extends Fragment
                 break;
             }
             */
+        }
+    }
+
+    private void handleViews(int level) {
+        switch (level) {
+            case 0:
+                mRegisterEventButton.setEnabled(false);
+                break;
+            case 1:
+                mRegisterEventButton.setEnabled(true);
         }
     }
 }

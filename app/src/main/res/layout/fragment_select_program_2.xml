@@ -48,4 +48,14 @@
         android:layout_marginBottom="6dp"
         app:hint="@string/choose_program" />
 
+    <org.hisp.dhis2.android.sdk.utils.ui.views.FontButton
+        android:id="@+id/register_new_event"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/register_event"
+        android:textSize="15sp"
+        android:textColor="@color/white"
+        android:background="@drawable/button_light_blue_selector"
+        app:font="@string/regular_font_name" />
+
 </LinearLayout>

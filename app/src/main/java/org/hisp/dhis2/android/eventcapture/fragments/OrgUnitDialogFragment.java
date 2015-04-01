@@ -90,6 +90,7 @@ public class OrgUnitDialogFragment extends DialogFragment implements AdapterView
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mListView = (ListView) view.findViewById(R.id.simple_listview);
         mListView.setOnItemClickListener(this);
+
         mAdapter = new SimpleAdapter<>(getActivity());
         mAdapter.setStringExtractor(new StringExtractor());
         mListView.setAdapter(mAdapter);
