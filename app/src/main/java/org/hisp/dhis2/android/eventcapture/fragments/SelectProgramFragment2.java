@@ -10,18 +10,37 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import com.raizlabs.android.dbflow.sql.builder.Condition;
+import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
+import org.hisp.dhis2.android.eventcapture.models.EventItem;
+import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SelectProgramFragment2 extends Fragment
         implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
+
+    private ListView mListView;
+    private EventAdapter mAdapter;
 
     private CardTextViewButton mOrgUnitButton;
     private CardTextViewButton mProgramButton;
@@ -63,9 +82,17 @@ public class SelectProgramFragment2 extends Fragment
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mOrgUnitButton = (CardTextViewButton) view.findViewById(R.id.select_organisation_unit);
-        mProgramButton = (CardTextViewButton) view.findViewById(R.id.select_program);
-        mRegisterEventButton = (Button) view.findViewById(R.id.register_new_event);
+        mListView = (ListView) view.findViewById(R.id.event_listview);
+        mAdapter = new EventAdapter(getLayoutInflater(savedInstanceState));
+        View header = getLayoutInflater(savedInstanceState).inflate(
+                R.layout.fragment_select_program_header, mListView, false
+        );
+        mListView.addHeaderView(header);
+        mListView.setAdapter(mAdapter);
+
+        mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
+        mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
+        mRegisterEventButton = (Button) header.findViewById(R.id.register_new_event);
 
         mOrgUnitButton.setOnClickListener(this);
         mProgramButton.setOnClickListener(this);
@@ -148,7 +175,87 @@ public class SelectProgramFragment2 extends Fragment
         mProgramButton.setText(programName);
 
         mState.setProgram(programId, programName);
+        prepareEventsList();
         handleViews(1);
+    }
+
+    private void prepareEventsList() {
+        // create a list of EventItems
+        Program selectedProgram = Select.byId(Program.class, mState.getProgramId());
+        if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
+            return;
+        }
+
+        // since this is single event its only 1 stage
+        ProgramStage programStage = selectedProgram.getProgramStages().get(0);
+        if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
+            return;
+        }
+
+        List<ProgramStageDataElement> stageElements = programStage
+                .getProgramStageDataElements();
+        if (isListEmpty(stageElements)) {
+            return;
+        }
+
+        List<String> elementsToShow = new ArrayList<>();
+        for (ProgramStageDataElement stageElement : stageElements) {
+            if (stageElement.displayInReports) {
+                elementsToShow.add(stageElement.dataElement);
+            }
+        }
+
+        List<Event> events = DataValueController.getEvents(
+                mState.getOrgUnitId(), mState.getProgramId()
+        );
+        if (isListEmpty(events)) {
+            return;
+        }
+
+        List<EventItem> eventItems = new ArrayList<>();
+        for (Event event : events) {
+            eventItems.add(createEventItem(event, elementsToShow));
+        }
+        System.out.println("EventItems: " + eventItems.size());
+        mAdapter.swapData(eventItems);
+    }
+
+    private EventItem createEventItem(Event event, List<String> elementsToShow) {
+        EventItem eventItem = new EventItem();
+        for (int i = 0; i < 3; i++) {
+            String dataElement = elementsToShow.get(i);
+            System.out.println("DataElement: " + dataElement);
+            if (dataElement != null) {
+                DataValue dataValue = getDataValue(event, dataElement);
+                if (dataValue == null) {
+                    System.out.println("EMPTY!!!");
+                    continue;
+                }
+                System.out.println("VALUE: " + dataValue.value);
+                if (i == 0) {
+                    eventItem.setFirstItem(dataValue.value);
+                } else if (i == 1) {
+                    eventItem.setSecondItem(dataValue.value);
+                } else if (i == 2) {
+                    eventItem.setThirdItem(dataValue.value);
+                }
+            }
+        }
+        return eventItem;
+    }
+
+    private DataValue getDataValue(Event event, String dataElement) {
+        List<DataValue> dataValues = Select.all(
+                DataValue.class,
+                Condition.column(DataValue$Table.EVENT).is(event.event),
+                Condition.column(DataValue$Table.DATAELEMENT).is(dataElement)
+        );
+
+        if (dataValues != null && !dataValues.isEmpty()) {
+            return dataValues.get(0);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -178,10 +285,15 @@ public class SelectProgramFragment2 extends Fragment
     private void handleViews(int level) {
         switch (level) {
             case 0:
+                mAdapter.swapData(null);
                 mRegisterEventButton.setEnabled(false);
                 break;
             case 1:
                 mRegisterEventButton.setEnabled(true);
         }
+    }
+
+    private static <T> boolean isListEmpty(List<T> items) {
+        return items == null || items.isEmpty();
     }
 }

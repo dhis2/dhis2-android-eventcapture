@@ -28,34 +28,17 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="8dp">
+    android:layout_height="match_parent">
 
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton
-        android:id="@+id/select_organisation_unit"
+    <ListView
+        android:id="@+id/event_listview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        app:hint="@string/choose_organisation_unit" />
-
-    <org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton
-        android:id="@+id/select_program"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        app:hint="@string/choose_program" />
-
-    <org.hisp.dhis2.android.sdk.utils.ui.views.FontButton
-        android:id="@+id/register_new_event"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="@string/register_event"
-        android:textSize="15sp"
-        android:textColor="@color/white"
-        android:background="@drawable/button_light_blue_selector"
-        app:font="@string/regular_font_name" />
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:cacheColorHint="@color/transparent"
+        android:scrollbarStyle="outsideOverlay" />
 
 </LinearLayout>
