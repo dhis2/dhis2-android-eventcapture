@@ -171,14 +171,14 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.action_new_event);
         item.setVisible(true);
-        /* if (currentFragment == settingsFragment)
+        if(currentFragment.equals(settingsFragment))
             item.setVisible(false);
         else */
         /* if (currentFragment == selectProgramFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_new));
         else if (currentFragment == dataEntryFragment)
             item.setIcon(getResources().getDrawable(R.drawable.ic_save));
-        else if (currentFragment == loadingFragment)
+        else if(currentFragment.equals(loadingFragment))
             item.setVisible(false);
 
         return true;
@@ -232,8 +232,8 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
                     showSelectProgramFragment();
                     dataEntryFragment = null;
                 }
-            } /* else if (currentFragment == settingsFragment) {
-                if (previousFragment == null) showSelectProgramFragment();
+            } else if ( currentFragment.equals(settingsFragment )) {
+                if(previousFragment == null) showSelectProgramFragment();
                 else showFragment(previousFragment);
             } */
         /*    return true;

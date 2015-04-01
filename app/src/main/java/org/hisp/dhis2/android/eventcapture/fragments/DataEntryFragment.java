@@ -29,14 +29,21 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -46,12 +53,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -59,14 +68,17 @@ import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramIndicator;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
 import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.AutoCompleteRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.BooleanRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.CheckBoxRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.DatePickerRow;
+import org.hisp.dhis2.android.sdk.utils.ui.rows.IndicatorRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.IntegerRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.LongTextRow;
 import org.hisp.dhis2.android.sdk.utils.ui.rows.NegativeIntegerRow;
@@ -104,6 +116,28 @@ public class DataEntryFragment extends Fragment {
     private ProgressBar progressBar;
     private LayoutInflater inflater;
     private Context context;
+    private List<IndicatorRow> indicatorRows;
+
+    private INavigationHandler mNavigationHandler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        mNavigationHandler = null;
+    }
 
     public static DataEntryFragment newInstance(OrganisationUnit unit,
                                                 Program program) {
@@ -128,6 +162,7 @@ public class DataEntryFragment extends Fragment {
                 container, false);
         this.inflater = inflater;
         this.context = getActivity();
+        setHasOptionsMenu(true);
 
         progressBar = (ProgressBar) rootView.findViewById(R.id.register_progress);
         setupUi(rootView);
@@ -192,9 +227,8 @@ public class DataEntryFragment extends Fragment {
                 programStageDataElements.addAll(section.getProgramStageDataElements());
             }
         }
-
-
         if (editingEvent < 0) {
+
             editing = false;
             createNewEvent();
         } else {
@@ -260,74 +294,103 @@ public class DataEntryFragment extends Fragment {
             public void run() {
                 if (context == null) return;
                 progressBar.setVisibility(View.GONE);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                Resources r = getActivity().getResources();
+                int px = Utils.getDpPx(6, r.getDisplayMetrics());
+                params.setMargins(px, px, px, 0);
 
-                if (programStageSections == null || programStageSections.isEmpty()) {
-                    for (int i = 0; i < rows.size(); i++) {
-                        Row row = rows.get(i);
-                        View view = row.getView(null);
-
-                        CardView cardView = new CardView(context);
-
-                        Resources r = getActivity().getResources();
-                        int px = Utils.getDpPx(6, r.getDisplayMetrics());
-
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                        );
-                        params.setMargins(px, px, px, 0);
-                        cardView.setLayoutParams(params);
-                        cardView.addView(view);
-                        dataElementContainer.addView(cardView);
-
-                        //set done button for last element to hide keyboard
-                        if (i == programStageDataElements.size() - 1) {
-                            TextView textView = row.getEntryView();
-                            if (textView != null)
-                                textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-                        }
-                    }
+                if(programStageSections == null || programStageSections.isEmpty()) {
+                    populateDataEntryRows(rows, dataElementContainer);
+                    populateIndicatorViews(selectedProgramStage.getProgramIndicators(), dataElementContainer);
                 } else {
                     for (int i = 0; i < programStageSections.size(); i++) {
                         ProgramStageSection section = programStageSections.get(i);
                         List<Row> sectionRows = sectionsRows.get(section.id);
                         CardView sectionCardView = new CardView(context);
-                        LinearLayout container = (LinearLayout) inflater.inflate(R.layout.dataentrysectionlayout, dataElementContainer, false);
+                        sectionCardView.setLayoutParams(params);
+                        LinearLayout container = (LinearLayout) inflater.inflate(R.layout.
+                                dataentrysectionlayout, dataElementContainer, false);
 
                         sectionCardView.addView(container);
                         TextView sectionLabel = (TextView) container.findViewById(R.id.sectionlabel);
                         sectionLabel.setText(section.name);
 
-                        for (int j = 0; j < sectionRows.size(); j++) {
-                            Row row = sectionRows.get(j);
-                            View view = row.getView(null);
-                            CardView dataEntryCardView = new CardView(context);
-
-                            Resources r = getActivity().getResources();
-                            int px = Utils.getDpPx(6, r.getDisplayMetrics());
-
-                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.MATCH_PARENT,
-                                    LinearLayout.LayoutParams.WRAP_CONTENT
-                            );
-                            params.setMargins(px, px, px, 0);
-                            sectionCardView.setLayoutParams(params);
-                            dataEntryCardView.addView(view);
-                            container.addView(dataEntryCardView);
-
-                            //set done button for last element to hide keyboard
-                            if (i == programStageSections.size() - 1 && j == sectionsRows.size() - 1) {
-                                TextView textView = row.getEntryView();
-                                if (textView != null)
-                                    textView.setImeOptions(EditorInfo.IME_ACTION_DONE);
-                            }
-                        }
+                        populateDataEntryRows(sectionRows, container);
+                        populateIndicatorViews(section.getProgramIndicators(), container);
 
                         dataElementContainer.addView(sectionCardView);
                     }
                 }
             }
         });
+    }
+
+    public void populateIndicatorViews(List<ProgramIndicator> programIndicators, LinearLayout container) {
+        if(programIndicators==null) return;
+        for (ProgramIndicator programIndicator : programIndicators) {
+            String value = ProgramIndicatorService.getProgramIndicatorValue(event, programIndicator);
+            if (value == null) value = "";
+            IndicatorRow indicatorRow = new IndicatorRow
+                    (inflater, programIndicator.name, value, programIndicator);
+            if (indicatorRows == null) indicatorRows = new ArrayList<>();
+            indicatorRows.add(indicatorRow);
+            container.addView(createDataEntryCardView(indicatorRow));
+        }
+    }
+
+    public void populateDataEntryRows(List<Row> rows, LinearLayout container) {
+        for(int j = 0; j<rows.size(); j++) {
+            Row row = rows.get(j);
+            container.addView(createDataEntryCardView(row));
+
+            //set done button for last element to hide keyboard
+            if(j==rows.size()-1) {
+                if(row.getEntryView()!=null) row.getEntryView().
+                        setImeOptions(EditorInfo.IME_ACTION_DONE);
+            }
+        }
+    }
+
+    public CardView createDataEntryCardView(Row row) {
+        View view = row.getView(null);
+        CardView dataEntryCardView = new CardView(context);
+        Resources r = getActivity().getResources();
+        int px = Utils.getDpPx(6, r.getDisplayMetrics());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(px, px, px, 0);
+        dataEntryCardView.setLayoutParams(params);
+        dataEntryCardView.addView(view);
+
+        TextView textView = row.getEntryView();
+        if(textView instanceof EditText) {
+            ((EditText) textView).addTextChangedListener(new InvalidateIndicatorTextWatcher());
+        }
+        return dataEntryCardView;
+    }
+
+    /**
+     * Re-calculates indicator values if any and updates ui
+     */
+    private void updateIndicatorValues() {
+        for(final IndicatorRow indicatorRow: indicatorRows) {
+            final String newValue = ProgramIndicatorService.
+                    getProgramIndicatorValue(event, indicatorRow.getProgramIndicator());
+            if(!newValue.equals(indicatorRow.getValue())) {
+                Activity activity = getActivity();
+                if(activity == null) return;
+                activity.runOnUiThread(new Thread() {
+                    public void run() {
+                        indicatorRow.setValue(newValue);
+                    }
+                });
+            }
+        }
     }
 
     /**
@@ -373,6 +436,7 @@ public class DataEntryFragment extends Fragment {
                     programStageDataElement.dataElement, false,
                     Dhis2.getUsername(getActivity())));
         }
+        event.dataValues = dataValues;
     }
 
     /**
@@ -458,6 +522,54 @@ public class DataEntryFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_select_program, menu);
+        MenuItem item = menu.findItem(R.id.action_new_event);
+        item.setIcon(getResources().getDrawable(R.drawable.ic_save));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG);
+            // showSettingsFragment();
+        } else if (id == R.id.action_new_event) {
+            submit();
+            // showRegisterEventFragment();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /*@Override
+    public int onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem item = menu.findItem(R.id.action_new_event);
+        item.setIcon(getResources().getDrawable(R.drawable.ic_save));
+        return true;
+
+        if(editing) {
+
+        } else {
+
+        }
+        item.setVisible(true);
+        if(currentFragment.equals(settingsFragment))
+            item.setVisible(false);
+        else
+        /* if (currentFragment == selectProgramFragment)
+            item.setIcon(getResources().getDrawable(R.drawable.ic_new));
+        else if (currentFragment == dataEntryFragment)
+            item.setIcon(getResources().getDrawable(R.drawable.ic_save));
+        else if(currentFragment.equals(loadingFragment))
+            item.setVisible(false);
+
+        return true;
+    } */
+
     public void saveEvent() {
         event.fromServer = false;
         event.lastUpdated = Utils.getCurrentTime();
@@ -467,8 +579,9 @@ public class DataEntryFragment extends Fragment {
     }
 
     public void showSelectProgramFragment() {
-        MessageEvent event = new MessageEvent(BaseEvent.EventType.showSelectProgramFragment);
-        Dhis2Application.bus.post(event);
+        //MessageEvent event = new MessageEvent(BaseEvent.EventType.showSelectProgramFragment);
+        //Dhis2Application.bus.post(event);
+        mNavigationHandler.switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
     }
 
     public OrganisationUnit getSelectedOrganisationUnit() {
@@ -489,6 +602,21 @@ public class DataEntryFragment extends Fragment {
 
     public void setEditingEvent(long event) {
         this.editingEvent = event;
+    }
+
+    private class InvalidateIndicatorTextWatcher implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            updateIndicatorValues();
+        }
     }
 
     @Override
