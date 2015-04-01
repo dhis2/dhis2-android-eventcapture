@@ -99,8 +99,8 @@ public class SelectProgramFragment extends Fragment
     private LinearLayout attributeNameContainer;
     private LinearLayout rowContainer;
 
-    private int programSelection;
-    private int orgunitSelection;
+    /*private int programSelection;
+    private int orgunitSelection;*/
 
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
@@ -214,7 +214,7 @@ public class SelectProgramFragment extends Fragment
         programSpinner.setOnItemSelectedListener(this);
         existingEventsListView.setOnItemClickListener(this);
 
-        Log.e(TAG, "Setting orgUnit " + orgunitSelection);
+        /*Log.e(TAG, "Setting orgUnit " + orgunitSelection);
         if (assignedOrganisationUnits != null && assignedOrganisationUnits.size() > orgunitSelection) {
             organisationUnitSpinner.setSelection(orgunitSelection);
         }
@@ -223,13 +223,18 @@ public class SelectProgramFragment extends Fragment
                 programsForSelectedOrganisationUnit.size() > programSelection) {
             programSpinner.setSelection(programSelection);
         }
-        Log.e(TAG, "Sat program " + programSelection);
+        Log.e(TAG, "Sat program " + programSelection);*/
     }
 
     public void editEvent(int position) {
-        MessageEvent message = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
+        DataEntryFragment fragment = DataEntryFragment.newInstance(
+                selectedOrganisationUnit, selectedProgram
+        );
+        fragment.setEditingEvent(displayedExistingEvents.get(position).localId);
+        mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG);
+        /*MessageEvent message = new MessageEvent(BaseEvent.EventType.showDataEntryFragment);
         message.item = displayedExistingEvents.get(position).localId;
-        Dhis2Application.bus.post(message);
+        Dhis2Application.bus.post(message);*/
     }
 
     public void populateSpinner(CardSpinner spinner, List<String> list) {
@@ -269,6 +274,7 @@ public class SelectProgramFragment extends Fragment
 
     @Subscribe
     public void onReceiveInvalidateMessage(InvalidateEvent event) {
+        Log.d(TAG, "invalidate message received");
         if (event.eventType == InvalidateEvent.EventType.event) {
             getActivity().runOnUiThread(new Thread() {
                 @Override
