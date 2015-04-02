@@ -3,6 +3,8 @@ package org.hisp.dhis2.android.eventcapture.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +21,8 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
+import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
+import org.hisp.dhis2.android.eventcapture.loaders.Query;
 import org.hisp.dhis2.android.eventcapture.models.EventItem;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
@@ -34,10 +38,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SelectProgramFragment2 extends Fragment
-        implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
-        ProgramDialogFragment.OnProgramSetListener {
+        implements View.OnClickListener,
+        OrgUnitDialogFragment.OnOrgUnitSetListener,
+        ProgramDialogFragment.OnProgramSetListener,
+        LoaderManager.LoaderCallbacks<List<EventItem>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
+    private static final int LOADER_ID = 1;
 
     private ListView mListView;
     private EventAdapter mAdapter;
@@ -175,86 +182,119 @@ public class SelectProgramFragment2 extends Fragment
         mProgramButton.setText(programName);
 
         mState.setProgram(programId, programName);
-        prepareEventsList();
         handleViews(1);
+
+        // this call will trigger onCreateLoader method
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
 
-    private void prepareEventsList() {
-        // create a list of EventItems
-        Program selectedProgram = Select.byId(Program.class, mState.getProgramId());
-        if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-            return;
+    @Override
+    public Loader<List<EventItem>> onCreateLoader(int id, Bundle args) {
+        if (LOADER_ID == id && isAdded()) {
+            return new DbLoader<>(
+                    getActivity().getBaseContext(), Event.class,
+                    new EventListQuery(mState.getOrgUnitId(), mState.getProgramId()));
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<EventItem>> loader, List<EventItem> data) {
+        if (LOADER_ID == loader.getId()) {
+            mAdapter.swapData(data);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<EventItem>> loader) {
+        mAdapter.swapData(null);
+    }
+
+    private static class EventListQuery implements Query<List<EventItem>> {
+        private final String mOrgUnitId;
+        private final String mProgramId;
+
+        public EventListQuery(String orgUnitId, String programId) {
+            mOrgUnitId = orgUnitId;
+            mProgramId = programId;
         }
 
-        // since this is single event its only 1 stage
-        ProgramStage programStage = selectedProgram.getProgramStages().get(0);
-        if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
-            return;
-        }
+        @Override
+        public List<EventItem> query() {
+            List<EventItem> eventItems = new ArrayList<>();
 
-        List<ProgramStageDataElement> stageElements = programStage
-                .getProgramStageDataElements();
-        if (isListEmpty(stageElements)) {
-            return;
-        }
-
-        List<String> elementsToShow = new ArrayList<>();
-        for (ProgramStageDataElement stageElement : stageElements) {
-            if (stageElement.displayInReports) {
-                elementsToShow.add(stageElement.dataElement);
+            // create a list of EventItems
+            Program selectedProgram = Select.byId(Program.class, mProgramId);
+            if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
+                return eventItems;
             }
-        }
 
-        List<Event> events = DataValueController.getEvents(
-                mState.getOrgUnitId(), mState.getProgramId()
-        );
-        if (isListEmpty(events)) {
-            return;
-        }
+            // since this is single event its only 1 stage
+            ProgramStage programStage = selectedProgram.getProgramStages().get(0);
+            if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
+                return eventItems;
+            }
 
-        List<EventItem> eventItems = new ArrayList<>();
-        for (Event event : events) {
-            eventItems.add(createEventItem(event, elementsToShow));
-        }
-        System.out.println("EventItems: " + eventItems.size());
-        mAdapter.swapData(eventItems);
-    }
+            List<ProgramStageDataElement> stageElements = programStage
+                    .getProgramStageDataElements();
+            if (isListEmpty(stageElements)) {
+                return eventItems;
+            }
 
-    private EventItem createEventItem(Event event, List<String> elementsToShow) {
-        EventItem eventItem = new EventItem();
-        for (int i = 0; i < 3; i++) {
-            String dataElement = elementsToShow.get(i);
-            System.out.println("DataElement: " + dataElement);
-            if (dataElement != null) {
-                DataValue dataValue = getDataValue(event, dataElement);
-                if (dataValue == null) {
-                    System.out.println("EMPTY!!!");
-                    continue;
-                }
-                System.out.println("VALUE: " + dataValue.value);
-                if (i == 0) {
-                    eventItem.setFirstItem(dataValue.value);
-                } else if (i == 1) {
-                    eventItem.setSecondItem(dataValue.value);
-                } else if (i == 2) {
-                    eventItem.setThirdItem(dataValue.value);
+            List<String> elementsToShow = new ArrayList<>();
+            for (ProgramStageDataElement stageElement : stageElements) {
+                if (stageElement.displayInReports) {
+                    elementsToShow.add(stageElement.dataElement);
                 }
             }
+
+            List<Event> events = DataValueController.getEvents(
+                    mOrgUnitId, mProgramId
+            );
+            if (isListEmpty(events)) {
+                return eventItems;
+            }
+
+            for (Event event : events) {
+                eventItems.add(createEventItem(event, elementsToShow));
+            }
+
+            return eventItems;
         }
-        return eventItem;
-    }
 
-    private DataValue getDataValue(Event event, String dataElement) {
-        List<DataValue> dataValues = Select.all(
-                DataValue.class,
-                Condition.column(DataValue$Table.EVENT).is(event.event),
-                Condition.column(DataValue$Table.DATAELEMENT).is(dataElement)
-        );
+        private EventItem createEventItem(Event event, List<String> elementsToShow) {
+            EventItem eventItem = new EventItem();
+            for (int i = 0; i < 3; i++) {
+                String dataElement = elementsToShow.get(i);
+                if (dataElement != null) {
+                    DataValue dataValue = getDataValue(event, dataElement);
+                    if (dataValue == null) {
+                        continue;
+                    }
+                    if (i == 0) {
+                        eventItem.setFirstItem(dataValue.value);
+                    } else if (i == 1) {
+                        eventItem.setSecondItem(dataValue.value);
+                    } else if (i == 2) {
+                        eventItem.setThirdItem(dataValue.value);
+                    }
+                }
+            }
+            return eventItem;
+        }
 
-        if (dataValues != null && !dataValues.isEmpty()) {
-            return dataValues.get(0);
-        } else {
-            return null;
+        private DataValue getDataValue(Event event, String dataElement) {
+            List<DataValue> dataValues = Select.all(
+                    DataValue.class,
+                    Condition.column(DataValue$Table.EVENT).is(event.event),
+                    Condition.column(DataValue$Table.DATAELEMENT).is(dataElement)
+            );
+
+            if (dataValues != null && !dataValues.isEmpty()) {
+                return dataValues.get(0);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -283,9 +323,9 @@ public class SelectProgramFragment2 extends Fragment
     }
 
     private void handleViews(int level) {
+        mAdapter.swapData(null);
         switch (level) {
             case 0:
-                mAdapter.swapData(null);
                 mRegisterEventButton.setEnabled(false);
                 break;
             case 1:
