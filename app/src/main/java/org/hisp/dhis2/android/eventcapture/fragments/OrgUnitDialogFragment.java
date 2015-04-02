@@ -38,6 +38,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.SimpleAdapter;
@@ -57,6 +58,7 @@ public class OrgUnitDialogFragment extends DialogFragment
     private static final int LOADER_ID = 1;
 
     private ListView mListView;
+    private ProgressBar mProgressBar;
     private SimpleAdapter<OrganisationUnit> mAdapter;
     private OnOrgUnitSetListener mListener;
 
@@ -88,6 +90,7 @@ public class OrgUnitDialogFragment extends DialogFragment
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mProgressBar.setVisibility(View.VISIBLE);
         getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
     }
 
@@ -105,6 +108,7 @@ public class OrgUnitDialogFragment extends DialogFragment
     public void onLoadFinished(Loader<List<OrganisationUnit>> loader,
                                List<OrganisationUnit> data) {
         if (loader.getId() == LOADER_ID) {
+            mProgressBar.setVisibility(View.GONE);
             mAdapter.swapData(data);
         }
     }
@@ -116,6 +120,9 @@ public class OrgUnitDialogFragment extends DialogFragment
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.INVISIBLE);
+
         mListView = (ListView) view.findViewById(R.id.simple_listview);
         mListView.setOnItemClickListener(this);
 

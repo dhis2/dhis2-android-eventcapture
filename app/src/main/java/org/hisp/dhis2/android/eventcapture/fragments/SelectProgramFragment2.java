@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
@@ -29,13 +30,16 @@ import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SelectProgramFragment2 extends Fragment
         implements View.OnClickListener,
@@ -47,6 +51,7 @@ public class SelectProgramFragment2 extends Fragment
     private static final int LOADER_ID = 1;
 
     private ListView mListView;
+    private ProgressBar mProgressBar;
     private EventAdapter mAdapter;
 
     private CardTextViewButton mOrgUnitButton;
@@ -94,6 +99,9 @@ public class SelectProgramFragment2 extends Fragment
         View header = getLayoutInflater(savedInstanceState).inflate(
                 R.layout.fragment_select_program_header, mListView, false
         );
+        mProgressBar = (ProgressBar) header.findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.GONE);
+
         mListView.addHeaderView(header);
         mListView.setAdapter(mAdapter);
 
@@ -184,6 +192,7 @@ public class SelectProgramFragment2 extends Fragment
         mState.setProgram(programId, programName);
         handleViews(1);
 
+        mProgressBar.setVisibility(View.VISIBLE);
         // this call will trigger onCreateLoader method
         getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
@@ -201,6 +210,7 @@ public class SelectProgramFragment2 extends Fragment
     @Override
     public void onLoadFinished(Loader<List<EventItem>> loader, List<EventItem> data) {
         if (LOADER_ID == loader.getId()) {
+            mProgressBar.setVisibility(View.GONE);
             mAdapter.swapData(data);
         }
     }
@@ -255,14 +265,21 @@ public class SelectProgramFragment2 extends Fragment
                 return eventItems;
             }
 
+            List<Option> options = Select.all(Option.class);
+            Map<String, String> codeToName = new HashMap<>();
+            for (Option option : options) {
+                codeToName.put(option.getCode(), option.getName());
+            }
+
             for (Event event : events) {
-                eventItems.add(createEventItem(event, elementsToShow));
+                eventItems.add(createEventItem(event, elementsToShow, codeToName));
             }
 
             return eventItems;
         }
 
-        private EventItem createEventItem(Event event, List<String> elementsToShow) {
+        private EventItem createEventItem(Event event, List<String> elementsToShow,
+                                          Map<String, String> codeToName) {
             EventItem eventItem = new EventItem();
             for (int i = 0; i < 3; i++) {
                 String dataElement = elementsToShow.get(i);
@@ -271,12 +288,15 @@ public class SelectProgramFragment2 extends Fragment
                     if (dataValue == null) {
                         continue;
                     }
+
+                    String code = dataValue.value;
+                    String name = codeToName.get(code) == null ? code : codeToName.get(code);
                     if (i == 0) {
-                        eventItem.setFirstItem(dataValue.value);
+                        eventItem.setFirstItem(name);
                     } else if (i == 1) {
-                        eventItem.setSecondItem(dataValue.value);
+                        eventItem.setSecondItem(name);
                     } else if (i == 2) {
-                        eventItem.setThirdItem(dataValue.value);
+                        eventItem.setThirdItem(name);
                     }
                 }
             }
