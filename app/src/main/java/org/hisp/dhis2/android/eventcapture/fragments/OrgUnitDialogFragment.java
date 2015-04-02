@@ -45,7 +45,9 @@ import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -160,9 +162,30 @@ public class OrgUnitDialogFragment extends DialogFragment
 
         @Override
         public List<OrganisationUnit> query() {
+            List<OrganisationUnit> orgUnits = queryUnits();
+            List<OrganisationUnit> filteredUnits = new ArrayList<>();
+            for (OrganisationUnit orgUnit : orgUnits) {
+                if (hasPrograms(orgUnit.getId())) {
+                    filteredUnits.add(orgUnit);
+                }
+            }
+
+            return filteredUnits;
+        }
+
+        private List<OrganisationUnit> queryUnits() {
             return Dhis2.getInstance()
                     .getMetaDataController()
                     .getAssignedOrganisationUnits();
+        }
+
+        private boolean hasPrograms(String unitId) {
+            List<Program> programs = Dhis2.getInstance()
+                    .getMetaDataController()
+                    .getProgramsForOrganisationUnit(
+                            unitId, Program.SINGLE_EVENT_WITHOUT_REGISTRATION
+                    );
+            return (programs != null && !programs.isEmpty());
         }
     }
 }
