@@ -32,37 +32,34 @@ package org.hisp.dhis2.android.eventcapture.loaders;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.raizlabs.android.dbflow.sql.builder.Condition;
-import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
-
-import java.util.List;
 
 import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 
 
-public class DbLoader<ModelClass extends Model> extends AsyncTaskLoader<List<ModelClass>> {
+public class DbLoader<ModelClass extends Model, T> extends AsyncTaskLoader<T> {
+    // A Model Class which we want to observe
     private final Class<ModelClass> mModelClass;
-    private final Condition[] mConditions;
 
+    // The actual observer
     private ModelChangeObserver<ModelClass> mObserver;
-    private List<ModelClass> mData;
+
+    // The object which will perform Query
+    private final Query<T> mQuery;
+
+    private T mData;
 
     public DbLoader(Context context,
                     Class<ModelClass> modelClass,
-                    Condition... conditions) {
+                    Query<T> query) {
         super(context);
 
         mModelClass = isNull(modelClass, "Model Class object must not be null");
-        mConditions = conditions;
-    }
-
-    public Class<ModelClass> getModelClass() {
-        return mModelClass;
+        mQuery = isNull(query, "Query object must not be null");
     }
 
     private void registerObserver() {
-        mObserver = new ModelChangeObserver<>(this);
+        mObserver = new ModelChangeObserver<>(mModelClass, this);
         mObserver.registerObserver();
     }
 
@@ -74,12 +71,12 @@ public class DbLoader<ModelClass extends Model> extends AsyncTaskLoader<List<Mod
     }
 
     @Override
-    public List<ModelClass> loadInBackground() {
-        return Select.all(mModelClass, mConditions);
+    public T loadInBackground() {
+        return mQuery.query();
     }
 
     @Override
-    public void deliverResult(List<ModelClass> data) {
+    public void deliverResult(T data) {
         if (isReset()) {
             // The Loader has been reset; ignore the result and invalidate the data.
             releaseResources();
@@ -88,7 +85,7 @@ public class DbLoader<ModelClass extends Model> extends AsyncTaskLoader<List<Mod
 
         // Hold a reference to the old data so it doesn't get garbage collected.
         // We must protect it until the new data has been delivered.
-        List<ModelClass> oldData = mData;
+        T oldData = mData;
         mData = data;
 
         if (isStarted()) {
@@ -145,7 +142,7 @@ public class DbLoader<ModelClass extends Model> extends AsyncTaskLoader<List<Mod
     }
 
     @Override
-    public void onCanceled(List<ModelClass> data) {
+    public void onCanceled(T data) {
         // Attempt to cancel the current asynchronous load.
         super.onCanceled(data);
 

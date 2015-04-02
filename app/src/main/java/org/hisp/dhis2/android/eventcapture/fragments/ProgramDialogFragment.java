@@ -28,10 +28,11 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,14 +41,18 @@ import android.widget.ListView;
 
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.SimpleAdapter;
+import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
+import org.hisp.dhis2.android.eventcapture.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
 import java.util.List;
 
-public class ProgramDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener {
+public class ProgramDialogFragment extends DialogFragment
+        implements AdapterView.OnItemClickListener, LoaderManager.LoaderCallbacks<List<Program>> {
     private static String TAG = ProgramDialogFragment.class.getName();
+    private static final int LOADER_ID = 1;
 
     private ListView mListView;
     private SimpleAdapter<Program> mAdapter;
@@ -95,13 +100,30 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        List<Program> programs = Dhis2.getInstance()
-                .getMetaDataController()
-                .getProgramsForOrganisationUnit(
-                        getArguments().getString(OrganisationUnit$Table.ID),
-                        Program.SINGLE_EVENT_WITHOUT_REGISTRATION
-                );
-        mAdapter.swapData(programs);
+        getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
+    }
+
+    @Override
+    public Loader<List<Program>> onCreateLoader(int id, Bundle args) {
+        if (LOADER_ID == id && isAdded()) {
+            String organisationUnitId = args.getString(OrganisationUnit$Table.ID);
+            return new DbLoader<>(
+                    getActivity().getBaseContext(), Program.class, new ProgramQuery(organisationUnitId)
+            );
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Program>> loader, List<Program> data) {
+        if (LOADER_ID == loader.getId()) {
+            mAdapter.swapData(data);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Program>> loader) {
+        mAdapter.swapData(null);
     }
 
     @Override
@@ -134,6 +156,23 @@ public class ProgramDialogFragment extends DialogFragment implements AdapterView
         @Override
         public String getString(Program object) {
             return object.getName();
+        }
+    }
+
+    static class ProgramQuery implements Query<List<Program>> {
+        private final String mOrgUnitId;
+
+        public ProgramQuery(String orgUnitId) {
+            mOrgUnitId = orgUnitId;
+        }
+
+        @Override
+        public List<Program> query() {
+            return Dhis2.getInstance()
+                    .getMetaDataController()
+                    .getProgramsForOrganisationUnit(
+                            mOrgUnitId, Program.SINGLE_EVENT_WITHOUT_REGISTRATION
+                    );
         }
     }
 }

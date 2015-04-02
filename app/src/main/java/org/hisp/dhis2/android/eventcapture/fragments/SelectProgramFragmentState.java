@@ -45,7 +45,6 @@ public class SelectProgramFragmentState implements Parcelable {
         }
     };
     private static final String TAG = SelectProgramFragmentState.class.getName();
-    private static final int DEFAULT_INDEX = -1;
     private boolean syncInProcess;
 
     private String orgUnitLabel;

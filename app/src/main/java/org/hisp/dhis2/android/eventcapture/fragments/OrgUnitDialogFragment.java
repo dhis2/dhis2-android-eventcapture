@@ -42,6 +42,8 @@ import android.widget.ListView;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.SimpleAdapter;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
+import org.hisp.dhis2.android.eventcapture.loaders.Query;
+import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
 
 import java.util.List;
@@ -91,7 +93,7 @@ public class OrgUnitDialogFragment extends DialogFragment
     public Loader<List<OrganisationUnit>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             return new DbLoader<>(
-                    getActivity().getBaseContext(), OrganisationUnit.class
+                    getActivity().getBaseContext(), OrganisationUnit.class, new OrgUnitQuery()
             );
         }
         return null;
@@ -151,6 +153,16 @@ public class OrgUnitDialogFragment extends DialogFragment
         @Override
         public String getString(OrganisationUnit object) {
             return object.getLabel();
+        }
+    }
+
+    static class OrgUnitQuery implements Query<List<OrganisationUnit>> {
+
+        @Override
+        public List<OrganisationUnit> query() {
+            return Dhis2.getInstance()
+                    .getMetaDataController()
+                    .getAssignedOrganisationUnits();
         }
     }
 }
