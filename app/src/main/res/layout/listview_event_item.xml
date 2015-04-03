@@ -32,8 +32,8 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="1"
-    android:background="@drawable/transparent_selector">
+    android:background="@drawable/white_selector"
+    android:weightSum="1">
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
         android:id="@+id/first_event_item"
@@ -94,14 +94,15 @@
         android:layout_height="match_parent"
         android:layout_weight="0.25"
         android:orientation="vertical"
+        android:gravity="center"
         android:padding="2dp">
 
         <ImageView
             android:id="@+id/status_item"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:contentDescription="@string/description"
-            android:gravity="center" />
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/description" />
     </LinearLayout>
 
 

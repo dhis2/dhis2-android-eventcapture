@@ -29,6 +29,7 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,9 @@ public final class EventItemRow implements Row {
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
-    private EventItemStatus mStatus;
+    private EventItemStatus mStatus = EventItemStatus.OFFLINE;
+
+    private Drawable mOffline;
 
     @Override
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
@@ -69,6 +72,24 @@ public final class EventItemRow implements Row {
         holder.firstItem.setText(mFirstItem);
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
+
+        Drawable drawable = null;
+        switch (mStatus) {
+            case OFFLINE: {
+                if (mOffline == null) {
+                    mOffline = inflater.getContext().getDrawable(R.drawable.perm_group_display);
+                }
+                drawable = mOffline;
+            }
+            case ERROR: {
+
+            }
+            case SENT: {
+
+            }
+        }
+
+        holder.imageView.setImageDrawable(drawable);
 
         return view;
     }
