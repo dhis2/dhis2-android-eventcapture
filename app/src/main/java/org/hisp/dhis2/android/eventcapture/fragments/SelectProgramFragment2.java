@@ -22,6 +22,7 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.ColumnNamesRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.EventItemRow;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.EventItemStatus;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.Row;
 import org.hisp.dhis2.android.eventcapture.fragments.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.dialogs.ProgramDialogFragment;
@@ -33,6 +34,8 @@ import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
+import org.hisp.dhis2.android.sdk.persistence.models.FailedItem$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
@@ -41,8 +44,10 @@ import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SelectProgramFragment2 extends Fragment
         implements View.OnClickListener,
@@ -283,15 +288,29 @@ public class SelectProgramFragment2 extends Fragment
                 codeToName.put(option.getCode(), option.getName());
             }
 
+            List<FailedItem> failedEvents = Select.all(
+                    FailedItem.class, Condition
+                            .column(FailedItem$Table.ITEMTYPE)
+                            .is(FailedItem.EVENT)
+            );
+
+            Set<String> failedEventIds = new HashSet<>();
+            for (FailedItem failedItem : failedEvents) {
+                Event event = (Event) failedItem.getItem();
+                failedEventIds.add(event.getEvent());
+            }
+
             for (Event event : events) {
-                eventRows.add(createEventItem(event, elementsToShow, codeToName));
+                eventRows.add(createEventItem(event, elementsToShow,
+                        codeToName, failedEventIds));
             }
 
             return eventRows;
         }
 
         private EventItemRow createEventItem(Event event, List<String> elementsToShow,
-                                             Map<String, String> codeToName) {
+                                             Map<String, String> codeToName,
+                                             Set<String> failedEventIds) {
             EventItemRow eventItem = new EventItemRow();
             for (int i = 0; i < 3; i++) {
                 String dataElement = elementsToShow.get(i);
@@ -311,6 +330,14 @@ public class SelectProgramFragment2 extends Fragment
                         eventItem.setSecondItem(name);
                     } else if (i == 2) {
                         eventItem.setThirdItem(name);
+                    }
+
+                    if (event.fromServer) {
+                        eventItem.setStatus(EventItemStatus.SENT);
+                    } else if (failedEventIds.contains(event.getEvent())) {
+                        eventItem.setStatus(EventItemStatus.ERROR);
+                    } else {
+                        eventItem.setStatus(EventItemStatus.OFFLINE);
                     }
                 }
             }

@@ -29,6 +29,7 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,14 +47,22 @@ public final class EventItemRow implements Row {
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
-    private EventItemStatus mStatus = EventItemStatus.OFFLINE;
+    private EventItemStatus mStatus;
 
-    private Drawable mOffline;
+    private Drawable mOfflineDrawable;
+    private Drawable mErrorDrawable;
+    private Drawable mSentDrawable;
+
+    private String mSent;
+    private String mError;
+    private String mOffline;
 
     @Override
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
         ViewHolder holder;
+
+        initResources(inflater.getContext());
 
         if (convertView == null) {
             view = inflater.inflate(R.layout.listview_event_item, container, false);
@@ -74,23 +83,23 @@ public final class EventItemRow implements Row {
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
 
-        Drawable drawable = null;
         switch (mStatus) {
             case OFFLINE: {
-                if (mOffline == null) {
-                    mOffline = inflater.getContext().getDrawable(R.drawable.perm_group_display);
-                }
-                drawable = mOffline;
+                holder.statusImageView.setImageDrawable(mOfflineDrawable);
+                holder.statusTextView.setText(mOffline);
+                break;
             }
             case ERROR: {
-
+                holder.statusImageView.setImageDrawable(mErrorDrawable);
+                holder.statusTextView.setText(mError);
+                break;
             }
             case SENT: {
-
+                holder.statusImageView.setImageDrawable(mSentDrawable);
+                holder.statusTextView.setText(mSent);
+                break;
             }
         }
-
-        holder.statusImageView.setImageDrawable(drawable);
 
         return view;
     }
@@ -103,6 +112,20 @@ public final class EventItemRow implements Row {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    private void initResources(Context context) {
+        if (mOfflineDrawable == null || mErrorDrawable == null || mSentDrawable == null) {
+            mOfflineDrawable = context.getResources().getDrawable(R.drawable.ic_offline);
+            mErrorDrawable = context.getResources().getDrawable(R.drawable.ic_event_error);
+            mSentDrawable = context.getResources().getDrawable(R.drawable.ic_from_server);
+        }
+
+        if (mSent == null || mError == null || mOffline == null) {
+            mSent = context.getResources().getString(R.string.event_sent);
+            mError = context.getResources().getString(R.string.event_error);
+            mOffline = context.getResources().getString(R.string.event_offline);
+        }
     }
 
     public void setEventId(String eventId) {
