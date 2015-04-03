@@ -27,34 +27,12 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.models;
+package org.hisp.dhis2.android.eventcapture.adapters.rows;
 
-public final class EventItem {
-    private String firstItem;
-    private String secondItem;
-    private String thirdItem;
-
-    public String getFirstItem() {
-        return firstItem;
-    }
-
-    public void setFirstItem(String firstItem) {
-        this.firstItem = firstItem;
-    }
-
-    public String getSecondItem() {
-        return secondItem;
-    }
-
-    public void setSecondItem(String secondItem) {
-        this.secondItem = secondItem;
-    }
-
-    public String getThirdItem() {
-        return thirdItem;
-    }
-
-    public void setThirdItem(String thirdItem) {
-        this.thirdItem = thirdItem;
-    }
+/**
+ * Created by araz on 03.04.2015.
+ */
+public enum RowType {
+    COLUMN_NAMES_ROW,
+    EVENT_ITEM_ROW
 }

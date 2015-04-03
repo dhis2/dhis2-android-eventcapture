@@ -32,7 +32,7 @@ package org.hisp.dhis2.android.eventcapture.fragments;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class SelectProgramFragmentState implements Parcelable {
+class SelectProgramFragmentState implements Parcelable {
     public static final Creator<SelectProgramFragmentState> CREATOR
             = new Creator<SelectProgramFragmentState>() {
 

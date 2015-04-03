@@ -22,9 +22,13 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.ColumnNamesRow;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.EventItemRow;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.Row;
+import org.hisp.dhis2.android.eventcapture.fragments.dialogs.OrgUnitDialogFragment;
+import org.hisp.dhis2.android.eventcapture.fragments.dialogs.ProgramDialogFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.loaders.Query;
-import org.hisp.dhis2.android.eventcapture.models.EventItem;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -45,7 +49,7 @@ public class SelectProgramFragment2 extends Fragment
         implements View.OnClickListener,
         OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<List<EventItem>> {
+        LoaderManager.LoaderCallbacks<List<Row>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
@@ -111,6 +115,7 @@ public class SelectProgramFragment2 extends Fragment
 
         mOrgUnitButton.setOnClickListener(this);
         mProgramButton.setOnClickListener(this);
+        mRegisterEventButton.setOnClickListener(this);
 
         mOrgUnitButton.setEnabled(true);
         mProgramButton.setEnabled(false);
@@ -198,7 +203,7 @@ public class SelectProgramFragment2 extends Fragment
     }
 
     @Override
-    public Loader<List<EventItem>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<Row>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             return new DbLoader<>(
                     getActivity().getBaseContext(), Event.class,
@@ -208,7 +213,7 @@ public class SelectProgramFragment2 extends Fragment
     }
 
     @Override
-    public void onLoadFinished(Loader<List<EventItem>> loader, List<EventItem> data) {
+    public void onLoadFinished(Loader<List<Row>> loader, List<Row> data) {
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
             mAdapter.swapData(data);
@@ -216,11 +221,11 @@ public class SelectProgramFragment2 extends Fragment
     }
 
     @Override
-    public void onLoaderReset(Loader<List<EventItem>> loader) {
+    public void onLoaderReset(Loader<List<Row>> loader) {
         mAdapter.swapData(null);
     }
 
-    private static class EventListQuery implements Query<List<EventItem>> {
+    private static class EventListQuery implements Query<List<Row>> {
         private final String mOrgUnitId;
         private final String mProgramId;
 
@@ -230,39 +235,49 @@ public class SelectProgramFragment2 extends Fragment
         }
 
         @Override
-        public List<EventItem> query() {
-            List<EventItem> eventItems = new ArrayList<>();
+        public List<Row> query() {
+            List<Row> eventRows = new ArrayList<>();
 
             // create a list of EventItems
             Program selectedProgram = Select.byId(Program.class, mProgramId);
             if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-                return eventItems;
+                return eventRows;
             }
 
             // since this is single event its only 1 stage
             ProgramStage programStage = selectedProgram.getProgramStages().get(0);
             if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
-                return eventItems;
+                return eventRows;
             }
 
             List<ProgramStageDataElement> stageElements = programStage
                     .getProgramStageDataElements();
             if (isListEmpty(stageElements)) {
-                return eventItems;
+                return eventRows;
             }
 
             List<String> elementsToShow = new ArrayList<>();
+            ColumnNamesRow columnNames = new ColumnNamesRow();
             for (ProgramStageDataElement stageElement : stageElements) {
-                if (stageElement.displayInReports) {
+                if (stageElement.displayInReports && elementsToShow.size() < 3) {
                     elementsToShow.add(stageElement.dataElement);
+                    String name = stageElement.getDataElement().getName();
+                    if (elementsToShow.size() == 1) {
+                        columnNames.setFirstItem(name);
+                    } else if (elementsToShow.size() == 2) {
+                        columnNames.setSecondItem(name);
+                    } else if (elementsToShow.size() == 3) {
+                        columnNames.setThirdItem(name);
+                    }
                 }
             }
+            eventRows.add(columnNames);
 
             List<Event> events = DataValueController.getEvents(
                     mOrgUnitId, mProgramId
             );
             if (isListEmpty(events)) {
-                return eventItems;
+                return eventRows;
             }
 
             List<Option> options = Select.all(Option.class);
@@ -272,15 +287,15 @@ public class SelectProgramFragment2 extends Fragment
             }
 
             for (Event event : events) {
-                eventItems.add(createEventItem(event, elementsToShow, codeToName));
+                eventRows.add(createEventItem(event, elementsToShow, codeToName));
             }
 
-            return eventItems;
+            return eventRows;
         }
 
-        private EventItem createEventItem(Event event, List<String> elementsToShow,
-                                          Map<String, String> codeToName) {
-            EventItem eventItem = new EventItem();
+        private EventItemRow createEventItem(Event event, List<String> elementsToShow,
+                                             Map<String, String> codeToName) {
+            EventItemRow eventItem = new EventItemRow();
             for (int i = 0; i < 3; i++) {
                 String dataElement = elementsToShow.get(i);
                 if (dataElement != null) {
@@ -291,6 +306,8 @@ public class SelectProgramFragment2 extends Fragment
 
                     String code = dataValue.value;
                     String name = codeToName.get(code) == null ? code : codeToName.get(code);
+
+                    eventItem.setEventId(event.getEvent());
                     if (i == 0) {
                         eventItem.setFirstItem(name);
                     } else if (i == 1) {
@@ -333,12 +350,10 @@ public class SelectProgramFragment2 extends Fragment
                 fragment.show(getChildFragmentManager());
                 break;
             }
-            /*
-            case R.id.data_entry_button: {
-                startReportEntryActivity();
+            case R.id.register_new_event: {
+
                 break;
             }
-            */
         }
     }
 

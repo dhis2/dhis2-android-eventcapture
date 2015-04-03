@@ -33,16 +33,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
-import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.models.EventItem;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.Row;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.RowType;
 
 import java.util.List;
 
 public class EventAdapter extends BaseAdapter {
     private final LayoutInflater mInflater;
-    private List<EventItem> mItems;
+    private List<Row> mRows;
 
     public EventAdapter(LayoutInflater inflater) {
         this.mInflater = inflater;
@@ -50,8 +49,8 @@ public class EventAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        if (mItems != null) {
-            return mItems.size();
+        if (mRows != null) {
+            return mRows.size();
         } else {
             return 0;
         }
@@ -59,8 +58,8 @@ public class EventAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        if (mItems != null) {
-            return mItems.get(position);
+        if (mRows != null) {
+            return mRows.get(position);
         } else {
             return null;
         }
@@ -73,51 +72,47 @@ public class EventAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view;
-        ViewHolder holder;
-
-        if (convertView == null) {
-            view = mInflater.inflate(R.layout.listview_event_item, parent, false);
-            holder = new ViewHolder(
-                    (TextView) view.findViewById(R.id.first_event_item),
-                    (TextView) view.findViewById(R.id.second_event_item),
-                    (TextView) view.findViewById(R.id.third_event_item)
-            );
-            view.setTag(holder);
+        if (mRows != null) {
+            return mRows.get(position).getView(mInflater, convertView, parent);
         } else {
-            view = convertView;
-            holder = (ViewHolder) view.getTag();
+            return null;
         }
-
-        EventItem eventItem = (EventItem) getItem(position);
-        if (eventItem != null) {
-            holder.firstItem.setText(eventItem.getFirstItem());
-            holder.secondItem.setText(eventItem.getSecondItem());
-            holder.thirdItem.setText(eventItem.getThirdItem());
-        }
-        return view;
     }
 
-    public void swapData(List<EventItem> items) {
-        boolean notifyAdapter = mItems != items;
-        mItems = items;
+    @Override
+    public boolean areAllItemsEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled(int position) {
+        if (mRows != null) {
+            return mRows.get(position).isEnabled();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return RowType.values().length;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mRows != null) {
+            return mRows.get(position).getViewType();
+        } else {
+            return 0;
+        }
+    }
+
+    public void swapData(List<Row> rows) {
+        boolean notifyAdapter = mRows != rows;
+        mRows = rows;
 
         if (notifyAdapter) {
             notifyDataSetChanged();
-        }
-    }
-
-    private static class ViewHolder {
-        public final TextView firstItem;
-        public final TextView secondItem;
-        public final TextView thirdItem;
-
-        private ViewHolder(TextView firstItem,
-                           TextView secondItem,
-                           TextView thirdItem) {
-            this.firstItem = firstItem;
-            this.secondItem = secondItem;
-            this.thirdItem = thirdItem;
         }
     }
 }

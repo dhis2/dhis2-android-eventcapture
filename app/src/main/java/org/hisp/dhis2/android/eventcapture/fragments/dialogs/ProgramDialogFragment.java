@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis2.android.eventcapture.fragments.dialogs;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;

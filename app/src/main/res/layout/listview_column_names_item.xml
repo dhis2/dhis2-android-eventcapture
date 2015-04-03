@@ -36,7 +36,7 @@
     android:background="@drawable/transparent_selector">
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
-        android:id="@+id/first_event_item"
+        android:id="@+id/first_column_name"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:lines="2"
@@ -54,7 +54,7 @@
         android:background="@color/darker_grey" />
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
-        android:id="@+id/second_event_item"
+        android:id="@+id/second_column_name"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:lines="2"
@@ -72,7 +72,7 @@
         android:background="@color/darker_grey" />
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
-        android:id="@+id/third_event_item"
+        android:id="@+id/third_column_name"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:lines="2"
@@ -89,20 +89,19 @@
         android:layout_height="match_parent"
         android:background="@color/darker_grey" />
 
-    <LinearLayout
+    <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
+        android:id="@+id/status_column"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:lines="2"
         android:layout_weight="0.25"
-        android:orientation="vertical"
-        android:padding="2dp">
-
-        <ImageView
-            android:id="@+id/status_item"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:contentDescription="@string/description"
-            android:gravity="center" />
-    </LinearLayout>
+        android:textSize="13sp"
+        android:gravity="center"
+        android:ellipsize="end"
+        android:minHeight="48dp"
+        android:padding="2dp"
+        android:text="@string/status"
+        app:font="@string/light_font_name" />
 
 
 </LinearLayout>

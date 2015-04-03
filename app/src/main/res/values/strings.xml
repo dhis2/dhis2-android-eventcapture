@@ -38,5 +38,6 @@
 
     <string name="choose_organisation_unit">Choose organisation unit</string>
     <string name="choose_program">Choose program</string>
+    <string name="status">Status</string>
 
 </resources>

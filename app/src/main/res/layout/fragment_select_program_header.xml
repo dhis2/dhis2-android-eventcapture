@@ -45,7 +45,7 @@
         android:id="@+id/select_program"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="16dp"
         app:hint="@string/choose_program" />
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontButton
@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:text="@string/register_new_event"
-        android:textSize="15sp"
+        android:textSize="14sp"
         android:textColor="@color/white"
         android:background="@drawable/button_light_blue_selector"
         app:font="@string/regular_font_name" />
