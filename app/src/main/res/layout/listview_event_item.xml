@@ -98,11 +98,18 @@
         android:padding="2dp">
 
         <ImageView
-            android:id="@+id/status_item"
+            android:id="@+id/status_image_view"
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/description" />
+
+        <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
+            android:id="@+id/status_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            app:font="@string/light_font_name" />
     </LinearLayout>
 
 

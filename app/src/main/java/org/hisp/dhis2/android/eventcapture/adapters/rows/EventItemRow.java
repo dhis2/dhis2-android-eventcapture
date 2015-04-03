@@ -61,7 +61,8 @@ public final class EventItemRow implements Row {
                     (TextView) view.findViewById(R.id.first_event_item),
                     (TextView) view.findViewById(R.id.second_event_item),
                     (TextView) view.findViewById(R.id.third_event_item),
-                    (ImageView) view.findViewById(R.id.status_item)
+                    (ImageView) view.findViewById(R.id.status_image_view),
+                    (TextView) view.findViewById(R.id.status_text_view)
             );
             view.setTag(holder);
         } else {
@@ -89,7 +90,7 @@ public final class EventItemRow implements Row {
             }
         }
 
-        holder.imageView.setImageDrawable(drawable);
+        holder.statusImageView.setImageDrawable(drawable);
 
         return view;
     }
@@ -128,16 +129,19 @@ public final class EventItemRow implements Row {
         public final TextView firstItem;
         public final TextView secondItem;
         public final TextView thirdItem;
-        public final ImageView imageView;
+        public final ImageView statusImageView;
+        public final TextView statusTextView;
 
         private ViewHolder(TextView firstItem,
                            TextView secondItem,
                            TextView thirdItem,
-                           ImageView imageView) {
+                           ImageView statusImageView,
+                           TextView statusTextView) {
             this.firstItem = firstItem;
             this.secondItem = secondItem;
             this.thirdItem = thirdItem;
-            this.imageView = imageView;
+            this.statusImageView = statusImageView;
+            this.statusTextView = statusTextView;
         }
     }
 }
