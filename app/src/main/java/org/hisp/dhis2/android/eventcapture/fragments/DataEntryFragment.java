@@ -58,10 +58,7 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
-import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
@@ -302,7 +299,7 @@ public class DataEntryFragment extends Fragment {
                 int px = Utils.getDpPx(6, r.getDisplayMetrics());
                 params.setMargins(px, px, px, 0);
 
-                if(programStageSections == null || programStageSections.isEmpty()) {
+                if (programStageSections == null || programStageSections.isEmpty()) {
                     populateDataEntryRows(rows, dataElementContainer);
                     populateIndicatorViews(selectedProgramStage.getProgramIndicators(), dataElementContainer);
                 } else {
@@ -329,7 +326,7 @@ public class DataEntryFragment extends Fragment {
     }
 
     public void populateIndicatorViews(List<ProgramIndicator> programIndicators, LinearLayout container) {
-        if(programIndicators==null) return;
+        if (programIndicators == null) return;
         for (ProgramIndicator programIndicator : programIndicators) {
             String value = ProgramIndicatorService.getProgramIndicatorValue(event, programIndicator);
             if (value == null) value = "";
@@ -342,13 +339,13 @@ public class DataEntryFragment extends Fragment {
     }
 
     public void populateDataEntryRows(List<Row> rows, LinearLayout container) {
-        for(int j = 0; j<rows.size(); j++) {
+        for (int j = 0; j < rows.size(); j++) {
             Row row = rows.get(j);
             container.addView(createDataEntryCardView(row));
 
             //set done button for last element to hide keyboard
-            if(j==rows.size()-1) {
-                if(row.getEntryView()!=null) row.getEntryView().
+            if (j == rows.size() - 1) {
+                if (row.getEntryView() != null) row.getEntryView().
                         setImeOptions(EditorInfo.IME_ACTION_DONE);
             }
         }
@@ -368,7 +365,7 @@ public class DataEntryFragment extends Fragment {
         dataEntryCardView.addView(view);
 
         TextView textView = row.getEntryView();
-        if(textView instanceof EditText) {
+        if (textView instanceof EditText) {
             ((EditText) textView).addTextChangedListener(new InvalidateIndicatorTextWatcher());
         }
         return dataEntryCardView;
@@ -378,12 +375,12 @@ public class DataEntryFragment extends Fragment {
      * Re-calculates indicator values if any and updates ui
      */
     private void updateIndicatorValues() {
-        for(final IndicatorRow indicatorRow: indicatorRows) {
+        for (final IndicatorRow indicatorRow : indicatorRows) {
             final String newValue = ProgramIndicatorService.
                     getProgramIndicatorValue(event, indicatorRow.getProgramIndicator());
-            if(!newValue.equals(indicatorRow.getValue())) {
+            if (!newValue.equals(indicatorRow.getValue())) {
                 Activity activity = getActivity();
-                if(activity == null) return;
+                if (activity == null) return;
                 activity.runOnUiThread(new Thread() {
                     public void run() {
                         indicatorRow.setValue(newValue);
@@ -524,7 +521,7 @@ public class DataEntryFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_select_program, menu);
+        inflater.inflate(R.menu.menu_data_entry, menu);
         MenuItem item = menu.findItem(R.id.action_new_event);
         item.setIcon(getResources().getDrawable(R.drawable.ic_save));
     }

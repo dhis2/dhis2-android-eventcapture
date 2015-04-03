@@ -36,4 +36,10 @@
         android:orderInCategory="100"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_new_event"
+        android:icon="@drawable/ic_new"
+        android:title="@string/new_event"
+        app:showAsAction="always" />
+
 </menu>

@@ -11,10 +11,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
@@ -29,6 +27,7 @@ import org.hisp.dhis2.android.eventcapture.fragments.dialogs.OrgUnitDialogFragme
 import org.hisp.dhis2.android.eventcapture.fragments.dialogs.ProgramDialogFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.loaders.Query;
+import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -60,7 +59,7 @@ public class SelectProgramFragment2 extends Fragment
 
     private CardTextViewButton mOrgUnitButton;
     private CardTextViewButton mProgramButton;
-    private Button mRegisterEventButton;
+    private FloatingActionButton mRegisterEventButton;
 
     private SelectProgramFragmentState mState;
 
@@ -111,7 +110,7 @@ public class SelectProgramFragment2 extends Fragment
 
         mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
-        mRegisterEventButton = (Button) header.findViewById(R.id.register_new_event);
+        mRegisterEventButton = (FloatingActionButton) header.findViewById(R.id.register_new_event);
 
         mOrgUnitButton.setOnClickListener(this);
         mProgramButton.setOnClickListener(this);
@@ -119,7 +118,7 @@ public class SelectProgramFragment2 extends Fragment
 
         mOrgUnitButton.setEnabled(true);
         mProgramButton.setEnabled(false);
-        mRegisterEventButton.setEnabled(false);
+        mRegisterEventButton.hide();
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -145,8 +144,6 @@ public class SelectProgramFragment2 extends Fragment
         if (id == R.id.action_settings) {
             mNavigationHandler.switchFragment(
                     new SettingsFragment(), SettingsFragment.TAG);
-        } else if (id == R.id.action_new_event) {
-            Toast.makeText(getActivity(), "Another button", Toast.LENGTH_SHORT).show();
         }
 
         return super.onOptionsItemSelected(item);
@@ -361,10 +358,10 @@ public class SelectProgramFragment2 extends Fragment
         mAdapter.swapData(null);
         switch (level) {
             case 0:
-                mRegisterEventButton.setEnabled(false);
+                mRegisterEventButton.hide();
                 break;
             case 1:
-                mRegisterEventButton.setEnabled(true);
+                mRegisterEventButton.show();
         }
     }
 

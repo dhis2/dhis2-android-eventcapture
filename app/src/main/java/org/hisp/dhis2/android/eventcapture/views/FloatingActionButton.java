@@ -29,6 +29,8 @@
 
 package org.hisp.dhis2.android.eventcapture.views;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -38,11 +40,16 @@ import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 
 import org.hisp.dhis2.android.eventcapture.R;
 
 public class FloatingActionButton extends ImageButton {
+    private final static OvershootInterpolator OVERSHOOT_INTERPOLATOR = new OvershootInterpolator();
+    private final static AccelerateInterpolator ACCELERATE_INTERPOLATOR = new AccelerateInterpolator();
+
     public static final int TYPE_NORMAL = 0;
     public static final int TYPE_MINI = 1;
 
@@ -53,6 +60,7 @@ public class FloatingActionButton extends ImageButton {
     private int mColorPressed;
     private int mShadowSize;
     private boolean mShadow;
+    private boolean mHidden;
 
     public FloatingActionButton(Context context) {
         super(context);
@@ -199,5 +207,31 @@ public class FloatingActionButton extends ImageButton {
 
     private int getDimension(int id) {
         return getResources().getDimensionPixelSize(id);
+    }
+
+    public void hide() {
+        if (!mHidden) {
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(this, "scaleX", 1, 0);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(this, "scaleY", 1, 0);
+            AnimatorSet animSetXY = new AnimatorSet();
+            animSetXY.playTogether(scaleX, scaleY);
+            animSetXY.setInterpolator(ACCELERATE_INTERPOLATOR);
+            animSetXY.setDuration(100);
+            animSetXY.start();
+            mHidden = true;
+        }
+    }
+
+    public void show() {
+        if (mHidden) {
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(this, "scaleX", 0, 1);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(this, "scaleY", 0, 1);
+            AnimatorSet animSetXY = new AnimatorSet();
+            animSetXY.playTogether(scaleX, scaleY);
+            animSetXY.setInterpolator(OVERSHOOT_INTERPOLATOR);
+            animSetXY.setDuration(200);
+            animSetXY.start();
+            mHidden = false;
+        }
     }
 }
