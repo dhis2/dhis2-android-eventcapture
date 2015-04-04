@@ -56,7 +56,7 @@ public class SelectProgramFragment2 extends Fragment
         OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
         LoaderManager.LoaderCallbacks<List<Row>> {
-    public static final String TAG = SelectProgramFragment.class.getSimpleName();
+    public static final String TAG = SelectProgramFragment2.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
 
