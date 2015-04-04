@@ -43,7 +43,7 @@ import org.hisp.dhis2.android.eventcapture.R;
  * Created by araz on 03.04.2015.
  */
 public final class EventItemRow implements Row {
-    private String mEventId;
+    private long mEventId;
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
@@ -83,21 +83,24 @@ public final class EventItemRow implements Row {
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
 
-        switch (mStatus) {
-            case OFFLINE: {
-                holder.statusImageView.setImageDrawable(mOfflineDrawable);
-                holder.statusTextView.setText(mOffline);
-                break;
-            }
-            case ERROR: {
-                holder.statusImageView.setImageDrawable(mErrorDrawable);
-                holder.statusTextView.setText(mError);
-                break;
-            }
-            case SENT: {
-                holder.statusImageView.setImageDrawable(mSentDrawable);
-                holder.statusTextView.setText(mSent);
-                break;
+        System.out.println("ROW: " + mStatus);
+        if (mStatus != null) {
+            switch (mStatus) {
+                case OFFLINE: {
+                    holder.statusImageView.setImageDrawable(mOfflineDrawable);
+                    holder.statusTextView.setText(mOffline);
+                    break;
+                }
+                case ERROR: {
+                    holder.statusImageView.setImageDrawable(mErrorDrawable);
+                    holder.statusTextView.setText(mError);
+                    break;
+                }
+                case SENT: {
+                    holder.statusImageView.setImageDrawable(mSentDrawable);
+                    holder.statusTextView.setText(mSent);
+                    break;
+                }
             }
         }
 
@@ -107,6 +110,11 @@ public final class EventItemRow implements Row {
     @Override
     public int getViewType() {
         return RowType.EVENT_ITEM_ROW.ordinal();
+    }
+
+    @Override
+    public long getId() {
+        return mEventId;
     }
 
     @Override
@@ -128,8 +136,8 @@ public final class EventItemRow implements Row {
         }
     }
 
-    public void setEventId(String eventId) {
-        this.mEventId = eventId;
+    public void setEventId(long eventId) {
+        mEventId = eventId;
     }
 
     public void setSecondItem(String secondItem) {
@@ -145,7 +153,11 @@ public final class EventItemRow implements Row {
     }
 
     public void setStatus(EventItemStatus status) {
-        this.mStatus = status;
+        mStatus = status;
+    }
+
+    public EventItemStatus getStatus() {
+        return mStatus;
     }
 
     private static class ViewHolder {

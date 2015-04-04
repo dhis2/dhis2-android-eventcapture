@@ -11,8 +11,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
@@ -50,7 +52,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class SelectProgramFragment2 extends Fragment
-        implements View.OnClickListener,
+        implements View.OnClickListener, AdapterView.OnItemClickListener,
         OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
         LoaderManager.LoaderCallbacks<List<Row>> {
@@ -112,6 +114,7 @@ public class SelectProgramFragment2 extends Fragment
 
         mListView.addHeaderView(header);
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(this);
 
         mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
@@ -227,6 +230,15 @@ public class SelectProgramFragment2 extends Fragment
         mAdapter.swapData(null);
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Toast.makeText(getActivity(), "ID: " + id, Toast.LENGTH_SHORT).show();
+        DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
+                mState.getOrgUnitId(), mState.getProgramId(), id
+        );
+        mNavigationHandler.switchFragment(fragment2, DataEntryFragment4.TAG);
+    }
+
     private static class EventListQuery implements Query<List<Row>> {
         private final String mOrgUnitId;
         private final String mProgramId;
@@ -312,6 +324,17 @@ public class SelectProgramFragment2 extends Fragment
                                              Map<String, String> codeToName,
                                              Set<String> failedEventIds) {
             EventItemRow eventItem = new EventItemRow();
+            System.out.println("EventID: " + event.localId);
+            eventItem.setEventId(event.localId);
+
+            if (event.fromServer) {
+                eventItem.setStatus(EventItemStatus.SENT);
+            } else if (failedEventIds.contains(event.getEvent())) {
+                eventItem.setStatus(EventItemStatus.ERROR);
+            } else {
+                eventItem.setStatus(EventItemStatus.OFFLINE);
+            }
+
             for (int i = 0; i < 3; i++) {
                 String dataElement = elementsToShow.get(i);
                 if (dataElement != null) {
@@ -323,21 +346,12 @@ public class SelectProgramFragment2 extends Fragment
                     String code = dataValue.value;
                     String name = codeToName.get(code) == null ? code : codeToName.get(code);
 
-                    eventItem.setEventId(event.getEvent());
                     if (i == 0) {
                         eventItem.setFirstItem(name);
                     } else if (i == 1) {
                         eventItem.setSecondItem(name);
                     } else if (i == 2) {
                         eventItem.setThirdItem(name);
-                    }
-
-                    if (event.fromServer) {
-                        eventItem.setStatus(EventItemStatus.SENT);
-                    } else if (failedEventIds.contains(event.getEvent())) {
-                        eventItem.setStatus(EventItemStatus.ERROR);
-                    } else {
-                        eventItem.setStatus(EventItemStatus.OFFLINE);
                     }
                 }
             }
@@ -375,7 +389,12 @@ public class SelectProgramFragment2 extends Fragment
                 break;
             }
             case R.id.register_new_event: {
-
+                DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
+                        mState.getOrgUnitId(), mState.getProgramId()
+                );
+                mNavigationHandler.switchFragment(
+                        fragment2, DataEntryFragment4.TAG
+                );
                 break;
             }
         }

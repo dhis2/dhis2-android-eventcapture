@@ -29,11 +29,102 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
+import android.app.Activity;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
+
+import org.hisp.dhis2.android.eventcapture.INavigationHandler;
+import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.eventcapture.adapters.StageSectionAdapter;
+import org.hisp.dhis2.android.eventcapture.views.SlidingTabLayout;
 
 /**
  * Created by araz on 04.04.2015.
  */
 public class DataEntryFragment3 extends Fragment {
+    private static final int LOADER_ID = 89254134;
+    private static final String IS_PROGRESS_BAR_VISIBLE = "extra:isProgressBarVisible";
 
+    private SlidingTabLayout mSlidingTabLayout;
+    private ViewPager mViewPager;
+    private StageSectionAdapter mAdapter;
+
+    private ProgressBar mProgressBar;
+    private INavigationHandler mNavigationHandler;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        mNavigationHandler = null;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_data_entry, menu);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_data_entry, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        mSlidingTabLayout = (SlidingTabLayout) view.findViewById(R.id.sliding_tabs);
+        mViewPager = (ViewPager) view.findViewById(R.id.view_pager);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+
+        mAdapter = new StageSectionAdapter(getChildFragmentManager());
+
+        final int blue = getResources().getColor(R.color.navy_blue);
+        final int gray = getResources().getColor(R.color.darker_grey);
+
+        mSlidingTabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+
+            @Override
+            public int getIndicatorColor(int position) {
+                return blue;
+            }
+
+            @Override
+            public int getDividerColor(int position) {
+                return gray;
+            }
+        });
+
+        mViewPager.setAdapter(mAdapter);
+        mSlidingTabLayout.setViewPager(mViewPager);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // getLoaderManager().initLoader(LOADER_ID, getArguments(), this);
+    }
 }

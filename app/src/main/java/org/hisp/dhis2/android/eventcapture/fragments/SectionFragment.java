@@ -27,15 +27,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.adapters.rows;
+package org.hisp.dhis2.android.eventcapture.fragments;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v4.app.Fragment;
 
-public interface Row {
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container);
-    public int getViewType();
-    public long getId();
-    public boolean isEnabled();
+/**
+ * Created by araz on 04.04.2015.
+ */
+public class SectionFragment extends Fragment {
+    public static SectionFragment newInstance(String sectionId) {
+        return new SectionFragment();
+    }
 }

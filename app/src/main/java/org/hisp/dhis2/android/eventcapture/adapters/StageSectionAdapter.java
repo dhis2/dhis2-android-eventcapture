@@ -29,93 +29,56 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 
-import org.hisp.dhis2.android.eventcapture.adapters.rows.Row;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.RowType;
+import org.hisp.dhis2.android.eventcapture.fragments.SectionFragment;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
 
 import java.util.List;
 
-public class EventAdapter extends BaseAdapter {
-    private final LayoutInflater mInflater;
-    private List<Row> mRows;
+public class StageSectionAdapter extends FragmentPagerAdapter {
+    private static final String EMPTY_TITLE = "";
+    private List<ProgramStageSection> mSections;
 
-    public EventAdapter(LayoutInflater inflater) {
-        this.mInflater = inflater;
+    public StageSectionAdapter(FragmentManager fm) {
+        super(fm);
+    }
+
+    @Override
+    public Fragment getItem(int position) {
+        if (mSections != null && mSections.size() > 0) {
+            String sectionId = mSections.get(position).getId();
+            return SectionFragment.newInstance(sectionId);
+        } else {
+            return null;
+        }
     }
 
     @Override
     public int getCount() {
-        if (mRows != null) {
-            return mRows.size();
+        if (mSections != null) {
+            return mSections.size();
         } else {
             return 0;
         }
     }
 
     @Override
-    public Object getItem(int position) {
-        if (mRows != null) {
-            return mRows.get(position);
+    public CharSequence getPageTitle(int position) {
+        if (mSections != null && mSections.size() > 0) {
+            return mSections.get(position).getName();
         } else {
-            return null;
+            return EMPTY_TITLE;
         }
     }
 
-    @Override
-    public long getItemId(int position) {
-        if (mRows != null) {
-            return mRows.get(position).getId();
-        } else {
-            return -1;
-        }
-    }
+    public void swapData(List<ProgramStageSection> sections) {
+        boolean hasToNotifyAdapter = mSections != sections;
+        mSections = sections;
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if (mRows != null) {
-            return mRows.get(position).getView(mInflater, convertView, parent);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public boolean areAllItemsEnabled() {
-        return false;
-    }
-
-    @Override
-    public boolean isEnabled(int position) {
-        if (mRows != null) {
-            return mRows.get(position).isEnabled();
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return RowType.values().length;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (mRows != null) {
-            return mRows.get(position).getViewType();
-        } else {
-            return 0;
-        }
-    }
-
-    public void swapData(List<Row> rows) {
-        boolean notifyAdapter = mRows != rows;
-        mRows = rows;
-
-        if (notifyAdapter) {
+        if (hasToNotifyAdapter) {
             notifyDataSetChanged();
         }
     }

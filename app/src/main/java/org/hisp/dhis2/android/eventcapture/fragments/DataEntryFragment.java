@@ -52,6 +52,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
@@ -155,6 +156,7 @@ public class DataEntryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Toast.makeText(getActivity(), "ID: " + editingEvent, Toast.LENGTH_SHORT).show();
         final View rootView = inflater.inflate(R.layout.fragment_register_event,
                 container, false);
         this.inflater = inflater;

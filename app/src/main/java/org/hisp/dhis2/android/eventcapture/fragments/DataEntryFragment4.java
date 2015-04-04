@@ -53,6 +53,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.raizlabs.android.dbflow.sql.builder.Condition;
+import com.raizlabs.android.dbflow.sql.language.Select;
+
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
@@ -64,7 +67,9 @@ import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.Program$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramIndicator;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
@@ -91,21 +96,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
+
 /**
  * @author Simen Skogly Russnes on 20.02.15.
  */
-public class DataEntryFragment2 extends Fragment {
-    public static final String TAG = DataEntryFragment2.class.getSimpleName();
+public class DataEntryFragment4 extends Fragment {
+    public static final String TAG = DataEntryFragment4.class.getSimpleName();
+
+    private static final String ORG_UNIT_ID = "extra:orgUnitId";
+    private static final String PROGRAM_ID = "extra:ProgramId";
+    private static final String EVENT_ID = "extra:EventId";
 
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
-    private long editingEvent = -1;
-
     private ProgramStage selectedProgramStage;
     private Button captureCoordinateButton;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
     private Event event;
+    private long editingEvent = -1;
     private List<DataValue> dataValues;
     private List<ProgramStageDataElement> programStageDataElements;
     private List<ProgramStageSection> programStageSections;
@@ -137,19 +147,49 @@ public class DataEntryFragment2 extends Fragment {
         mNavigationHandler = null;
     }
 
-    public static DataEntryFragment2 newInstance(OrganisationUnit unit,
-                                                 Program program) {
-        DataEntryFragment2 fragment = new DataEntryFragment2();
-        fragment.setSelectedOrganisationUnit(unit);
-        fragment.setSelectedProgram(program);
+
+    public static DataEntryFragment4 newInstance(String unitId, String programId) {
+        DataEntryFragment4 fragment = new DataEntryFragment4();
+        Bundle args = new Bundle();
+        args.putString(ORG_UNIT_ID, unitId);
+        args.putString(PROGRAM_ID, programId);
+        fragment.setArguments(args);
         return fragment;
     }
 
-    public static DataEntryFragment2 newInstance(OrganisationUnit unit,
-                                                 Program program, long eventId) {
-        DataEntryFragment2 fragment = newInstance(unit, program);
-        fragment.setEditingEvent(eventId);
+    public static DataEntryFragment4 newInstance(String unitId, String programId, long eventId) {
+        DataEntryFragment4 fragment = new DataEntryFragment4();
+        Bundle args = new Bundle();
+        args.putString(ORG_UNIT_ID, unitId);
+        args.putString(PROGRAM_ID, programId);
+        args.putLong(EVENT_ID, eventId);
+        fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        String orgUnitId = getArguments().getString(ORG_UNIT_ID, null);
+        String programId = getArguments().getString(PROGRAM_ID, null);
+        long eventId = getArguments().getLong(EVENT_ID, -1);
+
+        isNull(orgUnitId, "OrganisationUnit ID must not be null");
+        isNull(programId, "Program ID must not be null");
+
+        selectedOrganisationUnit = Select.all(
+                OrganisationUnit.class,
+                Condition.column(OrganisationUnit$Table.ID).is(orgUnitId)
+        ).get(0);
+
+        selectedProgram = Select.all(
+                Program.class,
+                Condition.column(Program$Table.ID).is(programId)
+        ).get(0);
+
+        if (!(eventId < 0)) {
+            editingEvent = eventId;
+        }
     }
 
 
@@ -579,7 +619,7 @@ public class DataEntryFragment2 extends Fragment {
     public void showSelectProgramFragment() {
         //MessageEvent event = new MessageEvent(BaseEvent.EventType.showSelectProgramFragment);
         //Dhis2Application.bus.post(event);
-        mNavigationHandler.switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
+        mNavigationHandler.switchFragment(new SelectProgramFragment2(), SelectProgramFragment2.TAG);
     }
 
     public OrganisationUnit getSelectedOrganisationUnit() {

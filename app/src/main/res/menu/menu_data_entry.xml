@@ -38,7 +38,7 @@
 
     <item
         android:id="@+id/action_new_event"
-        android:icon="@drawable/ic_new"
+        android:icon="@drawable/ic_save"
         android:title="@string/new_event"
         app:showAsAction="always" />
 
