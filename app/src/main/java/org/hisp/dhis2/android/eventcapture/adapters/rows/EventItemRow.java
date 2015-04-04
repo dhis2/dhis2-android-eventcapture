@@ -83,24 +83,21 @@ public final class EventItemRow implements Row {
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
 
-        System.out.println("ROW: " + mStatus);
-        if (mStatus != null) {
-            switch (mStatus) {
-                case OFFLINE: {
-                    holder.statusImageView.setImageDrawable(mOfflineDrawable);
-                    holder.statusTextView.setText(mOffline);
-                    break;
-                }
-                case ERROR: {
-                    holder.statusImageView.setImageDrawable(mErrorDrawable);
-                    holder.statusTextView.setText(mError);
-                    break;
-                }
-                case SENT: {
-                    holder.statusImageView.setImageDrawable(mSentDrawable);
-                    holder.statusTextView.setText(mSent);
-                    break;
-                }
+        switch (mStatus) {
+            case OFFLINE: {
+                holder.statusImageView.setImageDrawable(mOfflineDrawable);
+                holder.statusTextView.setText(mOffline);
+                break;
+            }
+            case ERROR: {
+                holder.statusImageView.setImageDrawable(mErrorDrawable);
+                holder.statusTextView.setText(mError);
+                break;
+            }
+            case SENT: {
+                holder.statusImageView.setImageDrawable(mSentDrawable);
+                holder.statusTextView.setText(mSent);
+                break;
             }
         }
 

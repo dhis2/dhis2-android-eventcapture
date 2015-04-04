@@ -40,6 +40,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.raizlabs.android.dbflow.structure.Model;
+
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.SimpleAdapter;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
@@ -97,8 +99,10 @@ public class OrgUnitDialogFragment extends DialogFragment
     @Override
     public Loader<List<OrganisationUnit>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
+            List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
+            modelsToTrack.add(OrganisationUnit.class);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), OrganisationUnit.class, new OrgUnitQuery()
+                    getActivity().getBaseContext(), modelsToTrack, new OrgUnitQuery()
             );
         }
         return null;

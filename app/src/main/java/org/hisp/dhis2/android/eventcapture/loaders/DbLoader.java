@@ -34,15 +34,19 @@ import android.support.v4.content.AsyncTaskLoader;
 
 import com.raizlabs.android.dbflow.structure.Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 
 
-public class DbLoader<ModelClass extends Model, T> extends AsyncTaskLoader<T> {
+public class DbLoader<T> extends AsyncTaskLoader<T> {
     // A Model Class which we want to observe
-    private final Class<ModelClass> mModelClass;
+    private final List<Class<? extends Model>> mModelClasses;
 
     // The actual observer
-    private ModelChangeObserver<ModelClass> mObserver;
+    // private ModelChangeObserver<ModelClass> mObserver;
+    private List<ModelChangeObserver<?>> mObservers;
 
     // The object which will perform Query
     private final Query<T> mQuery;
@@ -50,23 +54,33 @@ public class DbLoader<ModelClass extends Model, T> extends AsyncTaskLoader<T> {
     private T mData;
 
     public DbLoader(Context context,
-                    Class<ModelClass> modelClass,
+                    List<Class<? extends Model>> modelClasses,
                     Query<T> query) {
         super(context);
 
-        mModelClass = isNull(modelClass, "Model Class object must not be null");
+        mModelClasses = isNull(modelClasses, "Model Class object must not be null");
         mQuery = isNull(query, "Query object must not be null");
     }
 
-    private void registerObserver() {
-        mObserver = new ModelChangeObserver<>(mModelClass, this);
-        mObserver.registerObserver();
+    private void registerObservers() {
+        mObservers = new ArrayList<>();
+        for (Class<? extends Model> modelClass : mModelClasses) {
+            ModelChangeObserver<?> observer = new ModelChangeObserver<>(modelClass, this);
+            observer.registerObserver();
+            mObservers.add(observer);
+        }
+        // mObserver = new ModelChangeObserver<>(mModelClass, this);
+        // mObserver.registerObserver();
     }
 
-    private void unregisterObserver() {
-        if (mObserver != null) {
-            mObserver.unregisterObserver();
-            mObserver = null;
+    private void unregisterObservers() {
+        if (mObservers != null) {
+            for (ModelChangeObserver<?> observer : mObservers) {
+                observer.unregisterObserver();
+            }
+            mObservers = null;
+            // mObserver.unregisterObserver();
+            // mObserver = null;
         }
     }
 
@@ -108,7 +122,7 @@ public class DbLoader<ModelClass extends Model, T> extends AsyncTaskLoader<T> {
         }
 
         // Begin monitoring the underlying data source.
-        registerObserver();
+        registerObservers();
 
         if (takeContentChanged() || mData == null) {
             // When the observer detects a change, it should call onContentChanged()
@@ -138,7 +152,7 @@ public class DbLoader<ModelClass extends Model, T> extends AsyncTaskLoader<T> {
         // At this point we can release the resources associated with 'mData'.
         releaseResources();
         // The Loader is being reset, so we should stop monitoring for changes.
-        unregisterObserver();
+        unregisterObservers();
     }
 
     @Override

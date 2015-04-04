@@ -39,11 +39,11 @@ import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 public class ModelChangeObserver<ModelClass extends Model> implements FlowContentObserver.ModelChangeListener {
     private static final String TAG = ModelChangeObserver.class.getSimpleName();
 
-    private final DbLoader<?, ?> mLoader;
+    private final DbLoader<?> mLoader;
     private final Class<ModelClass> mModelClass;
     private final FlowContentObserver mObserver;
 
-    public ModelChangeObserver(Class<ModelClass> modelClass, DbLoader<?, ?> loader) {
+    public ModelChangeObserver(Class<ModelClass> modelClass, DbLoader<?> loader) {
         mModelClass = isNull(modelClass, "Class<ModelClass> object must not be null");
         mLoader = isNull(loader, "DbLoader must not be null");
         mObserver = new FlowContentObserver();

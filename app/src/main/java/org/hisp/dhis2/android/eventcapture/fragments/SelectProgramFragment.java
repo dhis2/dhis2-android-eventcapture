@@ -14,10 +14,10 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
+import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
@@ -45,6 +45,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -210,8 +211,11 @@ public class SelectProgramFragment extends Fragment
     @Override
     public Loader<List<Row>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
+            List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
+            modelsToTrack.add(Event.class);
+            modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), Event.class,
+                    getActivity().getBaseContext(), modelsToTrack,
                     new EventListQuery(mState.getOrgUnitId(), mState.getProgramId()));
         }
         return null;
@@ -232,7 +236,6 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(getActivity(), "ID: " + id, Toast.LENGTH_SHORT).show();
         DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
                 mState.getOrgUnitId(), mState.getProgramId(), id
         );
@@ -324,7 +327,6 @@ public class SelectProgramFragment extends Fragment
                                              Map<String, String> codeToName,
                                              Set<String> failedEventIds) {
             EventItemRow eventItem = new EventItemRow();
-            System.out.println("EventID: " + event.localId);
             eventItem.setEventId(event.localId);
 
             if (event.fromServer) {

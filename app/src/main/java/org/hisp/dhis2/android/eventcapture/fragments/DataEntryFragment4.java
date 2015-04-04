@@ -551,10 +551,18 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         boolean valid = true;
         //go through each data element and check that they are valid
         //i.e. all compulsory are not empty
-        for (int i = 0; i < dataValues.size(); i++) {
-            ProgramStageDataElement programStageDataElement = programStageDataElements.get(i);
-            if (programStageDataElement.isCompulsory()) {
-                DataValue dataValue = dataValues.get(i);
+        System.out.println("DataValues: " + dataValues.size() + " ProgramStageElements: " + programStageDataElements.size());
+        for (DataValue dataValueElement : dataValues) {
+            System.out.println("DataValueElement: " + dataValueElement.dataElement);
+        }
+        for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+            System.out.println("ProgramStageDataElement: " + programStageDataElement.dataElement);
+        }
+
+        Map<String, ProgramStageDataElement> elementMap = toMap(programStageDataElements);
+        for (DataValue dataValue : dataValues) {
+            ProgramStageDataElement stageElement = elementMap.get(dataValue.dataElement);
+            if (stageElement != null && stageElement.isCompulsory()) {
                 if (dataValue.value == null || dataValue.value.length() <= 0) {
                     valid = false;
                 }
@@ -566,7 +574,9 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
                     "Some compulsory fields are empty, please fill them in");
         } else {
             saveEvent();
-            showSelectProgramFragment();
+            if (isAdded()) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
         }
     }
 
@@ -583,13 +593,22 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         if (id == R.id.action_settings) {
             mNavigationHandler.switchFragment(
                     new SettingsFragment(), SettingsFragment.TAG);
-            // showSettingsFragment();
         } else if (id == R.id.action_new_event) {
             submit();
             // showRegisterEventFragment();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private static Map<String, ProgramStageDataElement> toMap(List<ProgramStageDataElement> elements) {
+        Map<String, ProgramStageDataElement> map = new HashMap<>();
+        if (elements != null && elements.size() > 0) {
+            for (ProgramStageDataElement element : elements) {
+                map.put(element.dataElement, element);
+            }
+        }
+        return map;
     }
 
     /*@Override
@@ -626,32 +645,6 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         Dhis2.sendLocalData(getActivity().getApplicationContext());
     }
 
-    public void showSelectProgramFragment() {
-        //MessageEvent event = new MessageEvent(BaseEvent.EventType.showSelectProgramFragment);
-        //Dhis2Application.bus.post(event);
-        mNavigationHandler.switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
-    }
-
-    public OrganisationUnit getSelectedOrganisationUnit() {
-        return selectedOrganisationUnit;
-    }
-
-    public void setSelectedOrganisationUnit(OrganisationUnit selectedOrganisationUnit) {
-        this.selectedOrganisationUnit = selectedOrganisationUnit;
-    }
-
-    public Program getSelectedProgram() {
-        return selectedProgram;
-    }
-
-    public void setSelectedProgram(Program selectedProgram) {
-        this.selectedProgram = selectedProgram;
-    }
-
-    public void setEditingEvent(long event) {
-        this.editingEvent = event;
-    }
-
     @Override
     public void doBack() {
         if (!hasEdited()) {
@@ -679,10 +672,12 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
 
     private class InvalidateIndicatorTextWatcher implements TextWatcher {
         @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
         @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) { }
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
 
         @Override
         public void afterTextChanged(Editable s) {

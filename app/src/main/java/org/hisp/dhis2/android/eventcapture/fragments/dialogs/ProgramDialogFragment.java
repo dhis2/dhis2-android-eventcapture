@@ -40,6 +40,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.raizlabs.android.dbflow.structure.Model;
+
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.SimpleAdapter;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
@@ -48,6 +50,7 @@ import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProgramDialogFragment extends DialogFragment
@@ -113,8 +116,10 @@ public class ProgramDialogFragment extends DialogFragment
     public Loader<List<Program>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             String organisationUnitId = args.getString(OrganisationUnit$Table.ID);
+            List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
+            modelsToTrack.add(Program.class);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), Program.class, new ProgramQuery(organisationUnitId)
+                    getActivity().getBaseContext(), modelsToTrack, new ProgramQuery(organisationUnitId)
             );
         }
         return null;
