@@ -53,10 +53,12 @@ public class ModelChangeObserver<ModelClass extends Model> implements FlowConten
         mObserver.registerForContentChanges(
                 mLoader.getContext(), mModelClass
         );
+        mObserver.addModelChangeListener(this);
     }
 
     public void unregisterObserver() {
         mObserver.unregisterForContentChanges(mLoader.getContext());
+        mObserver.removeModelChangeListener(this);
     }
 
     @Override
