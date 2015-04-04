@@ -32,6 +32,7 @@ package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -57,6 +58,8 @@ import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
+import org.hisp.dhis2.android.eventcapture.MainActivity;
+import org.hisp.dhis2.android.eventcapture.OnBackPressedListener;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
@@ -101,7 +104,7 @@ import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 /**
  * @author Simen Skogly Russnes on 20.02.15.
  */
-public class DataEntryFragment4 extends Fragment {
+public class DataEntryFragment4 extends Fragment implements OnBackPressedListener {
     public static final String TAG = DataEntryFragment4.class.getSimpleName();
 
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
@@ -137,16 +140,23 @@ public class DataEntryFragment4 extends Fragment {
         } else {
             throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
         }
+
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).setBackPressedListener(this);
+        }
     }
 
     @Override
     public void onDetach() {
-        super.onDetach();
         // we need to nullify reference
         // to parent activity in order not to leak it
         mNavigationHandler = null;
-    }
 
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setBackPressedListener(null);
+        }
+        super.onDetach();
+    }
 
     public static DataEntryFragment4 newInstance(String unitId, String programId) {
         DataEntryFragment4 fragment = new DataEntryFragment4();
@@ -642,14 +652,37 @@ public class DataEntryFragment4 extends Fragment {
         this.editingEvent = event;
     }
 
-    private class InvalidateIndicatorTextWatcher implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    @Override
+    public void doBack() {
+        if (!hasEdited()) {
+            getActivity().getSupportFragmentManager().popBackStack();
+            return;
         }
 
+        String message = isEditing() ?
+                getString(R.string.discard_confirm_changes) :
+                getString(R.string.discard_confirm);
+
+        Dhis2.getInstance().showConfirmDialog(getActivity(),
+                getString(R.string.discard), message,
+                getString(R.string.yes_option), getString(R.string.no_option),
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (isAdded()) {
+                            getActivity().getSupportFragmentManager().popBackStack();
+                        }
+                    }
+                });
+    }
+
+    private class InvalidateIndicatorTextWatcher implements TextWatcher {
         @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) { }
 
         @Override
         public void afterTextChanged(Editable s) {

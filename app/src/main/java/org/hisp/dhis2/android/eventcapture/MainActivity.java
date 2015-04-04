@@ -29,31 +29,27 @@
 
 package org.hisp.dhis2.android.eventcapture;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment2;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
-import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
 
-
 public class MainActivity extends ActionBarActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
+    private OnBackPressedListener mBackPressedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,118 +126,23 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         //selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
-    public void showSettingsFragment() {
-        setTitle("Settings");
-        switchFragment(new SettingsFragment(), SettingsFragment.TAG);
-        /*
-        if (settingsFragment == null) {
-            settingsFragment = new SettingsFragment();
-        }
-        */
-        /*
-        if (selectProgramFragment != null) {
-            lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
-            lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
-        }
-        */
-
-    }
-
-    /*
-    public void showEditEventFragment(long localEventId) {
-        setTitle("Edit Event");
-        Fragment fragment = DataEntryFragment.newInstance(
-                selectProgramFragment.getSelectedOrganisationUnit(),
-                selectProgramFragment.getSelectedProgram(),
-                localEventId
-        );
-        switchFragment(fragment, DataEntryFragment.TAG);
-        /* dataEntryFragment = new DataEntryFragment();
-        OrganisationUnit organisationUnit = selectProgramFragment.getSelectedOrganisationUnit();
-        Program program = selectProgramFragment.getSelectedProgram();
-        dataEntryFragment.setSelectedOrganisationUnit(organisationUnit);
-        dataEntryFragment.setSelectedProgram(program);
-        dataEntryFragment.setEditingEvent(localEventId);
-        lastSelectedOrgUnit = selectProgramFragment.getSelectedOrganisationUnitIndex();
-        lastSelectedProgram = selectProgramFragment.getSelectedProgramIndex();
-        showFragment(dataEntryFragment); */
-    // }
-
-    /* @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        MenuItem item = menu.findItem(R.id.action_new_event);
-        item.setVisible(true);
-        if(currentFragment.equals(settingsFragment))
-            item.setVisible(false);
-        else */
-        /* if (currentFragment == selectProgramFragment)
-            item.setIcon(getResources().getDrawable(R.drawable.ic_new));
-        else if (currentFragment == dataEntryFragment)
-            item.setIcon(getResources().getDrawable(R.drawable.ic_save));
-        else if(currentFragment.equals(loadingFragment))
-            item.setVisible(false);
-
-        return true;
-    } */
-
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        if (mBackPressedListener != null) {
+            mBackPressedListener.doBack();
+            return;
+        }
 
-        if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
-
-            Toast.makeText(
-                    getApplicationContext(), "onBackPressed() -> Exit " + getSupportFragmentManager().getBackStackEntryCount(), Toast.LENGTH_SHORT
-            ).show();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+            super.onBackPressed();
+        } else {
+            finish();
         }
     }
 
-    /*
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            if (currentFragment == selectProgramFragment) {
-                Dhis2.getInstance().showConfirmDialog(this, getString(R.string.confirm),
-                        getString(R.string.exit_confirmation), getString(R.string.yes_option),
-                        getString(R.string.no_option),
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                                System.exit(0);
-                            }
-                        });
-            } else if (currentFragment == dataEntryFragment) {
-                String message = null;
-                if (dataEntryFragment.isEditing()) {
-                    message = getString(R.string.discard_confirm_changes);
-                } else {
-                    message = getString(R.string.discard_confirm);
-                }
-                if (dataEntryFragment.hasEdited()) {
-                    Dhis2.getInstance().showConfirmDialog(this, getString(R.string.discard),
-                            message, getString(R.string.yes_option),
-                            getString(R.string.no_option),
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    showSelectProgramFragment();
-                                }
-                            });
-                } else {
-                    showSelectProgramFragment();
-                    dataEntryFragment = null;
-                }
-            } else if ( currentFragment.equals(settingsFragment )) {
-                if(previousFragment == null) showSelectProgramFragment();
-                else showFragment(previousFragment);
-            } */
-        /*    return true;
-        }
-
-        return super.onKeyDown(keyCode, event);
-    }*/
+    public void setBackPressedListener(OnBackPressedListener listener) {
+        mBackPressedListener = listener;
+    }
 
     @Override
     protected void onDestroy() {
