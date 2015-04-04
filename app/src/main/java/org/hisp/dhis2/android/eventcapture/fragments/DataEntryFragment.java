@@ -580,7 +580,7 @@ public class DataEntryFragment extends Fragment {
     public void showSelectProgramFragment() {
         //MessageEvent event = new MessageEvent(BaseEvent.EventType.showSelectProgramFragment);
         //Dhis2Application.bus.post(event);
-        mNavigationHandler.switchFragment(new SelectProgramFragment2(), SelectProgramFragment2.TAG);
+        mNavigationHandler.switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
     }
 
     public OrganisationUnit getSelectedOrganisationUnit() {
