@@ -143,7 +143,7 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_select_program, menu);
+        inflater.inflate(R.menu.menu_data_entry, menu);
     }
 
     @Override
