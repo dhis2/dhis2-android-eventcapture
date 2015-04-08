@@ -426,6 +426,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
      * Re-calculates indicator values if any and updates ui
      */
     private void updateIndicatorValues() {
+        if(indicatorRows == null) return;
         for (final IndicatorRow indicatorRow : indicatorRows) {
             final String newValue = ProgramIndicatorService.
                     getProgramIndicatorValue(event, indicatorRow.getProgramIndicator());
