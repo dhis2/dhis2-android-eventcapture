@@ -32,7 +32,7 @@ package org.hisp.dhis2.android.eventcapture.adapters.rows;
 /**
  * Created by araz on 03.04.2015.
  */
-public enum RowType {
+public enum EventRowType {
     COLUMN_NAMES_ROW,
     EVENT_ITEM_ROW
 }

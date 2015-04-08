@@ -25,7 +25,7 @@ import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.ColumnNamesRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.EventItemRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.EventItemStatus;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.Row;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.EventRow;
 import org.hisp.dhis2.android.eventcapture.fragments.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.dialogs.ProgramDialogFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
@@ -55,7 +55,7 @@ public class SelectProgramFragment extends Fragment
         implements View.OnClickListener, AdapterView.OnItemClickListener,
         OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
-        LoaderManager.LoaderCallbacks<List<Row>> {
+        LoaderManager.LoaderCallbacks<List<EventRow>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
@@ -208,7 +208,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public Loader<List<Row>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(Event.class);
@@ -221,7 +221,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Row>> loader, List<Row> data) {
+    public void onLoadFinished(Loader<List<EventRow>> loader, List<EventRow> data) {
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
             mAdapter.swapData(data);
@@ -229,7 +229,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Row>> loader) {
+    public void onLoaderReset(Loader<List<EventRow>> loader) {
         mAdapter.swapData(null);
     }
 
@@ -241,7 +241,7 @@ public class SelectProgramFragment extends Fragment
         mNavigationHandler.switchFragment(fragment2, DataEntryFragment4.TAG);
     }
 
-    private static class EventListQuery implements Query<List<Row>> {
+    private static class EventListQuery implements Query<List<EventRow>> {
         private final String mOrgUnitId;
         private final String mProgramId;
 
@@ -251,25 +251,25 @@ public class SelectProgramFragment extends Fragment
         }
 
         @Override
-        public List<Row> query() {
-            List<Row> eventRows = new ArrayList<>();
+        public List<EventRow> query() {
+            List<EventRow> eventEventRows = new ArrayList<>();
 
             // create a list of EventItems
             Program selectedProgram = Select.byId(Program.class, mProgramId);
             if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-                return eventRows;
+                return eventEventRows;
             }
 
             // since this is single event its only 1 stage
             ProgramStage programStage = selectedProgram.getProgramStages().get(0);
             if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
-                return eventRows;
+                return eventEventRows;
             }
 
             List<ProgramStageDataElement> stageElements = programStage
                     .getProgramStageDataElements();
             if (isListEmpty(stageElements)) {
-                return eventRows;
+                return eventEventRows;
             }
 
             List<String> elementsToShow = new ArrayList<>();
@@ -287,13 +287,13 @@ public class SelectProgramFragment extends Fragment
                     }
                 }
             }
-            eventRows.add(columnNames);
+            eventEventRows.add(columnNames);
 
             List<Event> events = DataValueController.getEvents(
                     mOrgUnitId, mProgramId
             );
             if (isListEmpty(events)) {
-                return eventRows;
+                return eventEventRows;
             }
 
             List<Option> options = Select.all(Option.class);
@@ -315,11 +315,11 @@ public class SelectProgramFragment extends Fragment
             }
 
             for (Event event : events) {
-                eventRows.add(createEventItem(event, elementsToShow,
+                eventEventRows.add(createEventItem(event, elementsToShow,
                         codeToName, failedEventIds));
             }
 
-            return eventRows;
+            return eventEventRows;
         }
 
         private EventItemRow createEventItem(Event event, List<String> elementsToShow,

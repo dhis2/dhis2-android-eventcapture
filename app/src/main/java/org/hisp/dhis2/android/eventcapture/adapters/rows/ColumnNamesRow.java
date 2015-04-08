@@ -39,7 +39,7 @@ import org.hisp.dhis2.android.eventcapture.R;
 /**
  * Created by araz on 03.04.2015.
  */
-public class ColumnNamesRow implements Row {
+public class ColumnNamesRow implements EventRow {
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
@@ -71,7 +71,7 @@ public class ColumnNamesRow implements Row {
 
     @Override
     public int getViewType() {
-        return RowType.COLUMN_NAMES_ROW.ordinal();
+        return EventRowType.COLUMN_NAMES_ROW.ordinal();
     }
 
     @Override

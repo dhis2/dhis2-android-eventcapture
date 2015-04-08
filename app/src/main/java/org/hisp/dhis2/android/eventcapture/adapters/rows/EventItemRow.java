@@ -42,7 +42,7 @@ import org.hisp.dhis2.android.eventcapture.R;
 /**
  * Created by araz on 03.04.2015.
  */
-public final class EventItemRow implements Row {
+public final class EventItemRow implements EventRow {
     private long mEventId;
     private String mFirstItem;
     private String mSecondItem;
@@ -106,7 +106,7 @@ public final class EventItemRow implements Row {
 
     @Override
     public int getViewType() {
-        return RowType.EVENT_ITEM_ROW.ordinal();
+        return EventRowType.EVENT_ITEM_ROW.ordinal();
     }
 
     @Override

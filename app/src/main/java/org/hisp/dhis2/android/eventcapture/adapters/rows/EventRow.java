@@ -33,7 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public interface Row {
+public interface EventRow {
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container);
     public int getViewType();
     public long getId();
