@@ -50,7 +50,7 @@ public class DataEntryFragment2 extends Fragment
     private static final int LOADER_ID = 1;
 
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
-    private static final String EXTRA_SAVED_INSTACE_STATE = "extra:savedInstanceState";
+    private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
 
     private static final String ORG_UNIT_ID = "extra:orgUnitId";
     private static final String PROGRAM_ID = "extra:ProgramId";
@@ -112,7 +112,7 @@ public class DataEntryFragment2 extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         Bundle argumentsBundle = new Bundle();
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
-        argumentsBundle.putBundle(EXTRA_SAVED_INSTACE_STATE, savedInstanceState);
+        argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
     }
 

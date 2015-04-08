@@ -34,8 +34,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import org.hisp.dhis2.android.eventcapture.adapters.rows.EventRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.EventRowType;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRowType;
 
 import java.util.List;
 

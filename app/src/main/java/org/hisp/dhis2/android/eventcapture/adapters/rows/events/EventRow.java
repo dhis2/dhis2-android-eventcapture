@@ -27,12 +27,15 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.adapters.rows;
+package org.hisp.dhis2.android.eventcapture.adapters.rows.events;
 
-/**
- * Created by araz on 03.04.2015.
- */
-public enum EventRowType {
-    COLUMN_NAMES_ROW,
-    EVENT_ITEM_ROW
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+public interface EventRow {
+    public View getView(LayoutInflater inflater, View convertView, ViewGroup container);
+    public int getViewType();
+    public long getId();
+    public boolean isEnabled();
 }

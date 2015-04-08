@@ -27,14 +27,11 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.adapters.rows;
+package org.hisp.dhis2.android.eventcapture.adapters.rows.events;
 
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
@@ -42,36 +39,22 @@ import org.hisp.dhis2.android.eventcapture.R;
 /**
  * Created by araz on 03.04.2015.
  */
-public final class EventItemRow implements EventRow {
-    private long mEventId;
+public class ColumnNamesRow implements EventRow {
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
-    private EventItemStatus mStatus;
-
-    private Drawable mOfflineDrawable;
-    private Drawable mErrorDrawable;
-    private Drawable mSentDrawable;
-
-    private String mSent;
-    private String mError;
-    private String mOffline;
 
     @Override
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
         ViewHolder holder;
 
-        initResources(inflater.getContext());
-
         if (convertView == null) {
-            view = inflater.inflate(R.layout.listview_event_item, container, false);
+            view = inflater.inflate(R.layout.listview_column_names_item, container, false);
             holder = new ViewHolder(
-                    (TextView) view.findViewById(R.id.first_event_item),
-                    (TextView) view.findViewById(R.id.second_event_item),
-                    (TextView) view.findViewById(R.id.third_event_item),
-                    (ImageView) view.findViewById(R.id.status_image_view),
-                    (TextView) view.findViewById(R.id.status_text_view)
+                    (TextView) view.findViewById(R.id.first_column_name),
+                    (TextView) view.findViewById(R.id.second_column_name),
+                    (TextView) view.findViewById(R.id.third_column_name)
             );
             view.setTag(holder);
         } else {
@@ -83,97 +66,47 @@ public final class EventItemRow implements EventRow {
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
 
-        switch (mStatus) {
-            case OFFLINE: {
-                holder.statusImageView.setImageDrawable(mOfflineDrawable);
-                holder.statusTextView.setText(mOffline);
-                break;
-            }
-            case ERROR: {
-                holder.statusImageView.setImageDrawable(mErrorDrawable);
-                holder.statusTextView.setText(mError);
-                break;
-            }
-            case SENT: {
-                holder.statusImageView.setImageDrawable(mSentDrawable);
-                holder.statusTextView.setText(mSent);
-                break;
-            }
-        }
-
         return view;
     }
 
     @Override
     public int getViewType() {
-        return EventRowType.EVENT_ITEM_ROW.ordinal();
+        return EventRowType.COLUMN_NAMES_ROW.ordinal();
     }
 
     @Override
     public long getId() {
-        return mEventId;
+        return -1;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
-    }
-
-    private void initResources(Context context) {
-        if (mOfflineDrawable == null || mErrorDrawable == null || mSentDrawable == null) {
-            mOfflineDrawable = context.getResources().getDrawable(R.drawable.ic_offline);
-            mErrorDrawable = context.getResources().getDrawable(R.drawable.ic_event_error);
-            mSentDrawable = context.getResources().getDrawable(R.drawable.ic_from_server);
-        }
-
-        if (mSent == null || mError == null || mOffline == null) {
-            mSent = context.getResources().getString(R.string.event_sent);
-            mError = context.getResources().getString(R.string.event_error);
-            mOffline = context.getResources().getString(R.string.event_offline);
-        }
-    }
-
-    public void setEventId(long eventId) {
-        mEventId = eventId;
-    }
-
-    public void setSecondItem(String secondItem) {
-        this.mSecondItem = secondItem;
+        return false;
     }
 
     public void setThirdItem(String thirdItem) {
         this.mThirdItem = thirdItem;
     }
 
+    public void setSecondItem(String secondItem) {
+        this.mSecondItem = secondItem;
+    }
+
     public void setFirstItem(String firstItem) {
         this.mFirstItem = firstItem;
-    }
-
-    public void setStatus(EventItemStatus status) {
-        mStatus = status;
-    }
-
-    public EventItemStatus getStatus() {
-        return mStatus;
     }
 
     private static class ViewHolder {
         public final TextView firstItem;
         public final TextView secondItem;
         public final TextView thirdItem;
-        public final ImageView statusImageView;
-        public final TextView statusTextView;
 
         private ViewHolder(TextView firstItem,
                            TextView secondItem,
-                           TextView thirdItem,
-                           ImageView statusImageView,
-                           TextView statusTextView) {
+                           TextView thirdItem) {
             this.firstItem = firstItem;
             this.secondItem = secondItem;
             this.thirdItem = thirdItem;
-            this.statusImageView = statusImageView;
-            this.statusTextView = statusTextView;
         }
     }
 }

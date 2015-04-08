@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.adapters.rows;
+package org.hisp.dhis2.android.eventcapture.adapters.rows.events;
 
 public enum EventItemStatus {
     SENT,
