@@ -114,20 +114,24 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
     private OrganisationUnit selectedOrganisationUnit;
     private Program selectedProgram;
     private ProgramStage selectedProgramStage;
+
     private Button captureCoordinateButton;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
+    private ProgressBar progressBar;
+
     private Event event;
     private long editingEvent = -1;
-    private List<DataValue> dataValues;
-    private List<ProgramStageDataElement> programStageDataElements;
-    private List<ProgramStageSection> programStageSections;
     private boolean editing;
+
+    private List<ProgramStageSection> programStageSections;
+    private List<ProgramStageDataElement> programStageDataElements;
+    private List<DataValue> dataValues;
     private List<DataValue> originalDataValues;
-    private ProgressBar progressBar;
+    private List<IndicatorRow> indicatorRows;
+
     private LayoutInflater inflater;
     private Context context;
-    private List<IndicatorRow> indicatorRows;
 
     private INavigationHandler mNavigationHandler;
 

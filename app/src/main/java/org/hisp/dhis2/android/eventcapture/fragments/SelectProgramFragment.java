@@ -45,7 +45,6 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +99,7 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_select_program_2, container, false);
+        return inflater.inflate(R.layout.fragment_select_program, container, false);
     }
 
     @Override
