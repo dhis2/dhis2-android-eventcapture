@@ -26,18 +26,50 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
-public enum DataEntryRowTypes {
-    PROGRAM_STAGE_SECTION,
-    TEXT,
-    LONG_TEXT,
-    NUMBER,
-    INTEGER,
-    INTEGER_NEGATIVE,
-    INTEGER_ZERO_OR_POSITIVE,
-    INTEGER_POSITIVE,
-    BOOLEAN,
-    GENDER,
-    TRUE_ONLY,
-    AUTO_COMPLETE,
-    DATE,
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import org.hisp.dhis2.android.eventcapture.R;
+
+public final class SectionRow implements DataEntryRow {
+    private String mLabel;
+
+    public SectionRow(String label) {
+        mLabel = label;
+    }
+
+    @Override
+    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
+        View view;
+        ViewHolder viewHolder;
+
+        if (convertView == null) {
+            view = inflater.inflate(R.layout.listview_row_section, container, false);
+            viewHolder = new ViewHolder(
+                    (TextView) view.findViewById(R.id.program_stage_section)
+            );
+            view.setTag(viewHolder);
+        } else {
+            view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
+        }
+
+        viewHolder.textView.setText(mLabel);
+        return view;
+    }
+
+    @Override
+    public int getViewType() {
+        return DataEntryRowTypes.PROGRAM_STAGE_SECTION.ordinal();
+    }
+
+    private static class ViewHolder {
+        public final TextView textView;
+
+        private ViewHolder(TextView textView) {
+            this.textView = textView;
+        }
+    }
 }
