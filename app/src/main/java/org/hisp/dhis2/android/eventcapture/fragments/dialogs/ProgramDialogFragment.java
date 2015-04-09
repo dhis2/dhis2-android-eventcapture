@@ -28,6 +28,7 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments.dialogs;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -179,7 +180,7 @@ public class ProgramDialogFragment extends DialogFragment
         }
 
         @Override
-        public List<Program> query() {
+        public List<Program> query(Context context) {
             return Dhis2.getInstance()
                     .getMetaDataController()
                     .getProgramsForOrganisationUnit(

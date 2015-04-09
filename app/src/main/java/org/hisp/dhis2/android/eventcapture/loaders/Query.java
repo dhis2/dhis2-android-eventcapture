@@ -29,6 +29,8 @@
 
 package org.hisp.dhis2.android.eventcapture.loaders;
 
+import android.content.Context;
+
 public interface Query<T> {
-    public abstract T query();
+    public abstract T query(Context context);
 }

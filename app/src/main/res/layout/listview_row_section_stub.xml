@@ -25,12 +25,9 @@
   ~ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/text_label"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="5dp"
-    android:textSize="16sp"
-    app:font="@string/condensed_font_name"/>
+    android:layout_height="16dp"
+    android:background="@color/transparent"/>

@@ -28,6 +28,7 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments.dialogs;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -172,7 +173,7 @@ public class OrgUnitDialogFragment extends DialogFragment
     static class OrgUnitQuery implements Query<List<OrganisationUnit>> {
 
         @Override
-        public List<OrganisationUnit> query() {
+        public List<OrganisationUnit> query(Context context) {
             List<OrganisationUnit> orgUnits = queryUnits();
             List<OrganisationUnit> filteredUnits = new ArrayList<>();
             for (OrganisationUnit orgUnit : orgUnits) {

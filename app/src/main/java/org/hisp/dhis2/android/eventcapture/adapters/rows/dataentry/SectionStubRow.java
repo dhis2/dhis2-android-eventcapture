@@ -26,19 +26,26 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
-public enum DataEntryRowTypes {
-    SECTION_STUB,
-    PROGRAM_STAGE_SECTION,
-    TEXT,
-    LONG_TEXT,
-    NUMBER,
-    INTEGER,
-    INTEGER_NEGATIVE,
-    INTEGER_ZERO_OR_POSITIVE,
-    INTEGER_POSITIVE,
-    BOOLEAN,
-    GENDER,
-    TRUE_ONLY,
-    AUTO_COMPLETE,
-    DATE,
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import org.hisp.dhis2.android.eventcapture.R;
+
+public final class SectionStubRow implements DataEntryRow {
+    @Override
+    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
+        View view;
+        if (convertView == null) {
+            view = inflater.inflate(R.layout.listview_row_section_stub, container, false);
+        } else {
+            view = convertView;
+        }
+        return view;
+    }
+
+    @Override
+    public int getViewType() {
+        return DataEntryRowTypes.SECTION_STUB.ordinal();
+    }
 }

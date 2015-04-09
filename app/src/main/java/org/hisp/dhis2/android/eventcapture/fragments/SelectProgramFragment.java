@@ -1,6 +1,7 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -238,7 +239,7 @@ public class SelectProgramFragment extends Fragment
         DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
                 mState.getOrgUnitId(), mState.getProgramId(), id
         );
-        mNavigationHandler.switchFragment(fragment2, DataEntryFragment4.TAG);
+        mNavigationHandler.switchFragment(fragment2, DataEntryFragment2.TAG);
     }
 
     private static class EventListQuery implements Query<List<EventRow>> {
@@ -251,7 +252,7 @@ public class SelectProgramFragment extends Fragment
         }
 
         @Override
-        public List<EventRow> query() {
+        public List<EventRow> query(Context context) {
             List<EventRow> eventEventRows = new ArrayList<>();
 
             // create a list of EventItems
@@ -390,7 +391,7 @@ public class SelectProgramFragment extends Fragment
                 break;
             }
             case R.id.register_new_event: {
-                DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
+                DataEntryFragment2 fragment2 = DataEntryFragment2.newInstance(
                         mState.getOrgUnitId(), mState.getProgramId()
                 );
                 mNavigationHandler.switchFragment(

@@ -86,7 +86,7 @@ public class DbLoader<T> extends AsyncTaskLoader<T> {
 
     @Override
     public T loadInBackground() {
-        return mQuery.query();
+        return mQuery.query(getContext());
     }
 
     @Override
