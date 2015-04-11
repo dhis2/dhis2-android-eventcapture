@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:padding="12dp"
         android:orientation="vertical"
-        android:layout_weight="0.87"
+        android:layout_weight="0.86"
         android:gravity="center_vertical">
 
         <include layout="@layout/listview_row_text_view_label"/>
@@ -62,7 +62,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="0.13"
+        android:layout_weight="0.14"
         android:orientation="horizontal">
 
         <View

@@ -50,6 +50,10 @@ public class AutoCompleteAdapter extends BaseAdapter implements Filterable {
 
     private LayoutInflater mInflater;
 
+    public AutoCompleteAdapter() {
+        mObjects = new ArrayList<>();
+    }
+
     public AutoCompleteAdapter(LayoutInflater inflater) {
         mInflater = inflater;
         mObjects = new ArrayList<>();
@@ -238,5 +242,9 @@ public class AutoCompleteAdapter extends BaseAdapter implements Filterable {
                 mObjects.clear();
             }
         }
+    }
+
+    public void setLayoutInflater(LayoutInflater inflater) {
+        mInflater = inflater;
     }
 }

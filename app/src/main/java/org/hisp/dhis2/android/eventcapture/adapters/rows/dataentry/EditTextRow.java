@@ -113,6 +113,8 @@ public class EditTextRow implements DataEntryRow {
 
             OnTextChangeListener listener = new OnTextChangeListener();
             holder = new ValueEntryHolder(label, editText, listener);
+            holder.editText.addTextChangedListener(listener);
+
             root.setTag(holder);
             view = root;
         } else {
@@ -120,7 +122,11 @@ public class EditTextRow implements DataEntryRow {
             holder = (ValueEntryHolder) view.getTag();
         }
 
-        holder.updateViews(mLabel, mValue);
+        holder.textLabel.setText(mLabel);
+        holder.listener.setBaseValue(mValue);
+
+        holder.editText.setText(mValue.getValue());
+        holder.editText.clearFocus();
         return view;
     }
 
@@ -141,14 +147,6 @@ public class EditTextRow implements DataEntryRow {
             this.editText = editText;
             this.listener = listener;
         }
-
-        public void updateViews(String label, BaseValue value) {
-            textLabel.setText(label);
-            listener.setBaseValue(value);
-
-            editText.setText(value.value);
-            editText.clearFocus();
-        }
     }
 
     private static class OnTextChangeListener implements TextWatcher {
@@ -160,11 +158,6 @@ public class EditTextRow implements DataEntryRow {
 
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            if (s != null) {
-                value.value = s.toString();
-            } else {
-                value.value = EMPTY_FIELD;
-            }
         }
 
         @Override
@@ -173,6 +166,11 @@ public class EditTextRow implements DataEntryRow {
 
         @Override
         public void afterTextChanged(Editable s) {
+            if (s != null) {
+                value.setValue(s.toString());
+            } else {
+                value.setValue(EMPTY_FIELD);
+            }
         }
     }
 

@@ -43,8 +43,8 @@ public class CheckBoxRow implements DataEntryRow {
     private static final String TRUE = "true";
     private static final String EMPTY_FIELD = "";
 
-    private String mLabel;
-    private BaseValue mBaseValue;
+    private final String mLabel;
+    private final BaseValue mBaseValue;
 
     public CheckBoxRow(String label, BaseValue baseValue) {
         mLabel = label;
@@ -64,6 +64,8 @@ public class CheckBoxRow implements DataEntryRow {
             CheckBoxListener listener = new CheckBoxListener();
             holder = new CheckBoxHolder(textLabel, checkBox, listener);
 
+            holder.checkBox.setOnCheckedChangeListener(holder.listener);
+
             root.setTag(holder);
             view = root;
         } else {
@@ -71,7 +73,16 @@ public class CheckBoxRow implements DataEntryRow {
             holder = (CheckBoxHolder) view.getTag();
         }
 
-        holder.updateViews(mLabel, mBaseValue);
+        holder.textLabel.setText(mLabel);
+        holder.listener.setValue(mBaseValue);
+
+        String stringValue = mBaseValue.getValue();
+        if (TRUE.equalsIgnoreCase(stringValue)) {
+            holder.checkBox.setChecked(true);
+        } else if (isEmpty(stringValue)) {
+            holder.checkBox.setChecked(false);
+        }
+
         return view;
     }
 
@@ -90,9 +101,9 @@ public class CheckBoxRow implements DataEntryRow {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if (isChecked) {
-                value.value = TRUE;
+                value.setValue(TRUE);
             } else {
-                value.value = EMPTY_FIELD;
+                value.setValue(EMPTY_FIELD);
             }
         }
     }
@@ -107,22 +118,6 @@ public class CheckBoxRow implements DataEntryRow {
             this.textLabel = textLabel;
             this.checkBox = checkBox;
             this.listener = listener;
-        }
-
-        public void updateViews(String valueLabel, BaseValue value) {
-            listener.setValue(value);
-            textLabel.setText(valueLabel);
-            checkBox.setOnCheckedChangeListener(listener);
-
-            String stringValue = value.value;
-            if (TRUE.equalsIgnoreCase(stringValue)) {
-                checkBox.setChecked(true);
-                return;
-            }
-
-            if (isEmpty(stringValue)) {
-                checkBox.setChecked(false);
-            }
         }
     }
 }

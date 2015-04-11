@@ -90,6 +90,10 @@ public class RadioButtonsRow implements DataEntryRow {
             holder = new BooleanRowHolder(mType, label, firstButton,
                     secondButton, thirdButton, listener);
 
+            holder.firstButton.setOnCheckedChangeListener(listener);
+            holder.secondButton.setOnCheckedChangeListener(listener);
+            holder.thirdButton.setOnCheckedChangeListener(listener);
+
             root.setTag(holder);
             view = root;
         } else {
@@ -131,11 +135,7 @@ public class RadioButtonsRow implements DataEntryRow {
             listener.setType(type);
             listener.setBaseValue(baseValue);
 
-            firstButton.setOnCheckedChangeListener(listener);
-            secondButton.setOnCheckedChangeListener(listener);
-            thirdButton.setOnCheckedChangeListener(listener);
-
-            String value = baseValue.value;
+            String value = baseValue.getValue();
             if (DataEntryRowTypes.BOOLEAN.equals(type)) {
                 if (TRUE.equalsIgnoreCase(value)) {
                     firstButton.setChecked(true);
@@ -179,15 +179,15 @@ public class RadioButtonsRow implements DataEntryRow {
             if (DataEntryRowTypes.BOOLEAN.equals(type)) {
                 switch (buttonView.getId()) {
                     case R.id.first_radio_button: {
-                        value.value = TRUE;
+                        value.setValue(TRUE);
                         break;
                     }
                     case R.id.second_radio_button: {
-                        value.value = FALSE;
+                        value.setValue(FALSE);
                         break;
                     }
                     case R.id.third_radio_button: {
-                        value.value = EMPTY_FIELD;
+                        value.setValue(EMPTY_FIELD);
                         break;
                     }
                 }
@@ -196,15 +196,15 @@ public class RadioButtonsRow implements DataEntryRow {
             if (DataEntryRowTypes.GENDER.equals(type)) {
                 switch (buttonView.getId()) {
                     case R.id.first_radio_button: {
-                        value.value = MALE;
+                        value.setValue(MALE);
                         break;
                     }
                     case R.id.second_radio_button: {
-                        value.value = FEMALE;
+                        value.setValue(FEMALE);
                         break;
                     }
                     case R.id.third_radio_button: {
-                        value.value = OTHER;
+                        value.setValue(OTHER);
                         break;
                     }
                 }
