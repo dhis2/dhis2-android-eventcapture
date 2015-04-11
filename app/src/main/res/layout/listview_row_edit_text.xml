@@ -29,29 +29,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="6dp"
-    android:paddingRight="6dp"
-    android:orientation="vertical">
+    android:padding="12dp"
+    android:baselineAligned="false"
+    android:orientation="vertical"
+    android:background="@color/white">
 
-    <LinearLayout
+    <include layout="@layout/listview_row_text_view_label"/>
+
+    <org.hisp.dhis2.android.sdk.utils.ui.views.FontEditText
+        android:id="@+id/edit_text_row"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="10dp"
-        android:orientation="vertical"
-        android:background="@color/white">
-
-        <include layout="@layout/listview_row_text_view_label"/>
-
-        <org.hisp.dhis2.android.sdk.utils.ui.views.FontEditText
-            android:id="@+id/edit_text_row"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="6dp"
-            android:textSize="16sp"
-            android:paddingTop="11dp"
-            android:paddingBottom="11dp"
-            app:font="@string/light_font_name"/>
-
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:textSize="16sp"
+        android:paddingTop="11dp"
+        android:paddingBottom="11dp"
+        app:font="@string/light_font_name"/>
 
 </LinearLayout>

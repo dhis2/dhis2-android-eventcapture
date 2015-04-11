@@ -241,9 +241,9 @@ public class DataEntryFragment2 extends Fragment
             String username = Dhis2.getUsername(context);
             for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
                 ProgramStageSection section = stage.getProgramStageSections().get(i);
-                if (i != 0) {
+                /* if (i != 0) {
                     rows.add(new SectionStubRow());
-                }
+                } */
                 rows.add(new SectionRow(section.getName()));
 
                 if (section.getProgramStageDataElements() == null) {

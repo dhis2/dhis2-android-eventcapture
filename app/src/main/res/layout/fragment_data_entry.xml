@@ -35,7 +35,6 @@
         android:id="@+id/datavalues_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="6dp"
         android:clipToPadding="false"
         android:scrollbarStyle="outsideOverlay"/>
 
