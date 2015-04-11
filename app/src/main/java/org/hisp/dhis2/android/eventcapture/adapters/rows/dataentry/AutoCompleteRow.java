@@ -51,8 +51,8 @@ public final class AutoCompleteRow implements DataEntryRow {
     private final BaseValue mValue;
     private final OptionSet mOptionSet;
     private final List<String> mOptions;
-    // private final Map<String, String> mCodeToNameMap;
     private AutoCompleteAdapter mAdapter;
+    //private final Map<String, String> mCodeToNameMap;
 
     public AutoCompleteRow(String label,
                            BaseValue value,
@@ -79,6 +79,7 @@ public final class AutoCompleteRow implements DataEntryRow {
         if (convertView == null) {
             OnFocusListener onFocusListener = new OnFocusListener();
             OnTextChangedListener onTextChangedListener = new OnTextChangedListener();
+            DropDownButtonListener dropButtonListener = new DropDownButtonListener();
 
             view = inflater.inflate(R.layout.listview_row_autocomplete, container, false);
             holder = new ViewHolder(
@@ -88,8 +89,11 @@ public final class AutoCompleteRow implements DataEntryRow {
                     onFocusListener, onTextChangedListener
             );
 
-            DropDownButtonListener dropButtonListener = new DropDownButtonListener();
+            onFocusListener.setAutoComplete(holder.autoCompleteTextView);
             dropButtonListener.setAutoComplete(holder.autoCompleteTextView);
+
+            holder.imageButton.setOnClickListener(dropButtonListener);
+            holder.autoCompleteTextView.addTextChangedListener(onTextChangedListener);
 
             view.setTag(holder);
         } else {
@@ -103,11 +107,15 @@ public final class AutoCompleteRow implements DataEntryRow {
         }
 
         holder.textView.setText(mLabel);
+        holder.onFocusListener.setOptions(mOptions);
+
         holder.onTextChangedListener.setBaseValue(mValue);
         holder.onTextChangedListener.setOptions(mOptions);
-        holder.onFocusListener.setAutoComplete(holder.autoCompleteTextView);
-        holder.onFocusListener.setOptions(mOptions);
-        holder.autoCompleteTextView.setText(mValue.value);
+
+        holder.autoCompleteTextView.setText(mValue.getValue());
+        holder.autoCompleteTextView.setAdapter(mAdapter);
+        holder.autoCompleteTextView.clearFocus();
+
         return view;
     }
 
@@ -120,7 +128,6 @@ public final class AutoCompleteRow implements DataEntryRow {
         public final TextView textView;
         public final AutoCompleteTextView autoCompleteTextView;
         public final ImageButton imageButton;
-
         public final OnFocusListener onFocusListener;
         public final OnTextChangedListener onTextChangedListener;
 
@@ -173,7 +180,7 @@ public final class AutoCompleteRow implements DataEntryRow {
             if (s != null) {
                 String name = s.toString();
                 if (options.contains(name)) {
-                    value.value = name;
+                    value.setValue(name);
                 }
             }
         }

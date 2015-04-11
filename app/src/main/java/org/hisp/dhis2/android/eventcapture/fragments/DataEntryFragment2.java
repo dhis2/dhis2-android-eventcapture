@@ -141,6 +141,7 @@ public class DataEntryFragment2 extends Fragment
         mAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
         mListView.setAdapter(mAdapter);
+        mListView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -152,6 +153,7 @@ public class DataEntryFragment2 extends Fragment
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
         mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -162,9 +164,10 @@ public class DataEntryFragment2 extends Fragment
     @Override
     public Loader<List<DataEntryRow>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
+            // Adding Tables for tracking here is dangerous (since MetaData updates in background
+            // can trigger reload of values from db which will reset all fields).
+            // Hence, it would be more safe not to track any changes in any tables
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
-            modelsToTrack.add(DataValue.class);
-
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new ProgramQuery(
@@ -181,6 +184,7 @@ public class DataEntryFragment2 extends Fragment
     public void onLoadFinished(Loader<List<DataEntryRow>> loader, List<DataEntryRow> data) {
         if (loader.getId() == LOADER_ID) {
             mProgressBar.setVisibility(View.GONE);
+            mListView.setVisibility(View.VISIBLE);
             mAdapter.swap(data);
         }
     }
