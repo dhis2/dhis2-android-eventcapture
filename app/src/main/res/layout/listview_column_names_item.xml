@@ -42,7 +42,7 @@
         android:textSize="16sp"
         android:textColor="@color/white"
         android:gravity="center"
-        app:font="@string/regular_font_name" />
+        app:font="@string/condensed_font_name" />
 
     <View
         android:layout_width="match_parent"
@@ -66,7 +66,7 @@
             android:ellipsize="end"
             android:minHeight="48dp"
             android:padding="2dp"
-            app:font="@string/regular_font_name" />
+            app:font="@string/condensed_font_name" />
 
         <View
             android:layout_width="1px"
@@ -85,7 +85,7 @@
             android:ellipsize="end"
             android:minHeight="48dp"
             android:padding="2dp"
-            app:font="@string/regular_font_name" />
+            app:font="@string/condensed_font_name" />
 
         <View
             android:layout_width="1px"
@@ -104,7 +104,7 @@
             android:ellipsize="end"
             android:minHeight="48dp"
             android:padding="2dp"
-            app:font="@string/regular_font_name" />
+            app:font="@string/condensed_font_name" />
 
         <View
             android:layout_width="1px"
@@ -124,7 +124,7 @@
             android:minHeight="48dp"
             android:padding="2dp"
             android:text="@string/status"
-            app:font="@string/regular_font_name" />
+            app:font="@string/condensed_font_name" />
 
     </LinearLayout>
 

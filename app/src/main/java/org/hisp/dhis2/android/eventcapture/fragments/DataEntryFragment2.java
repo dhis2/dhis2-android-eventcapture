@@ -37,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
@@ -52,7 +53,6 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DatePickerRow
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.SectionRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.SectionStubRow;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
@@ -84,6 +84,7 @@ public class DataEntryFragment2 extends Fragment
     private static final String EVENT_ID = "extra:EventId";
 
     private ListView mListView;
+    private ProgressBar mProgressBar;
     private DataValueAdapter mAdapter;
 
     private INavigationHandler mNavigationHandler;
@@ -134,6 +135,9 @@ public class DataEntryFragment2 extends Fragment
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        mProgressBar.setVisibility(View.GONE);
+
         mAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
         mListView.setAdapter(mAdapter);
@@ -147,6 +151,7 @@ public class DataEntryFragment2 extends Fragment
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
+        mProgressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -175,6 +180,7 @@ public class DataEntryFragment2 extends Fragment
     @Override
     public void onLoadFinished(Loader<List<DataEntryRow>> loader, List<DataEntryRow> data) {
         if (loader.getId() == LOADER_ID) {
+            mProgressBar.setVisibility(View.GONE);
             mAdapter.swap(data);
         }
     }
