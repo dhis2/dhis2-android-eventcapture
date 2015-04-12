@@ -56,6 +56,7 @@ import android.widget.Toast;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.SelectProgramFragment;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;

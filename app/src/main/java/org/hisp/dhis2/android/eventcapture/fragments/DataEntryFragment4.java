@@ -120,10 +120,10 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
     private EditText longitudeEditText;
     private ProgressBar progressBar;
 
-    private Event event;
     private long editingEvent = -1;
     private boolean editing;
 
+    //private Event event;
     private List<ProgramStageSection> programStageSections;
     private List<ProgramStageDataElement> programStageDataElements;
     private List<DataValue> dataValues;
@@ -135,7 +135,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
 
     private INavigationHandler mNavigationHandler;
 
-    @Override
+    /* @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
@@ -220,8 +220,9 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         setupUi(rootView);
         return rootView;
     }
+    */
 
-    public void setupUi(View rootView) {
+    /* public void setupUi(View rootView) {
         captureCoordinateButton = (Button) rootView.findViewById(R.id.dataentry_getcoordinatesbutton);
         latitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_latitudeedit);
         longitudeEditText = (EditText) rootView.findViewById(R.id.dataentry_longitudeedit);
@@ -238,8 +239,8 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
                 setupDataEntryForm(dataElementContainer);
             }
         }.start();
+    } */
 
-    }
 
     /**
      * returns true if the DataEntryFragment is currently editing an existing event. False if
@@ -247,16 +248,16 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
      *
      * @return
      */
-    public boolean isEditing() {
+    /* public boolean isEditing() {
         return editing;
-    }
+    } */
 
     /**
      * returns true if there have been made changes to an editing event.
      *
      * @return
      */
-    public boolean hasEdited() {
+    /* public boolean hasEdited() {
         if (originalDataValues == null || dataValues == null) {
             return false;
         }
@@ -266,7 +267,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
             }
         }
         return false;
-    }
+    } */
 
     public void setupDataEntryForm(final LinearLayout dataElementContainer) {
         selectedProgramStage = selectedProgram.getProgramStages().get(0); //since this is event capture, there will only be 1 stage.
@@ -280,7 +281,6 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
             }
         }
         if (editingEvent < 0) {
-
             editing = false;
             createNewEvent();
         } else {
@@ -406,7 +406,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         }
     }
 
-    public CardView createDataEntryCardView(Row row) {
+    /* public CardView createDataEntryCardView(Row row) {
         View view = row.getView(null);
         CardView dataEntryCardView = new CardView(context);
         Resources r = getActivity().getResources();
@@ -424,7 +424,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
             ((EditText) textView).addTextChangedListener(new InvalidateIndicatorTextWatcher());
         }
         return dataEntryCardView;
-    }
+    } */
 
     /**
      * Re-calculates indicator values if any and updates ui
@@ -508,7 +508,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         captureCoordinateButton.setVisibility(View.VISIBLE);
     }
 
-    public Row createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
+    /* public Row createDataEntryView(ProgramStageDataElement programStageDataElement, DataValue dataValue) {
         DataElement dataElement = MetaDataController.getDataElement(programStageDataElement.dataElement);
         Row row;
         if (dataElement.getOptionSet() != null) {
@@ -546,7 +546,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         }
 
         return row;
-    }
+    } */
 
     /**
      * saves the current data values as a registered event.
@@ -584,7 +584,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         }
     }
 
-    @Override
+    /* @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_data_entry, menu);
         MenuItem item = menu.findItem(R.id.action_new_event);
@@ -603,7 +603,7 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    } */
 
     private static Map<String, ProgramStageDataElement> toMap(List<ProgramStageDataElement> elements) {
         Map<String, ProgramStageDataElement> map = new HashMap<>();
@@ -689,9 +689,11 @@ public class DataEntryFragment4 extends Fragment implements OnBackPressedListene
         }
     }
 
+    /*
     @Override
     public void onDestroy() {
         super.onDestroy();
         Dhis2.disableGps();
     }
+    */
 }

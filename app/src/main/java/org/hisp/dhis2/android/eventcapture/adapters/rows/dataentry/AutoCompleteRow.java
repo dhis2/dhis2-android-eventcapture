@@ -112,11 +112,14 @@ public final class AutoCompleteRow implements DataEntryRow {
         holder.onTextChangedListener.setBaseValue(mValue);
         holder.onTextChangedListener.setOptions(mNameToCodeMap);
 
+        String name;
         if (mCodeToNameMap.containsKey(mValue.getValue())) {
-            String name = mCodeToNameMap.get(mValue.getValue());
-            holder.autoCompleteTextView.setText(name);
+            name = mCodeToNameMap.get(mValue.getValue());
+        } else {
+            name = EMPTY_FIELD;
         }
 
+        holder.autoCompleteTextView.setText(name);
         holder.autoCompleteTextView.setAdapter(mAdapter);
         holder.autoCompleteTextView.clearFocus();
 

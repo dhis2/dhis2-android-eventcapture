@@ -27,52 +27,28 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.AutoCompleteRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.CheckBoxRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DatePickerRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.EditTextRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.RadioButtonsRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.SectionRow;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
-import org.hisp.dhis2.android.eventcapture.loaders.Query;
-import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
-import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
-import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
-import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class DataEntryFragment2 extends Fragment
-        implements LoaderManager.LoaderCallbacks<List<DataEntryRow>> {
+        implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form> {
     public static final String TAG = DataEntryFragment2.class.getSimpleName();
     private static final int LOADER_ID = 1;
 
@@ -162,7 +138,7 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
-    public Loader<List<DataEntryRow>> onCreateLoader(int id, Bundle args) {
+    public Loader<DataEntryFragment2Form> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             // Adding Tables for tracking here is dangerous (since MetaData updates in background
             // can trigger reload of values from db which will reset all fields).
@@ -170,7 +146,7 @@ public class DataEntryFragment2 extends Fragment
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new ProgramQuery(
+                    getActivity().getBaseContext(), modelsToTrack, new DataEntryFragment2Query(
                     fragmentArguments.getString(ORG_UNIT_ID),
                     fragmentArguments.getString(PROGRAM_ID),
                     -1
@@ -181,127 +157,18 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
-    public void onLoadFinished(Loader<List<DataEntryRow>> loader, List<DataEntryRow> data) {
+    public void onLoadFinished(Loader<DataEntryFragment2Form> loader, DataEntryFragment2Form data) {
         if (loader.getId() == LOADER_ID) {
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
-            mAdapter.swap(data);
+            mAdapter.swap(data.getRows());
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<List<DataEntryRow>> loader) {
+    public void onLoaderReset(Loader<DataEntryFragment2Form> loader) {
         if (loader.getId() == LOADER_ID) {
             mAdapter.swap(null);
-        }
-    }
-
-    /*
-    static class ProgramHolder {
-        public final List<ProgramStageSection> programStageSections;
-        public final List<ProgramStageDataElement> programStageDataElements;
-
-        private ProgramHolder(List<ProgramStageSection> programStageSections,
-                              List<ProgramStageDataElement> programStageDataElements) {
-            this.programStageSections = programStageSections;
-            this.programStageDataElements = programStageDataElements;
-        }
-    }
-    */
-
-    static class ProgramQuery implements Query<List<DataEntryRow>> {
-        private static final String EMPTY_FIELD = "";
-        private final String orgUnitId;
-        private final String programId;
-        private final long eventId;
-
-        ProgramQuery(String orgUnitId, String programId, long eventId) {
-            this.orgUnitId = orgUnitId;
-            this.programId = programId;
-            this.eventId = eventId;
-        }
-
-        @Override
-        public List<DataEntryRow> query(Context context) {
-            Program program = Select.byId(
-                    Program.class, programId
-            );
-
-            List<DataEntryRow> rows = new ArrayList<>();
-            ProgramStage stage = program.getProgramStages().get(0);
-            if (stage == null || stage.getProgramStageSections() == null) {
-                return rows;
-            }
-
-            List<DataValue> dataValues = new ArrayList<>();
-            Event event = new Event();
-            if (eventId < 0) {
-                event.event = Dhis2.QUEUED + UUID.randomUUID().toString();
-                event.fromServer = false;
-                event.dueDate = Utils.getCurrentDate();
-                event.eventDate = Utils.getCurrentDate();
-                event.organisationUnitId = orgUnitId;
-                event.programId = programId;
-                event.programStageId = stage.id;
-                event.status = Event.STATUS_COMPLETED;
-                event.lastUpdated = Utils.getCurrentTime();
-                event.dataValues = dataValues;
-            }
-
-            String username = Dhis2.getUsername(context);
-            for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
-                ProgramStageSection section = stage.getProgramStageSections().get(i);
-                rows.add(new SectionRow(section.getName()));
-
-                if (section.getProgramStageDataElements() == null) {
-                    continue;
-                }
-                for (int j = 0; j < 2; j++)
-                    for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
-                        DataValue dataValue = new DataValue(event.event, EMPTY_FIELD,
-                                stageDataElement.dataElement, false, username);
-                        dataValues.add(dataValue);
-
-                        DataElement dataElement = MetaDataController.getDataElement(stageDataElement.dataElement);
-                        DataEntryRow row;
-                        if (dataElement.getOptionSet() != null) {
-                            OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
-                            if (optionSet == null) {
-                                row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.TEXT);
-                            } else {
-                                row = new AutoCompleteRow(dataElement.name, dataValue, optionSet);
-                            }
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.TEXT);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.NUMBER);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER_ZERO_OR_POSITIVE);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER_POSITIVE);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER_NEGATIVE);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
-                            row = new RadioButtonsRow(dataElement.name, dataValue, DataEntryRowTypes.BOOLEAN);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
-                            row = new CheckBoxRow(dataElement.name, dataValue);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
-                            row = new DatePickerRow(dataElement.name, dataValue);
-                        } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
-                        } else {
-                            Log.d(TAG, "type is: " + dataElement.getType());
-                            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
-                        }
-
-                        rows.add(row);
-                    }
-            }
-            return rows;
         }
     }
 }
