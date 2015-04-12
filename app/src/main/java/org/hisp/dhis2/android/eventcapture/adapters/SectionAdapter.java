@@ -30,27 +30,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import org.hisp.dhis2.android.eventcapture.fragments.DataEntryFragment2Section;
+
 import java.util.List;
 
 import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 
 public final class SectionAdapter extends BaseAdapter {
     private final String mLabel;
-    private final List<DataValueAdapter> mAdapters;
+    private final List<DataEntryFragment2Section> mSections;
 
-    public SectionAdapter(String label, List<DataValueAdapter> adapters) {
+    public SectionAdapter(String label, List<DataEntryFragment2Section> sections) {
         mLabel = isNull(label, "String Label object must not be null");
-        mAdapters = isNull(adapters, "List<DataValueAdapter> object must not be null");
+        mSections = isNull(sections, "List<DataValueAdapter> object must not be null");
     }
 
     @Override
     public int getCount() {
-        return mAdapters.size();
+        return mSections.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mAdapters.get(position);
+        return mSections.get(position);
     }
 
     @Override

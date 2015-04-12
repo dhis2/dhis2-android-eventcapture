@@ -37,7 +37,6 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowT
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.EditTextRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.RadioButtonsRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.SectionRow;
 import org.hisp.dhis2.android.eventcapture.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
@@ -60,6 +59,8 @@ import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController
 
 class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
     private static final String EMPTY_FIELD = "";
+    private static final String DEFAULT_SECTION = "defaultSection";
+
     private final String orgUnitId;
     private final String programId;
     private final long eventId;
@@ -87,34 +88,37 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
                 orgUnitId, programId, eventId, stage, username
         );
 
-        List<DataEntryRow> rows = new ArrayList<>();
+        List<DataEntryFragment2Section> sections = new ArrayList<>();
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
+            List<DataEntryRow> rows = new ArrayList<>();
             for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
                 rows.add(createRow(
                                 getDataElement(stageDataElement.dataElement),
                                 getDataValue(stageDataElement.dataElement, event, username))
                 );
             }
+            sections.add(new DataEntryFragment2Section(DEFAULT_SECTION, rows));
         } else {
             for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
                 ProgramStageSection section = stage.getProgramStageSections().get(i);
-                rows.add(new SectionRow(section.getName()));
 
                 if (section.getProgramStageDataElements() == null) {
                     continue;
                 }
 
+                List<DataEntryRow> rows = new ArrayList<>();
                 for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
                     rows.add(createRow(
                                     getDataElement(stageDataElement.dataElement),
                                     getDataValue(stageDataElement.dataElement, event, username))
                     );
                 }
+                sections.add(new DataEntryFragment2Section(section.getName(), rows));
             }
         }
 
         form.setEvent(event);
-        form.setRows(rows);
+        form.setSections(sections);
 
         return form;
     }

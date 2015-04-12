@@ -26,14 +26,13 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments;
 
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 
 import java.util.List;
 
 class DataEntryFragment2Form {
     private Event event;
-    private List<DataEntryRow> rows;
+    private List<DataEntryFragment2Section> sections;
 
     public Event getEvent() {
         return event;
@@ -43,11 +42,11 @@ class DataEntryFragment2Form {
         this.event = event;
     }
 
-    public List<DataEntryRow> getRows() {
-        return rows;
+    public List<DataEntryFragment2Section> getSections() {
+        return sections;
     }
 
-    public void setRows(List<DataEntryRow> rows) {
-        this.rows = rows;
+    public void setSections(List<DataEntryFragment2Section> sections) {
+        this.sections = sections;
     }
 }
