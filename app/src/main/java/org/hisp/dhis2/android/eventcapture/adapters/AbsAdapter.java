@@ -27,44 +27,57 @@
 package org.hisp.dhis2.android.eventcapture.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.BaseAdapter;
 
-import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.fragments.DataEntryFragment2Section;
+import java.util.List;
 
-public final class SectionAdapter extends AbsAdapter<DataEntryFragment2Section> {
-    private static final String DROPDOWN = "dropDown";
-    private static final String NON_DROPDOWN = "nonDropDown";
+import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 
-    public SectionAdapter(LayoutInflater inflater) {
-        super(inflater);
+public abstract class AbsAdapter<T> extends BaseAdapter {
+    private final LayoutInflater mInflater;
+    private List<T> mData;
+
+    public AbsAdapter(LayoutInflater inflater) {
+        mInflater = isNull(inflater, "LayoutInflater must not be null");
     }
 
     @Override
-    public View getDropDownView(int position, View view, ViewGroup parent) {
-        if (view == null || !view.getTag().toString().equals(DROPDOWN)) {
-            view = getInflater().inflate(R.layout.toolbar_spinner_item_dropdown, parent, false);
-            view.setTag(DROPDOWN);
+    public final int getCount() {
+        if (mData != null) {
+            return mData.size();
+        } else {
+            return 0;
         }
-
-        TextView textView = (TextView) view.findViewById(android.R.id.text1);
-        textView.setText(getData().get(position).getLabel());
-
-        return view;
     }
 
     @Override
-    public View getView(int position, View view, ViewGroup parent) {
-        if (view == null || !view.getTag().toString().equals(NON_DROPDOWN)) {
-            view = getInflater().inflate(R.layout.
-                    toolbar_spinner_item_actionbar, parent, false);
-            view.setTag(NON_DROPDOWN);
+    public final Object getItem(int position) {
+        if (mData != null) {
+            return mData.get(position);
+        } else {
+            return null;
         }
+    }
 
-        TextView textView = (TextView) view.findViewById(android.R.id.text1);
-        textView.setText(getData().get(position).getLabel());
-        return view;
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    protected LayoutInflater getInflater() {
+        return mInflater;
+    }
+
+    protected List<T> getData() {
+        return mData;
+    }
+
+    public void swapData(List<T> data) {
+        boolean notifyAdapter = mData != data;
+        mData = data;
+
+        if (notifyAdapter) {
+            notifyDataSetChanged();
+        }
     }
 }

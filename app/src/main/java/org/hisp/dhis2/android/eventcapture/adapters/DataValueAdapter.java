@@ -29,51 +29,21 @@ package org.hisp.dhis2.android.eventcapture.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis2.android.eventcapture.views.PinnedSectionListView.PinnedSectionListAdapter;
 
-import java.util.List;
-
-import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
-
-public final class DataValueAdapter extends BaseAdapter implements PinnedSectionListAdapter {
-    private List<DataEntryRow> mRows;
-    private LayoutInflater mInflater;
+public final class DataValueAdapter extends AbsAdapter<DataEntryRow> implements PinnedSectionListAdapter {
 
     public DataValueAdapter(LayoutInflater inflater) {
-        mInflater = isNull(inflater, "LayoutInflater object must not be null");
-    }
-
-    @Override
-    public int getCount() {
-        if (mRows != null) {
-            return mRows.size();
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public Object getItem(int position) {
-        if (mRows != null) {
-            return mRows.get(position);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
+        super(inflater);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (mRows != null) {
-            return mRows.get(position).getView(mInflater, convertView, parent);
+        if (getData() != null) {
+            return getData().get(position).getView(getInflater(), convertView, parent);
         } else {
             return null;
         }
@@ -86,8 +56,8 @@ public final class DataValueAdapter extends BaseAdapter implements PinnedSection
 
     @Override
     public int getItemViewType(int position) {
-        if (mRows != null) {
-            return mRows.get(position).getViewType();
+        if (getData() != null) {
+            return getData().get(position).getViewType();
         } else {
             return 0;
         }
@@ -96,14 +66,5 @@ public final class DataValueAdapter extends BaseAdapter implements PinnedSection
     @Override
     public boolean isItemViewTypePinned(int viewType) {
         return DataEntryRowTypes.PROGRAM_STAGE_SECTION.ordinal() == viewType;
-    }
-
-    public void swap(List<DataEntryRow> rows) {
-        boolean notifyChanged = mRows != rows;
-        mRows = rows;
-
-        if (notifyChanged) {
-            notifyDataSetChanged();
-        }
     }
 }

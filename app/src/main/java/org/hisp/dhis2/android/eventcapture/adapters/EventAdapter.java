@@ -32,43 +32,20 @@ package org.hisp.dhis2.android.eventcapture.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRowType;
 
-import java.util.List;
-
-public class EventAdapter extends BaseAdapter {
-    private final LayoutInflater mInflater;
-    private List<EventRow> mEventRows;
+public class EventAdapter extends AbsAdapter<EventRow> {
 
     public EventAdapter(LayoutInflater inflater) {
-        this.mInflater = inflater;
-    }
-
-    @Override
-    public int getCount() {
-        if (mEventRows != null) {
-            return mEventRows.size();
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public Object getItem(int position) {
-        if (mEventRows != null) {
-            return mEventRows.get(position);
-        } else {
-            return null;
-        }
+        super(inflater);
     }
 
     @Override
     public long getItemId(int position) {
-        if (mEventRows != null) {
-            return mEventRows.get(position).getId();
+        if (getData() != null) {
+            return getData().get(position).getId();
         } else {
             return -1;
         }
@@ -76,8 +53,8 @@ public class EventAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        if (mEventRows != null) {
-            return mEventRows.get(position).getView(mInflater, convertView, parent);
+        if (getData() != null) {
+            return getData().get(position).getView(getInflater(), convertView, parent);
         } else {
             return null;
         }
@@ -90,11 +67,7 @@ public class EventAdapter extends BaseAdapter {
 
     @Override
     public boolean isEnabled(int position) {
-        if (mEventRows != null) {
-            return mEventRows.get(position).isEnabled();
-        } else {
-            return false;
-        }
+        return getData() != null && getData().get(position).isEnabled();
     }
 
     @Override
@@ -104,19 +77,10 @@ public class EventAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if (mEventRows != null) {
-            return mEventRows.get(position).getViewType();
+        if (getData() != null) {
+            return getData().get(position).getViewType();
         } else {
             return 0;
-        }
-    }
-
-    public void swapData(List<EventRow> eventRows) {
-        boolean notifyAdapter = mEventRows != eventRows;
-        mEventRows = eventRows;
-
-        if (notifyAdapter) {
-            notifyDataSetChanged();
         }
     }
 }

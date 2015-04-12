@@ -31,25 +31,30 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
+import org.hisp.dhis2.android.eventcapture.MainActivity;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
+import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataEntryFragment2 extends Fragment
-        implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form> {
+        implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form>, AdapterView.OnItemSelectedListener {
     public static final String TAG = DataEntryFragment2.class.getSimpleName();
     private static final int LOADER_ID = 1;
 
@@ -62,7 +67,11 @@ public class DataEntryFragment2 extends Fragment
 
     private ListView mListView;
     private ProgressBar mProgressBar;
-    private DataValueAdapter mAdapter;
+
+    private View mSpinnerContainer;
+    private Spinner mSpinner;
+    private SectionAdapter mSpinnerAdapter;
+    private DataValueAdapter mListViewAdapter;
 
     private INavigationHandler mNavigationHandler;
 
@@ -70,9 +79,6 @@ public class DataEntryFragment2 extends Fragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof ActionBarActivity) {
-            ((ActionBarActivity) activity).getSupportActionBar().hide();
-        }
         if (activity instanceof INavigationHandler) {
             mNavigationHandler = (INavigationHandler) activity;
         } else {
@@ -84,11 +90,6 @@ public class DataEntryFragment2 extends Fragment
     public void onDetach() {
         // we need to nullify reference
         // to parent activity in order not to leak it
-        if (getActivity() != null && getActivity()
-                instanceof ActionBarActivity) {
-            ((ActionBarActivity) getActivity()).getSupportActionBar().show();
-        }
-
         mNavigationHandler = null;
         super.onDetach();
     }
@@ -123,10 +124,16 @@ public class DataEntryFragment2 extends Fragment
         mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.GONE);
 
-        mAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
+        mListViewAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
-        mListView.setAdapter(mAdapter);
         mListView.setVisibility(View.VISIBLE);
+        mListView.setAdapter(mListViewAdapter);
+    }
+
+    @Override
+    public void onDestroyView() {
+        detachSpinner();
+        super.onDestroyView();
     }
 
     @Override
@@ -167,17 +174,92 @@ public class DataEntryFragment2 extends Fragment
 
     @Override
     public void onLoadFinished(Loader<DataEntryFragment2Form> loader, DataEntryFragment2Form data) {
-        if (loader.getId() == LOADER_ID) {
+        if (loader.getId() == LOADER_ID && isAdded()) {
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
-            mAdapter.swap(data.getRows());
+
+            if (!data.getSections().isEmpty()) {
+                if (data.getSections().size() > 1) {
+                    attachSpinner();
+                    mSpinnerAdapter.swapData(data.getSections());
+                } else {
+                    DataEntryFragment2Section section = data.getSections().get(0);
+                    mListViewAdapter.swapData(section.getRows());
+                }
+            }
         }
     }
 
     @Override
     public void onLoaderReset(Loader<DataEntryFragment2Form> loader) {
         if (loader.getId() == LOADER_ID) {
-            mAdapter.swap(null);
+            if (mSpinnerAdapter != null) {
+                mSpinnerAdapter.swapData(null);
+            }
+            if (mListViewAdapter != null) {
+                mListViewAdapter.swapData(null);
+            }
         }
+    }
+
+    private Toolbar getActionBarToolbar() {
+        if (isAdded() && getActivity() != null &&
+                getActivity() instanceof MainActivity) {
+            return (Toolbar) getActivity().findViewById(R.id.toolbar);
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to MainActivity");
+        }
+    }
+
+    private void attachSpinner() {
+        if (!isSpinnerAttached()) {
+            Toolbar toolbar = getActionBarToolbar();
+
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            mSpinnerContainer = inflater.inflate(
+                    R.layout.toolbar_spinner, toolbar, false);
+            ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            toolbar.addView(mSpinnerContainer, lp);
+
+            mSpinnerAdapter = new SectionAdapter(inflater);
+
+            mSpinner = (Spinner) mSpinnerContainer.findViewById(R.id.toolbar_spinner);
+            mSpinner.setAdapter(mSpinnerAdapter);
+            mSpinner.setOnItemSelectedListener(this);
+        }
+    }
+
+    private void detachSpinner() {
+        if (isSpinnerAttached()) {
+            if (mSpinnerContainer != null) {
+                ((ViewGroup) mSpinnerContainer.getParent()).removeView(mSpinnerContainer);
+                mSpinnerContainer = null;
+                mSpinner = null;
+                if (mSpinnerAdapter != null) {
+                    mSpinnerAdapter.swapData(null);
+                    mSpinnerAdapter = null;
+                }
+            }
+        }
+    }
+
+    private boolean isSpinnerAttached() {
+        return mSpinnerContainer != null;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        DataEntryFragment2Section section = (DataEntryFragment2Section)
+                mSpinnerAdapter.getItem(position);
+
+        if (section != null) {
+            mListViewAdapter.swapData(section.getRows());
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // stub implementation
     }
 }
