@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +70,9 @@ public class DataEntryFragment2 extends Fragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
+        if (activity instanceof ActionBarActivity) {
+            ((ActionBarActivity) activity).getSupportActionBar().hide();
+        }
         if (activity instanceof INavigationHandler) {
             mNavigationHandler = (INavigationHandler) activity;
         } else {
@@ -80,6 +84,11 @@ public class DataEntryFragment2 extends Fragment
     public void onDetach() {
         // we need to nullify reference
         // to parent activity in order not to leak it
+        if (getActivity() != null && getActivity()
+                instanceof ActionBarActivity) {
+            ((ActionBarActivity) getActivity()).getSupportActionBar().show();
+        }
+
         mNavigationHandler = null;
         super.onDetach();
     }
@@ -147,9 +156,9 @@ public class DataEntryFragment2 extends Fragment
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack, new DataEntryFragment2Query(
-                    fragmentArguments.getString(ORG_UNIT_ID),
-                    fragmentArguments.getString(PROGRAM_ID),
-                    -1
+                    fragmentArguments.getString(ORG_UNIT_ID, null),
+                    fragmentArguments.getString(PROGRAM_ID, null),
+                    fragmentArguments.getLong(EVENT_ID, -1)
             )
             );
         }

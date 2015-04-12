@@ -28,7 +28,6 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventItemRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventItemStatus;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
 import org.hisp.dhis2.android.eventcapture.fragments.DataEntryFragment2;
-import org.hisp.dhis2.android.eventcapture.fragments.DataEntryFragment4;
 import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.dialogs.ProgramDialogFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
@@ -238,7 +237,7 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
+        DataEntryFragment2 fragment2 = DataEntryFragment2.newInstance(
                 mState.getOrgUnitId(), mState.getProgramId(), id
         );
         mNavigationHandler.switchFragment(fragment2, DataEntryFragment2.TAG);
@@ -397,7 +396,7 @@ public class SelectProgramFragment extends Fragment
                         mState.getOrgUnitId(), mState.getProgramId()
                 );
                 mNavigationHandler.switchFragment(
-                        fragment2, DataEntryFragment4.TAG
+                        fragment2, DataEntryFragment2.TAG
                 );
                 break;
             }

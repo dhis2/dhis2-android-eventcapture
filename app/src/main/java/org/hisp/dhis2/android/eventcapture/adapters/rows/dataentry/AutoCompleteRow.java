@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.text.TextUtils.isEmpty;
+
 public final class AutoCompleteRow implements DataEntryRow {
     private static final String EMPTY_FIELD = "";
 
@@ -184,11 +186,15 @@ public final class AutoCompleteRow implements DataEntryRow {
 
         @Override
         public void afterTextChanged(Editable s) {
+            String name;
             if (s != null) {
-                String name = s.toString();
-                if (nameToCodeMap.containsKey(name)) {
-                    value.setValue(nameToCodeMap.get(name));
-                }
+                name = s.toString();
+            } else {
+                name = EMPTY_FIELD;
+            }
+
+            if (isEmpty(name) || nameToCodeMap.containsKey(name)) {
+                value.setValue(nameToCodeMap.get(name));
             }
         }
     }

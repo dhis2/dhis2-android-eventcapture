@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController.getDataElement;
+
 class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
     private static final String EMPTY_FIELD = "";
     private final String orgUnitId;
@@ -80,26 +82,34 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
             return form;
         }
 
-        List<DataValue> dataValues = new ArrayList<>();
-        List<DataEntryRow> rows = new ArrayList<>();
-        Event event = createEvent(orgUnitId, programId, stage.getId(), eventId);
-
         String username = Dhis2.getUsername(context);
-        for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
-            ProgramStageSection section = stage.getProgramStageSections().get(i);
-            rows.add(new SectionRow(section.getName()));
+        Event event = getEvent(
+                orgUnitId, programId, eventId, stage, username
+        );
 
-            if (section.getProgramStageDataElements() == null) {
-                continue;
+        List<DataEntryRow> rows = new ArrayList<>();
+        if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
+            for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
+                rows.add(createRow(
+                                getDataElement(stageDataElement.dataElement),
+                                getDataValue(stageDataElement.dataElement, event, username))
+                );
             }
+        } else {
+            for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
+                ProgramStageSection section = stage.getProgramStageSections().get(i);
+                rows.add(new SectionRow(section.getName()));
 
-            for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
-                DataValue dataValue = new DataValue(event.event, EMPTY_FIELD,
-                        stageDataElement.dataElement, false, username);
-                dataValues.add(dataValue);
+                if (section.getProgramStageDataElements() == null) {
+                    continue;
+                }
 
-                DataElement dataElement = MetaDataController.getDataElement(stageDataElement.dataElement);
-                rows.add(createRow(dataElement, dataValue));
+                for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
+                    rows.add(createRow(
+                                    getDataElement(stageDataElement.dataElement),
+                                    getDataValue(stageDataElement.dataElement, event, username))
+                    );
+                }
             }
         }
 
@@ -109,8 +119,8 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
         return form;
     }
 
-    private static Event createEvent(String orgUnitId, String programId,
-                                     String programStageId, long eventId) {
+    private Event getEvent(String orgUnitId, String programId, long eventId,
+                           ProgramStage programStage, String username) {
         Event event;
         if (eventId < 0) {
             event = new Event();
@@ -120,10 +130,17 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
             event.setEventDate(Utils.getCurrentDate());
             event.setOrganisationUnitId(orgUnitId);
             event.setProgramId(programId);
-            event.setProgramStageId(programStageId);
+            event.setProgramStageId(programStage.getId());
             event.setStatus(Event.STATUS_COMPLETED);
             event.setLastUpdated(Utils.getCurrentTime());
-            // event.dataValues = dataValues;
+
+            List<DataValue> dataValues = new ArrayList<>();
+            for (ProgramStageDataElement dataElement : programStage.getProgramStageDataElements()) {
+                dataValues.add(
+                        new DataValue(event.event, EMPTY_FIELD, dataElement.dataElement, false, username)
+                );
+            }
+            event.setDataValues(dataValues);
         } else {
             event = DataValueController.getEvent(eventId);
         }
@@ -166,5 +183,22 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
             row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
         }
         return row;
+    }
+
+    // private static Map<String, DataValue> toMap(List<>)
+    public static DataValue getDataValue(String dataElement, Event event,
+                                         String username) {
+        for (DataValue dataValue : event.getDataValues()) {
+            if (dataValue.getDataElement().equals(dataElement)) {
+                return dataValue;
+            }
+        }
+
+        // The DataValue didn't exist for some reason. Create a new one.
+        DataValue dataValue = new DataValue(
+                event.getEvent(), EMPTY_FIELD, dataElement, false, username
+        );
+        event.getDataValues().add(dataValue);
+        return dataValue;
     }
 }

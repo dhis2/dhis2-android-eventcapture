@@ -31,7 +31,7 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:orientation="vertical"
-    android:background="@color/dark_navy_blue">
+    android:background="@color/navy_blue">
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
         android:id="@+id/program_stage_section"
