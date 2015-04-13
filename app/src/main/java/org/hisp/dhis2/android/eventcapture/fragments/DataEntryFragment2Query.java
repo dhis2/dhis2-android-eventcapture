@@ -189,7 +189,6 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
         return row;
     }
 
-    // private static Map<String, DataValue> toMap(List<>)
     public static DataValue getDataValue(String dataElement, Event event,
                                          String username) {
         for (DataValue dataValue : event.getDataValues()) {

@@ -32,8 +32,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -45,6 +47,7 @@ import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.MainActivity;
+import org.hisp.dhis2.android.eventcapture.OnBackPressedListener;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
@@ -54,7 +57,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataEntryFragment2 extends Fragment
-        implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form>, AdapterView.OnItemSelectedListener {
+        implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form>,
+        OnBackPressedListener, AdapterView.OnItemSelectedListener {
     public static final String TAG = DataEntryFragment2.class.getSimpleName();
     private static final int LOADER_ID = 1;
 
@@ -75,25 +79,6 @@ public class DataEntryFragment2 extends Fragment
 
     private INavigationHandler mNavigationHandler;
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof INavigationHandler) {
-            mNavigationHandler = (INavigationHandler) activity;
-        } else {
-            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        // we need to nullify reference
-        // to parent activity in order not to leak it
-        mNavigationHandler = null;
-        super.onDetach();
-    }
-
     public static DataEntryFragment2 newInstance(String unitId, String programId) {
         DataEntryFragment2 fragment = new DataEntryFragment2();
         Bundle args = new Bundle();
@@ -112,6 +97,53 @@ public class DataEntryFragment2 extends Fragment
         args.putLong(EVENT_ID, eventId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof ActionBarActivity) {
+            getActionBar().setHomeButtonEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        if (activity instanceof MainActivity) {
+            ((MainActivity) activity).setBackPressedListener(this);
+        }
+
+        if (activity instanceof INavigationHandler) {
+            mNavigationHandler = (INavigationHandler) activity;
+        } else {
+            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        if (getActivity() != null &&
+                getActivity() instanceof ActionBarActivity) {
+            getActionBar().setHomeButtonEnabled(false);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setDisplayShowTitleEnabled(true);
+        }
+
+        // we need to nullify reference
+        // to parent activity in order not to leak it
+        if (getActivity() != null &&
+                getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setBackPressedListener(null);
+        }
+
+        mNavigationHandler = null;
+        super.onDetach();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -137,6 +169,16 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            doBack();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
@@ -144,6 +186,7 @@ public class DataEntryFragment2 extends Fragment
         argumentsBundle.putBundle(EXTRA_ARGUMENTS, getArguments());
         argumentsBundle.putBundle(EXTRA_SAVED_INSTANCE_STATE, savedInstanceState);
         getLoaderManager().initLoader(LOADER_ID, argumentsBundle, this);
+
         mProgressBar.setVisibility(View.VISIBLE);
         mListView.setVisibility(View.GONE);
     }
@@ -202,6 +245,35 @@ public class DataEntryFragment2 extends Fragment
         }
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        DataEntryFragment2Section section = (DataEntryFragment2Section)
+                mSpinnerAdapter.getItem(position);
+
+        if (section != null) {
+            mListViewAdapter.swapData(section.getRows());
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // stub implementation
+    }
+
+    @Override
+    public void doBack() {
+        getFragmentManager().popBackStack();
+    }
+
+    private ActionBar getActionBar() {
+        if (getActivity() != null &&
+                getActivity() instanceof ActionBarActivity) {
+            return ((ActionBarActivity) getActivity()).getSupportActionBar();
+        } else {
+            throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
+        }
+    }
+
     private Toolbar getActionBarToolbar() {
         if (isAdded() && getActivity() != null &&
                 getActivity() instanceof MainActivity) {
@@ -246,20 +318,5 @@ public class DataEntryFragment2 extends Fragment
 
     private boolean isSpinnerAttached() {
         return mSpinnerContainer != null;
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        DataEntryFragment2Section section = (DataEntryFragment2Section)
-                mSpinnerAdapter.getItem(position);
-
-        if (section != null) {
-            mListViewAdapter.swapData(section.getRows());
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-        // stub implementation
     }
 }

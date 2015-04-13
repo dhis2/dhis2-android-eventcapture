@@ -7,4 +7,5 @@ import android.support.v4.app.Fragment;
  */
 public interface INavigationHandler {
     public void switchFragment(Fragment fragment, String tag);
+    public void onBackPressed();
 }
