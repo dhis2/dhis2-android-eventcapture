@@ -45,7 +45,6 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -236,10 +235,10 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
+        /* DataEntryFragment fragment2 = DataEntryFragment.newInstance(
                 mState.getOrgUnitId(), mState.getProgramId(), id
         );
-        mNavigationHandler.switchFragment(fragment2, DataEntryFragment4.TAG);
+        mNavigationHandler.switchFragment(fragment2, DataEntryFragment.TAG); */
     }
 
     private static class EventListQuery implements Query<List<Row>> {
@@ -391,12 +390,12 @@ public class SelectProgramFragment extends Fragment
                 break;
             }
             case R.id.register_new_event: {
-                DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
+                /* DataEntryFragment4 fragment2 = DataEntryFragment4.newInstance(
                         mState.getOrgUnitId(), mState.getProgramId()
                 );
                 mNavigationHandler.switchFragment(
                         fragment2, DataEntryFragment4.TAG
-                );
+                ); */
                 break;
             }
         }
