@@ -89,13 +89,13 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
         );
 
         List<DataEntryFragment2Section> sections = new ArrayList<>();
+        // List<DataValue> dataValues = new ArrayList<>();
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
             List<DataEntryRow> rows = new ArrayList<>();
             for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
-                rows.add(createRow(
-                                getDataElement(stageDataElement.dataElement),
-                                getDataValue(stageDataElement.dataElement, event, username))
-                );
+                DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
+                rows.add(createRow(getDataElement(stageDataElement.dataElement), dataValue));
+                // dataValues.add(dataValue);
             }
             sections.add(new DataEntryFragment2Section(DEFAULT_SECTION, rows));
         } else {
@@ -108,10 +108,9 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
 
                 List<DataEntryRow> rows = new ArrayList<>();
                 for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
-                    rows.add(createRow(
-                                    getDataElement(stageDataElement.dataElement),
-                                    getDataValue(stageDataElement.dataElement, event, username))
-                    );
+                    DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
+                    rows.add(createRow(getDataElement(stageDataElement.dataElement), dataValue));
+                    // dataValues.add(dataValue);
                 }
                 sections.add(new DataEntryFragment2Section(section.getName(), rows));
             }
@@ -119,6 +118,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
 
         form.setEvent(event);
         form.setSections(sections);
+        // form.setDataValues(dataValues);
         form.setStage(stage);
 
         return form;

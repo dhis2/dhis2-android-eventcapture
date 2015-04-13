@@ -26,6 +26,7 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
+import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 
@@ -35,28 +36,37 @@ class DataEntryFragment2Form {
     private Event event;
     private ProgramStage stage;
     private List<DataEntryFragment2Section> sections;
-
-    public Event getEvent() {
-        return event;
-    }
+    private List<DataValue> dataValues;
 
     public void setEvent(Event event) {
         this.event = event;
     }
 
-    public List<DataEntryFragment2Section> getSections() {
-        return sections;
+    public Event getEvent() {
+        return event;
     }
 
     public void setSections(List<DataEntryFragment2Section> sections) {
         this.sections = sections;
     }
 
-    public ProgramStage getStage() {
-        return stage;
+    public List<DataEntryFragment2Section> getSections() {
+        return sections;
     }
 
     public void setStage(ProgramStage stage) {
         this.stage = stage;
+    }
+
+    public ProgramStage getStage() {
+        return stage;
+    }
+
+    public List<DataValue> getDataValues() {
+        return dataValues;
+    }
+
+    public void setDataValues(List<DataValue> dataValues) {
+        this.dataValues = dataValues;
     }
 }

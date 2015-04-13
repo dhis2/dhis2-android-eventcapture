@@ -37,6 +37,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,9 +60,16 @@ import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
+import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
+import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 public class DataEntryFragment2 extends Fragment
         implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form>,
@@ -89,6 +98,7 @@ public class DataEntryFragment2 extends Fragment
     private DataValueAdapter mListViewAdapter;
 
     private INavigationHandler mNavigationHandler;
+    private DataEntryFragment2Form mForm;
 
     public static DataEntryFragment2 newInstance(String unitId, String programId) {
         DataEntryFragment2 fragment = new DataEntryFragment2();
@@ -159,6 +169,11 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_data_entry, menu);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_data_entry, container, false);
     }
@@ -185,6 +200,8 @@ public class DataEntryFragment2 extends Fragment
         if (menuItem.getItemId() == android.R.id.home) {
             doBack();
             return true;
+        } else if (menuItem.getItemId() == R.id.action_new_event) {
+            submitEvent();
         }
 
         return super.onOptionsItemSelected(menuItem);
@@ -233,6 +250,7 @@ public class DataEntryFragment2 extends Fragment
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
+            mForm = data;
             if (data.getStage() != null &&
                     data.getStage().captureCoordinates) {
                 Double latitude = data.getEvent().getLatitude();
@@ -400,5 +418,46 @@ public class DataEntryFragment2 extends Fragment
 
     private boolean isSpinnerAttached() {
         return mSpinnerContainer != null;
+    }
+
+    private void submitEvent() {
+        if (mForm != null && isAdded()) {
+            if (isEventValid()) {
+                mForm.getEvent().setFromServer(false);
+                mForm.getEvent().setLastUpdated(Utils.getCurrentTime());
+                mForm.getEvent().save(true);
+
+                Dhis2.sendLocalData(getActivity().getBaseContext());
+                doBack();
+            } else {
+                Dhis2.getInstance().showErrorDialog(getActivity(), "Validation error",
+                        "Some compulsory fields are empty, please fill them in");
+            }
+        }
+    }
+
+    private boolean isEventValid() {
+        Map<String, ProgramStageDataElement> dataElements = toMap(
+                mForm.getStage().getProgramStageDataElements()
+        );
+
+        for (DataValue dataValue : mForm.getEvent().getDataValues()) {
+            ProgramStageDataElement dataElement = dataElements.get(dataValue.dataElement);
+            if (dataElement.compulsory && isEmpty(dataValue.getValue())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static Map<String, ProgramStageDataElement> toMap(List<ProgramStageDataElement> dataElements) {
+        Map<String, ProgramStageDataElement> dataElementMap = new HashMap<>();
+        if (dataElements != null && !dataElements.isEmpty()) {
+            for (ProgramStageDataElement dataElement : dataElements) {
+                dataElementMap.put(dataElement.dataElement, dataElement);
+            }
+        }
+        return dataElementMap;
     }
 }
