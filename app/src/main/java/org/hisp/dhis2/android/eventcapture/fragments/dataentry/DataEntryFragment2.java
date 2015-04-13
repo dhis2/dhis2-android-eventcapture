@@ -24,9 +24,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.app.Activity;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -35,13 +36,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -54,7 +55,9 @@ import org.hisp.dhis2.android.eventcapture.OnBackPressedListener;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
+import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,8 +80,10 @@ public class DataEntryFragment2 extends Fragment
 
     private View mSpinnerContainer;
     private Spinner mSpinner;
+
     private EditText mLatitude;
     private EditText mLongitude;
+    private ImageButton mCaptureCoords;
 
     private SectionAdapter mSpinnerAdapter;
     private DataValueAdapter mListViewAdapter;
@@ -142,6 +147,7 @@ public class DataEntryFragment2 extends Fragment
             ((MainActivity) getActivity()).setBackPressedListener(null);
         }
 
+        Dhis2.disableGps();
         mNavigationHandler = null;
         super.onDetach();
     }
@@ -297,11 +303,17 @@ public class DataEntryFragment2 extends Fragment
     }
 
     private void attachCoordinatePicker(Double latitude, Double longitude) {
+        // Prepare GPS for work. Note, we should use base
+        // context in order not to leak activity
+        Dhis2.activateGps(getActivity().getBaseContext());
+
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(
                 R.layout.fragment_data_entry_header, mListView, false);
+
         mLatitude = (EditText) view.findViewById(R.id.latitude_edittext);
         mLongitude = (EditText) view.findViewById(R.id.longitude_edittext);
+        mCaptureCoords = (ImageButton) view.findViewById(R.id.capture_coordinates);
 
         if (latitude != null) {
             mLatitude.setText(String.valueOf(latitude));
@@ -314,16 +326,7 @@ public class DataEntryFragment2 extends Fragment
         final String latitudeMessage = getString(R.string.latitude_error_message);
         final String longitudeMessage = getString(R.string.longitude_error_message);
 
-        mLatitude.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // stub implementation
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // stub implementation
-            }
+        mLatitude.addTextChangedListener(new AbsTextWatcher() {
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -336,16 +339,7 @@ public class DataEntryFragment2 extends Fragment
             }
         });
 
-        mLongitude.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // stub implementation
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // stub implementation
-            }
+        mLongitude.addTextChangedListener(new AbsTextWatcher() {
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -355,6 +349,16 @@ public class DataEntryFragment2 extends Fragment
                         mLongitude.setError(longitudeMessage);
                     }
                 }
+            }
+        });
+
+        mCaptureCoords.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Location location = Dhis2.getLocation(getActivity().getBaseContext());
+
+                mLatitude.setText(String.valueOf(location.getLatitude()));
+                mLongitude.setText(String.valueOf(location.getLongitude()));
             }
         });
 

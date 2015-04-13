@@ -30,7 +30,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +37,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 
 public class EditTextRow implements DataEntryRow {
@@ -149,19 +149,11 @@ public class EditTextRow implements DataEntryRow {
         }
     }
 
-    private static class OnTextChangeListener implements TextWatcher {
+    private static class OnTextChangeListener extends AbsTextWatcher {
         private BaseValue value;
 
         public void setBaseValue(BaseValue value) {
             this.value = value;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
         }
 
         @Override

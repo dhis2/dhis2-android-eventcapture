@@ -27,7 +27,7 @@
  *
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 
 import android.app.Activity;

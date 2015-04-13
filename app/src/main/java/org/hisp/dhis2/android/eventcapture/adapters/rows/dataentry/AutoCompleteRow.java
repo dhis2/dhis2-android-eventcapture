@@ -27,7 +27,6 @@
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +36,7 @@ import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.AutoCompleteAdapter;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
@@ -164,7 +164,7 @@ public final class AutoCompleteRow implements DataEntryRow {
         }
     }
 
-    private static class OnTextChangedListener implements TextWatcher {
+    private static class OnTextChangedListener extends AbsTextWatcher {
         private BaseValue value;
         private Map<String, String> nameToCodeMap;
 
@@ -174,14 +174,6 @@ public final class AutoCompleteRow implements DataEntryRow {
 
         public void setOptions(Map<String, String> nameToCodeMap) {
             this.nameToCodeMap = nameToCodeMap;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
         }
 
         @Override

@@ -27,8 +27,6 @@
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
 public enum DataEntryRowTypes {
-    SECTION_STUB,
-    PROGRAM_STAGE_SECTION,
     TEXT,
     LONG_TEXT,
     NUMBER,

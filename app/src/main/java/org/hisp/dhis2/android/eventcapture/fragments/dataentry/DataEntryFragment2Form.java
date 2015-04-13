@@ -24,52 +24,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
+package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 
-import org.hisp.dhis2.android.eventcapture.R;
+import java.util.List;
 
-public final class SectionRow implements DataEntryRow {
-    private String mLabel;
+class DataEntryFragment2Form {
+    private Event event;
+    private ProgramStage stage;
+    private List<DataEntryFragment2Section> sections;
 
-    public SectionRow(String label) {
-        mLabel = label;
+    public Event getEvent() {
+        return event;
     }
 
-    @Override
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
-        View view;
-        ViewHolder viewHolder;
-
-        if (convertView == null) {
-            view = inflater.inflate(R.layout.listview_row_section, container, false);
-            viewHolder = new ViewHolder(
-                    (TextView) view.findViewById(R.id.program_stage_section)
-            );
-            view.setTag(viewHolder);
-        } else {
-            view = convertView;
-            viewHolder = (ViewHolder) view.getTag();
-        }
-
-        viewHolder.textView.setText(mLabel);
-        return view;
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
-    @Override
-    public int getViewType() {
-        return DataEntryRowTypes.PROGRAM_STAGE_SECTION.ordinal();
+    public List<DataEntryFragment2Section> getSections() {
+        return sections;
     }
 
-    private static class ViewHolder {
-        public final TextView textView;
+    public void setSections(List<DataEntryFragment2Section> sections) {
+        this.sections = sections;
+    }
 
-        private ViewHolder(TextView textView) {
-            this.textView = textView;
-        }
+    public ProgramStage getStage() {
+        return stage;
+    }
+
+    public void setStage(ProgramStage stage) {
+        this.stage = stage;
     }
 }

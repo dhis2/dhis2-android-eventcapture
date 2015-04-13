@@ -24,39 +24,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 
 import java.util.List;
 
-class DataEntryFragment2Form {
-    private Event event;
-    private ProgramStage stage;
-    private List<DataEntryFragment2Section> sections;
+public final class DataEntryFragment2Section {
+    private final String label;
+    private final List<DataEntryRow> rows;
 
-    public Event getEvent() {
-        return event;
+    public DataEntryFragment2Section(String label,
+                                     List<DataEntryRow> rows) {
+        this.label = label;
+        this.rows = rows;
     }
 
-    public void setEvent(Event event) {
-        this.event = event;
+    public String getLabel() {
+        return label;
     }
 
-    public List<DataEntryFragment2Section> getSections() {
-        return sections;
-    }
-
-    public void setSections(List<DataEntryFragment2Section> sections) {
-        this.sections = sections;
-    }
-
-    public ProgramStage getStage() {
-        return stage;
-    }
-
-    public void setStage(ProgramStage stage) {
-        this.stage = stage;
+    public List<DataEntryRow> getRows() {
+        return rows;
     }
 }

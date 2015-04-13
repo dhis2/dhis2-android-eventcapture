@@ -27,7 +27,7 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.events.ColumnNamesRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventItemRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventItemStatus;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
-import org.hisp.dhis2.android.eventcapture.fragments.DataEntryFragment2;
+import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragment2;
 import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.dialogs.ProgramDialogFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;

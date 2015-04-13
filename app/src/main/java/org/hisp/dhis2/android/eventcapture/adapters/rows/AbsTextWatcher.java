@@ -24,27 +24,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis2.android.eventcapture.adapters.rows;
 
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
+import android.text.Editable;
+import android.text.TextWatcher;
 
-import java.util.List;
-
-public final class DataEntryFragment2Section {
-    private final String label;
-    private final List<DataEntryRow> rows;
-
-    public DataEntryFragment2Section(String label,
-                                     List<DataEntryRow> rows) {
-        this.label = label;
-        this.rows = rows;
+public abstract class AbsTextWatcher implements TextWatcher {
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        // stub implementation
     }
 
-    public String getLabel() {
-        return label;
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        // stub implementation
     }
 
-    public List<DataEntryRow> getRows() {
-        return rows;
+    @Override
+    public void afterTextChanged(Editable s) {
+        // stub implementation
     }
 }
