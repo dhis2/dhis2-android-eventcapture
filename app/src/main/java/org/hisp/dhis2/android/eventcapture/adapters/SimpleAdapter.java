@@ -29,24 +29,18 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
 
-import java.util.List;
-
-public class SimpleAdapter<T> extends BaseAdapter {
-    private List<T> mItems;
-    private LayoutInflater mInflater;
+public class SimpleAdapter<T> extends AbsAdapter<T> {
     private ExtractStringCallback<T> mCallback;
 
-    public SimpleAdapter(Context context) {
-        mInflater = LayoutInflater.from(context);
+    public SimpleAdapter(LayoutInflater inflater) {
+        super(inflater);
     }
 
     public void setStringExtractor(ExtractStringCallback<T> callback) {
@@ -59,7 +53,7 @@ public class SimpleAdapter<T> extends BaseAdapter {
         View view;
 
         if (convertView == null) {
-            View root = mInflater.inflate(R.layout.dialog_fragment_listview_item, parent, false);
+            View root = getInflater().inflate(R.layout.dialog_fragment_listview_item, parent, false);
             TextView textView = (TextView) root.findViewById(R.id.textview_item);
 
             holder = new TextViewHolder(textView);
@@ -70,42 +64,16 @@ public class SimpleAdapter<T> extends BaseAdapter {
             holder = (TextViewHolder) view.getTag();
         }
 
-        String label = mCallback.getString(mItems.get(position));
+        String label = mCallback.getString(getData().get(position));
         holder.textView.setText(label);
         return view;
     }
 
-    @Override
-    public int getCount() {
-        if (mItems != null) {
-            return mItems.size();
-        } else {
-            return 0;
-        }
-    }
-
-    @Override
-    public Object getItem(int pos) {
-        return getItemSafely(pos);
-    }
-
     public T getItemSafely(int pos) {
-        if (mItems != null && mItems.size() > 0) {
-            return mItems.get(pos);
+        if (getData() != null && getData().size() > 0) {
+            return getData().get(pos);
         } else {
             return null;
-        }
-    }
-
-    @Override
-    public long getItemId(int pos) {
-        return pos;
-    }
-
-    public void swapData(List<T> items) {
-        if (mItems != items) {
-            mItems = items;
-            notifyDataSetChanged();
         }
     }
 

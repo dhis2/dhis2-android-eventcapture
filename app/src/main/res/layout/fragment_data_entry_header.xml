@@ -72,8 +72,7 @@
                 android:paddingTop="11dp"
                 android:paddingBottom="11dp"
                 android:hint="@string/latitude"
-                android:inputType="numberDecimal"
-                android:background="@drawable/editbox_background"/>
+                android:inputType="numberDecimal"/>
 
             <org.hisp.dhis2.android.sdk.utils.ui.views.FontEditText
                 android:id="@+id/longitude_edittext"
@@ -86,8 +85,7 @@
                 android:paddingTop="11dp"
                 android:paddingBottom="11dp"
                 android:hint="@string/longitude"
-                android:inputType="numberDecimal"
-                android:background="@drawable/editbox_background"/>
+                android:inputType="numberDecimal"/>
         </LinearLayout>
     </LinearLayout>
 

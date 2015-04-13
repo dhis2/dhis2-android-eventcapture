@@ -131,7 +131,7 @@ public class OrgUnitDialogFragment extends DialogFragment
         mListView = (ListView) view.findViewById(R.id.simple_listview);
         mListView.setOnItemClickListener(this);
 
-        mAdapter = new SimpleAdapter<>(getActivity());
+        mAdapter = new SimpleAdapter<>(LayoutInflater.from(getActivity()));
         mAdapter.setStringExtractor(new StringExtractor());
         mListView.setAdapter(mAdapter);
     }
