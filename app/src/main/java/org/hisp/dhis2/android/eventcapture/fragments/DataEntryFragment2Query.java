@@ -119,6 +119,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
 
         form.setEvent(event);
         form.setSections(sections);
+        form.setStage(stage);
 
         return form;
     }

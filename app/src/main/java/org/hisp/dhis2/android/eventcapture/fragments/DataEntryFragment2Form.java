@@ -27,11 +27,13 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 
 import java.util.List;
 
 class DataEntryFragment2Form {
     private Event event;
+    private ProgramStage stage;
     private List<DataEntryFragment2Section> sections;
 
     public Event getEvent() {
@@ -48,5 +50,13 @@ class DataEntryFragment2Form {
 
     public void setSections(List<DataEntryFragment2Section> sections) {
         this.sections = sections;
+    }
+
+    public ProgramStage getStage() {
+        return stage;
+    }
+
+    public void setStage(ProgramStage stage) {
+        this.stage = stage;
     }
 }

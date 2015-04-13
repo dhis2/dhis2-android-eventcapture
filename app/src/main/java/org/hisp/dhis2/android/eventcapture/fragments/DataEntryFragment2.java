@@ -34,11 +34,14 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -74,6 +77,9 @@ public class DataEntryFragment2 extends Fragment
 
     private View mSpinnerContainer;
     private Spinner mSpinner;
+    private EditText mLatitude;
+    private EditText mLongitude;
+
     private SectionAdapter mSpinnerAdapter;
     private DataValueAdapter mListViewAdapter;
 
@@ -221,6 +227,13 @@ public class DataEntryFragment2 extends Fragment
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
+            if (data.getStage() != null &&
+                    data.getStage().captureCoordinates) {
+                Double latitude = data.getEvent().getLatitude();
+                Double longitude = data.getEvent().getLongitude();
+                attachCoordinatePicker(latitude, longitude);
+            }
+
             if (!data.getSections().isEmpty()) {
                 if (data.getSections().size() > 1) {
                     attachSpinner();
@@ -281,6 +294,71 @@ public class DataEntryFragment2 extends Fragment
         } else {
             throw new IllegalArgumentException("Fragment should be attached to MainActivity");
         }
+    }
+
+    private void attachCoordinatePicker(Double latitude, Double longitude) {
+        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        View view = inflater.inflate(
+                R.layout.fragment_data_entry_header, mListView, false);
+        mLatitude = (EditText) view.findViewById(R.id.latitude_edittext);
+        mLongitude = (EditText) view.findViewById(R.id.longitude_edittext);
+
+        if (latitude != null) {
+            mLatitude.setText(String.valueOf(latitude));
+        }
+
+        if (longitude != null) {
+            mLongitude.setText(String.valueOf(longitude));
+        }
+
+        final String latitudeMessage = getString(R.string.latitude_error_message);
+        final String longitudeMessage = getString(R.string.longitude_error_message);
+
+        mLatitude.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // stub implementation
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // stub implementation
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 1) {
+                    double value = Double.parseDouble(s.toString());
+                    if (value < -90 || value > 90) {
+                        mLatitude.setError(latitudeMessage);
+                    }
+                }
+            }
+        });
+
+        mLongitude.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // stub implementation
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // stub implementation
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 1) {
+                    double value = Double.parseDouble(s.toString());
+                    if (value < -180 || value > 180) {
+                        mLongitude.setError(longitudeMessage);
+                    }
+                }
+            }
+        });
+
+        mListView.addHeaderView(view);
     }
 
     private void attachSpinner() {

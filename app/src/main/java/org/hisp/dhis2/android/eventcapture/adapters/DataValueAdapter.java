@@ -32,9 +32,8 @@ import android.view.ViewGroup;
 
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
-import org.hisp.dhis2.android.eventcapture.views.PinnedSectionListView.PinnedSectionListAdapter;
 
-public final class DataValueAdapter extends AbsAdapter<DataEntryRow> implements PinnedSectionListAdapter {
+public final class DataValueAdapter extends AbsAdapter<DataEntryRow> {
 
     public DataValueAdapter(LayoutInflater inflater) {
         super(inflater);
@@ -61,10 +60,5 @@ public final class DataValueAdapter extends AbsAdapter<DataEntryRow> implements 
         } else {
             return 0;
         }
-    }
-
-    @Override
-    public boolean isItemViewTypePinned(int viewType) {
-        return DataEntryRowTypes.PROGRAM_STAGE_SECTION.ordinal() == viewType;
     }
 }
