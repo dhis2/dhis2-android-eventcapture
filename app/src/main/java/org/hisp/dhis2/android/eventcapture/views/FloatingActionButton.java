@@ -40,6 +40,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
@@ -211,19 +212,16 @@ public class FloatingActionButton extends ImageButton {
 
     public void hide() {
         if (!mHidden) {
-            ObjectAnimator scaleX = ObjectAnimator.ofFloat(this, "scaleX", 1, 0);
-            ObjectAnimator scaleY = ObjectAnimator.ofFloat(this, "scaleY", 1, 0);
-            AnimatorSet animSetXY = new AnimatorSet();
-            animSetXY.playTogether(scaleX, scaleY);
-            animSetXY.setInterpolator(ACCELERATE_INTERPOLATOR);
-            animSetXY.setDuration(100);
-            animSetXY.start();
+            setVisibility(View.GONE);
             mHidden = true;
         }
     }
 
     public void show() {
         if (mHidden) {
+            setVisibility(View.VISIBLE);
+            mHidden = false;
+
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(this, "scaleX", 0, 1);
             ObjectAnimator scaleY = ObjectAnimator.ofFloat(this, "scaleY", 0, 1);
             AnimatorSet animSetXY = new AnimatorSet();
@@ -231,7 +229,6 @@ public class FloatingActionButton extends ImageButton {
             animSetXY.setInterpolator(OVERSHOOT_INTERPOLATOR);
             animSetXY.setDuration(200);
             animSetXY.start();
-            mHidden = false;
         }
     }
 }
