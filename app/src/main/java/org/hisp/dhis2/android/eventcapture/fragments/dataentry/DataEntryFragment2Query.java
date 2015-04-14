@@ -52,7 +52,9 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
 import org.hisp.dhis2.android.sdk.utils.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController.getDataElement;
@@ -65,9 +67,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
     private final String programId;
     private final long eventId;
 
-    DataEntryFragment2Query(String orgUnitId,
-                            String programId,
-                            long eventId) {
+    DataEntryFragment2Query(String orgUnitId, String programId, long eventId) {
         this.orgUnitId = orgUnitId;
         this.programId = programId;
         this.eventId = eventId;
@@ -89,13 +89,14 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
         );
 
         List<DataEntryFragment2Section> sections = new ArrayList<>();
-        // List<DataValue> dataValues = new ArrayList<>();
+        Map<String, String> dataElementsNames = new HashMap<>();
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
             List<DataEntryRow> rows = new ArrayList<>();
             for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
                 DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
-                rows.add(createRow(getDataElement(stageDataElement.dataElement), dataValue));
-                // dataValues.add(dataValue);
+                DataElement dataElement = getDataElement(stageDataElement.dataElement);
+                rows.add(createRow(dataElement, dataValue));
+                dataElementsNames.put(stageDataElement.dataElement, dataElement.name);
             }
             sections.add(new DataEntryFragment2Section(DEFAULT_SECTION, rows));
         } else {
@@ -109,17 +110,18 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
                 List<DataEntryRow> rows = new ArrayList<>();
                 for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
                     DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
-                    rows.add(createRow(getDataElement(stageDataElement.dataElement), dataValue));
-                    // dataValues.add(dataValue);
+                    DataElement dataElement = getDataElement(stageDataElement.dataElement);
+                    rows.add(createRow(dataElement, dataValue));
+                    dataElementsNames.put(stageDataElement.dataElement, dataElement.name);
                 }
                 sections.add(new DataEntryFragment2Section(section.getName(), rows));
             }
         }
 
         form.setEvent(event);
-        form.setSections(sections);
-        // form.setDataValues(dataValues);
         form.setStage(stage);
+        form.setSections(sections);
+        form.setDataElementNames(dataElementsNames);
 
         return form;
     }

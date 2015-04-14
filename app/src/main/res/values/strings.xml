@@ -41,6 +41,8 @@
     <string name="event_offline">Offline</string>
     <string name="event_error">Error</string>
 
+    <string name="validation_error">Please, enter next compulsory fields</string>
+
     <string name="enter_coordinates">Enter coordinates</string>
     <string name="latitude_error_message">Latitude must be in range from -90 to 90</string>
     <string name="longitude_error_message">Longitude must be in range from -180 to 180</string>

@@ -58,6 +58,7 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
+import org.hisp.dhis2.android.eventcapture.fragments.dataentry.dialogs.ValidationErrorDialog;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -422,7 +423,8 @@ public class DataEntryFragment2 extends Fragment
 
     private void submitEvent() {
         if (mForm != null && isAdded()) {
-            if (isEventValid()) {
+            ArrayList<String> errors = isEventValid();
+            if (errors.isEmpty()) {
                 mForm.getEvent().setFromServer(false);
                 mForm.getEvent().setLastUpdated(Utils.getCurrentTime());
                 mForm.getEvent().save(true);
@@ -430,25 +432,27 @@ public class DataEntryFragment2 extends Fragment
                 Dhis2.sendLocalData(getActivity().getBaseContext());
                 doBack();
             } else {
-                Dhis2.getInstance().showErrorDialog(getActivity(), "Validation error",
-                        "Some compulsory fields are empty, please fill them in");
+                ValidationErrorDialog dialog = ValidationErrorDialog
+                        .newInstance(errors);
+                dialog.show(getChildFragmentManager());
             }
         }
     }
 
-    private boolean isEventValid() {
+    private ArrayList<String> isEventValid() {
         Map<String, ProgramStageDataElement> dataElements = toMap(
                 mForm.getStage().getProgramStageDataElements()
         );
 
+        ArrayList<String> errors = new ArrayList<>();
         for (DataValue dataValue : mForm.getEvent().getDataValues()) {
             ProgramStageDataElement dataElement = dataElements.get(dataValue.dataElement);
             if (dataElement.compulsory && isEmpty(dataValue.getValue())) {
-                return false;
+                errors.add(mForm.getDataElementNames().get(dataValue.dataElement));
             }
         }
 
-        return true;
+        return errors;
     }
 
     private static Map<String, ProgramStageDataElement> toMap(List<ProgramStageDataElement> dataElements) {
