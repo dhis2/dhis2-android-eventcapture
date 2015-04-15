@@ -62,7 +62,7 @@ import java.util.UUID;
 
 import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController.getDataElement;
 
-class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
+class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
     private static final String EMPTY_FIELD = "";
     private static final String DEFAULT_SECTION = "defaultSection";
 
@@ -70,17 +70,17 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
     private final String programId;
     private final long eventId;
 
-    DataEntryFragment2Query(String orgUnitId, String programId, long eventId) {
+    DataEntryFragmentQuery(String orgUnitId, String programId, long eventId) {
         this.orgUnitId = orgUnitId;
         this.programId = programId;
         this.eventId = eventId;
     }
 
     @Override
-    public DataEntryFragment2Form query(Context context) {
+    public DataEntryFragmentForm query(Context context) {
         Program program = Select.byId(Program.class, programId);
         ProgramStage stage = program.getProgramStages().get(0);
-        DataEntryFragment2Form form = new DataEntryFragment2Form();
+        DataEntryFragmentForm form = new DataEntryFragmentForm();
 
         if (stage == null || stage.getProgramStageSections() == null) {
             return form;
@@ -91,7 +91,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
                 orgUnitId, programId, eventId, stage, username
         );
 
-        List<DataEntryFragment2Section> sections = new ArrayList<>();
+        List<DataEntryFragmentSection> sections = new ArrayList<>();
         Map<String, String> dataElementsNames = new HashMap<>();
         List<IndicatorRow> indicatorRows = new ArrayList<>();
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
@@ -110,7 +110,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
                 rows.add(indicatorRow);
                 indicatorRows.add(indicatorRow);
             }
-            sections.add(new DataEntryFragment2Section(DEFAULT_SECTION, rows));
+            sections.add(new DataEntryFragmentSection(DEFAULT_SECTION, rows));
         } else {
             for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
                 ProgramStageSection section = stage.getProgramStageSections().get(i);
@@ -134,7 +134,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
                     rows.add(indicatorRow);
                     indicatorRows.add(indicatorRow);
                 }
-                sections.add(new DataEntryFragment2Section(section.getName(), rows));
+                sections.add(new DataEntryFragmentSection(section.getName(), rows));
             }
         }
 

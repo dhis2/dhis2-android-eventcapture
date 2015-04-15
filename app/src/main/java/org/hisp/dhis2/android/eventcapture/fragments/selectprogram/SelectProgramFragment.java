@@ -21,9 +21,7 @@ import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
-import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragment2;
-import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.dialogs.OrgUnitDialogFragment;
-import org.hisp.dhis2.android.eventcapture.fragments.selectprogram.dialogs.ProgramDialogFragment;
+import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
@@ -218,10 +216,10 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        DataEntryFragment2 fragment2 = DataEntryFragment2.newInstance(
+        DataEntryFragment fragment2 = DataEntryFragment.newInstance(
                 mState.getOrgUnitId(), mState.getProgramId(), id
         );
-        mNavigationHandler.switchFragment(fragment2, DataEntryFragment2.TAG);
+        mNavigationHandler.switchFragment(fragment2, DataEntryFragment.TAG);
     }
 
     @Override
@@ -240,11 +238,11 @@ public class SelectProgramFragment extends Fragment
                 break;
             }
             case R.id.register_new_event: {
-                DataEntryFragment2 fragment2 = DataEntryFragment2.newInstance(
+                DataEntryFragment fragment2 = DataEntryFragment.newInstance(
                         mState.getOrgUnitId(), mState.getProgramId()
                 );
                 mNavigationHandler.switchFragment(
-                        fragment2, DataEntryFragment2.TAG
+                        fragment2, DataEntryFragment.TAG
                 );
                 break;
             }

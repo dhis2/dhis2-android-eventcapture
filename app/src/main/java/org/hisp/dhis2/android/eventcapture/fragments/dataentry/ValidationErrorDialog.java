@@ -1,4 +1,4 @@
-package org.hisp.dhis2.android.eventcapture.fragments.dataentry.dialogs;
+package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;

@@ -63,7 +63,6 @@ import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
-import org.hisp.dhis2.android.eventcapture.fragments.dataentry.dialogs.ValidationErrorDialog;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -78,10 +77,10 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-public class DataEntryFragment2 extends Fragment
-        implements LoaderManager.LoaderCallbacks<DataEntryFragment2Form>,
+public class DataEntryFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<DataEntryFragmentForm>,
         OnBackPressedListener, AdapterView.OnItemSelectedListener {
-    public static final String TAG = DataEntryFragment2.class.getSimpleName();
+    public static final String TAG = DataEntryFragment.class.getSimpleName();
     private static final int LOADER_ID = 1;
 
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
@@ -105,10 +104,10 @@ public class DataEntryFragment2 extends Fragment
     private DataValueAdapter mListViewAdapter;
 
     private INavigationHandler mNavigationHandler;
-    private DataEntryFragment2Form mForm;
+    private DataEntryFragmentForm mForm;
 
-    public static DataEntryFragment2 newInstance(String unitId, String programId) {
-        DataEntryFragment2 fragment = new DataEntryFragment2();
+    public static DataEntryFragment newInstance(String unitId, String programId) {
+        DataEntryFragment fragment = new DataEntryFragment();
         Bundle args = new Bundle();
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
@@ -116,9 +115,9 @@ public class DataEntryFragment2 extends Fragment
         return fragment;
     }
 
-    public static DataEntryFragment2 newInstance(String unitId, String programId,
+    public static DataEntryFragment newInstance(String unitId, String programId,
                                                  long eventId) {
-        DataEntryFragment2 fragment = new DataEntryFragment2();
+        DataEntryFragment fragment = new DataEntryFragment();
         Bundle args = new Bundle();
         args.putString(ORG_UNIT_ID, unitId);
         args.putString(PROGRAM_ID, programId);
@@ -245,7 +244,7 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
-    public Loader<DataEntryFragment2Form> onCreateLoader(int id, Bundle args) {
+    public Loader<DataEntryFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             // Adding Tables for tracking here is dangerous (since MetaData updates in background
             // can trigger reload of values from db which will reset all fields).
@@ -253,7 +252,7 @@ public class DataEntryFragment2 extends Fragment
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new DataEntryFragment2Query(
+                    getActivity().getBaseContext(), modelsToTrack, new DataEntryFragmentQuery(
                     fragmentArguments.getString(ORG_UNIT_ID, null),
                     fragmentArguments.getString(PROGRAM_ID, null),
                     fragmentArguments.getLong(EVENT_ID, -1)
@@ -264,7 +263,7 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
-    public void onLoadFinished(Loader<DataEntryFragment2Form> loader, DataEntryFragment2Form data) {
+    public void onLoadFinished(Loader<DataEntryFragmentForm> loader, DataEntryFragmentForm data) {
         if (loader.getId() == LOADER_ID && isAdded()) {
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
@@ -282,7 +281,7 @@ public class DataEntryFragment2 extends Fragment
                     attachSpinner();
                     mSpinnerAdapter.swapData(data.getSections());
                 } else {
-                    DataEntryFragment2Section section = data.getSections().get(0);
+                    DataEntryFragmentSection section = data.getSections().get(0);
                     mListViewAdapter.swapData(section.getRows());
                 }
             }
@@ -290,7 +289,7 @@ public class DataEntryFragment2 extends Fragment
     }
 
     @Override
-    public void onLoaderReset(Loader<DataEntryFragment2Form> loader) {
+    public void onLoaderReset(Loader<DataEntryFragmentForm> loader) {
         if (loader.getId() == LOADER_ID) {
             if (mSpinnerAdapter != null) {
                 mSpinnerAdapter.swapData(null);
@@ -303,7 +302,7 @@ public class DataEntryFragment2 extends Fragment
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        DataEntryFragment2Section section = (DataEntryFragment2Section)
+        DataEntryFragmentSection section = (DataEntryFragmentSection)
                 mSpinnerAdapter.getItem(position);
 
         if (section != null) {

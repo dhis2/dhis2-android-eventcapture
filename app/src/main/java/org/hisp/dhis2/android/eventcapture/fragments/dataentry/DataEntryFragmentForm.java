@@ -34,10 +34,10 @@ import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import java.util.List;
 import java.util.Map;
 
-class DataEntryFragment2Form {
+class DataEntryFragmentForm {
     private Event event;
     private ProgramStage stage;
-    private List<DataEntryFragment2Section> sections;
+    private List<DataEntryFragmentSection> sections;
     private List<DataValue> dataValues;
     private Map<String, String> dataElementNames;
     private List<IndicatorRow> indicatorRows;
@@ -50,11 +50,11 @@ class DataEntryFragment2Form {
         return event;
     }
 
-    public void setSections(List<DataEntryFragment2Section> sections) {
+    public void setSections(List<DataEntryFragmentSection> sections) {
         this.sections = sections;
     }
 
-    public List<DataEntryFragment2Section> getSections() {
+    public List<DataEntryFragmentSection> getSections() {
         return sections;
     }
 

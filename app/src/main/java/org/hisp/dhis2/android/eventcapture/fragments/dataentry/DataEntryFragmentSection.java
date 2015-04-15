@@ -30,12 +30,12 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 
 import java.util.List;
 
-public final class DataEntryFragment2Section {
+public final class DataEntryFragmentSection {
     private final String label;
     private final List<DataEntryRow> rows;
 
-    public DataEntryFragment2Section(String label,
-                                     List<DataEntryRow> rows) {
+    public DataEntryFragmentSection(String label,
+                                    List<DataEntryRow> rows) {
         this.label = label;
         this.rows = rows;
     }

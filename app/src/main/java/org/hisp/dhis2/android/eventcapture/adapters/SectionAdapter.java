@@ -32,9 +32,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragment2Section;
+import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragmentSection;
 
-public final class SectionAdapter extends AbsAdapter<DataEntryFragment2Section> {
+public final class SectionAdapter extends AbsAdapter<DataEntryFragmentSection> {
     private static final String DROPDOWN = "dropDown";
     private static final String NON_DROPDOWN = "nonDropDown";
 
