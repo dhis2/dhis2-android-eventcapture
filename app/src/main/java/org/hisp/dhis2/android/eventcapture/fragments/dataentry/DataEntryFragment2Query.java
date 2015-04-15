@@ -36,6 +36,7 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DatePickerRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.EditTextRow;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.RadioButtonsRow;
 import org.hisp.dhis2.android.eventcapture.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
@@ -46,10 +47,12 @@ import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramIndicator;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageSection;
 import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,13 +93,22 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
 
         List<DataEntryFragment2Section> sections = new ArrayList<>();
         Map<String, String> dataElementsNames = new HashMap<>();
+        List<IndicatorRow> indicatorRows = new ArrayList<>();
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
             List<DataEntryRow> rows = new ArrayList<>();
             for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
                 DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
                 DataElement dataElement = getDataElement(stageDataElement.dataElement);
-                rows.add(createRow(dataElement, dataValue));
+                rows.add(createDataEntryRow(dataElement, dataValue));
                 dataElementsNames.put(stageDataElement.dataElement, dataElement.name);
+            }
+
+            for (ProgramIndicator programIndicator : stage.getProgramIndicators()) {
+                String value = ProgramIndicatorService
+                        .getProgramIndicatorValue(event, programIndicator);
+                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
+                rows.add(indicatorRow);
+                indicatorRows.add(indicatorRow);
             }
             sections.add(new DataEntryFragment2Section(DEFAULT_SECTION, rows));
         } else {
@@ -111,8 +123,16 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
                 for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
                     DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
                     DataElement dataElement = getDataElement(stageDataElement.dataElement);
-                    rows.add(createRow(dataElement, dataValue));
+                    rows.add(createDataEntryRow(dataElement, dataValue));
                     dataElementsNames.put(stageDataElement.dataElement, dataElement.name);
+                }
+
+                for (ProgramIndicator programIndicator : section.getProgramIndicators()) {
+                    String value = ProgramIndicatorService
+                            .getProgramIndicatorValue(event, programIndicator);
+                    IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
+                    rows.add(indicatorRow);
+                    indicatorRows.add(indicatorRow);
                 }
                 sections.add(new DataEntryFragment2Section(section.getName(), rows));
             }
@@ -122,6 +142,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
         form.setStage(stage);
         form.setSections(sections);
         form.setDataElementNames(dataElementsNames);
+        form.setIndicatorRows(indicatorRows);
 
         return form;
     }
@@ -155,7 +176,7 @@ class DataEntryFragment2Query implements Query<DataEntryFragment2Form> {
         return event;
     }
 
-    private static DataEntryRow createRow(DataElement dataElement, DataValue dataValue) {
+    private static DataEntryRow createDataEntryRow(DataElement dataElement, DataValue dataValue) {
         DataEntryRow row;
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);

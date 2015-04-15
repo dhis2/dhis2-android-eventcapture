@@ -36,6 +36,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.hisp.dhis2.android.eventcapture.EditTextValueChangedEvent;
+import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
@@ -158,10 +160,11 @@ public class EditTextRow implements DataEntryRow {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (s != null) {
-                value.setValue(s.toString());
-            } else {
-                value.setValue(EMPTY_FIELD);
+            String newValue = s != null ? s.toString() : EMPTY_FIELD;
+            if (!newValue.equals(value.getValue())) {
+                value.setValue(newValue);
+                EventCaptureApplication.getEventBus()
+                        .post(new EditTextValueChangedEvent());
             }
         }
     }

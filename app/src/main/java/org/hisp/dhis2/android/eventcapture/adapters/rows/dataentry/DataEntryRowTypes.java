@@ -39,4 +39,5 @@ public enum DataEntryRowTypes {
     TRUE_ONLY,
     AUTO_COMPLETE,
     DATE,
+    INDICATOR,
 }

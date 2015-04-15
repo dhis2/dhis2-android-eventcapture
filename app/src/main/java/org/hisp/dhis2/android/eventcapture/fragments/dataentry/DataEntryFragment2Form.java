@@ -26,6 +26,7 @@
 
 package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
+import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
@@ -39,6 +40,7 @@ class DataEntryFragment2Form {
     private List<DataEntryFragment2Section> sections;
     private List<DataValue> dataValues;
     private Map<String, String> dataElementNames;
+    private List<IndicatorRow> indicatorRows;
 
     public void setEvent(Event event) {
         this.event = event;
@@ -78,5 +80,13 @@ class DataEntryFragment2Form {
 
     public void setDataElementNames(Map<String, String> dataElementNames) {
         this.dataElementNames = dataElementNames;
+    }
+
+    public List<IndicatorRow> getIndicatorRows() {
+        return indicatorRows;
+    }
+
+    public void setIndicatorRows(List<IndicatorRow> indicatorRows) {
+        this.indicatorRows = indicatorRows;
     }
 }

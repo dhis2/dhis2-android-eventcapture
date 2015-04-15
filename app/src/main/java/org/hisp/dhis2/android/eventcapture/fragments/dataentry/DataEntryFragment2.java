@@ -50,7 +50,10 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import com.raizlabs.android.dbflow.structure.Model;
+import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.eventcapture.EditTextValueChangedEvent;
+import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.MainActivity;
 import org.hisp.dhis2.android.eventcapture.OnBackPressedListener;
@@ -58,12 +61,15 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis2.android.eventcapture.fragments.dataentry.dialogs.ValidationErrorDialog;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.Utils;
+import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -167,6 +173,18 @@ public class DataEntryFragment2 extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventCaptureApplication.getEventBus().register(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        EventCaptureApplication.getEventBus().unregister(this);
     }
 
     @Override
@@ -301,6 +319,36 @@ public class DataEntryFragment2 extends Fragment
     @Override
     public void doBack() {
         getFragmentManager().popBackStack();
+    }
+
+    @Subscribe
+    public void onRowValueChanged(EditTextValueChangedEvent event) {
+        if (mForm == null || mForm.getIndicatorRows() == null) {
+            return;
+        }
+
+        /*
+        * updating indicator values in rows
+        * */
+        for (IndicatorRow indicatorRow : mForm.getIndicatorRows()) {
+            String newValue = ProgramIndicatorService.
+                    getProgramIndicatorValue(mForm.getEvent(), indicatorRow.getIndicator());
+            if (!newValue.equals(indicatorRow.getValue())) {
+                indicatorRow.updateValue(newValue);
+            }
+        }
+
+        /*
+        * Calling adapter's getView in order to render changes in visible IndicatorRows
+        * */
+        int start = mListView.getFirstVisiblePosition();
+        int end = mListView.getLastVisiblePosition();
+        for (int pos = start; pos <= end; pos++) {
+            if (mListViewAdapter.getItemViewType(pos) == DataEntryRowTypes.INDICATOR.ordinal()) {
+                View view = mListView.getChildAt(pos);
+                mListViewAdapter.getView(pos, view, mListView);
+            }
+        }
     }
 
     private ActionBar getActionBar() {

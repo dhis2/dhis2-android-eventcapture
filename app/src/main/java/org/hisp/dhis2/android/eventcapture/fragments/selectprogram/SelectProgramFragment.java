@@ -95,7 +95,7 @@ public class SelectProgramFragment extends Fragment
         mProgressBar = (ProgressBar) header.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.GONE);
 
-        mListView.addHeaderView(header);
+        mListView.addHeaderView(header, TAG, false);
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
 
