@@ -116,7 +116,7 @@ public class DataEntryFragment extends Fragment
     }
 
     public static DataEntryFragment newInstance(String unitId, String programId,
-                                                 long eventId) {
+                                                long eventId) {
         DataEntryFragment fragment = new DataEntryFragment();
         Bundle args = new Bundle();
         args.putString(ORG_UNIT_ID, unitId);
@@ -124,6 +124,16 @@ public class DataEntryFragment extends Fragment
         args.putLong(EVENT_ID, eventId);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private static Map<String, ProgramStageDataElement> toMap(List<ProgramStageDataElement> dataElements) {
+        Map<String, ProgramStageDataElement> dataElementMap = new HashMap<>();
+        if (dataElements != null && !dataElements.isEmpty()) {
+            for (ProgramStageDataElement dataElement : dataElements) {
+                dataElementMap.put(dataElement.dataElement, dataElement);
+            }
+        }
+        return dataElementMap;
     }
 
     @Override
@@ -343,7 +353,9 @@ public class DataEntryFragment extends Fragment
         int start = mListView.getFirstVisiblePosition();
         int end = mListView.getLastVisiblePosition();
         for (int pos = start; pos <= end; pos++) {
-            if (mListViewAdapter.getItemViewType(pos) == DataEntryRowTypes.INDICATOR.ordinal()) {
+            if (mListViewAdapter.getCount() > pos &&
+                    mListViewAdapter.getItemViewType(pos)
+                            == DataEntryRowTypes.INDICATOR.ordinal()) {
                 View view = mListView.getChildAt(pos);
                 mListViewAdapter.getView(pos, view, mListView);
             }
@@ -502,15 +514,5 @@ public class DataEntryFragment extends Fragment
         }
 
         return errors;
-    }
-
-    private static Map<String, ProgramStageDataElement> toMap(List<ProgramStageDataElement> dataElements) {
-        Map<String, ProgramStageDataElement> dataElementMap = new HashMap<>();
-        if (dataElements != null && !dataElements.isEmpty()) {
-            for (ProgramStageDataElement dataElement : dataElements) {
-                dataElementMap.put(dataElement.dataElement, dataElement);
-            }
-        }
-        return dataElementMap;
     }
 }
