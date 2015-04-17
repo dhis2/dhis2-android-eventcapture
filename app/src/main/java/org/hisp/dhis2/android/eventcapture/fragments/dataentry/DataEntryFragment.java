@@ -401,6 +401,7 @@ public class DataEntryFragment extends Fragment
                     if (value < -90 || value > 90) {
                         mLatitude.setError(latitudeMessage);
                     }
+                    mForm.getEvent().setLatitude(Double.valueOf(value));
                 }
             }
         });
@@ -414,6 +415,7 @@ public class DataEntryFragment extends Fragment
                     if (value < -180 || value > 180) {
                         mLongitude.setError(longitudeMessage);
                     }
+                    mForm.getEvent().setLongitude(Double.valueOf(value));
                 }
             }
         });
