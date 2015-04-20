@@ -154,6 +154,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         }
 
         for (int i = 0; i < 3; i++) {
+            if(i>=elementsToShow.size()) break;
             String dataElement = elementsToShow.get(i);
             if (dataElement != null) {
                 DataValue dataValue = getDataValue(event, dataElement);
