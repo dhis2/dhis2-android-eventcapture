@@ -356,7 +356,7 @@ public class DataEntryFragment extends Fragment
             if (mListViewAdapter.getCount() > pos &&
                     mListViewAdapter.getItemViewType(pos)
                             == DataEntryRowTypes.INDICATOR.ordinal()) {
-                View view = mListView.getChildAt(pos);
+                View view = mListView.getChildAt(pos - start);
                 mListViewAdapter.getView(pos, view, mListView);
             }
         }

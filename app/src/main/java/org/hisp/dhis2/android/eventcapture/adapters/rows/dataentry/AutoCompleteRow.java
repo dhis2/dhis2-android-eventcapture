@@ -34,6 +34,8 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.hisp.dhis2.android.eventcapture.EditTextValueChangedEvent;
+import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.AutoCompleteAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
@@ -188,6 +190,9 @@ public final class AutoCompleteRow implements DataEntryRow {
             if (isEmpty(name) || nameToCodeMap.containsKey(name)) {
                 value.setValue(nameToCodeMap.get(name));
             }
+
+            EventCaptureApplication.getEventBus()
+                    .post(new EditTextValueChangedEvent());
         }
     }
 

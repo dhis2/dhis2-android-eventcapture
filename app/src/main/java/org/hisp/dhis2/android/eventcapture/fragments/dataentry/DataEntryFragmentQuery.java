@@ -27,6 +27,7 @@
 package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
@@ -56,6 +57,7 @@ import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -63,6 +65,9 @@ import java.util.UUID;
 import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController.getDataElement;
 
 class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
+
+    private static final String CLASS_TAG = DataEntryFragmentQuery.class.getSimpleName();
+
     private static final String EMPTY_FIELD = "";
     private static final String DEFAULT_SECTION = "defaultSection";
 
@@ -79,21 +84,20 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
     @Override
     public DataEntryFragmentForm query(Context context) {
         Program program = Select.byId(Program.class, programId);
-        ProgramStage stage = program.getProgramStages().get(0);
+        final ProgramStage stage = program.getProgramStages().get(0);
         DataEntryFragmentForm form = new DataEntryFragmentForm();
 
         if (stage == null || stage.getProgramStageSections() == null) {
             return form;
         }
-
-        String username = Dhis2.getUsername(context);
-        Event event = getEvent(
+        final String username = Dhis2.getUsername(context);
+        final Event event = getEvent(
                 orgUnitId, programId, eventId, stage, username
         );
 
-        List<DataEntryFragmentSection> sections = new ArrayList<>();
-        Map<String, String> dataElementsNames = new HashMap<>();
-        List<IndicatorRow> indicatorRows = new ArrayList<>();
+        final List<DataEntryFragmentSection> sections = new ArrayList<>();
+        final Map<String, String> dataElementsNames = new HashMap<>();
+        final List<IndicatorRow> indicatorRows = new ArrayList<>();
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
             List<DataEntryRow> rows = new ArrayList<>();
             for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
@@ -143,7 +147,6 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
         form.setSections(sections);
         form.setDataElementNames(dataElementsNames);
         form.setIndicatorRows(indicatorRows);
-
         return form;
     }
 
