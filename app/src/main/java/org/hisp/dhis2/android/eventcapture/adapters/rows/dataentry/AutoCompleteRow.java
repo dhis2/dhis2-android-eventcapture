@@ -44,7 +44,7 @@ import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static android.text.TextUtils.isEmpty;
@@ -64,8 +64,8 @@ public final class AutoCompleteRow implements DataEntryRow {
         mLabel = label;
         mValue = value;
 
-        mCodeToNameMap = new HashMap<>();
-        mNameToCodeMap = new HashMap<>();
+        mCodeToNameMap = new LinkedHashMap<>();
+        mNameToCodeMap = new LinkedHashMap<>();
 
         if (optionSet.getOptions() != null) {
             for (Option option : optionSet.getOptions()) {

@@ -27,7 +27,6 @@
 package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
@@ -57,7 +56,6 @@ import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -181,7 +179,6 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
 
     private static DataEntryRow createDataEntryRow(DataElement dataElement, DataValue dataValue) {
         DataEntryRow row;
-        System.out.println("DATA_ELEMENT_TYPE: " + dataElement.getType());
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
             if (optionSet == null) {
