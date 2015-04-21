@@ -27,13 +27,13 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="200dp"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
         android:id="@android:id/text1"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"
         android:drawableRight="@drawable/spinner_triangle"
@@ -42,6 +42,7 @@
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:font="@string/regular_font_name" />
+        android:singleLine="true"
+        app:font="@string/regular_font_name"/>
 
 </LinearLayout>
