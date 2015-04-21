@@ -181,6 +181,7 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
 
     private static DataEntryRow createDataEntryRow(DataElement dataElement, DataValue dataValue) {
         DataEntryRow row;
+        System.out.println("DATA_ELEMENT_TYPE: " + dataElement.getType());
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
             if (optionSet == null) {

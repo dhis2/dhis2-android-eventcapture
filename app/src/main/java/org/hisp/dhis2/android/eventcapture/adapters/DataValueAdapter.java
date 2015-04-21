@@ -42,7 +42,9 @@ public final class DataValueAdapter extends AbsAdapter<DataEntryRow> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (getData() != null) {
-            return getData().get(position).getView(getInflater(), convertView, parent);
+            View view = getData().get(position).getView(getInflater(), convertView, parent);
+            view.setId(position);
+            return view;
         } else {
             return null;
         }

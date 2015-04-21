@@ -61,7 +61,6 @@ import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
@@ -352,12 +351,12 @@ public class DataEntryFragment extends Fragment
         * */
         int start = mListView.getFirstVisiblePosition();
         int end = mListView.getLastVisiblePosition();
-        for (int pos = start; pos <= end; pos++) {
-            if (mListViewAdapter.getCount() > pos &&
-                    mListViewAdapter.getItemViewType(pos)
-                            == DataEntryRowTypes.INDICATOR.ordinal()) {
-                View view = mListView.getChildAt(pos - start);
-                mListViewAdapter.getView(pos, view, mListView);
+        for (int pos = 0; pos <= end - start; pos++) {
+            View view = mListView.getChildAt(pos);
+            if (view != null && view.getTag()
+                    instanceof IndicatorRow.IndicatorViewHolder) {
+                int adapterPosition = view.getId();
+                mListViewAdapter.getView(adapterPosition, view, mListView);
             }
         }
     }
