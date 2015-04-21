@@ -57,7 +57,6 @@ import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController.getDataElement;
@@ -81,71 +80,73 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
 
     @Override
     public DataEntryFragmentForm query(Context context) {
-        Program program = Select.byId(Program.class, programId);
+        final Program program = Select.byId(Program.class, programId);
         final ProgramStage stage = program.getProgramStages().get(0);
-        DataEntryFragmentForm form = new DataEntryFragmentForm();
+        final DataEntryFragmentForm form = new DataEntryFragmentForm();
 
         if (stage == null || stage.getProgramStageSections() == null) {
             return form;
         }
+
         final String username = Dhis2.getUsername(context);
         final Event event = getEvent(
                 orgUnitId, programId, eventId, stage, username
         );
 
-        final List<DataEntryFragmentSection> sections = new ArrayList<>();
-        final Map<String, String> dataElementsNames = new HashMap<>();
-        final List<IndicatorRow> indicatorRows = new ArrayList<>();
+        form.setEvent(event);
+        form.setStage(stage);
+        form.setSections(new ArrayList<DataEntryFragmentSection>());
+        form.setDataElementNames(new HashMap<String, String>());
+        form.setDataValues(new HashMap<String, DataValue>());
+        form.setIndicatorRows(new ArrayList<IndicatorRow>());
+
         if (stage.getProgramStageSections() == null || stage.getProgramStageSections().isEmpty()) {
             List<DataEntryRow> rows = new ArrayList<>();
-            for (ProgramStageDataElement stageDataElement : stage.getProgramStageDataElements()) {
-                DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
-                DataElement dataElement = getDataElement(stageDataElement.dataElement);
-                rows.add(createDataEntryRow(dataElement, dataValue));
-                dataElementsNames.put(stageDataElement.dataElement, dataElement.name);
-            }
-
-            for (ProgramIndicator programIndicator : stage.getProgramIndicators()) {
-                String value = ProgramIndicatorService
-                        .getProgramIndicatorValue(event, programIndicator);
-                IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
-                rows.add(indicatorRow);
-                indicatorRows.add(indicatorRow);
-            }
-            sections.add(new DataEntryFragmentSection(DEFAULT_SECTION, rows));
+            populateDataEntryRows(form, stage.getProgramStageDataElements(), rows, username);
+            populateIndicatorRows(form, stage.getProgramIndicators(), rows);
+            form.getSections().add(new DataEntryFragmentSection(DEFAULT_SECTION, rows));
         } else {
             for (int i = 0; i < stage.getProgramStageSections().size(); i++) {
-                ProgramStageSection section = stage.getProgramStageSections().get(i);
 
+                ProgramStageSection section = stage.getProgramStageSections().get(i);
                 if (section.getProgramStageDataElements() == null) {
                     continue;
                 }
 
                 List<DataEntryRow> rows = new ArrayList<>();
-                for (ProgramStageDataElement stageDataElement : section.getProgramStageDataElements()) {
-                    DataValue dataValue = getDataValue(stageDataElement.dataElement, event, username);
-                    DataElement dataElement = getDataElement(stageDataElement.dataElement);
-                    rows.add(createDataEntryRow(dataElement, dataValue));
-                    dataElementsNames.put(stageDataElement.dataElement, dataElement.name);
-                }
-
-                for (ProgramIndicator programIndicator : section.getProgramIndicators()) {
-                    String value = ProgramIndicatorService
-                            .getProgramIndicatorValue(event, programIndicator);
-                    IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
-                    rows.add(indicatorRow);
-                    indicatorRows.add(indicatorRow);
-                }
-                sections.add(new DataEntryFragmentSection(section.getName(), rows));
+                populateDataEntryRows(form, section.getProgramStageDataElements(), rows, username);
+                populateIndicatorRows(form, section.getProgramIndicators(), rows);
+                form.getSections().add(new DataEntryFragmentSection(section.getName(), rows));
             }
         }
 
-        form.setEvent(event);
-        form.setStage(stage);
-        form.setSections(sections);
-        form.setDataElementNames(dataElementsNames);
-        form.setIndicatorRows(indicatorRows);
         return form;
+    }
+
+    private static void populateDataEntryRows(DataEntryFragmentForm form,
+                                              List<ProgramStageDataElement> dataElements,
+                                              List<DataEntryRow> rows, String username) {
+        for (ProgramStageDataElement stageDataElement : dataElements) {
+            DataValue dataValue = getDataValue(stageDataElement.dataElement, form.getEvent(), username);
+            DataValue copyDataValue = dataValue.clone();
+            DataElement dataElement = getDataElement(stageDataElement.dataElement);
+
+            form.getDataValues().put(copyDataValue.dataElement, copyDataValue.clone());
+            form.getDataElementNames().put(stageDataElement.dataElement, dataElement.name);
+            rows.add(createDataEntryRow(dataElement, dataValue));
+        }
+    }
+
+    private static void populateIndicatorRows(DataEntryFragmentForm form,
+                                              List<ProgramIndicator> indicators,
+                                              List<DataEntryRow> rows) {
+        for (ProgramIndicator programIndicator : indicators) {
+            String value = ProgramIndicatorService
+                    .getProgramIndicatorValue(form.getEvent(), programIndicator);
+            IndicatorRow indicatorRow = new IndicatorRow(programIndicator, value);
+            rows.add(indicatorRow);
+            form.getIndicatorRows().add(indicatorRow);
+        }
     }
 
     private Event getEvent(String orgUnitId, String programId, long eventId,

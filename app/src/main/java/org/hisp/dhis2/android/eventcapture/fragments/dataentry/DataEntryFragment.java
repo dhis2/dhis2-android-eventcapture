@@ -27,6 +27,7 @@
 package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -326,8 +327,44 @@ public class DataEntryFragment extends Fragment
 
     @Override
     public void doBack() {
-        getFragmentManager().popBackStack();
+        if (haveValuesChanged()) {
+            Dhis2.getInstance().showConfirmDialog(getActivity(),
+                    getString(R.string.discard), getString(R.string.discard_confirm_changes),
+                    getString(R.string.yes_option), getString(R.string.no_option),
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            getFragmentManager().popBackStack();
+                        }
+                    });
+        } else {
+            getFragmentManager().popBackStack();
+        }
     }
+
+    private boolean haveValuesChanged() {
+        if (mForm == null || mForm.getEvent() == null
+                || mForm.getEvent().getDataValues() == null) {
+            return false;
+        }
+
+        for (DataValue dataValue : mForm.getEvent().getDataValues()) {
+            Map<String, DataValue> originalValues = mForm.getDataValues();
+            if (dataValue == null || !originalValues.containsKey(dataValue.dataElement)) {
+                continue;
+            }
+
+            DataValue originalDataValue = originalValues.get(dataValue.dataElement);
+            if (originalDataValue != null && originalDataValue.getValue() != null) {
+                if (!originalDataValue.getValue().equals(dataValue.getValue())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
 
     @Subscribe
     public void onRowValueChanged(EditTextValueChangedEvent event) {
@@ -490,7 +527,7 @@ public class DataEntryFragment extends Fragment
                 mForm.getEvent().save(true);
 
                 Dhis2.sendLocalData(getActivity().getBaseContext());
-                doBack();
+                getFragmentManager().popBackStack();
             } else {
                 ValidationErrorDialog dialog = ValidationErrorDialog
                         .newInstance(errors);

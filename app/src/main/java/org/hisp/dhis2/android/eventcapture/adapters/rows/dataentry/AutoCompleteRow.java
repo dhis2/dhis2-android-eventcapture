@@ -180,14 +180,10 @@ public final class AutoCompleteRow implements DataEntryRow {
 
         @Override
         public void afterTextChanged(Editable s) {
-            String name;
-            if (s != null) {
-                name = s.toString();
+            String name = s != null ? s.toString() : EMPTY_FIELD;
+            if (isEmpty(name)) {
+                value.setValue(EMPTY_FIELD);
             } else {
-                name = EMPTY_FIELD;
-            }
-
-            if (isEmpty(name) || nameToCodeMap.containsKey(name)) {
                 value.setValue(nameToCodeMap.get(name));
             }
 

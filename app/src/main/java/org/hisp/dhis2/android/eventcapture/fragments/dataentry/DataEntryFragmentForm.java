@@ -38,7 +38,7 @@ class DataEntryFragmentForm {
     private Event event;
     private ProgramStage stage;
     private List<DataEntryFragmentSection> sections;
-    private List<DataValue> dataValues;
+    private Map<String, DataValue> dataValues;
     private Map<String, String> dataElementNames;
     private List<IndicatorRow> indicatorRows;
 
@@ -66,11 +66,11 @@ class DataEntryFragmentForm {
         return stage;
     }
 
-    public List<DataValue> getDataValues() {
+    public Map<String, DataValue> getDataValues() {
         return dataValues;
     }
 
-    public void setDataValues(List<DataValue> dataValues) {
+    public void setDataValues(Map<String, DataValue> dataValues) {
         this.dataValues = dataValues;
     }
 
