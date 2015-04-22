@@ -181,14 +181,18 @@ public final class AutoCompleteRow implements DataEntryRow {
         @Override
         public void afterTextChanged(Editable s) {
             String name = s != null ? s.toString() : EMPTY_FIELD;
+            String newValue;
             if (isEmpty(name)) {
-                value.setValue(EMPTY_FIELD);
+                newValue = EMPTY_FIELD;
             } else {
-                value.setValue(nameToCodeMap.get(name));
+                newValue = nameToCodeMap.get(name);
             }
 
-            EventCaptureApplication.getEventBus()
-                    .post(new EditTextValueChangedEvent());
+            if (!newValue.equals(value.getValue())) {
+                EventCaptureApplication.getEventBus()
+                        .post(new EditTextValueChangedEvent());
+                value.setValue(newValue);
+            }
         }
     }
 

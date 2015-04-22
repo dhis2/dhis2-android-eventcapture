@@ -192,8 +192,8 @@ public class SelectProgramFragment extends Fragment
     public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
-            modelsToTrack.add(Event.class);
-            modelsToTrack.add(FailedItem.class);
+            // modelsToTrack.add(Event.class);
+            // modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
                     new SelectProgramFragmentQuery(mState.getOrgUnitId(), mState.getProgramId()));

@@ -253,12 +253,14 @@ public class DataEntryFragment extends Fragment
         super.onSaveInstanceState(outState);
     }
 
+    long timerStart = -1;
     @Override
     public Loader<DataEntryFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             // Adding Tables for tracking here is dangerous (since MetaData updates in background
             // can trigger reload of values from db which will reset all fields).
             // Hence, it would be more safe not to track any changes in any tables
+            timerStart = System.currentTimeMillis();
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             Bundle fragmentArguments = args.getBundle(EXTRA_ARGUMENTS);
             return new DbLoader<>(
@@ -278,6 +280,7 @@ public class DataEntryFragment extends Fragment
             mProgressBar.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
 
+            System.out.println("TIME: " + (System.currentTimeMillis() - timerStart));
             mForm = data;
             if (data.getStage() != null &&
                     data.getStage().captureCoordinates) {
