@@ -100,7 +100,7 @@ public final class AutoCompleteRow implements DataEntryRow {
 
             imageButton.setOnClickListener(dropButtonListener);
             autoComplete.addTextChangedListener(onTextChangedListener);
-            autoComplete.setOnFocusChangeListener(onFocusListener);
+            //autoComplete.setOnFocusChangeListener(onFocusListener);
 
             view.setTag(holder);
         } else {
@@ -181,17 +181,15 @@ public final class AutoCompleteRow implements DataEntryRow {
         @Override
         public void afterTextChanged(Editable s) {
             String name = s != null ? s.toString() : EMPTY_FIELD;
-            String newValue;
-            if (isEmpty(name)) {
+            String newValue = nameToCodeMap.get(name);
+            if (isEmpty(newValue)) {
                 newValue = EMPTY_FIELD;
-            } else {
-                newValue = nameToCodeMap.get(name);
             }
 
             if (!newValue.equals(value.getValue())) {
+                value.setValue(newValue);
                 EventCaptureApplication.getEventBus()
                         .post(new EditTextValueChangedEvent());
-                value.setValue(newValue);
             }
         }
     }
@@ -210,6 +208,7 @@ public final class AutoCompleteRow implements DataEntryRow {
 
         @Override
         public void onFocusChange(View view, boolean hasFocus) {
+            System.out.println("ON_FOCUS_CHANGED: " + hasFocus);
             if (!hasFocus) {
                 String choice = autoComplete.getText().toString();
                 if (!nameToCodeMap.containsKey(choice)) {

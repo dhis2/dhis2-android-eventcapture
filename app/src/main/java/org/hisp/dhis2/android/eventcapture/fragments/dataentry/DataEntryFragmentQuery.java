@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import static android.text.TextUtils.isEmpty;
 import static org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController.getDataElement;
 
 class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
@@ -180,37 +181,45 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
 
     private static DataEntryRow createDataEntryRow(DataElement dataElement, DataValue dataValue) {
         DataEntryRow row;
+
+        String dataElementName;
+        if (!isEmpty(dataElement.displayFormName)) {
+            dataElementName = dataElement.displayFormName;
+        } else {
+            dataElementName = dataElement.displayName;
+        }
+
         if (dataElement.getOptionSet() != null) {
             OptionSet optionSet = MetaDataController.getOptionSet(dataElement.optionSet);
             if (optionSet == null) {
-                row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.TEXT);
+                row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.TEXT);
             } else {
-                row = new AutoCompleteRow(dataElement.name, dataValue, optionSet);
+                row = new AutoCompleteRow(dataElementName, dataValue, optionSet);
             }
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TEXT)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.TEXT);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.TEXT);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_LONG_TEXT)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.LONG_TEXT);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NUMBER)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.NUMBER);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.NUMBER);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_INT)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.INTEGER);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_ZERO_OR_POSITIVE_INT)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER_ZERO_OR_POSITIVE);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.INTEGER_ZERO_OR_POSITIVE);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_POSITIVE_INT)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER_POSITIVE);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.INTEGER_POSITIVE);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_NEGATIVE_INT)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.INTEGER_NEGATIVE);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.INTEGER_NEGATIVE);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_BOOL)) {
-            row = new RadioButtonsRow(dataElement.name, dataValue, DataEntryRowTypes.BOOLEAN);
+            row = new RadioButtonsRow(dataElementName, dataValue, DataEntryRowTypes.BOOLEAN);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_TRUE_ONLY)) {
-            row = new CheckBoxRow(dataElement.name, dataValue);
+            row = new CheckBoxRow(dataElementName, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_DATE)) {
-            row = new DatePickerRow(dataElement.name, dataValue);
+            row = new DatePickerRow(dataElementName, dataValue);
         } else if (dataElement.getType().equalsIgnoreCase(DataElement.VALUE_TYPE_STRING)) {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.LONG_TEXT);
         } else {
-            row = new EditTextRow(dataElement.name, dataValue, DataEntryRowTypes.LONG_TEXT);
+            row = new EditTextRow(dataElementName, dataValue, DataEntryRowTypes.LONG_TEXT);
         }
         return row;
     }

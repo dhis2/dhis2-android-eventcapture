@@ -82,6 +82,7 @@ public class DataEntryFragment extends Fragment
         OnBackPressedListener, AdapterView.OnItemSelectedListener {
     public static final String TAG = DataEntryFragment.class.getSimpleName();
     private static final int LOADER_ID = 1;
+    private static final int INITIAL_POSITION = 0;
 
     private static final String EXTRA_ARGUMENTS = "extra:Arguments";
     private static final String EXTRA_SAVED_INSTANCE_STATE = "extra:savedInstanceState";
@@ -254,6 +255,7 @@ public class DataEntryFragment extends Fragment
     }
 
     long timerStart = -1;
+
     @Override
     public Loader<DataEntryFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
@@ -319,6 +321,7 @@ public class DataEntryFragment extends Fragment
                 mSpinnerAdapter.getItem(position);
 
         if (section != null) {
+            mListView.smoothScrollToPosition(INITIAL_POSITION);
             mListViewAdapter.swapData(section.getRows());
         }
     }
