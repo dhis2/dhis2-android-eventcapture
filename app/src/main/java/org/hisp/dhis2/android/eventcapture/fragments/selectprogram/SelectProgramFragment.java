@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
@@ -28,6 +29,8 @@ import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
@@ -237,27 +240,53 @@ public class SelectProgramFragment extends Fragment
             switch (eventClick.getStatus()) {
                 case SENT:
                     Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.status_sent),
+                            getString(R.string.event_sent),
                             getString(R.string.status_sent_description),
                             R.drawable.ic_from_server
                     );
                     break;
                 case OFFLINE:
                     Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.status_offline),
+                            getString(R.string.event_offline),
                             getString(R.string.status_offline_description),
                             R.drawable.ic_offline
                     );
                     break;
-                case ERROR:
+                case ERROR: {
+                    String message = getErrorDescription(eventClick.getEvent());
                     Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.status_error),
-                            getString(R.string.status_error_description),
-                            R.drawable.ic_event_error
+                            getString(R.string.event_error),
+                            message, R.drawable.ic_event_error
                     );
                     break;
+                }
             }
         }
+    }
+
+    private String getErrorDescription(Event event) {
+        FailedItem failedItem =
+                Select.byId(FailedItem.class, event.getLocalId());
+
+        if (failedItem != null) {
+            if (failedItem.httpStatusCode == 401) {
+                return getString(R.string.error_401_description);
+            }
+
+            if (failedItem.httpStatusCode == 408) {
+                return getString(R.string.error_408_description);
+            }
+
+            if (failedItem.httpStatusCode >= 400 && failedItem.httpStatusCode < 500) {
+                return getString(R.string.error_series_400_description);
+            }
+
+            if (failedItem.httpStatusCode >= 500) {
+                return getString(R.string.error_series_500_description);
+            }
+        }
+
+        return getString(R.string.unknown_error);
     }
 
     @Override
