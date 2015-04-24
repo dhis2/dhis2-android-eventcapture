@@ -92,6 +92,7 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
                 showSelectProgramFragment();
             } else {
                 //todo: notify the user that data is missing and request to try to re-load.
+                showSelectProgramFragment();
             }
         } else if (event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
             startActivity(new Intent(MainActivity.this,
