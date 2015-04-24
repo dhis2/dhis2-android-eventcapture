@@ -65,7 +65,6 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         setSupportActionBar(toolbar);
 
         Dhis2.activatePeriodicSynchronizer(this);
-
         if (Dhis2.isInitialDataLoaded(this)) {
             showSelectProgramFragment();
         } else if (Dhis2.isLoadingInitial()) {
@@ -88,22 +87,11 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
     @Subscribe
     public void onReceiveMessage(MessageEvent event) {
         Log.d(TAG, "onReceiveMessage");
-        if (event.eventType == BaseEvent.EventType.showRegisterEventFragment) {
-            //showRegisterEventFragment();
-        } else if (event.eventType == BaseEvent.EventType.showSelectProgramFragment) {
-            //showSelectProgramFragment();
-        } else if (event.eventType == BaseEvent.EventType.logout) {
-            //logout();
-        } else if (event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
+        if (event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
             if (Dhis2.isInitialDataLoaded(this)) {
                 showSelectProgramFragment();
             } else {
                 //todo: notify the user that data is missing and request to try to re-load.
-            }
-        } else if (event.eventType == BaseEvent.EventType.showDataEntryFragment) {
-            if (event.item != null) {
-                long localEventId = (long) event.item;
-                // showEditEventFragment(localEventId);
             }
         } else if (event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
             startActivity(new Intent(MainActivity.this,
@@ -114,16 +102,12 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
 
     public void showLoadingFragment() {
         setTitle("Loading initial data");
-        // if (loadingFragment == null) loadingFragment = new LoadingFragment();
         switchFragment(new LoadingFragment(), LoadingFragment.TAG);
     }
 
     public void showSelectProgramFragment() {
         setTitle("Event Capture");
-        // if (selectProgramFragment == null) selectProgramFragment = new SelectProgramFragment();
-        //showFragment(selectProgramFragment);
         switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
-        //selectProgramFragment.setSelection(lastSelectedOrgUnit, lastSelectedProgram);
     }
 
     @Override
@@ -154,6 +138,7 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         if (fragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
+                    .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
                     .replace(R.id.fragment_container, fragment)
                     .addToBackStack(fragmentTag)
                     .commit();
