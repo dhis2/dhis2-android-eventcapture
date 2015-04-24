@@ -158,7 +158,7 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
             event.setEvent(Dhis2.QUEUED + UUID.randomUUID().toString());
             event.setFromServer(false);
             event.setDueDate(Utils.getCurrentDate());
-            event.setEventDate(Utils.getCurrentDate());
+            //event.setEventDate(Utils.getCurrentDate());
             event.setOrganisationUnitId(orgUnitId);
             event.setProgramId(programId);
             event.setProgramStageId(programStage.getId());

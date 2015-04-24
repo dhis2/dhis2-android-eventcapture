@@ -34,7 +34,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.hisp.dhis2.android.eventcapture.EditTextValueChangedEvent;
+import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.AutoCompleteAdapter;

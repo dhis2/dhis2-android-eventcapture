@@ -134,18 +134,19 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
 
         Collections.sort(events, new EventComparator());
         for (Event event : events) {
-            eventEventRows.add(createEventItem(event, elementsToShow,
+            eventEventRows.add(createEventItem(context,
+                    event, elementsToShow,
                     codeToName, failedEventIds));
         }
 
         return eventEventRows;
     }
 
-    private EventItemRow createEventItem(Event event, List<String> elementsToShow,
+    private EventItemRow createEventItem(Context context, Event event, List<String> elementsToShow,
                                          Map<String, String> codeToName,
                                          Set<String> failedEventIds) {
-        EventItemRow eventItem = new EventItemRow();
-        eventItem.setEventId(event.getLocalId());
+        EventItemRow eventItem = new EventItemRow(context);
+        eventItem.setEvent(event);
 
         if (event.isFromServer()) {
             eventItem.setStatus(EventItemStatus.SENT);

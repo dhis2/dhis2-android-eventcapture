@@ -56,7 +56,7 @@ import android.widget.TextView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis2.android.eventcapture.EditTextValueChangedEvent;
+import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.MainActivity;
@@ -375,6 +375,8 @@ public class DataEntryFragment extends Fragment
             DataValue originalDataValue = originalValues.get(dataValue.dataElement);
             if (originalDataValue != null && originalDataValue.getValue() != null) {
                 if (!originalDataValue.getValue().equals(dataValue.getValue())) {
+                    System.out.println("Value changed [original|modified]: " +
+                            originalDataValue.getValue() + "|" + dataValue.getValue());
                     return true;
                 }
             }

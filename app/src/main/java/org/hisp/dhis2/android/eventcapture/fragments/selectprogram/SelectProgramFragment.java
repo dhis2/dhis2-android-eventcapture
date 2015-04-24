@@ -11,30 +11,30 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import com.raizlabs.android.dbflow.structure.Model;
+import com.squareup.otto.Subscribe;
 
+import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.eventcapture.events.OnEventClick;
 import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
+import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
-import org.hisp.dhis2.android.sdk.persistence.models.Event;
-import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectProgramFragment extends Fragment
-        implements View.OnClickListener, AdapterView.OnItemClickListener,
-        OrgUnitDialogFragment.OnOrgUnitSetListener,
+        implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
         ProgramDialogFragment.OnProgramSetListener,
         LoaderManager.LoaderCallbacks<List<EventRow>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
@@ -95,7 +95,6 @@ public class SelectProgramFragment extends Fragment
 
         mListView.addHeaderView(header, TAG, false);
         mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(this);
 
         mOrgUnitButton = (CardTextViewButton) header.findViewById(R.id.select_organisation_unit);
         mProgramButton = (CardTextViewButton) header.findViewById(R.id.select_program);
@@ -119,6 +118,18 @@ public class SelectProgramFragment extends Fragment
         }
 
         onRestoreState(true);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        EventCaptureApplication.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        EventCaptureApplication.getEventBus().register(this);
     }
 
     @Override
@@ -214,12 +225,39 @@ public class SelectProgramFragment extends Fragment
         mAdapter.swapData(null);
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        DataEntryFragment fragment2 = DataEntryFragment.newInstance(
-                mState.getOrgUnitId(), mState.getProgramId(), id
-        );
-        mNavigationHandler.switchFragment(fragment2, DataEntryFragment.TAG);
+    @Subscribe
+    public void onItemClick(OnEventClick eventClick) {
+        if (eventClick.isOnDescriptionClick()) {
+            DataEntryFragment fragment = DataEntryFragment.newInstance(
+                    mState.getOrgUnitId(), mState.getProgramId(),
+                    eventClick.getEvent().getLocalId()
+            );
+            mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG);
+        } else {
+            switch (eventClick.getStatus()) {
+                case SENT:
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.status_sent),
+                            getString(R.string.status_sent_description),
+                            R.drawable.ic_from_server
+                    );
+                    break;
+                case OFFLINE:
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.status_offline),
+                            getString(R.string.status_offline_description),
+                            R.drawable.ic_offline
+                    );
+                    break;
+                case ERROR:
+                    Dhis2.getInstance().showErrorDialog(getActivity(),
+                            getString(R.string.status_error),
+                            getString(R.string.status_error_description),
+                            R.drawable.ic_event_error
+                    );
+                    break;
+            }
+        }
     }
 
     @Override

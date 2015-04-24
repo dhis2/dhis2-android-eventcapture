@@ -37,13 +37,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.eventcapture.events.OnEventClick;
+import org.hisp.dhis2.android.sdk.persistence.models.Event;
+
+import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 
 /**
  * Created by araz on 03.04.2015.
  */
 public final class EventItemRow implements EventRow {
-    private long mEventId;
+    private Event mEvent;
     private String mFirstItem;
     private String mSecondItem;
     private String mThirdItem;
@@ -57,12 +62,22 @@ public final class EventItemRow implements EventRow {
     private String mError;
     private String mOffline;
 
+    public EventItemRow(Context context) {
+        isNull(context, "Context must not be null");
+
+        mOfflineDrawable = context.getResources().getDrawable(R.drawable.ic_offline);
+        mErrorDrawable = context.getResources().getDrawable(R.drawable.ic_event_error);
+        mSentDrawable = context.getResources().getDrawable(R.drawable.ic_from_server);
+
+        mSent = context.getResources().getString(R.string.event_sent);
+        mError = context.getResources().getString(R.string.event_error);
+        mOffline = context.getResources().getString(R.string.event_offline);
+    }
+
     @Override
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
         ViewHolder holder;
-
-        initResources(inflater.getContext());
 
         if (convertView == null) {
             view = inflater.inflate(R.layout.listview_event_item, container, false);
@@ -71,14 +86,20 @@ public final class EventItemRow implements EventRow {
                     (TextView) view.findViewById(R.id.second_event_item),
                     (TextView) view.findViewById(R.id.third_event_item),
                     (ImageView) view.findViewById(R.id.status_image_view),
-                    (TextView) view.findViewById(R.id.status_text_view)
+                    (TextView) view.findViewById(R.id.status_text_view),
+                    new OnEventInternalClickListener()
             );
             view.setTag(holder);
+            view.setOnClickListener(holder.listener);
+            view.findViewById(R.id.status_container)
+                    .setOnClickListener(holder.listener);
         } else {
             view = convertView;
             holder = (ViewHolder) view.getTag();
         }
 
+        holder.listener.setEvent(mEvent);
+        holder.listener.setStatus(mStatus);
         holder.firstItem.setText(mFirstItem);
         holder.secondItem.setText(mSecondItem);
         holder.thirdItem.setText(mThirdItem);
@@ -111,7 +132,11 @@ public final class EventItemRow implements EventRow {
 
     @Override
     public long getId() {
-        return mEventId;
+        if (mEvent != null) {
+            return mEvent.getLocalId();
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -119,22 +144,8 @@ public final class EventItemRow implements EventRow {
         return true;
     }
 
-    private void initResources(Context context) {
-        if (mOfflineDrawable == null || mErrorDrawable == null || mSentDrawable == null) {
-            mOfflineDrawable = context.getResources().getDrawable(R.drawable.ic_offline);
-            mErrorDrawable = context.getResources().getDrawable(R.drawable.ic_event_error);
-            mSentDrawable = context.getResources().getDrawable(R.drawable.ic_from_server);
-        }
-
-        if (mSent == null || mError == null || mOffline == null) {
-            mSent = context.getResources().getString(R.string.event_sent);
-            mError = context.getResources().getString(R.string.event_error);
-            mOffline = context.getResources().getString(R.string.event_offline);
-        }
-    }
-
-    public void setEventId(long eventId) {
-        mEventId = eventId;
+    public void setEvent(Event event) {
+        mEvent = event;
     }
 
     public void setSecondItem(String secondItem) {
@@ -163,17 +174,44 @@ public final class EventItemRow implements EventRow {
         public final TextView thirdItem;
         public final ImageView statusImageView;
         public final TextView statusTextView;
+        public final OnEventInternalClickListener listener;
 
         private ViewHolder(TextView firstItem,
                            TextView secondItem,
                            TextView thirdItem,
                            ImageView statusImageView,
-                           TextView statusTextView) {
+                           TextView statusTextView,
+                           OnEventInternalClickListener listener) {
             this.firstItem = firstItem;
             this.secondItem = secondItem;
             this.thirdItem = thirdItem;
             this.statusImageView = statusImageView;
             this.statusTextView = statusTextView;
+            this.listener = listener;
+        }
+    }
+
+    private static class OnEventInternalClickListener implements View.OnClickListener {
+        private Event event;
+        private EventItemStatus status;
+
+        public void setEvent(Event event) {
+            this.event = event;
+        }
+
+        public void setStatus(EventItemStatus status) {
+            this.status = status;
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (view.getId() == R.id.event_container) {
+                EventCaptureApplication.getEventBus()
+                        .post(new OnEventClick(event, status, true));
+            } else if (view.getId() == R.id.status_container) {
+                EventCaptureApplication.getEventBus()
+                        .post(new OnEventClick(event, status, false));
+            }
         }
     }
 }

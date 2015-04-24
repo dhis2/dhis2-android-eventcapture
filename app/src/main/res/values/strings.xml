@@ -42,6 +42,14 @@
     <string name="event_error">Error</string>
     <string name="report_date">Report date</string>
 
+    <string name="status_sent">Status: sent</string>
+    <string name="status_offline">Status: offline</string>
+    <string name="status_error">Status: error</string>
+
+    <string name="status_sent_description">This item has been successfully synchronized with the server.</string>
+    <string name="status_offline_description">This item has not yet been synchronized with the server.</string>
+    <string name="status_error_description">Something went wrong. Please, try to re-upload event or contact administrator.</string>
+
     <string name="validation_error">Please, enter next compulsory fields</string>
 
     <string name="enter_coordinates">Enter coordinates</string>
