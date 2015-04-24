@@ -30,6 +30,7 @@
 
 <resources>
     <color name="transparent">#00000000</color>
+    <color name="transparent_blue">#E3F2FD</color>
 
     <color name="button_re_log_in_state_enabled_false">#B0BEC5</color>
     <color name="button_re_log_in_state_unpressed">#FF1F70C3</color>

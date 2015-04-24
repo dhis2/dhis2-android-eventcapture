@@ -27,6 +27,7 @@
 package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
@@ -44,11 +45,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
@@ -69,6 +72,8 @@ import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.Utils;
 import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,6 +86,10 @@ public class DataEntryFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<DataEntryFragmentForm>,
         OnBackPressedListener, AdapterView.OnItemSelectedListener {
     public static final String TAG = DataEntryFragment.class.getSimpleName();
+
+    private static final String EMPTY_FIELD = "";
+    private static final String DATE_FORMAT = "YYYY-MM-dd";
+
     private static final int LOADER_ID = 1;
     private static final int INITIAL_POSITION = 0;
 
@@ -284,11 +293,14 @@ public class DataEntryFragment extends Fragment
 
             System.out.println("TIME: " + (System.currentTimeMillis() - timerStart));
             mForm = data;
+
+            if (data.getStage() != null) {
+                attachDatePicker();
+            }
+
             if (data.getStage() != null &&
                     data.getStage().captureCoordinates) {
-                Double latitude = data.getEvent().getLatitude();
-                Double longitude = data.getEvent().getLongitude();
-                attachCoordinatePicker(latitude, longitude);
+                attachCoordinatePicker();
             }
 
             if (!data.getSections().isEmpty()) {
@@ -422,14 +434,72 @@ public class DataEntryFragment extends Fragment
         }
     }
 
-    private void attachCoordinatePicker(Double latitude, Double longitude) {
+    private void attachDatePicker() {
+        if (mForm != null && isAdded()) {
+            final View reportDatePicker = LayoutInflater.from(getActivity())
+                    .inflate(R.layout.fragment_data_entry_date_picker, mListView, false);
+            final TextView label = (TextView) reportDatePicker
+                    .findViewById(R.id.text_label);
+            final EditText datePickerEditText = (EditText) reportDatePicker
+                    .findViewById(R.id.date_picker_edit_text);
+            final ImageButton clearDateButton = (ImageButton) reportDatePicker
+                    .findViewById(R.id.clear_edit_text);
+
+            final DatePickerDialog.OnDateSetListener dateSetListener
+                    = new DatePickerDialog.OnDateSetListener() {
+                @Override public void onDateSet(DatePicker view, int year,
+                                                int monthOfYear, int dayOfMonth) {
+                    LocalDate date = new LocalDate(year, monthOfYear + 1, dayOfMonth);
+                    String newValue = date.toString(DATE_FORMAT);
+                    datePickerEditText.setText(newValue);
+                    mForm.getEvent().setEventDate(newValue);
+                }
+            };
+            clearDateButton.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    datePickerEditText.setText(EMPTY_FIELD);
+                    mForm.getEvent().setEventDate(EMPTY_FIELD);
+                }
+            });
+            datePickerEditText.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    LocalDate currentDate = new LocalDate();
+                    DatePickerDialog picker = new DatePickerDialog(getActivity(),
+                            dateSetListener, currentDate.getYear(),
+                            currentDate.getMonthOfYear() - 1,
+                            currentDate.getDayOfMonth());
+                    picker.getDatePicker().setMaxDate(DateTime.now().getMillis());
+                    picker.show();
+                }
+            });
+
+            String reportDateDescription = mForm.getStage().reportDateDescription == null ?
+                    getString(R.string.report_date) : mForm.getStage().reportDateDescription;
+            label.setText(reportDateDescription);
+            if (mForm.getEvent() != null && mForm.getEvent().getEventDate() != null) {
+                DateTime date = DateTime.parse(mForm.getEvent().getEventDate());
+                String newValue = date.toString(DATE_FORMAT);
+                datePickerEditText.setText(newValue);
+            }
+
+            mListView.addHeaderView(reportDatePicker);
+        }
+    }
+
+    private void attachCoordinatePicker() {
+        if (mForm == null || mForm.getEvent() == null || !isAdded()) {
+            return;
+        }
         // Prepare GPS for work. Note, we should use base
         // context in order not to leak activity
         Dhis2.activateGps(getActivity().getBaseContext());
 
+        Double latitude = mForm.getEvent().getLatitude();
+        Double longitude = mForm.getEvent().getLongitude();
+
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View view = inflater.inflate(
-                R.layout.fragment_data_entry_header, mListView, false);
+                R.layout.fragment_data_entry_coordinate_picker, mListView, false);
 
         mLatitude = (EditText) view.findViewById(R.id.latitude_edittext);
         mLongitude = (EditText) view.findViewById(R.id.longitude_edittext);
@@ -543,11 +613,22 @@ public class DataEntryFragment extends Fragment
     }
 
     private ArrayList<String> isEventValid() {
+        ArrayList<String> errors = new ArrayList<>();
+
+        if (mForm == null || mForm.getEvent() == null || mForm.getStage() == null) {
+            return errors;
+        }
+
+        if (isEmpty(mForm.getEvent().getEventDate())) {
+            String reportDateDescription = mForm.getStage().reportDateDescription == null ?
+                    getString(R.string.report_date) : mForm.getStage().reportDateDescription;
+            errors.add(reportDateDescription);
+        }
+
         Map<String, ProgramStageDataElement> dataElements = toMap(
                 mForm.getStage().getProgramStageDataElements()
         );
 
-        ArrayList<String> errors = new ArrayList<>();
         for (DataValue dataValue : mForm.getEvent().getDataValues()) {
             ProgramStageDataElement dataElement = dataElements.get(dataValue.dataElement);
             if (dataElement.compulsory && isEmpty(dataValue.getValue())) {
