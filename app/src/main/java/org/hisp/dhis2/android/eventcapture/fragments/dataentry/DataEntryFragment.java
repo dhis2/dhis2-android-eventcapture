@@ -398,6 +398,9 @@ public class DataEntryFragment extends Fragment
         for (IndicatorRow indicatorRow : mForm.getIndicatorRows()) {
             String newValue = ProgramIndicatorService.
                     getProgramIndicatorValue(mForm.getEvent(), indicatorRow.getIndicator());
+            if(newValue==null) {
+                newValue = "";
+            }
             if (!newValue.equals(indicatorRow.getValue())) {
                 indicatorRow.updateValue(newValue);
             }
