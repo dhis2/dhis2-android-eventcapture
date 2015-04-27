@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -53,6 +54,7 @@ public class SelectProgramFragment extends Fragment
     private FloatingActionButton mRegisterEventButton;
 
     private SelectProgramFragmentState mState;
+    private SelectProgramFragmentPreferences mPrefs;
 
     private INavigationHandler mNavigationHandler;
 
@@ -88,6 +90,9 @@ public class SelectProgramFragment extends Fragment
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        mPrefs = new SelectProgramFragmentPreferences(
+                getActivity().getApplicationContext());
+
         mListView = (ListView) view.findViewById(R.id.event_listview);
         mAdapter = new EventAdapter(getLayoutInflater(savedInstanceState));
         View header = getLayoutInflater(savedInstanceState).inflate(
@@ -117,7 +122,16 @@ public class SelectProgramFragment extends Fragment
         }
 
         if (mState == null) {
+            // restoring last selection of program
+            Pair<String, String> orgUnit = mPrefs.getOrgUnit();
+            Pair<String, String> program = mPrefs.getProgram();
             mState = new SelectProgramFragmentState();
+            if (orgUnit != null) {
+                mState.setOrgUnit(orgUnit.first, orgUnit.second);
+                if (program != null) {
+                    mState.setProgram(program.first, program.second);
+                }
+            }
         }
 
         onRestoreState(true);
@@ -187,6 +201,10 @@ public class SelectProgramFragment extends Fragment
 
         mState.setOrgUnit(orgUnitId, orgUnitLabel);
         mState.resetProgram();
+
+        mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
+        mPrefs.putProgram(null);
+
         handleViews(0);
     }
 
@@ -195,6 +213,7 @@ public class SelectProgramFragment extends Fragment
         mProgramButton.setText(programName);
 
         mState.setProgram(programId, programName);
+        mPrefs.putProgram(new Pair<>(programId, programName));
         handleViews(1);
 
         mProgressBar.setVisibility(View.VISIBLE);
@@ -206,8 +225,8 @@ public class SelectProgramFragment extends Fragment
     public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
-            // modelsToTrack.add(Event.class);
-            // modelsToTrack.add(FailedItem.class);
+            modelsToTrack.add(Event.class);
+            modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
                     new SelectProgramFragmentQuery(mState.getOrgUnitId(), mState.getProgramId()));
