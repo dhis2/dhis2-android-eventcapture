@@ -35,7 +35,7 @@ import static org.hisp.dhis2.android.sdk.utils.Preconditions.isNull;
 
 public abstract class AbsAdapter<T> extends BaseAdapter {
     private final LayoutInflater mInflater;
-    private List<T> mData;
+    protected List<T> mData;
 
     public AbsAdapter(LayoutInflater inflater) {
         mInflater = isNull(inflater, "LayoutInflater must not be null");

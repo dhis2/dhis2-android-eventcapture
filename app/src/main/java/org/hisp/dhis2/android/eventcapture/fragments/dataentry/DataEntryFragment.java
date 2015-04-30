@@ -38,6 +38,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,10 +69,14 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
+import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramRule;
+import org.hisp.dhis2.android.sdk.persistence.models.ProgramRuleAction;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
 import org.hisp.dhis2.android.sdk.utils.Utils;
 import org.hisp.dhis2.android.sdk.utils.services.ProgramIndicatorService;
+import org.hisp.dhis2.android.sdk.utils.services.ProgramRuleService;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -115,6 +120,13 @@ public class DataEntryFragment extends Fragment
 
     private INavigationHandler mNavigationHandler;
     private DataEntryFragmentForm mForm;
+
+    private ProgramRuleHelper programRuleHelper;
+
+    private View reportDatePicker;
+    private View coordinatePickerView;
+
+    private boolean refreshing = false;
 
     public static DataEntryFragment newInstance(String unitId, String programId) {
         DataEntryFragment fragment = new DataEntryFragment();
@@ -224,6 +236,13 @@ public class DataEntryFragment extends Fragment
         mListViewAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
         mListView.setVisibility(View.VISIBLE);
+
+        reportDatePicker = LayoutInflater.from(getActivity())
+                .inflate(R.layout.fragment_data_entry_date_picker, mListView, false);
+        mListView.addHeaderView(reportDatePicker);
+
+        coordinatePickerView = LayoutInflater.from(getActivity())
+                .inflate(R.layout.fragment_data_entry_coordinate_picker, mListView, false);
         mListView.setAdapter(mListViewAdapter);
     }
 
@@ -293,6 +312,7 @@ public class DataEntryFragment extends Fragment
 
             System.out.println("TIME: " + (System.currentTimeMillis() - timerStart));
             mForm = data;
+            programRuleHelper = new ProgramRuleHelper(mForm.getStage().getProgram());
 
             if (data.getStage() != null) {
                 attachDatePicker();
@@ -301,6 +321,9 @@ public class DataEntryFragment extends Fragment
             if (data.getStage() != null &&
                     data.getStage().captureCoordinates) {
                 attachCoordinatePicker();
+            } else {
+                if(coordinatePickerView!=null)
+                    coordinatePickerView.setVisibility(View.INVISIBLE);
             }
 
             if (!data.getSections().isEmpty()) {
@@ -310,6 +333,7 @@ public class DataEntryFragment extends Fragment
                 } else {
                     DataEntryFragmentSection section = data.getSections().get(0);
                     mListViewAdapter.swapData(section.getRows());
+                    evaluateRules();
                 }
             }
         }
@@ -335,6 +359,7 @@ public class DataEntryFragment extends Fragment
         if (section != null) {
             mListView.smoothScrollToPosition(INITIAL_POSITION);
             mListViewAdapter.swapData(section.getRows());
+            evaluateRules();
         }
     }
 
@@ -385,40 +410,99 @@ public class DataEntryFragment extends Fragment
         return false;
     }
 
+    /**
+     * Evaluates the ProgramRules for the current program and the current data values and applies
+     * the results. This is for example used for hiding views if a rule contains skip logic
+     */
+    public void evaluateRules() {
+        List<ProgramRule> rules = mForm.getStage().getProgram().getProgramRules();
+        mListViewAdapter.resetHiding();
+        for(ProgramRule programRule: rules) {
+            boolean actionTrue = ProgramRuleService.evaluate(programRule.condition, mForm.getEvent());
+                for(ProgramRuleAction programRuleAction: programRule.getProgramRuleActions()) {
+                    applyProgramRuleAction(programRuleAction, actionTrue);
+                }
+        }
+    }
+
+    public void applyProgramRuleAction(ProgramRuleAction programRuleAction, boolean actionTrue) {
+        switch (programRuleAction.programRuleActionType) {
+            case ProgramRuleAction.TYPE_HIDEFIELD:
+                if(actionTrue) {
+                    hideField(programRuleAction.dataElement);
+                }
+                break;
+        }
+    }
+
+    public void hideField(String dataElement) {
+        mListViewAdapter.hideIndex(dataElement);
+        refreshListView();
+    }
+
+    private void refreshListView() {
+        Activity activity = getActivity();
+        if(activity == null) {
+            refreshing = false;
+            return;
+        }
+        activity.runOnUiThread(new Thread() {
+            public void run() {
+                int start = mListView.getFirstVisiblePosition();
+                int end = mListView.getLastVisiblePosition();
+                for (int pos = 0; pos <= end - start; pos++) {
+                    View view = mListView.getChildAt(pos);
+                    if (view != null ) {
+                        int adapterPosition = view.getId();
+                        if (adapterPosition < 0 || adapterPosition >= mListViewAdapter.getCount()) continue;
+                        if (!view.hasFocus()) {
+                            mListViewAdapter.getView(adapterPosition, view, mListView);
+                        }
+                    }
+                }
+                refreshing = false;
+            }
+        });
+    }
 
     @Subscribe
-    public void onRowValueChanged(EditTextValueChangedEvent event) {
+    public void onRowValueChanged(final EditTextValueChangedEvent event) {
         if (mForm == null || mForm.getIndicatorRows() == null) {
             return;
         }
+        if(refreshing) return; //we don't want to stack this up since it runs every time a character is entered for example
+        refreshing = true;
 
-        /*
-        * updating indicator values in rows
-        * */
-        for (IndicatorRow indicatorRow : mForm.getIndicatorRows()) {
-            String newValue = ProgramIndicatorService.
-                    getProgramIndicatorValue(mForm.getEvent(), indicatorRow.getIndicator());
-            if(newValue==null) {
-                newValue = "";
-            }
-            if (!newValue.equals(indicatorRow.getValue())) {
-                indicatorRow.updateValue(newValue);
-            }
-        }
+        new Thread() {
+            public void run() {
+                /**
+                 * Updating views based on ProgramRules
+                 */
+                if(event.isDataValue() && programRuleHelper.dataElementInRule(event.getId())) {
+                    evaluateRules();
+                }
 
-        /*
-        * Calling adapter's getView in order to render changes in visible IndicatorRows
-        * */
-        int start = mListView.getFirstVisiblePosition();
-        int end = mListView.getLastVisiblePosition();
-        for (int pos = 0; pos <= end - start; pos++) {
-            View view = mListView.getChildAt(pos);
-            if (view != null && view.getTag()
-                    instanceof IndicatorRow.IndicatorViewHolder) {
-                int adapterPosition = view.getId();
-                mListViewAdapter.getView(adapterPosition, view, mListView);
+                /*
+                * updating indicator values in rows
+                * */
+                for (IndicatorRow indicatorRow : mForm.getIndicatorRows()) {
+                    String newValue = ProgramIndicatorService.
+                            getProgramIndicatorValue(mForm.getEvent(), indicatorRow.getIndicator());
+                    if(newValue==null) {
+                        newValue = "";
+                    }
+                    if (!newValue.equals(indicatorRow.getValue())) {
+                        indicatorRow.updateValue(newValue);
+                    }
+                }
+
+                /*
+                * Calling adapter's getView in order to render changes in visible IndicatorRows
+                * */
+
+                refreshListView();
             }
-        }
+        }.start();
     }
 
     private ActionBar getActionBar() {
@@ -441,8 +525,8 @@ public class DataEntryFragment extends Fragment
 
     private void attachDatePicker() {
         if (mForm != null && isAdded()) {
-            final View reportDatePicker = LayoutInflater.from(getActivity())
-                    .inflate(R.layout.fragment_data_entry_date_picker, mListView, false);
+            //final View reportDatePicker = LayoutInflater.from(getActivity())
+            //        .inflate(R.layout.fragment_data_entry_date_picker, mListView, false);
             final TextView label = (TextView) reportDatePicker
                     .findViewById(R.id.text_label);
             final EditText datePickerEditText = (EditText) reportDatePicker
@@ -487,7 +571,7 @@ public class DataEntryFragment extends Fragment
                 datePickerEditText.setText(newValue);
             }
 
-            mListView.addHeaderView(reportDatePicker);
+            //mListView.addHeaderView(reportDatePicker);
         }
     }
 
@@ -503,12 +587,10 @@ public class DataEntryFragment extends Fragment
         Double longitude = mForm.getEvent().getLongitude();
 
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        View view = inflater.inflate(
-                R.layout.fragment_data_entry_coordinate_picker, mListView, false);
 
-        mLatitude = (EditText) view.findViewById(R.id.latitude_edittext);
-        mLongitude = (EditText) view.findViewById(R.id.longitude_edittext);
-        mCaptureCoords = (ImageButton) view.findViewById(R.id.capture_coordinates);
+        mLatitude = (EditText) coordinatePickerView.findViewById(R.id.latitude_edittext);
+        mLongitude = (EditText) coordinatePickerView.findViewById(R.id.longitude_edittext);
+        mCaptureCoords = (ImageButton) coordinatePickerView.findViewById(R.id.capture_coordinates);
 
         if (latitude != null) {
             mLatitude.setText(String.valueOf(latitude));
@@ -559,7 +641,7 @@ public class DataEntryFragment extends Fragment
             }
         });
 
-        mListView.addHeaderView(view);
+        //mListView.addHeaderView(view);
     }
 
     private void attachSpinner() {

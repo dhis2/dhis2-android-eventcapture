@@ -49,6 +49,8 @@ public class RadioButtonsRow implements DataEntryRow {
     private final BaseValue mValue;
     private final DataEntryRowTypes mType;
 
+    private boolean hidden = false;
+
     public RadioButtonsRow(String label, BaseValue baseValue, DataEntryRowTypes type) {
         if (!DataEntryRowTypes.GENDER.equals(type) && !DataEntryRowTypes.BOOLEAN.equals(type)) {
             throw new IllegalArgumentException("Unsupported row type");
@@ -64,7 +66,10 @@ public class RadioButtonsRow implements DataEntryRow {
         View view;
         BooleanRowHolder holder;
 
-        if (convertView == null) {
+        if (convertView != null && convertView.getTag() instanceof BooleanRowHolder) {
+            view = convertView;
+            holder = (BooleanRowHolder) convertView.getTag();
+        } else {
             View root = inflater.inflate(
                     R.layout.listview_row_radio_buttons, container, false);
             TextView label = (TextView)
@@ -96,9 +101,6 @@ public class RadioButtonsRow implements DataEntryRow {
 
             root.setTag(holder);
             view = root;
-        } else {
-            view = convertView;
-            holder = (BooleanRowHolder) convertView.getTag();
         }
 
         holder.updateViews(mLabel, mValue);
@@ -108,6 +110,21 @@ public class RadioButtonsRow implements DataEntryRow {
     @Override
     public int getViewType() {
         return mType.ordinal();
+    }
+
+    @Override
+    public BaseValue getBaseValue() {
+        return mValue;
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     private static class BooleanRowHolder {

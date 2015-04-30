@@ -48,6 +48,8 @@ public class DatePickerRow implements DataEntryRow {
     private final String mLabel;
     private final BaseValue mValue;
 
+    private boolean hidden = false;
+
     public DatePickerRow(String label, BaseValue value) {
         mLabel = label;
         mValue = value;
@@ -58,7 +60,10 @@ public class DatePickerRow implements DataEntryRow {
         View view;
         DatePickerRowHolder holder;
 
-        if (convertView == null) {
+        if (convertView != null && convertView.getTag() instanceof DatePickerRowHolder) {
+            view = convertView;
+            holder = (DatePickerRowHolder) view.getTag();
+        } else {
             View root = inflater.inflate(
                     R.layout.listview_row_datepicker, container, false);
 
@@ -78,9 +83,6 @@ public class DatePickerRow implements DataEntryRow {
 
             root.setTag(holder);
             view = root;
-        } else {
-            view = convertView;
-            holder = (DatePickerRowHolder) view.getTag();
         }
 
         holder.updateViews(mLabel, mValue);
@@ -90,6 +92,11 @@ public class DatePickerRow implements DataEntryRow {
     @Override
     public int getViewType() {
         return DataEntryRowTypes.DATE.ordinal();
+    }
+
+    @Override
+    public BaseValue getBaseValue() {
+        return mValue;
     }
 
     private class DatePickerRowHolder {
@@ -182,5 +189,15 @@ public class DatePickerRow implements DataEntryRow {
             editText.setText(newValue);
             value.setValue(newValue);
         }
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 }

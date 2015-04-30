@@ -59,6 +59,8 @@ public final class AutoCompleteRow implements DataEntryRow {
     private final Map<String, String> mCodeToNameMap;
     private final Map<String, String> mNameToCodeMap;
 
+    private boolean hidden = false;
+
     public AutoCompleteRow(String label, BaseValue value,
                            OptionSet optionSet) {
         mLabel = label;
@@ -83,7 +85,10 @@ public final class AutoCompleteRow implements DataEntryRow {
         View view;
         ViewHolder holder;
 
-        if (convertView == null) {
+        if (convertView != null && convertView.getTag() instanceof ViewHolder) {
+            view = convertView;
+            holder = (ViewHolder) view.getTag();
+        } else {
             view = inflater.inflate(R.layout.listview_row_autocomplete, container, false);
 
             TextView textLabel = (TextView) view.findViewById(R.id.text_label);
@@ -103,9 +108,6 @@ public final class AutoCompleteRow implements DataEntryRow {
             //autoComplete.setOnFocusChangeListener(onFocusListener);
 
             view.setTag(holder);
-        } else {
-            view = convertView;
-            holder = (ViewHolder) view.getTag();
         }
 
         mAdapter.setLayoutInflater(inflater);
@@ -133,6 +135,21 @@ public final class AutoCompleteRow implements DataEntryRow {
     @Override
     public int getViewType() {
         return DataEntryRowTypes.AUTO_COMPLETE.ordinal();
+    }
+
+    @Override
+    public BaseValue getBaseValue() {
+        return mValue;
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 
     private static class ViewHolder {
@@ -189,7 +206,7 @@ public final class AutoCompleteRow implements DataEntryRow {
             if (!newValue.equals(value.getValue())) {
                 value.setValue(newValue);
                 EventCaptureApplication.getEventBus()
-                        .post(new EditTextValueChangedEvent());
+                        .post(new EditTextValueChangedEvent(value));
             }
         }
     }

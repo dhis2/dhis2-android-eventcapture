@@ -46,6 +46,8 @@ public class CheckBoxRow implements DataEntryRow {
     private final String mLabel;
     private final BaseValue mBaseValue;
 
+    private boolean hidden = false;
+
     public CheckBoxRow(String label, BaseValue baseValue) {
         mLabel = label;
         mBaseValue = baseValue;
@@ -56,7 +58,10 @@ public class CheckBoxRow implements DataEntryRow {
         View view;
         CheckBoxHolder holder;
 
-        if (convertView == null) {
+        if (convertView != null && convertView.getTag() instanceof CheckBoxHolder) {
+            view = convertView;
+            holder = (CheckBoxHolder) view.getTag();
+        } else {
             View root = inflater.inflate(R.layout.listview_row_checkbox, container, false);
             TextView textLabel = (TextView) root.findViewById(R.id.text_label);
             CheckBox checkBox = (CheckBox) root.findViewById(R.id.checkbox);
@@ -68,9 +73,6 @@ public class CheckBoxRow implements DataEntryRow {
 
             root.setTag(holder);
             view = root;
-        } else {
-            view = convertView;
-            holder = (CheckBoxHolder) view.getTag();
         }
 
         holder.textLabel.setText(mLabel);
@@ -89,6 +91,11 @@ public class CheckBoxRow implements DataEntryRow {
     @Override
     public int getViewType() {
         return DataEntryRowTypes.TRUE_ONLY.ordinal();
+    }
+
+    @Override
+    public BaseValue getBaseValue() {
+        return mBaseValue;
     }
 
     private static class CheckBoxListener implements OnCheckedChangeListener {
@@ -119,6 +126,16 @@ public class CheckBoxRow implements DataEntryRow {
             this.checkBox = checkBox;
             this.listener = listener;
         }
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 }
 

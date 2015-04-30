@@ -41,6 +41,7 @@ import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
+import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 
 public class EditTextRow implements DataEntryRow {
     private static final String EMPTY_FIELD = "";
@@ -49,6 +50,8 @@ public class EditTextRow implements DataEntryRow {
     private final String mLabel;
     private final BaseValue mValue;
     private final DataEntryRowTypes mRowType;
+
+    private boolean hidden = false;
 
     public EditTextRow(String label, BaseValue baseValue, DataEntryRowTypes rowType) {
         mLabel = label;
@@ -71,7 +74,10 @@ public class EditTextRow implements DataEntryRow {
         View view;
         ValueEntryHolder holder;
 
-        if (convertView == null) {
+        if (convertView != null && convertView.getTag() instanceof ValueEntryHolder) {
+            view = convertView;
+            holder = (ValueEntryHolder) view.getTag();
+        } else {
             View root = inflater.inflate(R.layout.listview_row_edit_text, container, false);
             TextView label = (TextView) root.findViewById(R.id.text_label);
             EditText editText = (EditText) root.findViewById(R.id.edit_text_row);
@@ -119,9 +125,6 @@ public class EditTextRow implements DataEntryRow {
 
             root.setTag(holder);
             view = root;
-        } else {
-            view = convertView;
-            holder = (ValueEntryHolder) view.getTag();
         }
 
         holder.textLabel.setText(mLabel);
@@ -135,6 +138,11 @@ public class EditTextRow implements DataEntryRow {
     @Override
     public int getViewType() {
         return mRowType.ordinal();
+    }
+
+    @Override
+    public BaseValue getBaseValue() {
+        return mValue;
     }
 
     private static class ValueEntryHolder {
@@ -164,7 +172,7 @@ public class EditTextRow implements DataEntryRow {
             if (!newValue.equals(value.getValue())) {
                 value.setValue(newValue);
                 EventCaptureApplication.getEventBus()
-                        .post(new EditTextValueChangedEvent());
+                        .post(new EditTextValueChangedEvent(value));
             }
         }
     }
@@ -214,5 +222,15 @@ public class EditTextRow implements DataEntryRow {
 
             return str;
         }
+    }
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
     }
 }

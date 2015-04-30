@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramIndicator;
 
 public final class IndicatorRow implements DataEntryRow {
@@ -13,6 +14,8 @@ public final class IndicatorRow implements DataEntryRow {
 
     private final ProgramIndicator mIndicator;
     private String mValue;
+
+    private boolean hidden = false;
 
     public IndicatorRow(ProgramIndicator indicator, String value) {
         mIndicator = indicator;
@@ -23,7 +26,11 @@ public final class IndicatorRow implements DataEntryRow {
     public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
         View view;
         IndicatorViewHolder holder;
-        if (convertView == null) {
+
+        if (convertView != null && convertView.getTag() instanceof IndicatorViewHolder) {
+            view = convertView;
+            holder = (IndicatorViewHolder) view.getTag();
+        } else {
             View root = inflater.inflate(
                     R.layout.listview_row_indicator, container, false);
             holder = new IndicatorViewHolder(
@@ -33,9 +40,6 @@ public final class IndicatorRow implements DataEntryRow {
 
             root.setTag(holder);
             view = root;
-        } else {
-            view = convertView;
-            holder = (IndicatorViewHolder) view.getTag();
         }
 
         if (mIndicator.name != null) {
@@ -51,6 +55,11 @@ public final class IndicatorRow implements DataEntryRow {
     @Override
     public int getViewType() {
         return DataEntryRowTypes.INDICATOR.ordinal();
+    }
+
+    @Override
+    public BaseValue getBaseValue() {
+        return null;
     }
 
     public void updateValue(String value) {
@@ -75,5 +84,14 @@ public final class IndicatorRow implements DataEntryRow {
             this.textValue = textValue;
         }
     }
-    //android:inputType="number|numberDecimal|numberSigned"
+
+    @Override
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
 }
