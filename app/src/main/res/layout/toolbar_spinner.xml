@@ -28,12 +28,42 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:weightSum="1">
+
+    <ImageView
+        android:id="@+id/previous_section"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/transparent_selector"
+        android:clickable="true"
+        android:contentDescription="@string/description"
+        android:padding="4dp"
+        android:src="@drawable/ic_backwards"/>
 
     <Spinner
-        style="@style/Widget.MyApp.HeaderBar.Spinner"
         android:id="@+id/toolbar_spinner"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"/>
+        style="@style/Widget.MyApp.HeaderBar.Spinner"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <ImageView
+        android:id="@+id/next_section"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:adjustViewBounds="true"
+        android:background="@drawable/transparent_selector"
+        android:clickable="true"
+        android:contentDescription="@string/description"
+        android:padding="4dp"
+        android:src="@drawable/ic_forward"/>
+
+    <View
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        android:background="@color/dark_navy_blue"/>
 
 </LinearLayout>

@@ -36,10 +36,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,7 +50,7 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -60,7 +59,6 @@ import android.widget.TextView;
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.MainActivity;
@@ -70,9 +68,9 @@ import org.hisp.dhis2.android.eventcapture.adapters.DataValueAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.SectionAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
+import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramRuleAction;
@@ -126,10 +124,10 @@ public class DataEntryFragment extends Fragment
     private INavigationHandler mNavigationHandler;
     private DataEntryFragmentForm mForm;
 
-    private ProgramRuleHelper programRuleHelper;
+    private ProgramRuleHelper mProgramRuleHelper;
 
-    private View reportDatePicker;
-    private View coordinatePickerView;
+    private View mReportDatePicker;
+    private View mCoordinatePickerView;
 
     private boolean refreshing = false;
 
@@ -167,9 +165,7 @@ public class DataEntryFragment extends Fragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if (activity instanceof ActionBarActivity) {
-            getActionBar().setHomeButtonEnabled(true);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (activity instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(false);
         }
 
@@ -187,9 +183,7 @@ public class DataEntryFragment extends Fragment
     @Override
     public void onDetach() {
         if (getActivity() != null &&
-                getActivity() instanceof ActionBarActivity) {
-            getActionBar().setHomeButtonEnabled(false);
-            getActionBar().setDisplayHomeAsUpEnabled(false);
+                getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(true);
         }
 
@@ -242,13 +236,13 @@ public class DataEntryFragment extends Fragment
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
         mListView.setVisibility(View.VISIBLE);
 
-        reportDatePicker = LayoutInflater.from(getActivity())
+        mReportDatePicker = LayoutInflater.from(getActivity())
                 .inflate(R.layout.fragment_data_entry_date_picker, mListView, false);
-        mListView.addHeaderView(reportDatePicker);
+        mListView.addHeaderView(mReportDatePicker);
 
-        coordinatePickerView = LayoutInflater.from(getActivity())
+        mCoordinatePickerView = LayoutInflater.from(getActivity())
                 .inflate(R.layout.fragment_data_entry_coordinate_picker, mListView, false);
-        mListView.addHeaderView(coordinatePickerView);
+        mListView.addHeaderView(mCoordinatePickerView);
         mListView.setAdapter(mListViewAdapter);
     }
 
@@ -318,7 +312,7 @@ public class DataEntryFragment extends Fragment
 
             System.out.println("TIME: " + (System.currentTimeMillis() - timerStart));
             mForm = data;
-            programRuleHelper = new ProgramRuleHelper(mForm.getStage().getProgram());
+            mProgramRuleHelper = new ProgramRuleHelper(mForm.getStage().getProgram());
 
             if (data.getStage() != null) {
                 attachDatePicker();
@@ -328,9 +322,9 @@ public class DataEntryFragment extends Fragment
                     data.getStage().captureCoordinates) {
                 attachCoordinatePicker();
             } else {
-                if(coordinatePickerView!=null) {
-                    coordinatePickerView.setVisibility(View.GONE);
-                    coordinatePickerView.setLayoutParams(new AbsListView.
+                if (mCoordinatePickerView != null) {
+                    mCoordinatePickerView.setVisibility(View.GONE);
+                    mCoordinatePickerView.setLayoutParams(new AbsListView.
                             LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 1));
                 }
             }
@@ -426,18 +420,18 @@ public class DataEntryFragment extends Fragment
     public void evaluateRules() {
         List<ProgramRule> rules = mForm.getStage().getProgram().getProgramRules();
         mListViewAdapter.resetHiding();
-        for(ProgramRule programRule: rules) {
+        for (ProgramRule programRule : rules) {
             boolean actionTrue = ProgramRuleService.evaluate(programRule.condition, mForm.getEvent());
-                for(ProgramRuleAction programRuleAction: programRule.getProgramRuleActions()) {
-                    applyProgramRuleAction(programRuleAction, actionTrue);
-                }
+            for (ProgramRuleAction programRuleAction : programRule.getProgramRuleActions()) {
+                applyProgramRuleAction(programRuleAction, actionTrue);
+            }
         }
     }
 
     public void applyProgramRuleAction(ProgramRuleAction programRuleAction, boolean actionTrue) {
         switch (programRuleAction.programRuleActionType) {
             case ProgramRuleAction.TYPE_HIDEFIELD:
-                if(actionTrue) {
+                if (actionTrue) {
                     hideField(programRuleAction.dataElement);
                 }
                 break;
@@ -451,7 +445,7 @@ public class DataEntryFragment extends Fragment
 
     private void refreshListView() {
         Activity activity = getActivity();
-        if(activity == null) {
+        if (activity == null) {
             refreshing = false;
             return;
         }
@@ -461,9 +455,10 @@ public class DataEntryFragment extends Fragment
                 int end = mListView.getLastVisiblePosition();
                 for (int pos = 0; pos <= end - start; pos++) {
                     View view = mListView.getChildAt(pos);
-                    if (view != null ) {
+                    if (view != null) {
                         int adapterPosition = view.getId();
-                        if (adapterPosition < 0 || adapterPosition >= mListViewAdapter.getCount()) continue;
+                        if (adapterPosition < 0 || adapterPosition >= mListViewAdapter.getCount())
+                            continue;
                         if (!view.hasFocus()) {
                             mListViewAdapter.getView(adapterPosition, view, mListView);
                         }
@@ -479,7 +474,8 @@ public class DataEntryFragment extends Fragment
         if (mForm == null || mForm.getIndicatorRows() == null) {
             return;
         }
-        if(refreshing) return; //we don't want to stack this up since it runs every time a character is entered for example
+        if (refreshing)
+            return; //we don't want to stack this up since it runs every time a character is entered for example
         refreshing = true;
 
         new Thread() {
@@ -487,7 +483,7 @@ public class DataEntryFragment extends Fragment
                 /**
                  * Updating views based on ProgramRules
                  */
-                if(event.isDataValue() && programRuleHelper.dataElementInRule(event.getId())) {
+                if (event.isDataValue() && mProgramRuleHelper.dataElementInRule(event.getId())) {
                     evaluateRules();
                 }
 
@@ -497,7 +493,7 @@ public class DataEntryFragment extends Fragment
                 for (IndicatorRow indicatorRow : mForm.getIndicatorRows()) {
                     String newValue = ProgramIndicatorService.
                             getProgramIndicatorValue(mForm.getEvent(), indicatorRow.getIndicator());
-                    if(newValue==null) {
+                    if (newValue == null) {
                         newValue = "";
                     }
                     if (!newValue.equals(indicatorRow.getValue())) {
@@ -516,8 +512,8 @@ public class DataEntryFragment extends Fragment
 
     private ActionBar getActionBar() {
         if (getActivity() != null &&
-                getActivity() instanceof ActionBarActivity) {
-            return ((ActionBarActivity) getActivity()).getSupportActionBar();
+                getActivity() instanceof AppCompatActivity) {
+            return ((AppCompatActivity) getActivity()).getSupportActionBar();
         } else {
             throw new IllegalArgumentException("Fragment should be attached to ActionBarActivity");
         }
@@ -534,13 +530,13 @@ public class DataEntryFragment extends Fragment
 
     private void attachDatePicker() {
         if (mForm != null && isAdded()) {
-            //final View reportDatePicker = LayoutInflater.from(getActivity())
+            //final View mReportDatePicker = LayoutInflater.from(getActivity())
             //        .inflate(R.layout.fragment_data_entry_date_picker, mListView, false);
-            final TextView label = (TextView) reportDatePicker
+            final TextView label = (TextView) mReportDatePicker
                     .findViewById(R.id.text_label);
-            final EditText datePickerEditText = (EditText) reportDatePicker
+            final EditText datePickerEditText = (EditText) mReportDatePicker
                     .findViewById(R.id.date_picker_edit_text);
-            final ImageButton clearDateButton = (ImageButton) reportDatePicker
+            final ImageButton clearDateButton = (ImageButton) mReportDatePicker
                     .findViewById(R.id.clear_edit_text);
 
             final DatePickerDialog.OnDateSetListener dateSetListener
@@ -580,7 +576,7 @@ public class DataEntryFragment extends Fragment
                 datePickerEditText.setText(newValue);
             }
 
-            //mListView.addHeaderView(reportDatePicker);
+            //mListView.addHeaderView(mReportDatePicker);
         }
     }
 
@@ -597,9 +593,9 @@ public class DataEntryFragment extends Fragment
 
         LayoutInflater inflater = LayoutInflater.from(getActivity());
 
-        mLatitude = (EditText) coordinatePickerView.findViewById(R.id.latitude_edittext);
-        mLongitude = (EditText) coordinatePickerView.findViewById(R.id.longitude_edittext);
-        mCaptureCoords = (ImageButton) coordinatePickerView.findViewById(R.id.capture_coordinates);
+        mLatitude = (EditText) mCoordinatePickerView.findViewById(R.id.latitude_edittext);
+        mLongitude = (EditText) mCoordinatePickerView.findViewById(R.id.longitude_edittext);
+        mCaptureCoords = (ImageButton) mCoordinatePickerView.findViewById(R.id.capture_coordinates);
 
         if (latitude != null) {
             mLatitude.setText(String.valueOf(latitude));
@@ -660,6 +656,10 @@ public class DataEntryFragment extends Fragment
             LayoutInflater inflater = LayoutInflater.from(getActivity());
             mSpinnerContainer = inflater.inflate(
                     R.layout.toolbar_spinner, toolbar, false);
+            ImageView previousSectionButton = (ImageView) mSpinnerContainer
+                    .findViewById(R.id.previous_section);
+            ImageView nextSectionButton = (ImageView) mSpinnerContainer
+                    .findViewById(R.id.next_section);
             ActionBar.LayoutParams lp = new ActionBar.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             toolbar.addView(mSpinnerContainer, lp);
@@ -669,6 +669,24 @@ public class DataEntryFragment extends Fragment
             mSpinner = (Spinner) mSpinnerContainer.findViewById(R.id.toolbar_spinner);
             mSpinner.setAdapter(mSpinnerAdapter);
             mSpinner.setOnItemSelectedListener(this);
+
+            previousSectionButton.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    int currentPosition = mSpinner.getSelectedItemPosition();
+                    if (!(currentPosition - 1 < 0)) {
+                        mSpinner.setSelection(currentPosition - 1);
+                    }
+                }
+            });
+
+            nextSectionButton.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    int currentPosition = mSpinner.getSelectedItemPosition();
+                    if (!(currentPosition + 1 >= mSpinnerAdapter.getCount())) {
+                        mSpinner.setSelection(currentPosition + 1);
+                    }
+                }
+            });
         }
     }
 
