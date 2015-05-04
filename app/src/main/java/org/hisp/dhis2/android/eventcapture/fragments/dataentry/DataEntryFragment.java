@@ -46,10 +46,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -246,6 +248,7 @@ public class DataEntryFragment extends Fragment
 
         coordinatePickerView = LayoutInflater.from(getActivity())
                 .inflate(R.layout.fragment_data_entry_coordinate_picker, mListView, false);
+        mListView.addHeaderView(coordinatePickerView);
         mListView.setAdapter(mListViewAdapter);
     }
 
@@ -325,8 +328,11 @@ public class DataEntryFragment extends Fragment
                     data.getStage().captureCoordinates) {
                 attachCoordinatePicker();
             } else {
-                if(coordinatePickerView!=null)
-                    coordinatePickerView.setVisibility(View.INVISIBLE);
+                if(coordinatePickerView!=null) {
+                    coordinatePickerView.setVisibility(View.GONE);
+                    coordinatePickerView.setLayoutParams(new AbsListView.
+                            LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 1));
+                }
             }
 
             if (!data.getSections().isEmpty()) {
