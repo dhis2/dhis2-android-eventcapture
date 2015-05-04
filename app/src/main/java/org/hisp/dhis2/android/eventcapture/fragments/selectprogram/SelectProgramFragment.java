@@ -65,7 +65,8 @@ public class SelectProgramFragment extends Fragment
         if (activity instanceof INavigationHandler) {
             mNavigationHandler = (INavigationHandler) activity;
         } else {
-            throw new IllegalArgumentException("Activity must implement INavigationHandler interface");
+            throw new IllegalArgumentException("Activity must " +
+                    "implement INavigationHandler interface");
         }
     }
 
@@ -84,7 +85,8 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_select_program, container, false);
     }
 
@@ -160,7 +162,7 @@ public class SelectProgramFragment extends Fragment
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             mNavigationHandler.switchFragment(
-                    new SettingsFragment(), SettingsFragment.TAG);
+                    new SettingsFragment(), SettingsFragment.TAG, true);
         }
 
         return super.onOptionsItemSelected(item);
@@ -254,7 +256,7 @@ public class SelectProgramFragment extends Fragment
                     mState.getOrgUnitId(), mState.getProgramId(),
                     eventClick.getEvent().getLocalId()
             );
-            mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG);
+            mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
         } else {
             switch (eventClick.getStatus()) {
                 case SENT:
@@ -328,7 +330,7 @@ public class SelectProgramFragment extends Fragment
                         mState.getOrgUnitId(), mState.getProgramId()
                 );
                 mNavigationHandler.switchFragment(
-                        fragment2, DataEntryFragment.TAG
+                        fragment2, DataEntryFragment.TAG, true
                 );
                 break;
             }

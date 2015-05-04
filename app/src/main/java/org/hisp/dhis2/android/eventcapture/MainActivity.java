@@ -32,6 +32,7 @@ package org.hisp.dhis2.android.eventcapture;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -103,12 +104,12 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
 
     public void showLoadingFragment() {
         setTitle("Loading initial data");
-        switchFragment(new LoadingFragment(), LoadingFragment.TAG);
+        switchFragment(new LoadingFragment(), LoadingFragment.TAG, false);
     }
 
     public void showSelectProgramFragment() {
         setTitle("Event Capture");
-        switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG);
+        switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG, true);
     }
 
     @Override
@@ -135,14 +136,21 @@ public class MainActivity extends ActionBarActivity implements INavigationHandle
         Dhis2Application.bus.unregister(this);
     }
 
-    public void switchFragment(Fragment fragment, String fragmentTag) {
+    @Override
+    public void switchFragment(Fragment fragment, String fragmentTag, boolean addToBackStack) {
         if (fragment != null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
+            FragmentTransaction transaction =
+                    getSupportFragmentManager().beginTransaction();
+
+            transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(fragmentTag)
-                    .commit();
+                    .replace(R.id.fragment_container, fragment);
+            if (addToBackStack) {
+                transaction = transaction
+                        .addToBackStack(fragmentTag);
+            }
+
+            transaction.commit();
         }
     }
 }
