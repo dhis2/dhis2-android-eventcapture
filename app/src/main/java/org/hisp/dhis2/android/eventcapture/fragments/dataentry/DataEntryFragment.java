@@ -28,6 +28,7 @@ package org.hisp.dhis2.android.eventcapture.fragments.dataentry;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
 import android.os.Bundle;
@@ -84,6 +85,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -685,11 +688,25 @@ public class DataEntryFragment extends Fragment
         if (mForm != null && isAdded()) {
             ArrayList<String> errors = isEventValid();
             if (errors.isEmpty()) {
-                mForm.getEvent().setFromServer(false);
+                mForm.getEvent().setFromServer(true);
                 mForm.getEvent().setLastUpdated(Utils.getCurrentTime());
                 mForm.getEvent().save(true);
 
-                Dhis2.sendLocalData(getActivity().getBaseContext());
+                /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
+                before Dhis2 sends data to server to avoid some data values not being sent in race
+                conditions*/
+                mForm.getEvent().setFromServer(false);
+                mForm.getEvent().save(true);
+                final Context context = getActivity().getBaseContext();
+
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        Dhis2.sendLocalData(context);
+                    }
+                };
+                Timer timer = new Timer();
+                timer.schedule(timerTask, 5000);
                 getFragmentManager().popBackStack();
             } else {
                 ValidationErrorDialog dialog = ValidationErrorDialog
