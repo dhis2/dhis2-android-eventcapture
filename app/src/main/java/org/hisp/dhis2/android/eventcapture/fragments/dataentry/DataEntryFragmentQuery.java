@@ -132,8 +132,12 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
             DataValue copyDataValue = dataValue.clone();
             DataElement dataElement = getDataElement(stageDataElement.dataElement);
 
+            if (dataElement != null) {
+                form.getDataElementNames().put(stageDataElement.dataElement,
+                        dataElement.displayName);
+            }
+
             form.getDataValues().put(copyDataValue.dataElement, copyDataValue.clone());
-            form.getDataElementNames().put(stageDataElement.dataElement, dataElement.name);
             rows.add(createDataEntryRow(dataElement, dataValue));
         }
     }
