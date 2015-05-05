@@ -28,6 +28,7 @@ package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,7 +57,8 @@ public class DatePickerRow implements DataEntryRow {
     }
 
     @Override
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
+    public View getView(FragmentManager fragmentManager, LayoutInflater inflater,
+                        View convertView, ViewGroup container) {
         View view;
         DatePickerRowHolder holder;
 

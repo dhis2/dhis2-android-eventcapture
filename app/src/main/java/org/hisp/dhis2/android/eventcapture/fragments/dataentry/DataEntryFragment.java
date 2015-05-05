@@ -236,7 +236,8 @@ public class DataEntryFragment extends Fragment
         mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.GONE);
 
-        mListViewAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
+        mListViewAdapter = new DataValueAdapter(getChildFragmentManager(),
+                getLayoutInflater(savedInstanceState));
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
         mListView.setVisibility(View.VISIBLE);
 

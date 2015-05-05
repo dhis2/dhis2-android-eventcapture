@@ -29,31 +29,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:weightSum="1"
+    android:background="@color/white"
     android:baselineAligned="false"
     android:orientation="horizontal"
-    android:background="@color/white">
+    android:weightSum="1">
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="12dp"
-        android:orientation="vertical"
         android:layout_weight="0.86"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:padding="12dp">
 
         <include layout="@layout/listview_row_text_view_label"/>
 
-        <org.hisp.dhis2.android.sdk.utils.ui.views.FontAutoCompleteTextView
+        <org.hisp.dhis2.android.sdk.utils.ui.views.FontTextView
             android:id="@+id/choose_option"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
             android:layout_marginBottom="6dp"
-            android:completionThreshold="1"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/textfield_background"
             android:hint="@string/find_option"
-            android:imeOptions="actionNext|flagNoExtractUi"
-            android:singleLine="true"
+            android:paddingBottom="11dp"
+            android:paddingTop="11dp"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:font="@string/light_font_name"/>

@@ -26,19 +26,17 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters;
 
-import android.util.Log;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.LinearLayout;
 
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRow;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.DataEntryRowTypes;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,21 +46,24 @@ public final class DataValueAdapter extends AbsAdapter<DataEntryRow> {
     private static final String CLASS_TAG = DataValueAdapter.class.getSimpleName();
 
     private Map<String, Integer> dataElementsToRowIndexMap;
+    private final FragmentManager mFragmentManager;
 
-    public DataValueAdapter(LayoutInflater inflater) {
+    public DataValueAdapter(FragmentManager fragmentManager,
+                            LayoutInflater inflater) {
         super(inflater);
+        mFragmentManager = fragmentManager;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (getData() != null) {
             DataEntryRow dataEntryRow = getData().get(position);
-            View view = dataEntryRow.getView(getInflater(), convertView, parent);
+            View view = dataEntryRow.getView(mFragmentManager, getInflater(), convertView, parent);
             view.setVisibility(View.VISIBLE); //in case recycling invisible view
             view.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT,
                     AbsListView.LayoutParams.WRAP_CONTENT));
             view.setId(position);
-            if(dataEntryRow.isHidden()) {
+            if (dataEntryRow.isHidden()) {
                 view.setLayoutParams(new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
                 view.postInvalidate();
                 view.setVisibility(View.GONE);
@@ -95,12 +96,12 @@ public final class DataValueAdapter extends AbsAdapter<DataEntryRow> {
     public void swapData(List<DataEntryRow> data) {
         boolean notifyAdapter = mData != data;
         mData = data;
-        if(dataElementsToRowIndexMap == null)
+        if (dataElementsToRowIndexMap == null)
             dataElementsToRowIndexMap = new HashMap<>();
         else {
             dataElementsToRowIndexMap.clear();
         }
-        if(mData!=null) {
+        if (mData != null) {
             for (int i = 0; i < mData.size(); i++) {
                 DataEntryRow dataEntryRow = mData.get(i);
                 BaseValue baseValue = dataEntryRow.getBaseValue();
@@ -120,19 +121,19 @@ public final class DataValueAdapter extends AbsAdapter<DataEntryRow> {
     }
 
     public void hideIndex(int pos) {
-        if(pos<0) return;
+        if (pos < 0) return;
         getData().get(pos).setHidden(true);
     }
 
     public void resetHiding() {
-        if(mData==null) return;
-        for(DataEntryRow row: mData) {
+        if (mData == null) return;
+        for (DataEntryRow row : mData) {
             row.setHidden(false);
         }
     }
 
     public int getIndex(String dataElement) {
-        if(dataElementsToRowIndexMap.containsKey(dataElement))
+        if (dataElementsToRowIndexMap.containsKey(dataElement))
             return dataElementsToRowIndexMap.get(dataElement);
         else return -1;
     }

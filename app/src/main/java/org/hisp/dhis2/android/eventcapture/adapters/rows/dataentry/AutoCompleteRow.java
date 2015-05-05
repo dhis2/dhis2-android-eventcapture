@@ -26,19 +26,19 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.adapters.AutoCompleteAdapter;
 import org.hisp.dhis2.android.eventcapture.adapters.rows.AbsTextWatcher;
+import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
+import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.OptionDialogFragment.OnOptionSelectedListener;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.OptionSet;
@@ -54,10 +54,10 @@ public final class AutoCompleteRow implements DataEntryRow {
 
     private final String mLabel;
     private final BaseValue mValue;
-    private final AutoCompleteAdapter mAdapter;
 
     private final Map<String, String> mCodeToNameMap;
     private final Map<String, String> mNameToCodeMap;
+    private final ArrayList<String> mOptions;
 
     private boolean hidden = false;
 
@@ -76,12 +76,12 @@ public final class AutoCompleteRow implements DataEntryRow {
             }
         }
 
-        mAdapter = new AutoCompleteAdapter();
-        mAdapter.swapData(new ArrayList<>(mNameToCodeMap.keySet()));
+        mOptions = new ArrayList<>(mNameToCodeMap.keySet());
     }
 
     @Override
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
+    public View getView(FragmentManager fragmentManager, LayoutInflater inflater,
+                        View convertView, ViewGroup container) {
         View view;
         ViewHolder holder;
 
@@ -90,33 +90,17 @@ public final class AutoCompleteRow implements DataEntryRow {
             holder = (ViewHolder) view.getTag();
         } else {
             view = inflater.inflate(R.layout.listview_row_autocomplete, container, false);
-
-            TextView textLabel = (TextView) view.findViewById(R.id.text_label);
-            AutoCompleteTextView autoComplete = (AutoCompleteTextView) view.findViewById(R.id.choose_option);
-            ImageButton imageButton = (ImageButton) view.findViewById(R.id.show_drop_down_list);
-
-            OnFocusListener onFocusListener = new OnFocusListener(autoComplete);
-            OnTextChangedListener onTextChangedListener = new OnTextChangedListener();
-            DropDownButtonListener dropButtonListener = new DropDownButtonListener(autoComplete);
-
-            holder = new ViewHolder(
-                    textLabel, autoComplete, imageButton, onFocusListener, onTextChangedListener
-            );
-
-            imageButton.setOnClickListener(dropButtonListener);
-            autoComplete.addTextChangedListener(onTextChangedListener);
-            //autoComplete.setOnFocusChangeListener(onFocusListener);
-
+            holder = new ViewHolder(view);
             view.setTag(holder);
         }
 
-        mAdapter.setLayoutInflater(inflater);
-
         holder.textView.setText(mLabel);
-        holder.onFocusListener.setOptions(mNameToCodeMap);
 
         holder.onTextChangedListener.setBaseValue(mValue);
         holder.onTextChangedListener.setOptions(mNameToCodeMap);
+
+        holder.onDropDownButtonListener.setOptions(mOptions);
+        holder.onDropDownButtonListener.setFragmentManager(fragmentManager);
 
         String name;
         if (mCodeToNameMap.containsKey(mValue.getValue())) {
@@ -125,9 +109,8 @@ public final class AutoCompleteRow implements DataEntryRow {
             name = EMPTY_FIELD;
         }
 
-        holder.autoCompleteTextView.setText(name);
-        holder.autoCompleteTextView.setAdapter(mAdapter);
-        holder.autoCompleteTextView.clearFocus();
+        holder.valueTextView.setText(name);
+        holder.valueTextView.clearFocus();
 
         return view;
     }
@@ -154,32 +137,63 @@ public final class AutoCompleteRow implements DataEntryRow {
 
     private static class ViewHolder {
         public final TextView textView;
-        public final AutoCompleteTextView autoCompleteTextView;
+        public final TextView valueTextView;
         public final ImageButton imageButton;
-        public final OnFocusListener onFocusListener;
         public final OnTextChangedListener onTextChangedListener;
+        public final DropDownButtonListener onDropDownButtonListener;
 
-        private ViewHolder(TextView textView, AutoCompleteTextView autoCompleteTextView,
-                           ImageButton imageButton, OnFocusListener onFocusListener,
-                           OnTextChangedListener onTextChangedListener) {
-            this.textView = textView;
-            this.autoCompleteTextView = autoCompleteTextView;
-            this.imageButton = imageButton;
-            this.onFocusListener = onFocusListener;
-            this.onTextChangedListener = onTextChangedListener;
+        private ViewHolder(View view) {
+            textView = (TextView) view.findViewById(R.id.text_label);
+            valueTextView = (TextView) view.findViewById(R.id.choose_option);
+            imageButton = (ImageButton) view.findViewById(R.id.show_drop_down_list);
+
+            OnOptionSelectedListener onOptionListener
+                    = new OnOptionItemSelectedListener(valueTextView);
+            onTextChangedListener = new OnTextChangedListener();
+            onDropDownButtonListener = new DropDownButtonListener();
+            onDropDownButtonListener.setListener(onOptionListener);
+
+            imageButton.setOnClickListener(onDropDownButtonListener);
+            valueTextView.addTextChangedListener(onTextChangedListener);
+        }
+    }
+
+    private static class OnOptionItemSelectedListener
+            implements OnOptionSelectedListener {
+        private final TextView valueTextView;
+
+        public OnOptionItemSelectedListener(TextView valueTextView) {
+            this.valueTextView = valueTextView;
+        }
+
+        @Override
+        public void onOptionSelected(int position, String name) {
+            valueTextView.setText(name);
         }
     }
 
     private static class DropDownButtonListener implements View.OnClickListener {
-        private final AutoCompleteTextView autoComplete;
+        private FragmentManager fragmentManager;
+        private ArrayList<String> options;
+        private OnOptionSelectedListener listener;
 
-        private DropDownButtonListener(AutoCompleteTextView autoComplete) {
-            this.autoComplete = autoComplete;
+        public void setFragmentManager(FragmentManager fragmentManager) {
+            this.fragmentManager = fragmentManager;
+        }
+
+        public void setOptions(ArrayList<String> options) {
+            this.options = options;
+        }
+
+        public void setListener(OnOptionSelectedListener listener) {
+            this.listener = listener;
         }
 
         @Override
         public void onClick(View v) {
-            autoComplete.showDropDown();
+            OptionDialogFragment fragment =
+                    OptionDialogFragment.newInstance(options, listener);
+            fragment.show(fragmentManager);
         }
     }
 
@@ -207,30 +221,6 @@ public final class AutoCompleteRow implements DataEntryRow {
                 value.setValue(newValue);
                 EventCaptureApplication.getEventBus()
                         .post(new EditTextValueChangedEvent(value));
-            }
-        }
-    }
-
-    private class OnFocusListener implements View.OnFocusChangeListener {
-        private final AutoCompleteTextView autoComplete;
-        private Map<String, String> nameToCodeMap;
-
-        private OnFocusListener(AutoCompleteTextView autoComplete) {
-            this.autoComplete = autoComplete;
-        }
-
-        public void setOptions(Map<String, String> nameToCodeMap) {
-            this.nameToCodeMap = nameToCodeMap;
-        }
-
-        @Override
-        public void onFocusChange(View view, boolean hasFocus) {
-            System.out.println("ON_FOCUS_CHANGED: " + hasFocus);
-            if (!hasFocus) {
-                String choice = autoComplete.getText().toString();
-                if (!nameToCodeMap.containsKey(choice)) {
-                    autoComplete.setText(EMPTY_FIELD);
-                }
             }
         }
     }

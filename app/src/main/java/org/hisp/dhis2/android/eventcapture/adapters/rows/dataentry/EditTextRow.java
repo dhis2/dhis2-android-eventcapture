@@ -26,6 +26,7 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -70,7 +71,8 @@ public class EditTextRow implements DataEntryRow {
     }
 
     @Override
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
+    public View getView(FragmentManager fragmentManager, LayoutInflater inflater,
+                        View convertView, ViewGroup container) {
         View view;
         ValueEntryHolder holder;
 

@@ -31,13 +31,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minHeight="520dp"
     android:minWidth="320dp"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_marginBottom="16dp"
+        android:layout_height="56dp"
         android:background="@color/navy_blue"
         android:orientation="horizontal"
         android:weightSum="1">
@@ -47,8 +47,10 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:ellipsize="end"
             android:gravity="center_vertical"
             android:padding="16dp"
+            android:singleLine="true"
             android:text="@string/find_option"
             android:textAllCaps="true"
             android:textColor="@color/white"
@@ -56,8 +58,9 @@
             app:font="@string/condensed_font_name"/>
 
         <ImageView
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:id="@+id/close_dialog_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:adjustViewBounds="true"
             android:background="@drawable/transparent_selector"
             android:clickable="true"
@@ -67,14 +70,27 @@
 
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/dark_navy_blue"/>
+
     <org.hisp.dhis2.android.sdk.utils.ui.views.FontEditText
         android:id="@+id/filter_options"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_margin="16dp"
+        android:drawableLeft="@drawable/ic_search"
+        android:drawablePadding="4dp"
         android:hint="@string/search"
-        app:font="@string/condensed_font_name"/>
+        app:font="@string/light_font_name"/>
 
-    <include layout="@layout/listview_simple"/>
+    <ListView
+        android:id="@+id/simple_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:cacheColorHint="@color/transparent"
+        android:divider="@color/darker_grey"
+        android:dividerHeight="1px"/>
 
 </LinearLayout>
