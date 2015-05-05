@@ -55,7 +55,7 @@
             android:imeOptions="actionNext|flagNoExtractUi"
             android:singleLine="true"
             android:textColor="@color/black"
-            android:textSize="16sp"
+            android:textSize="@dimen/medium_text_size"
             app:font="@string/light_font_name"/>
     </LinearLayout>
 
