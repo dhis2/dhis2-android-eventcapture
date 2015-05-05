@@ -40,7 +40,7 @@
         android:paddingLeft="16dp"
         android:paddingRight="4dp"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/medium_text_size"
         android:textStyle="bold"
         android:singleLine="true"
         app:font="@string/regular_font_name"/>

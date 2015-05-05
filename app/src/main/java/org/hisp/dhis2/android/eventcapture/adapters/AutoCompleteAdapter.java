@@ -24,6 +24,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import org.hisp.dhis2.android.eventcapture.R;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -114,7 +116,7 @@ public class AutoCompleteAdapter extends BaseAdapter implements Filterable {
 
         if (convertView == null) {
             textView = (TextView) mInflater.inflate(
-                    android.R.layout.simple_spinner_dropdown_item, parent, false);
+                    R.layout.simple_spinner_dropdown_item_custom, parent, false);
         } else {
             textView = (TextView) convertView;
         }

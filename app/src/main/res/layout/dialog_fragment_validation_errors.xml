@@ -15,7 +15,7 @@
         android:paddingBottom="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:textSize="18sp"
+        android:textSize="@dimen/large_text_size"
         android:text="@string/validation_error"
         app:font="@string/medium_font_name"/>
 

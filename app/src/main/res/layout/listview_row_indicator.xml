@@ -45,7 +45,7 @@
         android:layout_marginBottom="6dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:textSize="16sp"
+        android:textSize="@dimen/medium_text_size"
         android:paddingTop="11dp"
         android:paddingBottom="11dp"
         app:font="@string/light_font_name"/>
