@@ -51,7 +51,8 @@
     <string name="error_series_500_description">50x server error. Please, try to synchronize later.</string>
     <string name="unknown_error">Unknown error</string>
 
-    <string name="validation_error">Please, enter next compulsory fields</string>
+    <string name="validation_error">Please complete the following compulsory fields</string>
+    <string name="warning_hidefieldwithvalue">The following fields with value is being hidden.</string>
 
     <string name="enter_coordinates">Enter coordinates</string>
     <string name="latitude_error_message">Latitude must be in range from -90 to 90</string>

@@ -129,7 +129,7 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
                                               List<DataEntryRow> rows, String username) {
         for (ProgramStageDataElement stageDataElement : dataElements) {
             DataValue dataValue = getDataValue(stageDataElement.dataElement, form.getEvent(), username);
-            DataValue copyDataValue = dataValue.clone();
+            //DataValue copyDataValue = dataValue.clone();
             DataElement dataElement = getDataElement(stageDataElement.dataElement);
 
             if (dataElement != null) {
@@ -137,7 +137,7 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
                         dataElement.displayName);
             }
 
-            form.getDataValues().put(copyDataValue.dataElement, copyDataValue.clone());
+            form.getDataValues().put(dataValue.dataElement, dataValue);
             rows.add(createDataEntryRow(dataElement, dataValue));
         }
     }

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.eventcapture.adapters.ValidationErrorAdapter;
@@ -18,7 +19,9 @@ public final class ValidationErrorDialog extends DialogFragment
         implements View.OnClickListener {
     private static final String TAG = ValidationErrorDialog.class.getSimpleName();
     private static final String ERRORS_LIST_EXTRA = "extra:ErrorsList";
+    private static final String HEADER_EXTRA = "extra:Header";
 
+    private TextView mHeader;
     private ListView mListView;
     private Button mButton;
     private ValidationErrorAdapter mAdapter;
@@ -27,6 +30,15 @@ public final class ValidationErrorDialog extends DialogFragment
         ValidationErrorDialog dialog = new ValidationErrorDialog();
         Bundle args = new Bundle();
         args.putStringArrayList(ERRORS_LIST_EXTRA, errors);
+        dialog.setArguments(args);
+        return dialog;
+    }
+
+    public static ValidationErrorDialog newInstance(String header, ArrayList<String> errors) {
+        ValidationErrorDialog dialog = new ValidationErrorDialog();
+        Bundle args = new Bundle();
+        args.putStringArrayList(ERRORS_LIST_EXTRA, errors);
+        args.putString(HEADER_EXTRA, header);
         dialog.setArguments(args);
         return dialog;
     }
@@ -49,6 +61,11 @@ public final class ValidationErrorDialog extends DialogFragment
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mListView = (ListView) view.findViewById(R.id.simple_listview);
+        mHeader = (TextView) view.findViewById(R.id.header);
+        String header = getArguments().getString(HEADER_EXTRA, null);
+        if(header != null) {
+            mHeader.setText(header);
+        }
         //mButton = (Button) view.findViewById(R.id.ok_button);
 
         mAdapter = new ValidationErrorAdapter(

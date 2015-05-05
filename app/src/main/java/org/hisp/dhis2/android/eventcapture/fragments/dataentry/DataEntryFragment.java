@@ -39,6 +39,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -413,6 +414,12 @@ public class DataEntryFragment extends Fragment
         return false;
     }
 
+    public void showWarningHiddenValuesDialog(ArrayList<String> affectedValues) {
+        ValidationErrorDialog dialog = ValidationErrorDialog
+                .newInstance(getString(R.string.warning_hidefieldwithvalue), affectedValues);
+        dialog.show(getChildFragmentManager());
+    }
+
     /**
      * Evaluates the ProgramRules for the current program and the current data values and applies
      * the results. This is for example used for hiding views if a rule contains skip logic
@@ -420,27 +427,48 @@ public class DataEntryFragment extends Fragment
     public void evaluateRules() {
         List<ProgramRule> rules = mForm.getStage().getProgram().getProgramRules();
         mListViewAdapter.resetHiding();
+        ArrayList<String> affectedFieldsWithValue = new ArrayList<>();
         for (ProgramRule programRule : rules) {
             boolean actionTrue = ProgramRuleService.evaluate(programRule.condition, mForm.getEvent());
             for (ProgramRuleAction programRuleAction : programRule.getProgramRuleActions()) {
-                applyProgramRuleAction(programRuleAction, actionTrue);
+                boolean valueInField = applyProgramRuleAction(programRuleAction, actionTrue);
+                if(valueInField) {
+                    affectedFieldsWithValue.add(programRuleAction.dataElement);
+                }
             }
         }
+        if(!affectedFieldsWithValue.isEmpty()) {
+            showWarningHiddenValuesDialog(affectedFieldsWithValue);
+        }
+        //todo dias make counter of stuff to show in dialog in rows with values are hidden.
     }
 
-    public void applyProgramRuleAction(ProgramRuleAction programRuleAction, boolean actionTrue) {
+    public boolean applyProgramRuleAction(ProgramRuleAction programRuleAction, boolean actionTrue) {
         switch (programRuleAction.programRuleActionType) {
             case ProgramRuleAction.TYPE_HIDEFIELD:
                 if (actionTrue) {
-                    hideField(programRuleAction.dataElement);
+                    return hideField(programRuleAction.dataElement);
                 }
                 break;
         }
+        return false;
     }
 
-    public void hideField(String dataElement) {
+    /**
+     * Hides a field in the listView of dataEntryRows. Returns true if the hidden field contained
+     * a value
+     * @param dataElement
+     * @return
+     */
+    public boolean hideField(String dataElement) {
         mListViewAdapter.hideIndex(dataElement);
         refreshListView();
+        DataValue dv = mForm.getDataValues().get(dataElement);
+        if(dv!=null && dv.getValue()!=null && !dv.getValue().isEmpty()){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void refreshListView() {
@@ -504,7 +532,6 @@ public class DataEntryFragment extends Fragment
                 /*
                 * Calling adapter's getView in order to render changes in visible IndicatorRows
                 * */
-
                 refreshListView();
             }
         }.start();
@@ -645,8 +672,6 @@ public class DataEntryFragment extends Fragment
                 mLongitude.setText(String.valueOf(location.getLongitude()));
             }
         });
-
-        //mListView.addHeaderView(view);
     }
 
     private void attachSpinner() {
