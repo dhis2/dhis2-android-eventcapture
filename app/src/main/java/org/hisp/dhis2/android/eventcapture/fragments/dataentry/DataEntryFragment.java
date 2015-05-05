@@ -167,6 +167,8 @@ public class DataEntryFragment extends Fragment
 
         if (activity instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
         }
 
         if (activity instanceof MainActivity) {
@@ -185,6 +187,8 @@ public class DataEntryFragment extends Fragment
         if (getActivity() != null &&
                 getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setHomeButtonEnabled(false);
         }
 
         // we need to nullify reference
