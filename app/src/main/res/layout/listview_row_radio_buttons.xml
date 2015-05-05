@@ -45,21 +45,21 @@
             android:id="@+id/first_radio_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="@dimen/medium_text_size"
             app:font="@string/regular_font_name"/>
 
         <org.hisp.dhis2.android.sdk.utils.ui.views.FontRadioButton
             android:id="@+id/second_radio_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="@dimen/medium_text_size"
             app:font="@string/regular_font_name"/>
 
         <org.hisp.dhis2.android.sdk.utils.ui.views.FontRadioButton
             android:id="@+id/third_radio_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="@dimen/medium_text_size"
             app:font="@string/regular_font_name"/>
     </RadioGroup>
 

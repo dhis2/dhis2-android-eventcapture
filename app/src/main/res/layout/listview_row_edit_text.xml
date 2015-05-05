@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="6dp"
-        android:textSize="16sp"
+        android:textSize="@dimen/medium_text_size"
         android:paddingTop="11dp"
         android:paddingBottom="11dp"
         app:font="@string/light_font_name"/>
