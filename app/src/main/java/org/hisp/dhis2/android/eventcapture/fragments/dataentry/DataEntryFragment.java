@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -131,6 +132,7 @@ public class DataEntryFragment extends Fragment
     private View mCoordinatePickerView;
 
     private boolean refreshing = false;
+    private boolean hasDataChanged = false;
 
     public static DataEntryFragment newInstance(String unitId, String programId) {
         DataEntryFragment fragment = new DataEntryFragment();
@@ -225,6 +227,15 @@ public class DataEntryFragment extends Fragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_data_entry, menu);
+        Log.d(TAG, "onCreateOptionsMenu");
+        MenuItem menuItem = menu.findItem(R.id.action_new_event);
+        if(!hasDataChanged) {
+            menuItem.setEnabled(false);
+            menuItem.getIcon().setAlpha(0x30);
+        } else {
+            menuItem.setEnabled(true);
+            menuItem.getIcon().setAlpha(0xFF);
+        }
     }
 
     @Override
@@ -382,11 +393,25 @@ public class DataEntryFragment extends Fragment
         if (haveValuesChanged()) {
             Dhis2.getInstance().showConfirmDialog(getActivity(),
                     getString(R.string.discard), getString(R.string.discard_confirm_changes),
-                    getString(R.string.yes_option), getString(R.string.no_option),
+                    getString(R.string.discard),
+                    getString(R.string.save_and_close),
+                    getString(R.string.cancel),
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             getFragmentManager().popBackStack();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if(submitEvent()) {
+                                getFragmentManager().popBackStack();
+                            }
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
                         }
                     });
         } else {
@@ -395,7 +420,7 @@ public class DataEntryFragment extends Fragment
     }
 
     private boolean haveValuesChanged() {
-        if (mForm == null || mForm.getEvent() == null
+        /*if (mForm == null || mForm.getEvent() == null
                 || mForm.getEvent().getDataValues() == null) {
             return false;
         }
@@ -414,9 +439,9 @@ public class DataEntryFragment extends Fragment
                     return true;
                 }
             }
-        }
+        }*/
 
-        return false;
+        return hasDataChanged;
     }
 
     public void showWarningHiddenValuesDialog(ArrayList<String> affectedValues) {
@@ -502,8 +527,16 @@ public class DataEntryFragment extends Fragment
         });
     }
 
+    public void flagDataChanged(boolean changed) {
+        if(hasDataChanged!=changed) {
+            hasDataChanged = changed;
+            getActivity().invalidateOptionsMenu();
+        }
+    }
+
     @Subscribe
     public void onRowValueChanged(final EditTextValueChangedEvent event) {
+        flagDataChanged(true);
         if (mForm == null || mForm.getIndicatorRows() == null) {
             return;
         }
@@ -738,7 +771,11 @@ public class DataEntryFragment extends Fragment
         return mSpinnerContainer != null;
     }
 
-    private void submitEvent() {
+    /**
+     * returns true if the event was successfully saved
+     * @return
+     */
+    private boolean submitEvent() {
         if (mForm != null && isAdded()) {
             ArrayList<String> errors = isEventValid();
             if (errors.isEmpty()) {
@@ -761,12 +798,17 @@ public class DataEntryFragment extends Fragment
                 };
                 Timer timer = new Timer();
                 timer.schedule(timerTask, 5000);
-                getFragmentManager().popBackStack();
+                //getFragmentManager().popBackStack();
+                flagDataChanged(false);
+                return true;
             } else {
                 ValidationErrorDialog dialog = ValidationErrorDialog
                         .newInstance(errors);
                 dialog.show(getChildFragmentManager());
+                return false;
             }
+        } else {
+            return false;
         }
     }
 
