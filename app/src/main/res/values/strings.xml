@@ -79,4 +79,6 @@
     <string name="enter_positive_integer">Enter positive integer</string>
     <string name="enter_date">Enter date</string>
 
+    <string name="search">Search</string>
+
 </resources>

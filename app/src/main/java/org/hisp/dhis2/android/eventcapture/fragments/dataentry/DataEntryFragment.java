@@ -168,6 +168,8 @@ public class DataEntryFragment extends Fragment
 
         if (activity instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(false);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+            getActionBar().setHomeButtonEnabled(true);
         }
 
         if (activity instanceof MainActivity) {
@@ -186,6 +188,8 @@ public class DataEntryFragment extends Fragment
         if (getActivity() != null &&
                 getActivity() instanceof AppCompatActivity) {
             getActionBar().setDisplayShowTitleEnabled(true);
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+            getActionBar().setHomeButtonEnabled(false);
         }
 
         // we need to nullify reference
@@ -233,7 +237,8 @@ public class DataEntryFragment extends Fragment
         mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(View.GONE);
 
-        mListViewAdapter = new DataValueAdapter(getLayoutInflater(savedInstanceState));
+        mListViewAdapter = new DataValueAdapter(getChildFragmentManager(),
+                getLayoutInflater(savedInstanceState));
         mListView = (ListView) view.findViewById(R.id.datavalues_listview);
         mListView.setVisibility(View.VISIBLE);
 

@@ -32,6 +32,18 @@
     android:orientation="horizontal"
     android:weightSum="1">
 
+    <Spinner
+        android:id="@+id/toolbar_spinner"
+        style="@style/Widget.MyApp.HeaderBar.Spinner"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <View
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        android:background="@color/dark_navy_blue"/>
+
     <ImageView
         android:id="@+id/previous_section"
         android:layout_width="44dp"
@@ -42,13 +54,6 @@
         android:contentDescription="@string/description"
         android:padding="4dp"
         android:src="@drawable/ic_backwards"/>
-
-    <Spinner
-        android:id="@+id/toolbar_spinner"
-        style="@style/Widget.MyApp.HeaderBar.Spinner"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"/>
 
     <ImageView
         android:id="@+id/next_section"

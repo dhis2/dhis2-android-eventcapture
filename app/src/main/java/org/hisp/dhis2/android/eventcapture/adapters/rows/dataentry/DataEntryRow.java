@@ -26,6 +26,7 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,9 +34,13 @@ import android.view.ViewGroup;
 import org.hisp.dhis2.android.sdk.persistence.models.BaseValue;
 
 public interface DataEntryRow {
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container);
-    public int getViewType();
-    public BaseValue getBaseValue();
-    public boolean isHidden();
-    public void setHidden(boolean hidden);
+    View getView(FragmentManager fragmentManager, LayoutInflater inflater, View convertView, ViewGroup container);
+
+    int getViewType();
+
+    BaseValue getBaseValue();
+
+    boolean isHidden();
+
+    void setHidden(boolean hidden);
 }

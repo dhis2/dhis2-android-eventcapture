@@ -26,6 +26,7 @@
 
 package org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry;
 
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +55,8 @@ public class CheckBoxRow implements DataEntryRow {
     }
 
     @Override
-    public View getView(LayoutInflater inflater, View convertView, ViewGroup container) {
+    public View getView(FragmentManager fragmentManager, LayoutInflater inflater,
+                        View convertView, ViewGroup container) {
         View view;
         CheckBoxHolder holder;
 
