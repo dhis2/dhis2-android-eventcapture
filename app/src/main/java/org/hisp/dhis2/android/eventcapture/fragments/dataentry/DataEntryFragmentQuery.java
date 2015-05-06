@@ -172,7 +172,7 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
             List<DataValue> dataValues = new ArrayList<>();
             for (ProgramStageDataElement dataElement : programStage.getProgramStageDataElements()) {
                 dataValues.add(
-                        new DataValue(event.event, EMPTY_FIELD, dataElement.dataElement, false, username)
+                        new DataValue(event, EMPTY_FIELD, dataElement.dataElement, false, username)
                 );
             }
             event.setDataValues(dataValues);
@@ -238,7 +238,7 @@ class DataEntryFragmentQuery implements Query<DataEntryFragmentForm> {
 
         // The DataValue didn't exist for some reason. Create a new one.
         DataValue dataValue = new DataValue(
-                event.getEvent(), EMPTY_FIELD, dataElement, false, username
+                event, EMPTY_FIELD, dataElement, false, username
         );
         event.getDataValues().add(dataValue);
         return dataValue;

@@ -420,27 +420,6 @@ public class DataEntryFragment extends Fragment
     }
 
     private boolean haveValuesChanged() {
-        /*if (mForm == null || mForm.getEvent() == null
-                || mForm.getEvent().getDataValues() == null) {
-            return false;
-        }
-
-        for (DataValue dataValue : mForm.getEvent().getDataValues()) {
-            Map<String, DataValue> originalValues = mForm.getDataValues();
-            if (dataValue == null || !originalValues.containsKey(dataValue.dataElement)) {
-                continue;
-            }
-
-            DataValue originalDataValue = originalValues.get(dataValue.dataElement);
-            if (originalDataValue != null && originalDataValue.getValue() != null) {
-                if (!originalDataValue.getValue().equals(dataValue.getValue())) {
-                    System.out.println("Value changed [original|modified]: " +
-                            originalDataValue.getValue() + "|" + dataValue.getValue());
-                    return true;
-                }
-            }
-        }*/
-
         return hasDataChanged;
     }
 
@@ -798,7 +777,6 @@ public class DataEntryFragment extends Fragment
                 };
                 Timer timer = new Timer();
                 timer.schedule(timerTask, 5000);
-                //getFragmentManager().popBackStack();
                 flagDataChanged(false);
                 return true;
             } else {
