@@ -133,6 +133,7 @@ public class DataEntryFragment extends Fragment
 
     private boolean refreshing = false;
     private boolean hasDataChanged = false;
+    private boolean saving = false;
 
     public static DataEntryFragment newInstance(String unitId, String programId) {
         DataEntryFragment fragment = new DataEntryFragment();
@@ -755,38 +756,48 @@ public class DataEntryFragment extends Fragment
      * @return
      */
     private boolean submitEvent() {
-        if (mForm != null && isAdded()) {
-            ArrayList<String> errors = isEventValid();
-            if (errors.isEmpty()) {
-                mForm.getEvent().setFromServer(true);
-                mForm.getEvent().setLastUpdated(Utils.getCurrentTime());
-                mForm.getEvent().save(true);
-
-                /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
-                before Dhis2 sends data to server to avoid some data values not being sent in race
-                conditions*/
-                mForm.getEvent().setFromServer(false);
-                mForm.getEvent().save(true);
-                final Context context = getActivity().getBaseContext();
-
-                TimerTask timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        Dhis2.sendLocalData(context);
-                    }
-                };
-                Timer timer = new Timer();
-                timer.schedule(timerTask, 5000);
-                flagDataChanged(false);
-                return true;
-            } else {
-                ValidationErrorDialog dialog = ValidationErrorDialog
-                        .newInstance(errors);
-                dialog.show(getChildFragmentManager());
-                return false;
-            }
-        } else {
+        if(saving) return false;
+        ArrayList<String> errors = isEventValid();
+        if (!errors.isEmpty()) {
+            ValidationErrorDialog dialog = ValidationErrorDialog
+                    .newInstance(errors);
+            dialog.show(getChildFragmentManager());
             return false;
+        }
+        else {
+
+            flagDataChanged(false);
+            new Thread() {
+                public void run() {
+                saving = true;
+                if(mForm!=null && isAdded()) {
+                    final Context context = getActivity().getBaseContext();
+
+                    mForm.getEvent().setFromServer(true);
+                    mForm.getEvent().setLastUpdated(Utils.getCurrentTime());
+                    mForm.getEvent().save(true);
+
+                    /*workaround for dbflow concurrency bug. This ensures that datavalues are saved
+                    before Dhis2 sends data to server to avoid some data values not being sent in race
+                    conditions*/
+                    mForm.getEvent().setFromServer(false);
+                    mForm.getEvent().save(true);
+
+
+                    TimerTask timerTask = new TimerTask() {
+                        @Override
+                        public void run() {
+                            Dhis2.sendLocalData(context);
+                        }
+                    };
+                    Timer timer = new Timer();
+                    timer.schedule(timerTask, 5000);
+                    }
+                    saving = false;
+                }
+
+            }.start();
+            return true;
         }
     }
 
