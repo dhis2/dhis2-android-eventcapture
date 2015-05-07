@@ -73,6 +73,8 @@ import org.hisp.dhis2.android.eventcapture.adapters.rows.dataentry.IndicatorRow;
 import org.hisp.dhis2.android.eventcapture.events.EditTextValueChangedEvent;
 import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramRule;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramRuleAction;
@@ -425,8 +427,16 @@ public class DataEntryFragment extends Fragment
     }
 
     public void showWarningHiddenValuesDialog(ArrayList<String> affectedValues) {
+        ArrayList<String> dataElementNames = new ArrayList<>();
+        for(String s: affectedValues) {
+            DataElement de = MetaDataController.getDataElement(s);
+            if(de!=null) {
+                dataElementNames.add(de.getDisplayName());
+            }
+        }
         ValidationErrorDialog dialog = ValidationErrorDialog
-                .newInstance(getString(R.string.warning_hidefieldwithvalue), affectedValues);
+                .newInstance(getString(R.string.warning_hidefieldwithvalue), dataElementNames
+                );
         dialog.show(getChildFragmentManager());
     }
 
@@ -440,16 +450,19 @@ public class DataEntryFragment extends Fragment
         ArrayList<String> affectedFieldsWithValue = new ArrayList<>();
         for (ProgramRule programRule : rules) {
             boolean actionTrue = ProgramRuleService.evaluate(programRule.condition, mForm.getEvent());
-            for (ProgramRuleAction programRuleAction : programRule.getProgramRuleActions()) {
-                boolean valueInField = applyProgramRuleAction(programRuleAction, actionTrue);
-                if(valueInField) {
-                    affectedFieldsWithValue.add(programRuleAction.dataElement);
+            if(actionTrue) {
+                for (ProgramRuleAction programRuleAction : programRule.getProgramRuleActions()) {
+                    boolean valueInField = applyProgramRuleAction(programRuleAction, actionTrue);
+                    if (valueInField) {
+                        affectedFieldsWithValue.add(programRuleAction.dataElement);
+                    }
                 }
             }
         }
         if(!affectedFieldsWithValue.isEmpty()) {
             showWarningHiddenValuesDialog(affectedFieldsWithValue);
         }
+        refreshListView();
         //todo dias make counter of stuff to show in dialog in rows with values are hidden.
     }
 
@@ -472,7 +485,6 @@ public class DataEntryFragment extends Fragment
      */
     public boolean hideField(String dataElement) {
         mListViewAdapter.hideIndex(dataElement);
-        refreshListView();
         DataValue dv = mForm.getDataValues().get(dataElement);
         if(dv!=null && dv.getValue()!=null && !dv.getValue().isEmpty()){
             return true;
@@ -516,6 +528,7 @@ public class DataEntryFragment extends Fragment
 
     @Subscribe
     public void onRowValueChanged(final EditTextValueChangedEvent event) {
+        Log.d(TAG, "onRowValueChanged");
         flagDataChanged(true);
         if (mForm == null || mForm.getIndicatorRows() == null) {
             return;
@@ -547,9 +560,6 @@ public class DataEntryFragment extends Fragment
                     }
                 }
 
-                /*
-                * Calling adapter's getView in order to render changes in visible IndicatorRows
-                * */
                 refreshListView();
             }
         }.start();
