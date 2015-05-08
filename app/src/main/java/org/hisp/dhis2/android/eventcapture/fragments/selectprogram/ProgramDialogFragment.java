@@ -44,9 +44,9 @@ import android.widget.ProgressBar;
 import com.raizlabs.android.dbflow.structure.Model;
 
 import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.adapters.SimpleAdapter;
-import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
-import org.hisp.dhis2.android.eventcapture.loaders.Query;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.SimpleAdapter;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;

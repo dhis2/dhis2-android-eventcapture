@@ -36,5 +36,4 @@
     <dimen name="floating_action_button_size_mini">40dp</dimen>
     <dimen name="floating_action_button_shadow_size">12dp</dimen>
 
-    <integer name="activity_anim_duration">300</integer>
 </resources>

@@ -20,13 +20,14 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
-import org.hisp.dhis2.android.eventcapture.INavigationHandler;
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.eventcapture.adapters.EventAdapter;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
-import org.hisp.dhis2.android.eventcapture.events.OnEventClick;
-import org.hisp.dhis2.android.eventcapture.fragments.dataentry.DataEntryFragment;
-import org.hisp.dhis2.android.eventcapture.loaders.DbLoader;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.EventAdapter;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.sdk.utils.OnEventClick;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
@@ -254,6 +255,7 @@ public class SelectProgramFragment extends Fragment
         if (eventClick.isOnDescriptionClick()) {
             DataEntryFragment fragment = DataEntryFragment.newInstance(
                     mState.getOrgUnitId(), mState.getProgramId(),
+                    MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getId(),
                     eventClick.getEvent().getLocalId()
             );
             mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
@@ -327,7 +329,8 @@ public class SelectProgramFragment extends Fragment
             }
             case R.id.register_new_event: {
                 DataEntryFragment fragment2 = DataEntryFragment.newInstance(
-                        mState.getOrgUnitId(), mState.getProgramId()
+                        mState.getOrgUnitId(), mState.getProgramId(),
+                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getId()
                 );
                 mNavigationHandler.switchFragment(
                         fragment2, DataEntryFragment.TAG, true

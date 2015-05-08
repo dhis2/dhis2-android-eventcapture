@@ -47,6 +47,8 @@ import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
+import org.hisp.dhis2.android.sdk.activities.OnBackPressedListener;
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -126,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         }
     }
 
+    @Override
     public void setBackPressedListener(OnBackPressedListener listener) {
         mBackPressedListener = listener;
     }

@@ -31,11 +31,11 @@ import android.content.Context;
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
-import org.hisp.dhis2.android.eventcapture.adapters.rows.events.ColumnNamesRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventItemRow;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventItemStatus;
-import org.hisp.dhis2.android.eventcapture.adapters.rows.events.EventRow;
-import org.hisp.dhis2.android.eventcapture.loaders.Query;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
