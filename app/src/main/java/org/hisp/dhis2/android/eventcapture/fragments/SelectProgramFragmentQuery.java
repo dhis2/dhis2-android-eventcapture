@@ -24,19 +24,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments.selectprogram;
+package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
@@ -46,6 +42,10 @@ import org.hisp.dhis2.android.sdk.persistence.models.Option;
 import org.hisp.dhis2.android.sdk.persistence.models.Program;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis2.android.sdk.persistence.models.ProgramStageDataElement;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -157,7 +157,9 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         }
 
         for (int i = 0; i < 3; i++) {
-            if(i>=elementsToShow.size()) break;
+            if (i >= elementsToShow.size()) {
+                break;
+            }
             String dataElement = elementsToShow.get(i);
             if (dataElement != null) {
                 DataValue dataValue = getDataValue(event, dataElement);

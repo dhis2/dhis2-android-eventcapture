@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments.selectprogram;
+package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.content.Context;
 import android.os.Bundle;

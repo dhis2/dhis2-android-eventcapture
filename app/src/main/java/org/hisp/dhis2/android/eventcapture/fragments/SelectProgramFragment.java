@@ -1,4 +1,4 @@
-package org.hisp.dhis2.android.eventcapture.fragments.selectprogram;
+package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
