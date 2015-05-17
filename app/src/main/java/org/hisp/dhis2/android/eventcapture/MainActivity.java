@@ -40,15 +40,15 @@ import android.util.Log;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.eventcapture.fragments.SelectProgramFragment;
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.activities.LoginActivity;
+import org.hisp.dhis2.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.MessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis2.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis2.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
-import org.hisp.dhis2.android.sdk.activities.OnBackPressedListener;
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -62,7 +62,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_EVENTCAPTURE);
         NetworkManager.getInstance().setCredentials(Dhis2.getCredentials(this));
         NetworkManager.getInstance().setServerUrl(Dhis2.getServer(this));
-        Dhis2Application.bus.register(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -74,6 +73,24 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
             showLoadingFragment();
         } else {
             loadInitialData();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Dhis2Application.getEventBus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Dhis2Application.getEventBus().register(this);
+
+        if (Dhis2.isInitialDataLoaded(this)) {
+            showSelectProgramFragment();
+        } else if (Dhis2.isLoadingInitial()) {
+            showLoadingFragment();
         }
     }
 
@@ -131,12 +148,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     @Override
     public void setBackPressedListener(OnBackPressedListener listener) {
         mBackPressedListener = listener;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Dhis2Application.bus.unregister(this);
     }
 
     @Override
