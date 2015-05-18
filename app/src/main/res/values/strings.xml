@@ -46,14 +46,11 @@
     <string name="unknown_error">Unknown error</string>
 
 
-
-
-
     <string name="choose_organisation_unit">Choose organisation unit</string>
     <string name="choose_program">Choose program</string>
 
-
-
     <string name="search">Search</string>
+    <string name="dialog_organisation_units">Organisation units</string>
+    <string name="dialog_programs">Programs</string>
 
 </resources>

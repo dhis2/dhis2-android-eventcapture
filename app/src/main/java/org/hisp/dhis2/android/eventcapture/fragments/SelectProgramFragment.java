@@ -20,27 +20,27 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
-import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
+import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
+import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.EventAdapter;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis2.android.sdk.utils.OnEventClick;
+import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
-import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
+import org.hisp.dhis2.android.sdk.utils.OnEventClick;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.EventAdapter;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SelectProgramFragment extends Fragment
-        implements View.OnClickListener, OrgUnitDialogFragment.OnOrgUnitSetListener,
-        ProgramDialogFragment.OnProgramSetListener,
+        implements View.OnClickListener, AutoCompleteDialogFragment.OnOptionSelectedListener,
         LoaderManager.LoaderCallbacks<List<EventRow>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
@@ -198,6 +198,19 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Override
+    public void onOptionSelected(int dialogId, int position, String id, String name) {
+        switch (dialogId) {
+            case OrgUnitDialogFragment2.ID: {
+                onUnitSelected(id, name);
+                break;
+            }
+            case ProgramDialogFragment2.ID: {
+                onProgramSelected(id, name);
+                break;
+            }
+        }
+    }
+
     public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
         mOrgUnitButton.setText(orgUnitLabel);
         mProgramButton.setEnabled(true);
@@ -211,7 +224,6 @@ public class SelectProgramFragment extends Fragment
         handleViews(0);
     }
 
-    @Override
     public void onProgramSelected(String programId, String programName) {
         mProgramButton.setText(programName);
 
@@ -316,13 +328,17 @@ public class SelectProgramFragment extends Fragment
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.select_organisation_unit: {
-                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                /* OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                        .newInstance(this); */
+                OrgUnitDialogFragment2 fragment = OrgUnitDialogFragment2
                         .newInstance(this);
                 fragment.show(getChildFragmentManager());
                 break;
             }
             case R.id.select_program: {
-                ProgramDialogFragment fragment = ProgramDialogFragment
+                /* ProgramDialogFragment fragment = ProgramDialogFragment
+                        .newInstance(this, mState.getOrgUnitId()); */
+                ProgramDialogFragment2 fragment = ProgramDialogFragment2
                         .newInstance(this, mState.getOrgUnitId());
                 fragment.show(getChildFragmentManager());
                 break;
