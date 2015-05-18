@@ -49,13 +49,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class OrgUnitDialogFragment2 extends AutoCompleteDialogFragment
+public class OrgUnitDialogFragment extends AutoCompleteDialogFragment
         implements LoaderManager.LoaderCallbacks<List<OptionAdapterValue>> {
     public static final int ID = 450123;
     private static final int LOADER_ID = 1;
 
-    public static OrgUnitDialogFragment2 newInstance(OnOptionSelectedListener listener) {
-        OrgUnitDialogFragment2 fragment = new OrgUnitDialogFragment2();
+    public static OrgUnitDialogFragment newInstance(OnOptionSelectedListener listener) {
+        OrgUnitDialogFragment fragment = new OrgUnitDialogFragment();
         fragment.setOnOptionSetListener(listener);
         return fragment;
     }

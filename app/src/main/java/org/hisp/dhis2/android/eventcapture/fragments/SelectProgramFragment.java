@@ -200,11 +200,11 @@ public class SelectProgramFragment extends Fragment
     @Override
     public void onOptionSelected(int dialogId, int position, String id, String name) {
         switch (dialogId) {
-            case OrgUnitDialogFragment2.ID: {
+            case OrgUnitDialogFragment.ID: {
                 onUnitSelected(id, name);
                 break;
             }
-            case ProgramDialogFragment2.ID: {
+            case ProgramDialogFragment.ID: {
                 onProgramSelected(id, name);
                 break;
             }
@@ -328,13 +328,13 @@ public class SelectProgramFragment extends Fragment
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.select_organisation_unit: {
-                OrgUnitDialogFragment2 fragment = OrgUnitDialogFragment2
+                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
                         .newInstance(this);
                 fragment.show(getChildFragmentManager());
                 break;
             }
             case R.id.select_program: {
-                ProgramDialogFragment2 fragment = ProgramDialogFragment2
+                ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(this, mState.getOrgUnitId());
                 fragment.show(getChildFragmentManager());
                 break;

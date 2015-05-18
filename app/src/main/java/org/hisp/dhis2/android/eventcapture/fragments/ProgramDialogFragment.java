@@ -48,14 +48,14 @@ import org.hisp.dhis2.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProgramDialogFragment2 extends AutoCompleteDialogFragment
+public class ProgramDialogFragment extends AutoCompleteDialogFragment
         implements LoaderManager.LoaderCallbacks<List<OptionAdapterValue>> {
     public static final int ID = 921345;
     private static final int LOADER_ID = 1;
 
-    public static ProgramDialogFragment2 newInstance(OnOptionSelectedListener listener,
+    public static ProgramDialogFragment newInstance(OnOptionSelectedListener listener,
                                                      String orgUnitId) {
-        ProgramDialogFragment2 fragment = new ProgramDialogFragment2();
+        ProgramDialogFragment fragment = new ProgramDialogFragment();
         Bundle args = new Bundle();
         args.putString(OrganisationUnit$Table.ID, orgUnitId);
         fragment.setArguments(args);
