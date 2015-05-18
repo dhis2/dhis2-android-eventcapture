@@ -328,16 +328,12 @@ public class SelectProgramFragment extends Fragment
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.select_organisation_unit: {
-                /* OrgUnitDialogFragment fragment = OrgUnitDialogFragment
-                        .newInstance(this); */
                 OrgUnitDialogFragment2 fragment = OrgUnitDialogFragment2
                         .newInstance(this);
                 fragment.show(getChildFragmentManager());
                 break;
             }
             case R.id.select_program: {
-                /* ProgramDialogFragment fragment = ProgramDialogFragment
-                        .newInstance(this, mState.getOrgUnitId()); */
                 ProgramDialogFragment2 fragment = ProgramDialogFragment2
                         .newInstance(this, mState.getOrgUnitId());
                 fragment.show(getChildFragmentManager());
