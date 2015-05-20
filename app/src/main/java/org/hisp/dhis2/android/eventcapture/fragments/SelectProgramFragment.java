@@ -1,10 +1,12 @@
 package org.hisp.dhis2.android.eventcapture.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 import com.raizlabs.android.dbflow.structure.Model;
@@ -41,11 +44,12 @@ import java.util.List;
 
 public class SelectProgramFragment extends Fragment
         implements View.OnClickListener, AutoCompleteDialogFragment.OnOptionSelectedListener,
-        LoaderManager.LoaderCallbacks<List<EventRow>> {
+        SwipeRefreshLayout.OnRefreshListener, LoaderManager.LoaderCallbacks<List<EventRow>> {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
     private static final String STATE = "state:SelectProgramFragment";
     private static final int LOADER_ID = 1;
 
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private ListView mListView;
     private ProgressBar mProgressBar;
     private EventAdapter mAdapter;
@@ -96,6 +100,10 @@ public class SelectProgramFragment extends Fragment
         mPrefs = new SelectProgramFragmentPreferences(
                 getActivity().getApplicationContext());
 
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_to_refresh_layout);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.green, R.color.blue, R.color.orange);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         mListView = (ListView) view.findViewById(R.id.event_listview);
         mAdapter = new EventAdapter(getLayoutInflater(savedInstanceState));
         View header = getLayoutInflater(savedInstanceState).inflate(
@@ -118,6 +126,10 @@ public class SelectProgramFragment extends Fragment
         mOrgUnitButton.setEnabled(true);
         mProgramButton.setEnabled(false);
         mRegisterEventButton.hide();
+
+        Toast.makeText(getActivity(), "IsLoading: " + Dhis2.getInstance().isLoading(),
+                Toast.LENGTH_SHORT).show();
+        mSwipeRefreshLayout.setRefreshing(Dhis2.getInstance().isLoading());
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -175,28 +187,6 @@ public class SelectProgramFragment extends Fragment
         super.onSaveInstanceState(out);
     }
 
-    public void onRestoreState(boolean hasUnits) {
-        mOrgUnitButton.setEnabled(hasUnits);
-        if (!hasUnits) {
-            return;
-        }
-
-        SelectProgramFragmentState backedUpState = new SelectProgramFragmentState(mState);
-        if (!backedUpState.isOrgUnitEmpty()) {
-            onUnitSelected(
-                    backedUpState.getOrgUnitId(),
-                    backedUpState.getOrgUnitLabel()
-            );
-
-            if (!backedUpState.isProgramEmpty()) {
-                onProgramSelected(
-                        backedUpState.getProgramId(),
-                        backedUpState.getProgramName()
-                );
-            }
-        }
-    }
-
     @Override
     public void onOptionSelected(int dialogId, int position, String id, String name) {
         switch (dialogId) {
@@ -209,31 +199,6 @@ public class SelectProgramFragment extends Fragment
                 break;
             }
         }
-    }
-
-    public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
-        mOrgUnitButton.setText(orgUnitLabel);
-        mProgramButton.setEnabled(true);
-
-        mState.setOrgUnit(orgUnitId, orgUnitLabel);
-        mState.resetProgram();
-
-        mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
-        mPrefs.putProgram(null);
-
-        handleViews(0);
-    }
-
-    public void onProgramSelected(String programId, String programName) {
-        mProgramButton.setText(programName);
-
-        mState.setProgram(programId, programName);
-        mPrefs.putProgram(new Pair<>(programId, programName));
-        handleViews(1);
-
-        mProgressBar.setVisibility(View.VISIBLE);
-        // this call will trigger onCreateLoader method
-        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
 
     @Override
@@ -297,6 +262,62 @@ public class SelectProgramFragment extends Fragment
                 }
             }
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        if (isAdded()) {
+            Context context = getActivity().getBaseContext();
+            Toast.makeText(context, getString(R.string.syncing), Toast.LENGTH_SHORT).show();
+            Dhis2.synchronize(context);
+        }
+    }
+
+    public void onRestoreState(boolean hasUnits) {
+        mOrgUnitButton.setEnabled(hasUnits);
+        if (!hasUnits) {
+            return;
+        }
+
+        SelectProgramFragmentState backedUpState = new SelectProgramFragmentState(mState);
+        if (!backedUpState.isOrgUnitEmpty()) {
+            onUnitSelected(
+                    backedUpState.getOrgUnitId(),
+                    backedUpState.getOrgUnitLabel()
+            );
+
+            if (!backedUpState.isProgramEmpty()) {
+                onProgramSelected(
+                        backedUpState.getProgramId(),
+                        backedUpState.getProgramName()
+                );
+            }
+        }
+    }
+
+    public void onUnitSelected(String orgUnitId, String orgUnitLabel) {
+        mOrgUnitButton.setText(orgUnitLabel);
+        mProgramButton.setEnabled(true);
+
+        mState.setOrgUnit(orgUnitId, orgUnitLabel);
+        mState.resetProgram();
+
+        mPrefs.putOrgUnit(new Pair<>(orgUnitId, orgUnitLabel));
+        mPrefs.putProgram(null);
+
+        handleViews(0);
+    }
+
+    public void onProgramSelected(String programId, String programName) {
+        mProgramButton.setText(programName);
+
+        mState.setProgram(programId, programName);
+        mPrefs.putProgram(new Pair<>(programId, programName));
+        handleViews(1);
+
+        mProgressBar.setVisibility(View.VISIBLE);
+        // this call will trigger onCreateLoader method
+        getLoaderManager().restartLoader(LOADER_ID, getArguments(), this);
     }
 
     private String getErrorDescription(Event event) {
