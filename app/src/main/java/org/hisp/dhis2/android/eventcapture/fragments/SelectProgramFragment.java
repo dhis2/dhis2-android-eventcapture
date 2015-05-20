@@ -28,6 +28,8 @@ import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.events.BaseEvent;
+import org.hisp.dhis2.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
@@ -127,9 +129,7 @@ public class SelectProgramFragment extends Fragment
         mProgramButton.setEnabled(false);
         mRegisterEventButton.hide();
 
-        Toast.makeText(getActivity(), "IsLoading: " + Dhis2.getInstance().isLoading(),
-                Toast.LENGTH_SHORT).show();
-        mSwipeRefreshLayout.setRefreshing(Dhis2.getInstance().isLoading());
+        setRefreshing(Dhis2.getInstance().isLoading());
 
         if (savedInstanceState != null &&
                 savedInstanceState.getParcelable(STATE) != null) {
@@ -264,12 +264,33 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
+    @Subscribe
+    public void onRefreshFinished(LoadingMessageEvent event) {
+        if (event.eventType == BaseEvent.EventType.metaDataSyncFinished) {
+            setRefreshing(false);
+        }
+    }
+
     @Override
     public void onRefresh() {
         if (isAdded()) {
             Context context = getActivity().getBaseContext();
             Toast.makeText(context, getString(R.string.syncing), Toast.LENGTH_SHORT).show();
             Dhis2.synchronize(context);
+        }
+    }
+
+    private void setRefreshing(final boolean refreshing) {
+        /* workaround for bug in android support v4 library */
+        if (mSwipeRefreshLayout.isRefreshing() != refreshing) {
+            System.out.println("VIEW: " + mSwipeRefreshLayout.isRefreshing() +
+                    " BOOL: " + refreshing);
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(refreshing);
+                }
+            });
         }
     }
 
