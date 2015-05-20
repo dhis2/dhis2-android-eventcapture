@@ -31,6 +31,12 @@ import android.content.Context;
 import com.raizlabs.android.dbflow.sql.builder.Condition;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis2.android.sdk.persistence.models.DataValue;
@@ -71,7 +77,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         List<EventRow> eventEventRows = new ArrayList<>();
 
         // create a list of EventItems
-        Program selectedProgram = Select.byId(Program.class, mProgramId);
+        Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
             return eventEventRows;
         }
@@ -114,17 +120,13 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
             return eventEventRows;
         }
 
-        List<Option> options = Select.all(Option.class);
+        List<Option> options = new Select().from(Option.class).queryList();
         Map<String, String> codeToName = new HashMap<>();
         for (Option option : options) {
             codeToName.put(option.getCode(), option.getName());
         }
 
-        List<FailedItem> failedEvents = Select.all(
-                FailedItem.class, Condition
-                        .column(FailedItem$Table.ITEMTYPE)
-                        .is(FailedItem.EVENT)
-        );
+        List<FailedItem> failedEvents = DataValueController.getFailedItems(FailedItem.EVENT);
 
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
@@ -183,17 +185,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     }
 
     private DataValue getDataValue(Event event, String dataElement) {
-        List<DataValue> dataValues = Select.all(
-                DataValue.class,
-                Condition.column(DataValue$Table.EVENT).is(event.event),
-                Condition.column(DataValue$Table.DATAELEMENT).is(dataElement)
-        );
-
-        if (dataValues != null && !dataValues.isEmpty()) {
-            return dataValues.get(0);
-        } else {
-            return null;
-        }
+        return DataValueController.getDataValue(event.localId, dataElement);
     }
 
     private static <T> boolean isListEmpty(List<T> items) {

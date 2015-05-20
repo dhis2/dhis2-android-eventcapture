@@ -24,20 +24,21 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.EventAdapter;
+import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis2.android.sdk.utils.OnEventClick;
+import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis2.android.sdk.events.BaseEvent;
 import org.hisp.dhis2.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
-import org.hisp.dhis2.android.sdk.fragments.dataentry.DataEntryFragment;
-import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis2.android.sdk.utils.OnEventClick;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.EventAdapter;
-import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis2.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis2.android.sdk.utils.ui.views.CardTextViewButton;
 
@@ -342,8 +343,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     private String getErrorDescription(Event event) {
-        FailedItem failedItem =
-                Select.byId(FailedItem.class, event.getLocalId());
+        FailedItem failedItem = DataValueController.getFailedItem(FailedItem.EVENT, event.getLocalId());
 
         if (failedItem != null) {
             if (failedItem.httpStatusCode == 401) {
