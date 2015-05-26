@@ -25,6 +25,9 @@ import org.hisp.dhis2.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis2.android.eventcapture.R;
 import org.hisp.dhis2.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis2.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis2.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis2.android.sdk.network.http.Response;
+import org.hisp.dhis2.android.sdk.utils.APIException;
 import org.hisp.dhis2.android.sdk.utils.ui.adapters.EventAdapter;
 import org.hisp.dhis2.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis2.android.sdk.utils.OnEventClick;
@@ -219,6 +222,7 @@ public class SelectProgramFragment extends Fragment
         if (LOADER_ID == loader.getId()) {
             mProgressBar.setVisibility(View.GONE);
             mAdapter.swapData(data);
+            setRefreshing(false);
         }
     }
 
@@ -264,11 +268,8 @@ public class SelectProgramFragment extends Fragment
         }
     }
 
-    @Subscribe
-    public void onRefreshFinished(LoadingMessageEvent event) {
-        if (event.eventType == BaseEvent.EventType.metaDataSyncFinished) {
-            setRefreshing(false);
-        }
+    public void onRefreshFinished() {
+        setRefreshing(false);
     }
 
     @Override
@@ -276,7 +277,18 @@ public class SelectProgramFragment extends Fragment
         if (isAdded()) {
             Context context = getActivity().getBaseContext();
             Toast.makeText(context, getString(R.string.syncing), Toast.LENGTH_SHORT).show();
-            Dhis2.synchronize(context);
+            ApiRequestCallback callback = new ApiRequestCallback() {
+                @Override
+                public void onSuccess(Response response) {
+                    onRefreshFinished();
+                }
+
+                @Override
+                public void onFailure(APIException exception) {
+                    onRefreshFinished();
+                }
+            };
+            Dhis2.synchronize(context, callback);
         }
     }
 
