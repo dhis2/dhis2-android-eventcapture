@@ -157,12 +157,22 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     }
 
     public void showLoadingFragment() {
-        setTitle("Loading initial data");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setTitle("Loading initial data");
+            }
+        });
         switchFragment(new LoadingFragment(), LoadingFragment.TAG, false);
     }
 
     public void showSelectProgramFragment() {
-        setTitle("Event Capture");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                setTitle("Event Capture");
+            }
+        });
         switchFragment(new SelectProgramFragment(), SelectProgramFragment.TAG, true);
     }
 
