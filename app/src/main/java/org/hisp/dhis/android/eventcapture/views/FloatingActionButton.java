@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.views;
+package org.hisp.dhis.android.eventcapture.views;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -45,7 +45,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
 
-import org.hisp.dhis2.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.R;
 
 public class FloatingActionButton extends ImageButton {
     private final static OvershootInterpolator OVERSHOOT_INTERPOLATOR = new OvershootInterpolator();

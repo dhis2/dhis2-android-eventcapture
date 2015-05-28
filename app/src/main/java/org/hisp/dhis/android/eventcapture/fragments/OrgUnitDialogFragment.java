@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -36,29 +36,26 @@ import android.view.View;
 
 import com.raizlabs.android.dbflow.structure.Model;
 
-import org.hisp.dhis2.android.eventcapture.R;
-import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
-import org.hisp.dhis2.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis2.android.sdk.persistence.models.OrganisationUnit$Table;
-import org.hisp.dhis2.android.sdk.persistence.models.Program;
-import org.hisp.dhis2.android.sdk.utils.ui.dialogs.AutoCompleteDialogAdapter.OptionAdapterValue;
-import org.hisp.dhis2.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
+import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.sdk.controllers.Dhis2;
+import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.loaders.Query;
+import org.hisp.dhis.android.sdk.persistence.models.OrganisationUnit;
+import org.hisp.dhis.android.sdk.persistence.models.Program;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogAdapter.OptionAdapterValue;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProgramDialogFragment extends AutoCompleteDialogFragment
+
+public class OrgUnitDialogFragment extends AutoCompleteDialogFragment
         implements LoaderManager.LoaderCallbacks<List<OptionAdapterValue>> {
-    public static final int ID = 921345;
+    public static final int ID = 450123;
     private static final int LOADER_ID = 1;
 
-    public static ProgramDialogFragment newInstance(OnOptionSelectedListener listener,
-                                                     String orgUnitId) {
-        ProgramDialogFragment fragment = new ProgramDialogFragment();
-        Bundle args = new Bundle();
-        args.putString(OrganisationUnit$Table.ID, orgUnitId);
-        fragment.setArguments(args);
+    public static OrgUnitDialogFragment newInstance(OnOptionSelectedListener listener) {
+        OrgUnitDialogFragment fragment = new OrgUnitDialogFragment();
         fragment.setOnOptionSetListener(listener);
         return fragment;
     }
@@ -66,7 +63,7 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setDialogLabel(R.string.dialog_programs);
+        setDialogLabel(R.string.dialog_organisation_units);
         setDialogId(ID);
     }
 
@@ -79,11 +76,9 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
     @Override
     public Loader<List<OptionAdapterValue>> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
-            String organisationUnitId = args.getString(OrganisationUnit$Table.ID);
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
-            modelsToTrack.add(Program.class);
             return new DbLoader<>(
-                    getActivity().getBaseContext(), modelsToTrack, new ProgramQuery(organisationUnitId)
+                    getActivity().getBaseContext(), modelsToTrack, new OrgUnitQuery()
             );
         }
         return null;
@@ -92,7 +87,7 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
     @Override
     public void onLoadFinished(Loader<List<OptionAdapterValue>> loader,
                                List<OptionAdapterValue> data) {
-        if (LOADER_ID == loader.getId()) {
+        if (loader.getId() == LOADER_ID) {
             getAdapter().swapData(data);
         }
     }
@@ -102,28 +97,34 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
         getAdapter().swapData(null);
     }
 
-    static class ProgramQuery implements Query<List<OptionAdapterValue>> {
-        private final String mOrgUnitId;
-
-        public ProgramQuery(String orgUnitId) {
-            mOrgUnitId = orgUnitId;
-        }
+    static class OrgUnitQuery implements Query<List<OptionAdapterValue>> {
 
         @Override
         public List<OptionAdapterValue> query(Context context) {
-            List<Program> programs = Dhis2.getInstance()
-                    .getMetaDataController()
-                    .getProgramsForOrganisationUnit(
-                            mOrgUnitId, Program.SINGLE_EVENT_WITHOUT_REGISTRATION
-                    );
+            List<OrganisationUnit> orgUnits = queryUnits();
             List<OptionAdapterValue> values = new ArrayList<>();
-            if (programs != null && !programs.isEmpty()) {
-                for (Program program : programs) {
-                    values.add(new OptionAdapterValue(program.getId(), program.getName()));
+            for (OrganisationUnit orgUnit : orgUnits) {
+                if (hasPrograms(orgUnit.getId())) {
+                    values.add(new OptionAdapterValue(orgUnit.getId(), orgUnit.getLabel()));
                 }
             }
 
             return values;
+        }
+
+        private List<OrganisationUnit> queryUnits() {
+            return Dhis2.getInstance()
+                    .getMetaDataController()
+                    .getAssignedOrganisationUnits();
+        }
+
+        private boolean hasPrograms(String unitId) {
+            List<Program> programs = Dhis2.getInstance()
+                    .getMetaDataController()
+                    .getProgramsForOrganisationUnit(
+                            unitId, Program.SINGLE_EVENT_WITHOUT_REGISTRATION
+                    );
+            return (programs != null && !programs.isEmpty());
         }
     }
 }

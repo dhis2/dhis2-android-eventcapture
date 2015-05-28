@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis2.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.os.Parcel;
 import android.os.Parcelable;

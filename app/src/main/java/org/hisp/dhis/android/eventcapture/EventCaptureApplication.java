@@ -27,16 +27,19 @@
  *
  */
 
-package org.hisp.dhis2.android.eventcapture;
+package org.hisp.dhis.android.eventcapture;
 
-import android.app.Application;
-import android.test.ApplicationTestCase;
+import android.app.Activity;
+
+import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 
 /**
- * <a href="http://d.android.com/tools/testing/testing_android.html">Testing Fundamentals</a>
+ * @author Simen Skogly Russnes on 20.02.15.
  */
-public class ApplicationTest extends ApplicationTestCase<Application> {
-    public ApplicationTest() {
-        super(Application.class);
+public class EventCaptureApplication extends Dhis2Application {
+
+    @Override
+    public Class<? extends Activity> getMainActivity() {
+        return new MainActivity().getClass();
     }
 }
