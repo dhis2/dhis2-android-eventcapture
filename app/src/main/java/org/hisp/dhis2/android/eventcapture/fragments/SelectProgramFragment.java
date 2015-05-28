@@ -36,8 +36,6 @@ import org.hisp.dhis2.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis2.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis2.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis2.android.sdk.controllers.Dhis2;
-import org.hisp.dhis2.android.sdk.events.BaseEvent;
-import org.hisp.dhis2.android.sdk.events.LoadingMessageEvent;
 import org.hisp.dhis2.android.sdk.fragments.SettingsFragment;
 import org.hisp.dhis2.android.sdk.persistence.models.Event;
 import org.hisp.dhis2.android.sdk.persistence.models.FailedItem;
