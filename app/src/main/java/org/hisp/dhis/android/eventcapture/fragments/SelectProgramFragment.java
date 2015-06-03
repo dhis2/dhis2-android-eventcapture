@@ -355,24 +355,24 @@ public class SelectProgramFragment extends Fragment
         FailedItem failedItem = DataValueController.getFailedItem(FailedItem.EVENT, event.getLocalId());
 
         if (failedItem != null) {
-            if (failedItem.httpStatusCode == 200) {
+            if (failedItem.getHttpStatusCode() == 200) {
                 if(failedItem.getImportSummary()!=null)
-                    return failedItem.getImportSummary().description;
+                    return failedItem.getImportSummary().getDescription();
             }
-            if (failedItem.httpStatusCode == 401) {
+            if (failedItem.getHttpStatusCode() == 401) {
                 return getString(R.string.error_401_description);
             }
 
-            if (failedItem.httpStatusCode == 408) {
+            if (failedItem.getHttpStatusCode()== 408) {
                 return getString(R.string.error_408_description);
             }
 
-            if (failedItem.httpStatusCode >= 400 && failedItem.httpStatusCode < 500) {
+            if (failedItem.getHttpStatusCode() >= 400 && failedItem.getHttpStatusCode()< 500) {
                 return getString(R.string.error_series_400_description);
             }
 
-            if (failedItem.httpStatusCode >= 500) {
-                return failedItem.errorMessage;
+            if (failedItem.getHttpStatusCode()>= 500) {
+                return failedItem.getErrorMessage();
             }
         }
 

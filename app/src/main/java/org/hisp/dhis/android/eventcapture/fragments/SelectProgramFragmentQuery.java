@@ -96,8 +96,8 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         List<String> elementsToShow = new ArrayList<>();
         ColumnNamesRow columnNames = new ColumnNamesRow();
         for (ProgramStageDataElement stageElement : stageElements) {
-            if (stageElement.displayInReports && elementsToShow.size() < 3) {
-                elementsToShow.add(stageElement.dataElement);
+            if (stageElement.getDisplayInReports() && elementsToShow.size() < 3) {
+                elementsToShow.add(stageElement.getDataelement());
                 if (stageElement.getDataElement() != null) {
                     String name = stageElement.getDataElement().getDisplayName();
                     if (elementsToShow.size() == 1) {
@@ -149,7 +149,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         EventItemRow eventItem = new EventItemRow(context);
         eventItem.setEvent(event);
 
-        if (event.isFromServer()) {
+        if (event.getFromServer()) {
             eventItem.setStatus(EventItemStatus.SENT);
         } else if (failedEventIds.contains(event.getEvent())) {
             eventItem.setStatus(EventItemStatus.ERROR);
@@ -184,7 +184,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     }
 
     private DataValue getDataValue(Event event, String dataElement) {
-        return DataValueController.getDataValue(event.localId, dataElement);
+        return DataValueController.getDataValue(event.getLocalId(), dataElement);
     }
 
     private static <T> boolean isListEmpty(List<T> items) {
