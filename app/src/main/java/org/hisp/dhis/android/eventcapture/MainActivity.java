@@ -74,8 +74,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         Dhis2.activatePeriodicSynchronizer(this);
         if (Dhis2.isInitialDataLoaded(this)) {
             showSelectProgramFragment();
-        } else {
-            loadInitialData();
         }
     }
 
@@ -89,9 +87,12 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     public void onResume() {
         super.onResume();
         Dhis2Application.getEventBus().register(this);
-
         if (Dhis2.isInitialDataLoaded(this)) {
-            showSelectProgramFragment();
+            if(Dhis2.getInstance().isBlocking()) {
+                showLoadingFragment();
+            } else {
+
+            }
         } else {
             loadInitialData();
         }
