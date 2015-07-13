@@ -46,6 +46,7 @@ import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.activities.LoginActivity;
 import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
+import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
 import org.hisp.dhis.android.sdk.events.BaseEvent;
 import org.hisp.dhis.android.sdk.events.MessageEvent;
 import org.hisp.dhis.android.sdk.fragments.LoadingFragment;
@@ -107,13 +108,13 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         });
         ApiRequestCallback callback = new ApiRequestCallback() {
             @Override
-            public void onSuccess(Response response) {
+            public void onSuccess(ResponseHolder holder) {
                 FlowContentObserver observer = Dhis2.getFlowContentObserverForAllTables();
                 String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
                 Dhis2.postProgressMessage(message);
                 ApiRequestCallback callback = new ApiRequestCallback() {
                     @Override
-                    public void onSuccess(Response response) {
+                    public void onSuccess(ResponseHolder holder) {
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 showSelectProgramFragment();
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
                     }
 
                     @Override
-                    public void onFailure(APIException exception) {
+                    public void onFailure(ResponseHolder holder) {
                         showSelectProgramFragment();
                     }
                 };
@@ -133,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
             }
 
             @Override
-            public void onFailure(APIException exception) {
+            public void onFailure(ResponseHolder holder) {
                 //todo: notify the user that data is missing and request to try to re-load.
                 showSelectProgramFragment();
             }

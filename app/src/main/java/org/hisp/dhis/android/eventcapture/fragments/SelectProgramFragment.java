@@ -23,6 +23,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
@@ -277,12 +278,12 @@ public class SelectProgramFragment extends Fragment
             Toast.makeText(context, getString(R.string.syncing), Toast.LENGTH_SHORT).show();
             ApiRequestCallback callback = new ApiRequestCallback() {
                 @Override
-                public void onSuccess(Response response) {
+                public void onSuccess(ResponseHolder holder) {
                     onRefreshFinished();
                 }
 
                 @Override
-                public void onFailure(APIException exception) {
+                public void onFailure(ResponseHolder holder) {
                     onRefreshFinished();
                 }
             };
