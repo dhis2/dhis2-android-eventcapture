@@ -231,6 +231,7 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Subscribe
+    @SuppressWarnings("unused")
     public void onItemClick(OnEventClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
             DataEntryFragment fragment = DataEntryFragment.newInstance(

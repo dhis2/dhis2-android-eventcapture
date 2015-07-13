@@ -99,7 +99,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
             if (stageElement.getDisplayInReports() && elementsToShow.size() < 3) {
                 elementsToShow.add(stageElement.getDataelement());
                 if (stageElement.getDataElement() != null) {
-                    String name = stageElement.getDataElement().getDisplayName();
+                    String name = stageElement.getDataElement().getShortName();
                     if (elementsToShow.size() == 1) {
                         columnNames.setFirstItem(name);
                     } else if (elementsToShow.size() == 2) {
