@@ -27,10 +27,12 @@
 package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
@@ -63,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 
 class SelectProgramFragmentQuery implements Query<List<EventRow>> {
+    private static final String TAG = SelectProgramFragmentQuery.class.getSimpleName();
     private final String mOrgUnitId;
     private final String mProgramId;
 
@@ -111,7 +114,6 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
             }
         }
         eventEventRows.add(columnNames);
-
         List<Event> events = DataValueController.getEvents(
                 mOrgUnitId, mProgramId
         );
@@ -149,12 +151,12 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
         EventItemRow eventItem = new EventItemRow(context);
         eventItem.setEvent(event);
 
-        if (event.getFromServer()) {
-            eventItem.setStatus(EventItemStatus.SENT);
+        if (event.isFromServer()) {
+            eventItem.setStatus(OnRowClick.ITEM_STATUS.SENT);
         } else if (failedEventIds.contains(event.getEvent())) {
-            eventItem.setStatus(EventItemStatus.ERROR);
+            eventItem.setStatus(OnRowClick.ITEM_STATUS.ERROR);
         } else {
-            eventItem.setStatus(EventItemStatus.OFFLINE);
+            eventItem.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
         }
 
         for (int i = 0; i < 3; i++) {
