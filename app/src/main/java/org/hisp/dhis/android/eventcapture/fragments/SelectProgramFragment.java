@@ -23,23 +23,21 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApplication;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
-import org.hisp.dhis.android.sdk.network.http.Response;
-import org.hisp.dhis.android.sdk.utils.APIException;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.EventAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.OnEventClick;
-import org.hisp.dhis.android.sdk.fragments.dataentry.DataEntryFragment;
-import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
+import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
+import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.fragments.SettingsFragment;
+import org.hisp.dhis.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
+import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.EventAdapter;
+import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 
@@ -231,39 +229,16 @@ public class SelectProgramFragment extends Fragment
     }
 
     @Subscribe
-    public void onItemClick(OnEventClick eventClick) {
+    public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
             DataEntryFragment fragment = DataEntryFragment.newInstance(
                     mState.getOrgUnitId(), mState.getProgramId(),
                     MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getId(),
-                    eventClick.getEvent().getLocalId()
+                    eventClick.getItem().getLocalId()
             );
             mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
         } else {
-            switch (eventClick.getStatus()) {
-                case SENT:
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_sent),
-                            getString(R.string.status_sent_description),
-                            R.drawable.ic_from_server
-                    );
-                    break;
-                case OFFLINE:
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_offline),
-                            getString(R.string.status_offline_description),
-                            R.drawable.ic_offline
-                    );
-                    break;
-                case ERROR: {
-                    String message = getErrorDescription(eventClick.getEvent());
-                    Dhis2.getInstance().showErrorDialog(getActivity(),
-                            getString(R.string.event_error),
-                            message, R.drawable.ic_event_error
-                    );
-                    break;
-                }
-            }
+            Dhis2.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
         }
     }
 
