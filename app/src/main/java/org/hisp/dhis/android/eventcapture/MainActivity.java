@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
                         .addToBackStack(fragmentTag);
             }
 
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         }
     }
 }
