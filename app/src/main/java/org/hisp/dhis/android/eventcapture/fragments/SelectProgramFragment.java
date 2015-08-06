@@ -36,9 +36,12 @@ import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
+import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.EventAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.AutoCompleteDialogFragment;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
 
 import java.util.ArrayList;
@@ -367,7 +370,9 @@ public class SelectProgramFragment extends Fragment
             }
             case R.id.select_program: {
                 ProgramDialogFragment fragment = ProgramDialogFragment
-                        .newInstance(this, mState.getOrgUnitId());
+                        .newInstance(this, mState.getOrgUnitId(),
+                                Program.ProgramType.SINGLE_EVENT_WITHOUT_REGISTRATION,
+                                Program.ProgramType.WITHOUT_REGISTRATION);
                 fragment.show(getChildFragmentManager());
                 break;
             }
