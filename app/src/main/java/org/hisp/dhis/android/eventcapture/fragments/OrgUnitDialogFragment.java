@@ -122,7 +122,8 @@ public class OrgUnitDialogFragment extends AutoCompleteDialogFragment
             List<Program> programs = Dhis2.getInstance()
                     .getMetaDataController()
                     .getProgramsForOrganisationUnit(
-                            unitId, Program.SINGLE_EVENT_WITHOUT_REGISTRATION
+                            unitId, Program.ProgramType.SINGLE_EVENT_WITHOUT_REGISTRATION,
+                            Program.ProgramType.WITHOUT_REGISTRATION
                     );
             return (programs != null && !programs.isEmpty());
         }
