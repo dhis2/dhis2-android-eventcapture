@@ -115,8 +115,8 @@ public class ProgramDialogFragment extends AutoCompleteDialogFragment
                     .getMetaDataController()
                     .getProgramsForOrganisationUnit(
                             mOrgUnitId,
-                            Program.SINGLE_EVENT_WITHOUT_REGISTRATION,
-                            Program.WITHOUT_REGISTRATION
+                            Program.ProgramType.SINGLE_EVENT_WITHOUT_REGISTRATION,
+                            Program.ProgramType.WITHOUT_REGISTRATION
                     );
             List<OptionAdapterValue> values = new ArrayList<>();
             if (programs != null && !programs.isEmpty()) {
