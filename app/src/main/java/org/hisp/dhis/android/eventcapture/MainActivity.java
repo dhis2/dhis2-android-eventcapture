@@ -40,7 +40,6 @@ import android.util.Log;
 import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
 import com.squareup.otto.Subscribe;
 
-import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.SelectProgramFragment;
 import org.hisp.dhis.android.sdk.activities.INavigationHandler;
 import org.hisp.dhis.android.sdk.activities.LoginActivity;
@@ -51,10 +50,8 @@ import org.hisp.dhis.android.sdk.events.BaseEvent;
 import org.hisp.dhis.android.sdk.events.MessageEvent;
 import org.hisp.dhis.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
-import org.hisp.dhis.android.sdk.network.http.Response;
 import org.hisp.dhis.android.sdk.network.managers.NetworkManager;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
-import org.hisp.dhis.android.sdk.utils.APIException;
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
