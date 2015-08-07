@@ -47,7 +47,6 @@ import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
 import org.hisp.dhis.android.sdk.events.BaseEvent;
-import org.hisp.dhis.android.sdk.events.MessageEvent;
 import org.hisp.dhis.android.sdk.fragments.LoadingFragment;
 import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
 import org.hisp.dhis.android.sdk.network.managers.NetworkManager;
@@ -137,23 +136,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
             }
         };
         Dhis2.loadInitialData(this, callback);
-    }
-
-    @Subscribe
-    public void onReceiveMessage(MessageEvent event) {
-        Log.d(TAG, "onReceiveMessage");
-        if (event.eventType == BaseEvent.EventType.onLoadingInitialDataFinished) {
-            if (Dhis2.isInitialDataLoaded(this)) {
-                showSelectProgramFragment();
-            } else {
-                //todo: notify the user that data is missing and request to try to re-load.
-                showSelectProgramFragment();
-            }
-        } else if (event.eventType == BaseEvent.EventType.loadInitialDataFailed) {
-            startActivity(new Intent(MainActivity.this,
-                    LoginActivity.class));
-            finish();
-        }
     }
 
     public void showLoadingFragment() {
