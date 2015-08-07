@@ -3,13 +3,11 @@ package org.hisp.dhis.android.eventcapture.fragments;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.View;
-import android.widget.ProgressBar;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
@@ -22,7 +20,7 @@ import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.EventAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.views.CardTextViewButton;
+import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
