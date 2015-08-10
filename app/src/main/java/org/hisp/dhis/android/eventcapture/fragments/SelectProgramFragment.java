@@ -19,6 +19,7 @@ import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.EventAdapter;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
 import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
 
@@ -53,6 +54,20 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
             public void onClick(View v) {
                 ProgramDialogFragment fragment = ProgramDialogFragment
                         .newInstance(SelectProgramFragment.this, mState.getOrgUnitId(),
+                                Program.ProgramType.SINGLE_EVENT_WITHOUT_REGISTRATION,
+                                Program.ProgramType.WITHOUT_REGISTRATION);
+                fragment.show(getChildFragmentManager());
+            }
+        };
+    }
+
+    @Override
+    protected View.OnClickListener getOrgUnitButtonOnClickListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OrgUnitDialogFragment fragment = OrgUnitDialogFragment
+                        .newInstance(SelectProgramFragment.this,
                                 Program.ProgramType.SINGLE_EVENT_WITHOUT_REGISTRATION,
                                 Program.ProgramType.WITHOUT_REGISTRATION);
                 fragment.show(getChildFragmentManager());
