@@ -33,6 +33,7 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
@@ -64,7 +65,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class SelectProgramFragmentQuery implements Query<List<EventRow>> {
+class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     private static final String TAG = SelectProgramFragmentQuery.class.getSimpleName();
     private final String mOrgUnitId;
     private final String mProgramId;
@@ -75,29 +76,32 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     }
 
     @Override
-    public List<EventRow> query(Context context) {
+    public SelectProgramFragmentForm query(Context context) {
+        SelectProgramFragmentForm fragmentForm = new SelectProgramFragmentForm();
         List<EventRow> eventEventRows = new ArrayList<>();
 
         // create a list of EventItems
         Program selectedProgram = MetaDataController.getProgram(mProgramId);
         if (selectedProgram == null || isListEmpty(selectedProgram.getProgramStages())) {
-            return eventEventRows;
+            return fragmentForm;
         }
 
         // since this is single event its only 1 stage
         ProgramStage programStage = selectedProgram.getProgramStages().get(0);
         if (programStage == null || isListEmpty(programStage.getProgramStageDataElements())) {
-            return eventEventRows;
+            return fragmentForm;
         }
 
         List<ProgramStageDataElement> stageElements = programStage
                 .getProgramStageDataElements();
         if (isListEmpty(stageElements)) {
-            return eventEventRows;
+            return fragmentForm;
         }
 
         List<String> elementsToShow = new ArrayList<>();
         ColumnNamesRow columnNames = new ColumnNamesRow();
+
+
         for (ProgramStageDataElement stageElement : stageElements) {
             if (stageElement.getDisplayInReports() && elementsToShow.size() < 3) {
                 elementsToShow.add(stageElement.getDataelement());
@@ -118,7 +122,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
                 mOrgUnitId, mProgramId
         );
         if (isListEmpty(events)) {
-            return eventEventRows;
+            return fragmentForm;
         }
 
         List<Option> options = new Select().from(Option.class).queryList();
@@ -142,7 +146,10 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
                     codeToName, failedEventIds));
         }
 
-        return eventEventRows;
+        fragmentForm.setEventRowList(eventEventRows);
+        fragmentForm.setProgram(selectedProgram);
+
+        return fragmentForm;
     }
 
     private EventItemRow createEventItem(Context context, Event event, List<String> elementsToShow,

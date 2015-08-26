@@ -12,6 +12,7 @@ import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
@@ -59,7 +60,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
         return new EventAdapter(getLayoutInflater(savedInstanceState));
     }
 
-    public Loader<List<EventRow>> onCreateLoader(int id, Bundle args) {
+    public Loader<SelectProgramFragmentForm> onCreateLoader(int id, Bundle args) {
         if (LOADER_ID == id && isAdded()) {
             List<Class<? extends Model>> modelsToTrack = new ArrayList<>();
             modelsToTrack.add(Event.class);
