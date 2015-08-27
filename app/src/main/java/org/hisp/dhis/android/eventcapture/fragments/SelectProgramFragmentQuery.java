@@ -27,32 +27,23 @@
 package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.ColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis.android.sdk.persistence.models.FailedItem$Table;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStageDataElement;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -114,7 +105,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
             }
         }
         eventEventRows.add(columnNames);
-        List<Event> events = DataValueController.getEvents(
+        List<Event> events = TrackerController.getEvents(
                 mOrgUnitId, mProgramId
         );
         if (isListEmpty(events)) {
@@ -127,7 +118,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
             codeToName.put(option.getCode(), option.getName());
         }
 
-        List<FailedItem> failedEvents = DataValueController.getFailedItems(FailedItem.EVENT);
+        List<FailedItem> failedEvents = TrackerController.getFailedItems(FailedItem.EVENT);
 
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
@@ -186,7 +177,7 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
     }
 
     private DataValue getDataValue(Event event, String dataElement) {
-        return DataValueController.getDataValue(event.getLocalId(), dataElement);
+        return TrackerController.getDataValue(event.getLocalId(), dataElement);
     }
 
     private static <T> boolean isListEmpty(List<T> items) {
@@ -201,8 +192,8 @@ class SelectProgramFragmentQuery implements Query<List<EventRow>> {
                 return 0;
             }
 
-            DateTime firstDateTime = DateTime.parse(first.getLastUpdated());
-            DateTime secondDateTime = DateTime.parse(second.getLastUpdated());
+            DateTime firstDateTime = first.getLastUpdated();
+            DateTime secondDateTime = second.getLastUpdated();
 
             if (firstDateTime.isBefore(secondDateTime)) {
                 return 1;

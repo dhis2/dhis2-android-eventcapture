@@ -29,28 +29,24 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-
-import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
-import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.fragments.SelectProgramFragment;
-import org.hisp.dhis.android.sdk.activities.INavigationHandler;
-import org.hisp.dhis.android.sdk.activities.LoginActivity;
-import org.hisp.dhis.android.sdk.activities.OnBackPressedListener;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
-import org.hisp.dhis.android.sdk.controllers.ResponseHolder;
-import org.hisp.dhis.android.sdk.events.BaseEvent;
-import org.hisp.dhis.android.sdk.fragments.LoadingFragment;
-import org.hisp.dhis.android.sdk.network.http.ApiRequestCallback;
-import org.hisp.dhis.android.sdk.network.managers.NetworkManager;
+import org.hisp.dhis.android.sdk.controllers.DhisController;
+import org.hisp.dhis.android.sdk.controllers.DhisService;
+import org.hisp.dhis.android.sdk.controllers.LoadingController;
+import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
+import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
+import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
+import org.hisp.dhis.android.sdk.ui.activities.LoginActivity;
+import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
+import org.hisp.dhis.android.sdk.ui.fragments.loading.LoadingFragment;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -61,15 +57,21 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Dhis2.getInstance().enableLoading(this, Dhis2.LOAD_EVENTCAPTURE);
-        NetworkManager.getInstance().setCredentials(Dhis2.getCredentials(this));
-        NetworkManager.getInstance().setServerUrl(Dhis2.getServer(this));
+        LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
+        LoadingController.enableLoading(this, ResourceType.OPTIONSETS);
+        LoadingController.enableLoading(this, ResourceType.PROGRAMS);
+        LoadingController.enableLoading(this, ResourceType.CONSTANTS);
+        LoadingController.enableLoading(this, ResourceType.PROGRAMRULES);
+        LoadingController.enableLoading(this, ResourceType.PROGRAMRULEVARIABLES);
+        LoadingController.enableLoading(this, ResourceType.PROGRAMRULEACTIONS);
+        LoadingController.enableLoading(this, ResourceType.RELATIONSHIPTYPES);
+        LoadingController.enableLoading(this, ResourceType.EVENTS);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Dhis2.activatePeriodicSynchronizer(this);
-        if (Dhis2.isInitialDataLoaded(this)) {
+        PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
+        if (LoadingController.isInitialDataLoaded(this)) {
             showSelectProgramFragment();
         }
     }
@@ -83,16 +85,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     @Override
     public void onResume() {
         super.onResume();
-        Dhis2Application.getEventBus().register(this);
-        if (Dhis2.isInitialDataLoaded(this)) {
-            if(Dhis2.getInstance().isBlocking()) {
-                showLoadingFragment();
-            } else {
-
-            }
-        } else {
-            loadInitialData();
-        }
+        loadInitialData();
     }
 
     public void loadInitialData() {
@@ -102,40 +95,19 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
                 showLoadingFragment();
             }
         });
-        ApiRequestCallback callback = new ApiRequestCallback() {
+        String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
+        UiUtils.postProgressMessage(message);
+        new Thread() {
             @Override
-            public void onSuccess(ResponseHolder holder) {
-                FlowContentObserver observer = Dhis2.getFlowContentObserverForAllTables();
-                String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
-                Dhis2.postProgressMessage(message);
-                ApiRequestCallback callback = new ApiRequestCallback() {
-                    @Override
-                    public void onSuccess(ResponseHolder holder) {
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                showSelectProgramFragment();
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(ResponseHolder holder) {
+            public void run() {
+                DhisService.loadInitialData(MainActivity.this);
+                runOnUiThread(new Runnable() {
+                    public void run() {
                         showSelectProgramFragment();
                     }
-                };
-                Dhis2.BlockThread blockThread = new Dhis2.BlockThread(observer, callback);
-                Dhis2.BlockingModelChangeListener listener = new Dhis2.BlockingModelChangeListener(blockThread);
-                observer.addModelChangeListener(listener);
-                blockThread.start();
+                });
             }
-
-            @Override
-            public void onFailure(ResponseHolder holder) {
-                //todo: notify the user that data is missing and request to try to re-load.
-                showSelectProgramFragment();
-            }
-        };
-        Dhis2.loadInitialData(this, callback);
+        }.start();
     }
 
     public void showLoadingFragment() {
