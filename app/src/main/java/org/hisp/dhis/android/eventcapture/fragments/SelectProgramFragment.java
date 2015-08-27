@@ -1,3 +1,32 @@
+/*
+ *  Copyright (c) 2015, University of Oslo
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or without
+ *  * modification, are permitted provided that the following conditions are met:
+ *  * Redistributions of source code must retain the above copyright notice, this
+ *  * list of conditions and the following disclaimer.
+ *  *
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *  * this list of conditions and the following disclaimer in the documentation
+ *  * and/or other materials provided with the distribution.
+ *  * Neither the name of the HISP project nor the names of its contributors may
+ *  * be used to endorse or promote products derived from this software without
+ *  * specific prior written permission.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
 package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.os.Bundle;
@@ -8,26 +37,24 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.sdk.controllers.Dhis2;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
-import org.hisp.dhis.android.sdk.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.AbsAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.EventAdapter;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.OrgUnitDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.dialogs.ProgramDialogFragment;
-import org.hisp.dhis.android.sdk.utils.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.EventAdapter;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
+import org.hisp.dhis.android.sdk.utils.UiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragment {
+public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragment {
     public static final String TAG = SelectProgramFragment.class.getSimpleName();
 
     private FloatingActionButton mRegisterEventButton;
@@ -78,12 +105,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
         if (eventClick.isOnDescriptionClick()) {
             DataEntryFragment fragment = DataEntryFragment.newInstance(
                     mState.getOrgUnitId(), mState.getProgramId(),
-                    MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getId(),
+                    MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
                     eventClick.getItem().getLocalId()
             );
             mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
         } else {
-            Dhis2.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
+            UiUtils.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
         }
     }
 
@@ -93,7 +120,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.fragments.s
             case R.id.register_new_event: {
                 DataEntryFragment fragment2 = DataEntryFragment.newInstance(
                         mState.getOrgUnitId(), mState.getProgramId(),
-                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getId()
+                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid()
                 );
                 mNavigationHandler.switchFragment(
                         fragment2, DataEntryFragment.TAG, true

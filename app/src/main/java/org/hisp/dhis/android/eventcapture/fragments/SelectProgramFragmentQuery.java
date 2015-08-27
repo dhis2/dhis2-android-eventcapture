@@ -1,27 +1,30 @@
 /*
- * Copyright (c) 2015, dhis2
- * All rights reserved.
+ *  Copyright (c) 2015, University of Oslo
+ *  * All rights reserved.
+ *  *
+ *  * Redistribution and use in source and binary forms, with or without
+ *  * modification, are permitted provided that the following conditions are met:
+ *  * Redistributions of source code must retain the above copyright notice, this
+ *  * list of conditions and the following disclaimer.
+ *  *
+ *  * Redistributions in binary form must reproduce the above copyright notice,
+ *  * this list of conditions and the following disclaimer in the documentation
+ *  * and/or other materials provided with the distribution.
+ *  * Neither the name of the HISP project nor the names of its contributors may
+ *  * be used to endorse or promote products derived from this software without
+ *  * specific prior written permission.
+ *  *
+ *  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ *  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ *  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ *  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- *  Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package org.hisp.dhis.android.eventcapture.fragments;
@@ -31,14 +34,13 @@ import android.content.Context;
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.ColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
@@ -46,10 +48,6 @@ import org.hisp.dhis.android.sdk.persistence.models.Option;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStageDataElement;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
-import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
@@ -114,7 +112,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             }
         }
         eventEventRows.add(columnNames);
-        List<Event> events = DataValueController.getEvents(
+        List<Event> events = TrackerController.getEvents(
                 mOrgUnitId, mProgramId
         );
         if (isListEmpty(events)) {
@@ -127,7 +125,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             codeToName.put(option.getCode(), option.getName());
         }
 
-        List<FailedItem> failedEvents = DataValueController.getFailedItems(FailedItem.EVENT);
+        List<FailedItem> failedEvents = TrackerController.getFailedItems(FailedItem.EVENT);
 
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
@@ -189,7 +187,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     }
 
     private DataValue getDataValue(Event event, String dataElement) {
-        return DataValueController.getDataValue(event.getLocalId(), dataElement);
+        return TrackerController.getDataValue(event.getLocalId(), dataElement);
     }
 
     private static <T> boolean isListEmpty(List<T> items) {
@@ -204,8 +202,8 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                 return 0;
             }
 
-            DateTime firstDateTime = DateTime.parse(first.getLastUpdated());
-            DateTime secondDateTime = DateTime.parse(second.getLastUpdated());
+            DateTime firstDateTime = first.getLastUpdated();
+            DateTime secondDateTime = second.getLastUpdated();
 
             if (firstDateTime.isBefore(secondDateTime)) {
                 return 1;
