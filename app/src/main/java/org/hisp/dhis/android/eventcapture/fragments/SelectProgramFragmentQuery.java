@@ -27,25 +27,21 @@
 package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.fragments.selectprogram.SelectProgramFragmentForm;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.ColumnNamesRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventItemStatus;
 import org.hisp.dhis.android.sdk.utils.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.controllers.datavalues.DataValueController;
-import org.hisp.dhis.android.sdk.persistence.loaders.Query;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
-import org.hisp.dhis.android.sdk.persistence.models.DataValue$Table;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis.android.sdk.persistence.models.FailedItem$Table;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
