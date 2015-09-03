@@ -31,6 +31,8 @@ package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.raizlabs.android.dbflow.structure.Model;
@@ -63,6 +65,16 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        return false;
     }
 
     protected View getListViewHeader(Bundle savedInstanceState) {
