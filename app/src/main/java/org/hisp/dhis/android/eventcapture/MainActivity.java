@@ -71,9 +71,7 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         setSupportActionBar(toolbar);
 
         PeriodicSynchronizerController.activatePeriodicSynchronizer(this);
-        //if (LoadingController.isInitialDataLoaded(this)) {
-            showSelectProgramFragment();
-        //}
+        showSelectProgramFragment();
     }
 
     @Override
@@ -89,25 +87,9 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     }
 
     public void loadInitialData() {
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                showLoadingFragment();
-//            }
-//        });
         String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
         UiUtils.postProgressMessage(message);
-        new Thread() {
-            @Override
-            public void run() {
-                DhisService.loadInitialData(MainActivity.this);
-//                runOnUiThread(new Runnable() {
-//                    public void run() {
-//                        showSelectProgramFragment();
-//                    }
-//                });
-            }
-        }.start();
+        DhisService.loadInitialData(MainActivity.this);
     }
 
     public void showLoadingFragment() {
