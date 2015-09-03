@@ -39,6 +39,8 @@ import com.squareup.otto.Subscribe;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
+import org.hisp.dhis.android.sdk.events.UiEvent;
+import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
@@ -103,7 +105,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @SuppressWarnings("unused")
     public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
-            DataEntryFragment fragment = DataEntryFragment.newInstance(
+            DataEntryFragment fragment = EventDataEntryFragment.newInstance(
                     mState.getOrgUnitId(), mState.getProgramId(),
                     MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
                     eventClick.getItem().getLocalId()
@@ -114,11 +116,16 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         }
     }
 
+    @Subscribe
+    public void onReceivedUiEvent(UiEvent uiEvent) {
+        super.onReceivedUiEvent(uiEvent);
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.register_new_event: {
-                DataEntryFragment fragment2 = DataEntryFragment.newInstance(
+                DataEntryFragment fragment2 = EventDataEntryFragment.newInstance(
                         mState.getOrgUnitId(), mState.getProgramId(),
                         MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid()
                 );
