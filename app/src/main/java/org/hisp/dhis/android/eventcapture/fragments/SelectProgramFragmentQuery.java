@@ -36,9 +36,9 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.ColumnNamesRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
@@ -93,7 +93,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
 
         List<String> elementsToShow = new ArrayList<>();
-        ColumnNamesRow columnNames = new ColumnNamesRow();
+        TrackedEntityInstanceColumnNamesRow columnNames = new TrackedEntityInstanceColumnNamesRow();
 
 
         for (ProgramStageDataElement stageElement : stageElements) {

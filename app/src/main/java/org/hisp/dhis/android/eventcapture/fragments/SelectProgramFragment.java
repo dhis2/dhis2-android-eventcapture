@@ -29,19 +29,26 @@
 
 package org.hisp.dhis.android.eventcapture.fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.ContextMenu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 
 import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
+import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.events.UiEvent;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
@@ -71,12 +78,48 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        new MenuInflater(this.getActivity()).inflate(org.hisp.dhis.android.eventcapture.R.menu.menu_selected_trackedentityinstance, menu);
 
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        return false;
+        AdapterView.AdapterContextMenuInfo info=
+                (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
+
+        final EventItemRow itemRow = (EventItemRow) mListView.getItemAtPosition(info.position);
+
+        if(item.getTitle().toString().equals(getResources().getString(R.string.go_to_dataentry_fragment)))
+        {
+            mNavigationHandler.switchFragment(EventDataEntryFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId()
+            , MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
+                    itemRow.getmEvent().getLocalId()), TAG, true);
+        }
+        else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
+        {
+
+            if( !(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) // if not sent to server, present dialog to user
+            {
+
+                UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
+                        getActivity().getString(R.string.warning_delete_unsent_tei),
+                        getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
+                        (R.drawable.ic_event_error),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                itemRow.getmEvent().delete();
+                                dialog.dismiss();
+                            }
+                        });
+            }
+            else
+            {
+                //if sent to server, be able to soft delete without annoying the user
+                itemRow.getmEvent().delete();
+            }
+        }
+        return true;
     }
 
     protected View getListViewHeader(Bundle savedInstanceState) {
