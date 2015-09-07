@@ -130,7 +130,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         Set<String> failedEventIds = new HashSet<>();
         for (FailedItem failedItem : failedEvents) {
             Event event = (Event) failedItem.getItem();
-            failedEventIds.add(event.getEvent());
+            if(event == null) {
+                failedItem.delete();
+            } else {
+                failedEventIds.add(event.getEvent());
+            }
         }
 
         Collections.sort(events, new EventComparator());
