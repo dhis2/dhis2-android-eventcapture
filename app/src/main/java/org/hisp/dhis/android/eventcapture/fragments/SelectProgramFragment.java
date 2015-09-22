@@ -43,10 +43,12 @@ import com.raizlabs.android.dbflow.structure.Model;
 import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.events.UiEvent;
+import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
@@ -167,7 +169,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             );
             mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
         } else {
-            UiUtils.showStatusDialog(getChildFragmentManager(), eventClick.getItem());
+            showStatusDialog(eventClick.getItem());
         }
     }
 
@@ -190,6 +192,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                 break;
             }
         }
+    }
+    public void showStatusDialog(BaseSerializableModel model) {
+
+        ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);
+        fragment.show(getChildFragmentManager());
     }
 
     protected void handleViews(int level) {
