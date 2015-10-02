@@ -37,8 +37,8 @@ android {
         applicationId "org.hisp.dhis.android.eventcapture"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode 11
-        versionName "0.2.3"
+        versionCode 12
+        versionName "0.2.4"
     }
     buildTypes {
         release {
@@ -54,7 +54,7 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':..:dhis2-android-sdk:app')
+    compile project(':sdk')
 }
 
 android {
