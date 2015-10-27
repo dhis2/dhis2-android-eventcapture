@@ -63,6 +63,7 @@ import org.hisp.dhis.android.sdk.ui.adapters.EventAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
+import org.hisp.dhis.android.sdk.utils.api.ProgramType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,10 +136,9 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     }
 
     @Override
-    protected Program.ProgramType[] getProgramTypes() {
-        return new Program.ProgramType[] {
-                Program.ProgramType.SINGLE_EVENT_WITHOUT_REGISTRATION,
-                Program.ProgramType.WITHOUT_REGISTRATION
+    protected ProgramType[] getProgramTypes() {
+        return new ProgramType[] {
+                ProgramType.WITHOUT_REGISTRATION
         };
     }
 
