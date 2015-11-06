@@ -208,8 +208,8 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                 return 0;
             }
 
-            DateTime firstDateTime = first.getLastUpdated();
-            DateTime secondDateTime = second.getLastUpdated();
+            DateTime firstDateTime = DateTime.parse(first.getLastUpdated());
+            DateTime secondDateTime = DateTime.parse(second.getLastUpdated());
 
             if (firstDateTime.isBefore(secondDateTime)) {
                 return 1;
