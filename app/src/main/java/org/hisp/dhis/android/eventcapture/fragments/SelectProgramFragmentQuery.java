@@ -133,7 +133,9 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             if(event == null) {
                 failedItem.delete();
             } else {
-                failedEventIds.add(event.getEvent());
+                if(failedItem.getHttpStatusCode() >= 0) {
+                    failedEventIds.add(event.getEvent());
+                }
             }
         }
 
