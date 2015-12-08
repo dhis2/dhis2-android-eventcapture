@@ -37,4 +37,14 @@
     <string name="status_offline_description">This item has not yet been synchronized with the server.</string>
     <string name="status_error_description">Something went wrong. Please, try to re-upload event or contact administrator.</string>
 
+    <string name="go_to_dataentry_fragment">Go to Data Entry</string>
+    <string name="delete">Delete</string>
+
+    <string name="select_organisation_unit">Organisation Unit...</string>
+    <string name="select_program">Program...</string>
+
+    <string name="synchronizing">Synchronizing</string>
+    <string name="search">Search</string>
+    <string name="action_settings">Settings</string>
+
 </resources>

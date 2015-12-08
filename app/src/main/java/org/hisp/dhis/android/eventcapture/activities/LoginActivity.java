@@ -27,51 +27,49 @@
  *
  */
 
-apply plugin: 'com.android.application'
+package org.hisp.dhis.android.eventcapture.activities;
 
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+import android.text.Editable;
 
-    defaultConfig {
-        applicationId "org.hisp.dhis.android.eventcapture"
-        minSdkVersion 15
-        targetSdkVersion 21
-        versionCode 16
-        versionName "0.2.8-2.21"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
+import org.hisp.dhis.android.sdk.common.D2;
+import org.hisp.dhis.android.sdk.ui.activities.AbsLoginActivity;
+import org.hisp.dhis.java.sdk.common.network.Configuration;
+import org.hisp.dhis.java.sdk.models.user.UserAccount;
 
-    lintOptions {
-        disable 'RtlSymmetry', 'RtlHardcoded'
-    }
-}
+import rx.Observable;
+import rx.Subscription;
+import rx.functions.Action0;
+import rx.functions.Action1;
 
-dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':sdk-core-android')
-    compile project(':sdk-ui')
-    compile 'com.android.support:support-v4:23.0.1'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
-}
+public class LoginActivity extends AbsLoginActivity {
+    @Override
+    protected void onLogInButtonClicked(Editable serverUrl, Editable username, Editable password) {
+        Configuration configuration = new Configuration(serverUrl.toString());
+        D2.init(this, configuration);
+        Observable<UserAccount> userAccountObservable = D2.signIn(username.toString(), password.toString());
 
-android {
-    packagingOptions {
-        exclude 'META-INF/DEPENDENCIES.txt'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/dependencies.txt'
-        exclude 'META-INF/LGPL2.1'
+        Action1<UserAccount> onNext = new Action1<UserAccount>() {
+            @Override
+            public void call(UserAccount userAccount) {
+
+            }
+        };
+
+        Action1<Throwable> onError = new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+
+            }
+        };
+
+        Action0 onComplete = new Action0() {
+            @Override
+            public void call() {
+
+            }
+        };
+
+        userAccountObservable.subscribe(onNext, onError, onComplete);
+
     }
 }

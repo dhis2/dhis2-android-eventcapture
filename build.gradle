@@ -28,8 +28,8 @@ ext {
 
     // Compilation configuration.
     minSdkVersion = 15
-    compileSdkVersion = 22
-    targetSdkVersion = 22
-    buildToolsVersion = "22.0.1"
+    compileSdkVersion = 23
+    targetSdkVersion = 23
+    buildToolsVersion = "23.0.1"
 }
 
