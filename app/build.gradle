@@ -23,7 +23,6 @@ android {
 
 dependencies {
     // Local
-    compile fileTree(dir: "libs", include: ["*.jar"])
     compile(name: 'core-android-debug', ext: 'aar')
 
     // Google
