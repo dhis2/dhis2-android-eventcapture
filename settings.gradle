@@ -1,3 +1,0 @@
-include ':app', ':sdk-core-android', 'sdk-ui'
-project(':sdk-core-android').projectDir = new File(settingsDir, '../dhis2-android-sdk/core-android')
-project(':sdk-ui').projectDir = new File(settingsDir, '../dhis2-android-sdk/ui')
