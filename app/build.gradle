@@ -29,5 +29,5 @@ dependencies {
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
     // Test
-    testCompile "junit:junit:4.12"
+    testCompile "junit:junit:${libs.junit}"
 }

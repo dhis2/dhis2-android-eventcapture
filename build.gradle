@@ -1,3 +1,20 @@
+ext {
+    configuration = [
+            package           : "org.hisp.dhis.android.eventcapture",
+            buildToolsVersion : "23.0.2",
+            minSdkVersion     : 15,
+            compileSdkVersion : 23,
+            targetSdkVersion  : 23,
+            versionCode       : 1,
+            versionName       : "1.0"
+    ]
+
+    libraries = [
+            supportVersion : "23.1.1",
+            junit : "4.12"
+    ]
+}
+
 buildscript {
     repositories {
         jcenter()
@@ -16,20 +33,4 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-ext {
-    configuration = [
-            package           : "org.hisp.dhis.android.eventcapture",
-            buildToolsVersion : "23.0.2",
-            minSdkVersion     : 15,
-            compileSdkVersion : 23,
-            targetSdkVersion  : 23,
-            versionCode       : 1,
-            versionName       : "1.0"
-    ]
-
-    libraries = [
-            supportVersion : "23.1.1",
-    ]
 }
