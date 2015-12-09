@@ -37,39 +37,44 @@ import org.hisp.dhis.java.sdk.common.network.Configuration;
 import org.hisp.dhis.java.sdk.models.user.UserAccount;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action0;
 import rx.functions.Action1;
 
 public class LoginActivity extends AbsLoginActivity {
+
+    private Subscription subscription;
+
     @Override
     protected void onLogInButtonClicked(Editable serverUrl, Editable username, Editable password) {
         Configuration configuration = new Configuration(serverUrl.toString());
         D2.init(this, configuration);
         Observable<UserAccount> userAccountObservable = D2.signIn(username.toString(), password.toString());
 
-        Action1<UserAccount> onNext = new Action1<UserAccount>() {
+        subscription = userAccountObservable.subscribe(new Subscriber<UserAccount>() {
             @Override
-            public void call(UserAccount userAccount) {
+            public void onCompleted() {
 
             }
-        };
 
-        Action1<Throwable> onError = new Action1<Throwable>() {
             @Override
-            public void call(Throwable throwable) {
+            public void onError(Throwable e) {
 
             }
-        };
 
-        Action0 onComplete = new Action0() {
             @Override
-            public void call() {
-
+            public void onNext(UserAccount userAccount) {
+                //save user account and go to main activity..
             }
-        };
+        });
+    }
 
-        userAccountObservable.subscribe(onNext, onError, onComplete);
-
+    @Override
+    public void onDestroy() {
+        if(subscription != null) {
+            subscription.unsubscribe();
+        }
+        super.onDestroy();
     }
 }
