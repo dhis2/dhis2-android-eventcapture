@@ -1,17 +1,17 @@
 ext {
     configuration = [
-            package           : "org.hisp.dhis.android.eventcapture",
-            buildToolsVersion : "23.0.2",
-            minSdkVersion     : 15,
-            compileSdkVersion : 23,
-            targetSdkVersion  : 23,
-            versionCode       : 1,
-            versionName       : "1.0"
+            package          : "org.hisp.dhis.android.eventcapture",
+            buildToolsVersion: "23.0.2",
+            minSdkVersion    : 15,
+            compileSdkVersion: 23,
+            targetSdkVersion : 23,
+            versionCode      : 16,
+            versionName      : "0.2.8-2.21"
     ]
 
     libraries = [
-            supportVersion : "23.1.1",
-            junit : "4.12"
+            supportVersion: "23.1.1",
+            junit         : "4.12"
     ]
 }
 
@@ -28,6 +28,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 

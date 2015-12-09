@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 
-def cfg  = rootProject.ext.configuration
+def cfg = rootProject.ext.configuration
 def libs = rootProject.ext.libraries
 
 android {
@@ -8,11 +8,11 @@ android {
     buildToolsVersion cfg.buildToolsVersion
 
     defaultConfig {
-        applicationId    cfg.package
-        minSdkVersion    cfg.minSdkVersion
+        applicationId cfg.package
+        minSdkVersion cfg.minSdkVersion
         targetSdkVersion cfg.targetSdkVersion
-        versionCode      cfg.versionCode
-        versionName      cfg.versionName
+        versionCode cfg.versionCode
+        versionName cfg.versionName
     }
 
     compileOptions {
@@ -24,6 +24,7 @@ android {
 dependencies {
     // Local
     compile fileTree(dir: "libs", include: ["*.jar"])
+    compile(name: 'core-android-debug', ext: 'aar')
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
