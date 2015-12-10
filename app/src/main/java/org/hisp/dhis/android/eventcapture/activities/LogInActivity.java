@@ -1,6 +1,13 @@
 package org.hisp.dhis.android.eventcapture.activities;
 
-import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 
-public class LogInActivity extends AppCompatActivity {
+import org.hisp.dhis.android.sdk.ui.activities.AbsLoginActivity;
+
+public class LogInActivity extends AbsLoginActivity {
+
+    @Override
+    protected void onLogInButtonClicked(Editable server, Editable username, Editable password) {
+
+    }
 }

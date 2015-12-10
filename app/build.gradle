@@ -24,6 +24,7 @@ android {
 dependencies {
     // Local
     compile(name: 'core-android-debug', ext: 'aar')
+    compile(name: 'ui-debug', ext: 'aar')
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
