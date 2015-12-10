@@ -29,6 +29,8 @@ dependencies {
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
+    compile "io.reactivex:rxandroid:1.0.1"
+
     // Test
     testCompile "junit:junit:${libs.junit}"
 }
