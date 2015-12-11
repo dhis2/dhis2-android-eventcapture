@@ -11,7 +11,8 @@ ext {
 
     libraries = [
             supportVersion: "23.1.1",
-            junit         : "4.12"
+            junit         : "4.12",
+            timber        : "4.1.0"
     ]
 }
 

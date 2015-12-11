@@ -19,6 +19,15 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+        }
+        release {
+            minifyEnabled false
+        }
+    }
 }
 
 dependencies {
@@ -31,11 +40,10 @@ dependencies {
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
     // Square/Jake Wharton
-    compile 'com.jakewharton.timber:timber:4.1.0'
+    compile "com.jakewharton.timber:timber:${libs.timber}"
 
     // Test
     testCompile "junit:junit:${libs.junit}"
-
 
     // Temporary dependencies to fulfill requirements of android sdk.
     compile "io.reactivex:rxandroid:1.1.0"

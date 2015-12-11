@@ -1,11 +1,9 @@
 package org.hisp.dhis.android.eventcapture.activities;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 
-import org.hisp.dhis.android.eventcapture.Main;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.sdk.ui.activities.AbsLoginActivity;
 
@@ -65,6 +63,6 @@ public class LogInActivity extends AbsLoginActivity implements ILoginView {
 
     @Override
     public void navigateToHome() {
-        startActivity(new Intent(this, Main.class));
+//        startActivity(new Intent(this, Main.class));
     }
 }
