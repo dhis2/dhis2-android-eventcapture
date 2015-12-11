@@ -4,7 +4,7 @@ import android.app.Application;
 
 import timber.log.Timber;
 
-public class EventCaptureApp extends Application {
+public final class EventCaptureApp extends Application {
 
     @Override
     public void onCreate() {
