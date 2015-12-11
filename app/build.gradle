@@ -22,6 +22,7 @@ android {
 }
 
 dependencies {
+
     // Local
     compile(name: 'core-android-debug', ext: 'aar')
     compile(name: 'ui-debug', ext: 'aar')
@@ -29,8 +30,13 @@ dependencies {
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
-    compile "io.reactivex:rxandroid:1.0.1"
+    // Square/Jake Wharton
+    compile 'com.jakewharton.timber:timber:4.1.0'
 
     // Test
     testCompile "junit:junit:${libs.junit}"
+
+
+    // Temporary dependencies to fulfill requirements of android sdk.
+    compile "io.reactivex:rxandroid:1.1.0"
 }
