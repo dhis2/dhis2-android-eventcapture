@@ -55,6 +55,10 @@ dependencies {
         transitive = true;
     }
 
+    // Stetho
+    debugCompile "com.facebook.stetho:stetho:${libs.stetho}"
+    debugCompile "com.facebook.stetho:stetho-okhttp:${libs.stetho}"
+
     // Temporary dependencies to fulfill requirements of android sdk.
     compile "io.reactivex:rxandroid:1.1.0"
 }
