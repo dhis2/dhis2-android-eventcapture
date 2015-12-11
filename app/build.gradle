@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 
 def cfg = rootProject.ext.configuration
 def libs = rootProject.ext.libraries
@@ -22,10 +23,14 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix ".debug"
+            buildConfigField "String", "SERVER_URL", '"https://play.dhis2.org/demo"'
+            buildConfigField "String", "USERNAME", '"android"'
+            buildConfigField "String", "PASSWORD", '"Android123"'
         }
         release {
-            minifyEnabled false
+            buildConfigField "String", "SERVER_URL", '""'
+            buildConfigField "String", "USERNAME", '""'
+            buildConfigField "String", "PASSWORD", '""'
         }
     }
 }
@@ -33,8 +38,8 @@ android {
 dependencies {
 
     // Local
-    compile(name: 'core-android-debug', ext: 'aar')
-    compile(name: 'ui-debug', ext: 'aar')
+    // compile(name: 'core-android-debug', ext: 'aar')
+    // compile(name: 'ui-debug', ext: 'aar')
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
@@ -44,6 +49,11 @@ dependencies {
 
     // Test
     testCompile "junit:junit:${libs.junit}"
+
+    // Fabric
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+        transitive = true;
+    }
 
     // Temporary dependencies to fulfill requirements of android sdk.
     compile "io.reactivex:rxandroid:1.1.0"
