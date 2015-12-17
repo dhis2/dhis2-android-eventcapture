@@ -33,13 +33,22 @@ android {
             buildConfigField "String", "PASSWORD", '""'
         }
     }
+
+    // TODO Remove this packaging HACK
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 dependencies {
 
     // Local
-    // compile(name: 'core-android-debug', ext: 'aar')
-    // compile(name: 'ui-debug', ext: 'aar')
+    compile(name: "core-android", ext: "aar")
+    compile(name: 'ui', ext: 'aar')
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"

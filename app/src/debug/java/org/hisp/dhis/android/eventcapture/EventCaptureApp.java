@@ -11,5 +11,8 @@ public final class EventCaptureApp extends Application {
         super.onCreate();
 
         Timber.plant(new Timber.DebugTree());
+
+        // TODO
+        // Add stetho initialization code here
     }
 }
