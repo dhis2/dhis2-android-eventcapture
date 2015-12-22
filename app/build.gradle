@@ -14,6 +14,7 @@ android {
         targetSdkVersion cfg.targetSdkVersion
         versionCode cfg.versionCode
         versionName cfg.versionName
+        multiDexEnabled true
     }
 
     compileOptions {
@@ -47,8 +48,8 @@ android {
 dependencies {
 
     // Local
-    compile(name: "core-android", ext: "aar")
-    compile(name: 'ui', ext: 'aar')
+    compile project(':core-android')
+    compile project(':ui')
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
@@ -67,7 +68,4 @@ dependencies {
     // Stetho
     debugCompile "com.facebook.stetho:stetho:${libs.stetho}"
     debugCompile "com.facebook.stetho:stetho-okhttp:${libs.stetho}"
-
-    // Temporary dependencies to fulfill requirements of android sdk.
-    compile "io.reactivex:rxandroid:1.1.0"
 }
