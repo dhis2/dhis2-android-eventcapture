@@ -30,7 +30,18 @@
 package org.hisp.dhis.android.eventcapture.activities;
 
 
+import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.core.common.network.ApiException;
+import org.hisp.dhis.client.sdk.core.common.network.Configuration;
+import org.hisp.dhis.client.sdk.models.user.UserAccount;
+
+import java.net.HttpURLConnection;
+
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
 
@@ -42,26 +53,27 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
     }
 
     @Override
-    public void validateCredentials(String username, String password) {
+    public void validateCredentials(String serverUrl, String username, String password) {
         loginView.showProgress();
-//        Observable<UserAccount> observable = D2.signIn(username, password);
-//        loginSubscription = observable.subscribe(new Subscriber<UserAccount>() {
-//            @Override
-//            public void onCompleted() {
-//            }
-//
-//            @Override
-//            public void onError(Throwable throwable) {
-//                loginView.hideProgress();
-//                handleError(throwable);
-//            }
-//
-//            @Override
-//            public void onNext(UserAccount userAccount) {
-//                loginView.hideProgress();
-//                onSuccess(userAccount);
-//            }
-//        });
+        Configuration configuration= new Configuration(serverUrl);
+
+        D2.signIn(configuration, username, password)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<UserAccount>() {
+                    @Override
+                    public void call(UserAccount userAccount) {
+                        loginView.hideProgress();
+                        onSuccess(userAccount);
+                        Timber.d(userAccount.getFirstName());
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                        handleError(throwable);
+                    }
+                });
     }
 
     @Override
@@ -74,38 +86,38 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
     }
 
     private void handleError(final Throwable throwable) {
-//        if(throwable instanceof ApiException) {
-//            ApiException apiException = (ApiException) throwable;
-//            switch (apiException.getKind()) {
-//                case CONVERSION:
-//                    onUnexpectedError(apiException.getMessage());
-//                    break;
-//                case HTTP: {
-//                    if (apiException.getResponse() != null) {
-//                        switch (apiException.getResponse().getStatus()) {
-//                            case HttpURLConnection.HTTP_UNAUTHORIZED: {
-//                                onInvalidCredentialsError();
-//                                break;
-//                            }
-//                            default: {
-//                                onUnexpectedError(throwable.getMessage());
-//                            }
-//                        }
-//                    }
-//                    break;
-//                }
-//                case NETWORK: {
-//                    onServerError(apiException.getMessage());
-//                    break;
-//                }
-//                case UNEXPECTED: {
-//                    onUnexpectedError(throwable.getMessage());
-//                    break;
-//                }
-//            }
-//        } else {
-//            onUnexpectedError(throwable.getMessage());
-//        }
+        if(throwable instanceof ApiException) {
+            ApiException apiException = (ApiException) throwable;
+            switch (apiException.getKind()) {
+                case CONVERSION:
+                    onUnexpectedError(apiException.getMessage());
+                    break;
+                case HTTP: {
+                    if (apiException.getResponse() != null) {
+                        switch (apiException.getResponse().getStatus()) {
+                            case HttpURLConnection.HTTP_UNAUTHORIZED: {
+                                onInvalidCredentialsError();
+                                break;
+                            }
+                            default: {
+                                onUnexpectedError(throwable.getMessage());
+                            }
+                        }
+                    }
+                    break;
+                }
+                case NETWORK: {
+                    onServerError(apiException.getMessage());
+                    break;
+                }
+                case UNEXPECTED: {
+                    onUnexpectedError(throwable.getMessage());
+                    break;
+                }
+            }
+        } else {
+            onUnexpectedError(throwable.getMessage());
+        }
     }
 
     @Override
@@ -122,9 +134,9 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
     public void onInvalidCredentialsError() {
         loginView.showInvalidCredentialsError();
     }
-//
-//    @Override
-//    public void onSuccess(UserAccount userAccount) {
-//        loginView.navigateToHome();
-//    }
+
+    @Override
+    public void onSuccess(UserAccount userAccount) {
+        loginView.navigateToHome();
+    }
 }

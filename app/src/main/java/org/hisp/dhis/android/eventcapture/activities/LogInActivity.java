@@ -1,19 +1,23 @@
 package org.hisp.dhis.android.eventcapture.activities;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.client.sdk.core.common.Main;
+import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
-public class LogInActivity extends AppCompatActivity implements ILoginView {
+public class LogInActivity extends AbsLoginActivity implements ILoginView {
 
     private ILoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         loginPresenter = new LoginPresenter(this);
         loginPresenter.onCreate();
     }
@@ -24,19 +28,19 @@ public class LogInActivity extends AppCompatActivity implements ILoginView {
         loginPresenter.onDestroy();
     }
 
-//    @Override
+    @Override
     protected void onLogInButtonClicked(Editable server, Editable username, Editable password) {
-        loginPresenter.validateCredentials(username.toString(), password.toString());
+        loginPresenter.validateCredentials(server.toString(), username.toString(), password.toString());
     }
 
     @Override
     public void showProgress() {
-        // onStartLoading();
+         onStartLoading();
     }
 
     @Override
     public void hideProgress() {
-        // onFinishLoading();
+         onFinishLoading();
     }
 
     @Override
@@ -63,6 +67,11 @@ public class LogInActivity extends AppCompatActivity implements ILoginView {
 
     @Override
     public void navigateToHome() {
-//        startActivity(new Intent(this, Main.class));
+        startActivity(new Intent(this, MainActivity.class));
+    }
+
+    @Override
+    public void setLoginCredentials() {
+
     }
 }

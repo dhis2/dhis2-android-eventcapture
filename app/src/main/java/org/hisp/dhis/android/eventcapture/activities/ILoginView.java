@@ -36,4 +36,5 @@ public interface ILoginView {
     void showInvalidCredentialsError();
     void showUnexpectedError(String message);
     void navigateToHome();
+    void setLoginCredentials();
 }
