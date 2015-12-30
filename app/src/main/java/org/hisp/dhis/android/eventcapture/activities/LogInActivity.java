@@ -69,9 +69,4 @@ public class LogInActivity extends AbsLoginActivity implements ILoginView {
     public void navigateToHome() {
         startActivity(new Intent(this, MainActivity.class));
     }
-
-    @Override
-    public void setLoginCredentials() {
-
-    }
 }
