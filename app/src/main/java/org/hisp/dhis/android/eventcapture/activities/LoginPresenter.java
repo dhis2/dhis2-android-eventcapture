@@ -65,7 +65,6 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
                     public void call(UserAccount userAccount) {
                         loginView.hideProgress();
                         onSuccess(userAccount);
-                        Timber.d(userAccount.getFirstName());
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -83,6 +82,18 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
     @Override
     public void onDestroy() {
         loginSubscription.unsubscribe();
+    }
+
+    @Override
+    public void onResume() {
+        D2.isSignedIn().subscribeOn(Schedulers.io()).
+                observeOn(AndroidSchedulers.mainThread()).
+                subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        onSuccess(null);
+                    }
+                });
     }
 
     private void handleError(final Throwable throwable) {

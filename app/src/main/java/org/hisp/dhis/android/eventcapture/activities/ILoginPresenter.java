@@ -33,4 +33,5 @@ public interface ILoginPresenter {
     void validateCredentials(String serverUrl, String username, String password);
     void onCreate();
     void onDestroy();
+    void onResume();
 }

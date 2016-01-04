@@ -29,6 +29,12 @@ public class LogInActivity extends AbsLoginActivity implements ILoginView {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        loginPresenter.onResume();
+    }
+
+    @Override
     protected void onLogInButtonClicked(Editable server, Editable username, Editable password) {
         loginPresenter.validateCredentials(server.toString(), username.toString(), password.toString());
     }
