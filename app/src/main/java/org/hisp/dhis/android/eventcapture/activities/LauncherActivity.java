@@ -22,7 +22,7 @@ public class LauncherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
 
-        System.out.println(BuildConfig.SERVER_URL);
+        Timber.d(BuildConfig.SERVER_URL);
 
         Configuration configuration = new Configuration(BuildConfig.SERVER_URL);
         D2.signIn(configuration, BuildConfig.USERNAME, BuildConfig.PASSWORD)

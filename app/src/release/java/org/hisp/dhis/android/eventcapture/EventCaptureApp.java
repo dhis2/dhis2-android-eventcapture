@@ -19,7 +19,7 @@ public final class EventCaptureApp extends Application {
         Fabric.with(this, new Crashlytics());
         Timber.plant(new ReleaseTree());
 
-        // Feed content to D2
+        // Feed context to D2
         D2.init(this);
     }
 }

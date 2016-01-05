@@ -31,9 +31,14 @@ package org.hisp.dhis.android.eventcapture.activities;
 
 public interface ILoginView {
     void showProgress();
+
     void hideProgress();
+
     void showServerError(String message);
+
     void showInvalidCredentialsError();
+
     void showUnexpectedError(String message);
+
     void navigateToHome();
 }

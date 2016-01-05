@@ -11,7 +11,6 @@ import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public static final String TAG = MainActivity.class.getSimpleName();
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

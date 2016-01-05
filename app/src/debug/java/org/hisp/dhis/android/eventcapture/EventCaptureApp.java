@@ -14,7 +14,7 @@ public final class EventCaptureApp extends Application {
 
         Timber.plant(new Timber.DebugTree());
 
-        // Feed content to D2
+        // Feed context to D2
         D2.init(this);
 
         // TODO
