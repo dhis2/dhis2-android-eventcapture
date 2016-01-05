@@ -37,9 +37,9 @@ import org.hisp.dhis.android.eventcapture.activities.MainActivity;
 
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 
-public final class NavigationUtils {
+public final class ActivityUtils {
 
-    private NavigationUtils() {
+    private ActivityUtils() {
         // private constructor
     }
 
