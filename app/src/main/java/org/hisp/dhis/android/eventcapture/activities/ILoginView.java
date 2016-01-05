@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.activities;
 
-public interface ILoginView {
+public interface ILogInView {
     void showProgress();
 
     void hideProgress();

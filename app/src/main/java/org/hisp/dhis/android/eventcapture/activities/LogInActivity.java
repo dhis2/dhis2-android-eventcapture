@@ -36,15 +36,15 @@ import android.text.Editable;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
-public class LogInActivity extends AbsLoginActivity implements ILoginView {
+public class LogInActivity extends AbsLoginActivity implements ILogInView {
 
-    private ILoginPresenter loginPresenter;
+    private ILogInPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        loginPresenter = new LoginPresenter(this);
+        loginPresenter = new LogInPresenter(this);
         loginPresenter.onCreate();
     }
 
@@ -95,7 +95,7 @@ public class LogInActivity extends AbsLoginActivity implements ILoginView {
 
     @Override
     public void navigateToHome() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, HomeActivity.class));
     }
 
     private void showError(String message) {

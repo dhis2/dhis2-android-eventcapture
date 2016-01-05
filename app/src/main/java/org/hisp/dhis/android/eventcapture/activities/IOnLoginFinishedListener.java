@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture.activities;
 
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 
-public interface IOnLoginFinishedListener {
+public interface IOnLogInFinishedListener {
     void onServerError(String message);
 
     void onUnexpectedError(String message);

@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.activities;
 
-public interface ILoginPresenter {
+public interface ILogInPresenter {
     void validateCredentials(String serverUrl, String username, String password);
 
     void onCreate();

@@ -45,7 +45,10 @@ public final class EventCaptureApp extends Application {
         // Feed context to D2
         D2.init(this);
 
-        // TODO
-        // Add stetho initialization code here
+        // TODO Add stetho initialization code here
+        // TODO Add LeakCanary support
+        // TODO Start writing unit tests for application
+        // TODO implement debug navigation drawer
+        // TODO integrate DI library.
     }
 }

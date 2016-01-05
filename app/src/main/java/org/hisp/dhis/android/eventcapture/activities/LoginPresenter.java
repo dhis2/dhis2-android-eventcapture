@@ -40,12 +40,12 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
+public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener {
 
-    private final ILoginView loginView;
+    private final ILogInView loginView;
     private Subscription loginSubscription;
 
-    public LoginPresenter(ILoginView loginView) {
+    public LogInPresenter(ILogInView loginView) {
         this.loginView = loginView;
     }
 
@@ -78,14 +78,17 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
 
     @Override
     public void onDestroy() {
-        loginSubscription.unsubscribe();
+        if (loginSubscription != null) {
+            loginSubscription.unsubscribe();
+        }
     }
 
     @Override
     public void onResume() {
-        D2.isSignedIn().subscribeOn(Schedulers.io()).
-                observeOn(AndroidSchedulers.mainThread()).
-                subscribe(new Action1<Boolean>() {
+        D2.isSignedIn()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
                         onSuccess(null);

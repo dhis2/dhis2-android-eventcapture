@@ -32,8 +32,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import org.hisp.dhis.android.eventcapture.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.activities.LogInActivity;
-import org.hisp.dhis.android.eventcapture.activities.MainActivity;
 
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 
@@ -47,7 +47,7 @@ public final class ActivityUtils {
         isNull(context, "Context must not be null");
 
         final ComponentName logInActivity = new ComponentName(context, LogInActivity.class);
-        final ComponentName mainActivity = new ComponentName(context, MainActivity.class);
+        final ComponentName homeActivity = new ComponentName(context, HomeActivity.class);
 
         final int logInActivityState = isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
@@ -56,7 +56,7 @@ public final class ActivityUtils {
 
         context.getPackageManager().setComponentEnabledSetting(logInActivity, logInActivityState,
                 PackageManager.DONT_KILL_APP);
-        context.getPackageManager().setComponentEnabledSetting(mainActivity, mainActivityState,
+        context.getPackageManager().setComponentEnabledSetting(homeActivity, mainActivityState,
                 PackageManager.DONT_KILL_APP);
     }
 }
