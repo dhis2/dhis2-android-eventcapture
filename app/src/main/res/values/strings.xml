@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">dhis2-android-eventcapture</string>
+
     <string name="error">Error</string>
     <string name="invalid_credentials_error">Unable to log in due to invalid credentials.</string>
 </resources>
