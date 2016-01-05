@@ -41,7 +41,6 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
 public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
 
@@ -55,7 +54,7 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
     @Override
     public void validateCredentials(String serverUrl, String username, String password) {
         loginView.showProgress();
-        Configuration configuration= new Configuration(serverUrl);
+        Configuration configuration = new Configuration(serverUrl);
 
         D2.signIn(configuration, username, password)
                 .subscribeOn(Schedulers.io())
@@ -97,7 +96,7 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
     }
 
     private void handleError(final Throwable throwable) {
-        if(throwable instanceof ApiException) {
+        if (throwable instanceof ApiException) {
             ApiException apiException = (ApiException) throwable;
             switch (apiException.getKind()) {
                 case CONVERSION:
