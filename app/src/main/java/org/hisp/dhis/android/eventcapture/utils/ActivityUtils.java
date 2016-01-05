@@ -51,8 +51,8 @@ public final class ActivityUtils {
 
         final int logInActivityState = isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
                 PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        final int mainActivityState = !isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_DISABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        final int mainActivityState = !isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 
         context.getPackageManager().setComponentEnabledSetting(logInActivity, logInActivityState,
                 PackageManager.DONT_KILL_APP);

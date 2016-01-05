@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 public class LogInActivity extends AbsLoginActivity implements ILogInView {
@@ -95,6 +96,7 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
 
     @Override
     public void navigateToHome() {
+        ActivityUtils.changeDefaultActivity(getBaseContext(), false);
         startActivity(new Intent(this, HomeActivity.class));
     }
 

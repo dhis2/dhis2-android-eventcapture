@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.activities;
 
+import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
