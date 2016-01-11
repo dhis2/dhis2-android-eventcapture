@@ -18,8 +18,9 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private FrameLayout mPickerFrameLayout;
     private PickerFragment mPickerFragment;
     private ISelectorPresenter mSelectorPresenter;
-    private FloatingActionButton mFloatingActionButton;
 
+    private FloatingActionButton mFloatingActionButton;
+    private boolean hiddenFloatingActionButton = true; //to save the state of the action button.
 
     public SelectorFragment() {
 
@@ -43,6 +44,9 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         mFloatingActionButton.setOnClickListener(this);
+        if(hiddenFloatingActionButton) {
+            mFloatingActionButton.hide();
+        }
         PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
         attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
     }
@@ -67,7 +71,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onClick(View v) {
-        Log.d("FloatingActcionButton", "onClick");
+        Log.d("FloatingActionButton", "onClick");
         // Add new event for orgUnit and program
 //        mSelectorPresenter.getOrganisationUnitPicker().getPickedItem();
 
@@ -75,14 +79,16 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void activate() {
-        // TODO: 11.01.16 show floatingActionButton
+        mFloatingActionButton.show();
+        hiddenFloatingActionButton = false;
         Log.d("FloatingActionButton", "activated");
 
     }
 
     @Override
     public void deactivate() {
-        // TODO: 11.01.16 hide floatingActionButton
+        mFloatingActionButton.hide();
+        hiddenFloatingActionButton = true;
         Log.d("FloatingActionButton", "deactivated");
     }
 }
