@@ -55,17 +55,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     }
 
-
-    @Override
-    public void attachPickerFragment() {
-
-    }
-
-    @Override
-    public void attachItemListFragment() {
-
-    }
-
     @Override
     public PickerFragment getPickerFragment() {
         return mPickerFragment = (PickerFragment) getFragmentManager().findFragmentByTag(PickerFragment.TAG);
