@@ -28,12 +28,13 @@
 
 package org.hisp.dhis.android.eventcapture.activities;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.SelectorFragment;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
 public class HomeActivity extends AppCompatActivity implements INavigationHandler {
@@ -42,7 +43,11 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
         showSelectorFragment();
     }
 
@@ -53,6 +58,13 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         } else {
             finish();
         }
+    }
+
+    @Override
+    public void addFragmentToLayout(int resId, Fragment fragment, String tag) {
+            FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.add(resId, fragment, tag);
+            fragmentTransaction.commit();
     }
 
     @Override
@@ -75,5 +87,6 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     private void showSelectorFragment() {
         setTitle("Event Capture");
+        switchFragment(new SelectorFragment(), SelectorFragment.TAG, true);
     }
 }
