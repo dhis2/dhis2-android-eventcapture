@@ -13,7 +13,7 @@ import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
-public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, View.OnClickListener {
+public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private FrameLayout mPickerFrameLayout;
     private PickerFragment mPickerFragment;
@@ -29,7 +29,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mSelectorPresenter = new SelectorPresenter(this);
+        mSelectorPresenter = new SelectorPresenter(this, this);
         mSelectorPresenter.onCreate();
     }
 
@@ -69,6 +69,20 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void onClick(View v) {
         Log.d("FloatingActcionButton", "onClick");
         // Add new event for orgUnit and program
+//        mSelectorPresenter.getOrganisationUnitPicker().getPickedItem();
 
+    }
+
+    @Override
+    public void activate() {
+        // TODO: 11.01.16 show floatingActionButton
+        Log.d("FloatingActionButton", "activated");
+
+    }
+
+    @Override
+    public void deactivate() {
+        // TODO: 11.01.16 hide floatingActionButton
+        Log.d("FloatingActionButton", "deactivated");
     }
 }
