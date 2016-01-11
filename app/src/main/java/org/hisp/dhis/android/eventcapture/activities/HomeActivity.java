@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.SelectorFragment;
@@ -39,10 +40,28 @@ import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
 public class HomeActivity extends AppCompatActivity implements INavigationHandler {
 
+    private SelectorFragment selectorFragmentInstance; //to save the instance
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        if (savedInstanceState != null) {
+            Log.d("HomeActivity", "bundle restore fragment");
+            //Restore the fragment's instance
+            selectorFragmentInstance = (SelectorFragment) getSupportFragmentManager().getFragment(
+                    savedInstanceState, "selectorFragmentInstance");
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        Log.d("HomeActivity", "Saving fragment instance on bundle.");
+        //Save the fragment's instance
+        getSupportFragmentManager().putFragment(outState, "selectorFragmentInstance", selectorFragmentInstance);
     }
 
     @Override
@@ -87,6 +106,14 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     private void showSelectorFragment() {
         setTitle("Event Capture");
-        switchFragment(new SelectorFragment(), SelectorFragment.TAG, true);
+
+        //restore/store saved instance of selectorFragment here
+        if(selectorFragmentInstance == null) {
+            Log.d("HomeActivity", " creating new selector fragment");
+            selectorFragmentInstance = new SelectorFragment();
+        } else {
+            Log.d("HomeActivity", " restoring selector fragment instance");
+        }
+        switchFragment(selectorFragmentInstance, SelectorFragment.TAG, true);
     }
 }
