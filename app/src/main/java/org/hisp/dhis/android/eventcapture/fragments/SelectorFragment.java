@@ -42,13 +42,19 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+
+        if (savedInstanceState == null) {
+            PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
+            attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
+        }
+
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         mFloatingActionButton.setOnClickListener(this);
+
         if(hiddenFloatingActionButton) {
             mFloatingActionButton.hide();
         }
-        PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
-        attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
+
     }
 
 

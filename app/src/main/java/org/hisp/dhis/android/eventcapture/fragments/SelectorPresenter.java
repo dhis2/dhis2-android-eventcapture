@@ -90,10 +90,8 @@ public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItem
         mProgramPicker.setListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ProgramPickable pickedPickable = (ProgramPickable) parent.getItemAtPosition(position);
-                mProgramPicker.setPickedItem(pickedPickable);
 
-                if (pickedPickable != null) {
+                if (mProgramPicker.getPickedItem() != null) {
                     mNewButtonActivator.activate();
                 } else {
                     mNewButtonActivator.deactivate();
@@ -105,7 +103,6 @@ public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItem
         mOrgUnitPicker.registerPickedItemClearListener(this);
 
         mOrgUnitPicker.setNextLinkedSibling(mProgramPicker);
-
         pickerList.add(mOrgUnitPicker);
 
         mPickerFragment = PickerFragment.newInstance(pickerList);
