@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 import android.support.v4.app.Fragment;
 

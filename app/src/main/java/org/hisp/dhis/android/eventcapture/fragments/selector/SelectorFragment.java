@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
 import android.os.Bundle;
@@ -56,8 +56,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         }
 
     }
-
-
 
     @Override
     public void onResume() {

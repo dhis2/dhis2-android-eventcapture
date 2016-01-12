@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.activities;
+package org.hisp.dhis.android.eventcapture.activities.login;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 public interface INewButtonActivator {
     void activate();

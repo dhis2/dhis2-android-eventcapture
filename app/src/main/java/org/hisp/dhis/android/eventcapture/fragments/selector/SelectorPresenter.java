@@ -1,9 +1,11 @@
-package org.hisp.dhis.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
 
+import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
+import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
@@ -14,7 +16,7 @@ import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Picker;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItemClickListener, IPickedItemClearListener {
+public class SelectorPresenter implements ISelectorPresenter, IPickedItemClearListener {
     private PickerFragment mPickerFragment;
     private ISelectorView mSelectorView;
     private INewButtonActivator mNewButtonActivator;
@@ -122,11 +124,6 @@ public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItem
     @Override
     public Picker getOrganisationUnitPicker() {
         return mOrgUnitPicker;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
     }
 
     @Override

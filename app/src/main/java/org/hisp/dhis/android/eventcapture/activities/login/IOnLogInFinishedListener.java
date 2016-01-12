@@ -26,18 +26,17 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.activities;
+package org.hisp.dhis.android.eventcapture.activities.login;
 
-public interface ILogInView {
-    void showProgress();
 
-    void hideProgress();
+import org.hisp.dhis.client.sdk.models.user.UserAccount;
 
-    void showServerError(String message);
+public interface IOnLogInFinishedListener {
+    void onServerError(String message);
 
-    void showInvalidCredentialsError();
+    void onUnexpectedError(String message);
 
-    void showUnexpectedError(String message);
+    void onInvalidCredentialsError();
 
-    void navigateToHome();
+    void onSuccess(UserAccount userAccount);
 }

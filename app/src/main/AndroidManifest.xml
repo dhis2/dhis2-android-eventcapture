@@ -36,7 +36,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
-        <activity android:name="org.hisp.dhis.android.eventcapture.activities.LogInActivity">
+        <activity android:name=".activities.login.LogInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

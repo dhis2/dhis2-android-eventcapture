@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.activities;
+package org.hisp.dhis.android.eventcapture.activities.login;
 
 public interface ILogInPresenter {
     void validateCredentials(String serverUrl, String username, String password);

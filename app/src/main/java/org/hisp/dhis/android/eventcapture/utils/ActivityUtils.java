@@ -33,7 +33,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 import org.hisp.dhis.android.eventcapture.activities.HomeActivity;
-import org.hisp.dhis.android.eventcapture.activities.LogInActivity;
+import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 

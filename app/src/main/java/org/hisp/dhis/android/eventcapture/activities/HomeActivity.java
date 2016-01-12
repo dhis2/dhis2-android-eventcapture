@@ -34,7 +34,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.fragments.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
 public class HomeActivity extends AppCompatActivity implements INavigationHandler {
