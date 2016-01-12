@@ -1,7 +1,6 @@
 package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -9,13 +8,13 @@ import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
+import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickedItemClearListener;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Picker;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItemClickListener {
+public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItemClickListener, IPickedItemClearListener {
     private PickerFragment mPickerFragment;
     private ISelectorView mSelectorView;
     private INewButtonActivator mNewButtonActivator;
@@ -93,21 +92,24 @@ public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItem
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ProgramPickable pickedPickable = (ProgramPickable) parent.getItemAtPosition(position);
                 mProgramPicker.setPickedItem(pickedPickable);
-                if(pickedPickable != null) {
+
+                if (pickedPickable != null) {
                     mNewButtonActivator.activate();
-                }
-                else {
+                } else {
                     mNewButtonActivator.deactivate();
                 }
 
             }
         });
+        mProgramPicker.registerPickedItemClearListener(this);
+        mOrgUnitPicker.registerPickedItemClearListener(this);
 
         mOrgUnitPicker.setNextLinkedSibling(mProgramPicker);
 
         pickerList.add(mOrgUnitPicker);
 
         mPickerFragment = PickerFragment.newInstance(pickerList);
+
         return mPickerFragment;
     }
 
@@ -129,4 +131,10 @@ public class SelectorPresenter implements ISelectorPresenter, AdapterView.OnItem
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
     }
+
+    @Override
+    public void clearedCallback() {
+        mNewButtonActivator.deactivate();
+    }
+
 }

@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.SelectorFragment;
@@ -48,7 +47,6 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         setContentView(R.layout.activity_home);
 
         if (savedInstanceState != null) {
-            Log.d("HomeActivity", "bundle restore fragment");
             //Restore the fragment's instance
             selectorFragmentInstance = (SelectorFragment) getSupportFragmentManager().getFragment(
                     savedInstanceState, "selectorFragmentInstance");
@@ -59,7 +57,6 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Log.d("HomeActivity", "Saving fragment instance on bundle.");
         //Save the fragment's instance
         getSupportFragmentManager().putFragment(outState, "selectorFragmentInstance", selectorFragmentInstance);
     }
@@ -109,10 +106,7 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
         //restore/store saved instance of selectorFragment here
         if(selectorFragmentInstance == null) {
-            Log.d("HomeActivity", " creating new selector fragment");
             selectorFragmentInstance = new SelectorFragment();
-        } else {
-            Log.d("HomeActivity", " restoring selector fragment instance");
         }
         switchFragment(selectorFragmentInstance, SelectorFragment.TAG, true);
     }

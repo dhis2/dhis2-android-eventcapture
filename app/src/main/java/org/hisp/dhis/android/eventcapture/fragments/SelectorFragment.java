@@ -81,14 +81,11 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void activate() {
         mFloatingActionButton.show();
         hiddenFloatingActionButton = false;
-        Log.d("FloatingActionButton", "activated");
-
     }
 
     @Override
     public void deactivate() {
         mFloatingActionButton.hide();
         hiddenFloatingActionButton = true;
-        Log.d("FloatingActionButton", "deactivated");
     }
 }
