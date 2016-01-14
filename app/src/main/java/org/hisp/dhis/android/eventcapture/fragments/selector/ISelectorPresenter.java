@@ -10,6 +10,8 @@ public interface ISelectorPresenter {
 
     Fragment createPickerFragment();
 
+    void registerPickerCallbacks();
+
     void onResume();
 
     Picker getProgramPicker();

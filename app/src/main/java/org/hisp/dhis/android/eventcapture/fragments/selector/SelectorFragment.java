@@ -20,7 +20,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private ISelectorPresenter mSelectorPresenter;
 
     private FloatingActionButton mFloatingActionButton;
-    private boolean hiddenFloatingActionButton = true; //to save the state of the action button.
+    private boolean hiddenFloatingActionButton; //to save the state of the action button.
+    public static final String FLOATING_BUTTON_STATE = "extra:FloatingButtonState";
 
     public SelectorFragment() {
 
@@ -29,7 +30,10 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        if (savedInstanceState != null) {
+            hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
+            //restore mSelectorPresenter ! (instead of getting the instance...)
+        }
         mSelectorPresenter = new SelectorPresenter(this, this);
         mSelectorPresenter.onCreate();
     }
@@ -42,10 +46,13 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-
         if (savedInstanceState == null) {
             PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
             attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
+            hiddenFloatingActionButton = true;
+        } else {
+            hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
+            mSelectorPresenter.registerPickerCallbacks();
         }
 
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
@@ -53,6 +60,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
         if(hiddenFloatingActionButton) {
             mFloatingActionButton.hide();
+        } else {
+            mFloatingActionButton.show();
         }
 
     }
@@ -60,7 +69,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -75,10 +83,9 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onClick(View v) {
-        Log.d("FloatingActionButton", "onClick");
+        //Log.d("FloatingActionButton", "onClick");
         // Add new event for orgUnit and program
 //        mSelectorPresenter.getOrganisationUnitPicker().getPickedItem();
-
     }
 
     @Override
@@ -91,5 +98,11 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void deactivate() {
         mFloatingActionButton.hide();
         hiddenFloatingActionButton = true;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
     }
 }
