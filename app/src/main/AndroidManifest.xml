@@ -44,7 +44,7 @@
         </activity>
 
         <activity
-            android:name="org.hisp.dhis.android.eventcapture.activities.HomeActivity"
+            android:name=".activities.HomeActivity"
             android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

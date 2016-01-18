@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -36,6 +36,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         }
         mSelectorPresenter = new SelectorPresenter(this, this);
         mSelectorPresenter.onCreate();
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -67,6 +68,20 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG, true);
+        }
+        else if (id == android.R.id.home) {
+            getFragmentManager().popBackStack();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
     }
@@ -85,7 +100,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void onClick(View v) {
         //Log.d("FloatingActionButton", "onClick");
         // Add new event for orgUnit and program
-//        mSelectorPresenter.getOrganisationUnitPicker().getPickedItem();
+        //mSelectorPresenter.getOrganisationUnitPicker().getPickedItem();
     }
 
     @Override

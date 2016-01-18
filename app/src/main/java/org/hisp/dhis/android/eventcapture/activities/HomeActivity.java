@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
@@ -51,6 +52,11 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
             selectorFragmentInstance = (SelectorFragment) getSupportFragmentManager().getFragment(
                     savedInstanceState, "selectorFragmentInstance");
         }
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+        setTitle("Event Capture");
+        showBackButton(false);
     }
 
     @Override
@@ -76,6 +82,33 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         }
     }
 
+    /*@Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu);//, inflater);
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+       int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new AbsSettingsFragment(), AbsSettingsFragment.TAG, true);
+        }
+        else if (id == android.R.id.home) {
+            getFragmentManager().popBackStack();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }*/
+
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
     @Override
     public void addFragmentToLayout(int resId, Fragment fragment, String tag) {
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -92,6 +125,7 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
             transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
                     .replace(R.id.fragment_container, fragment);
+            //getSupportActionBar().setSubtitle(fragment.getClass().getName());
             if (addToBackStack) {
                 transaction = transaction
                         .addToBackStack(tag);
@@ -102,12 +136,20 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
     }
 
     private void showSelectorFragment() {
-        setTitle("Event Capture");
-
+        setTitle("Event Capture" +
+                "");
         //restore/store saved instance of selectorFragment here
         if(selectorFragmentInstance == null) {
             selectorFragmentInstance = new SelectorFragment();
         }
+        showBackButton(true);
         switchFragment(selectorFragmentInstance, SelectorFragment.TAG, true);
+    }
+
+    @Override
+    public void showBackButton(Boolean enable) {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
+        }
     }
 }
