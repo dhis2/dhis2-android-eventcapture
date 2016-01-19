@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.fragments.selector;
+package org.hisp.dhis.android.eventcapture.fragments.settings;
 
 import android.content.Intent;
 import android.view.View;

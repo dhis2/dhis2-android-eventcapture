@@ -28,9 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-import org.hisp.dhis.android.eventcapture.activities.login.ILogInPresenter;
-import org.hisp.dhis.android.eventcapture.activities.login.ILogInView;
-import org.hisp.dhis.android.eventcapture.activities.login.IOnLogInFinishedListener;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
