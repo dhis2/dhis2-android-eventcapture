@@ -39,7 +39,6 @@ import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 public class LogInActivity extends AbsLoginActivity implements ILogInView {
-
     private ILogInPresenter loginPresenter;
 
     @Override

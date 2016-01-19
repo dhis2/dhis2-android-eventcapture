@@ -29,7 +29,6 @@
 package org.hisp.dhis.android.eventcapture.activities.login;
 
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
-import org.hisp.dhis.android.eventcapture.utils.PresenterManager;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
@@ -43,47 +42,38 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
-    private final ILogInView loginView;
-    private Subscription loginSubscription;
+    private final ILogInView mLoginView;
+    private Subscription mLoginSubscription;
 
     public LogInPresenter(ILogInView loginView) {
-        this.loginView = loginView;
+        this.mLoginView = loginView;
     }
 
     @Override
     public void validateCredentials(String serverUrl, String username, String password) {
-        loginView.showProgress();
         Configuration configuration = new Configuration(serverUrl);
 
-        D2.signIn(configuration, username, password)
+        mLoginView.showProgress();
+        mLoginSubscription = D2.signIn(configuration, username, password)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<UserAccount>() {
                     @Override
                     public void call(UserAccount userAccount) {
-                        loginView.hideProgress();
-                        onSuccess(userAccount);
+                        onSuccess();
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        throwable.printStackTrace();
                         handleError(throwable);
                     }
                 });
     }
 
     @Override
-    public void onCreate() {
-        PresenterManager.put(this);
-    }
-
-    @Override
     public void onDestroy() {
-        PresenterManager.remove(this);
-
-        if (loginSubscription != null) {
-            loginSubscription.unsubscribe();
+        if (mLoginSubscription != null) {
+            mLoginSubscription.unsubscribe();
         }
     }
 
@@ -99,30 +89,33 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
-                        onSuccess(null);
+                    public void call(Boolean isSignedIn) {
+                        if (isSignedIn != null && isSignedIn) {
+                            onSuccess();
+                        }
                     }
                 });
     }
 
     @Override
     public void onServerError(String message) {
-        loginView.showServerError(message);
+        mLoginView.showServerError(message);
     }
 
     @Override
     public void onUnexpectedError(String message) {
-        loginView.showUnexpectedError(message);
+        mLoginView.showUnexpectedError(message);
     }
 
     @Override
     public void onInvalidCredentialsError() {
-        loginView.showInvalidCredentialsError();
+        mLoginView.showInvalidCredentialsError();
     }
 
     @Override
-    public void onSuccess(UserAccount userAccount) {
-        loginView.navigateToHome();
+    public void onSuccess() {
+        mLoginView.hideProgress();
+        mLoginView.navigateToHome();
     }
 
     private void handleError(final Throwable throwable) {

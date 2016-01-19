@@ -35,6 +35,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
 public class HomeActivity extends AppCompatActivity implements INavigationHandler {
@@ -100,7 +101,7 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         setTitle("Event Capture");
 
         showBackButton(true);
-        // switchFragment(selectorFragmentInstance, SelectorFragment.TAG, true);
+        switchFragment(new SelectorFragment(), SelectorFragment.TAG, true);
     }
 
     @Override

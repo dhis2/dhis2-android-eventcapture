@@ -29,8 +29,6 @@
 package org.hisp.dhis.android.eventcapture.activities.login;
 
 
-import org.hisp.dhis.client.sdk.models.user.UserAccount;
-
 public interface IOnLogInFinishedListener {
     void onServerError(String message);
 
@@ -38,5 +36,5 @@ public interface IOnLogInFinishedListener {
 
     void onInvalidCredentialsError();
 
-    void onSuccess(UserAccount userAccount);
+    void onSuccess();
 }
