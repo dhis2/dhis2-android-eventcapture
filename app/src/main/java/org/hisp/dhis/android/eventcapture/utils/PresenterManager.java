@@ -28,35 +28,38 @@
 
 package org.hisp.dhis.android.eventcapture.utils;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
-import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
+public final class PresenterManager {
+    private final Map<String, IPresenter> mPresenters;
+    private static PresenterManager mPresenterManager;
 
-import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
-
-public final class ActivityUtils {
-
-    private ActivityUtils() {
-        // private constructor
+    private PresenterManager() {
+        mPresenters = new HashMap<>();
     }
 
-    public static void changeDefaultActivity(Context context, boolean isLogIn) {
-        isNull(context, "Context must not be null");
+    private static PresenterManager getInstance() {
+        if (mPresenterManager == null) {
+            mPresenterManager = new PresenterManager();
+        }
 
-        final ComponentName logInActivity = new ComponentName(context, LogInActivity.class);
-        final ComponentName homeActivity = new ComponentName(context, HomeActivity.class);
+        return mPresenterManager;
+    }
 
-        final int logInActivityState = isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        final int mainActivityState = !isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+    public static void put(IPresenter presenter) {
+        getInstance().mPresenters.put(presenter.getKey(), presenter);
+    }
 
-        context.getPackageManager().setComponentEnabledSetting(logInActivity, logInActivityState,
-                PackageManager.DONT_KILL_APP);
-        context.getPackageManager().setComponentEnabledSetting(homeActivity, mainActivityState,
-                PackageManager.DONT_KILL_APP);
+    public static IPresenter get(String key) {
+        return getInstance().mPresenters.get(key);
+    }
+
+    public static IPresenter remove(String key) {
+        return getInstance().mPresenters.remove(key);
+    }
+
+    public static IPresenter remove(IPresenter presenter) {
+        return getInstance().mPresenters.remove(presenter.getKey());
     }
 }

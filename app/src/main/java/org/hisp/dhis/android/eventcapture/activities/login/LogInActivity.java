@@ -34,7 +34,7 @@ import android.os.Bundle;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.activities.HomeActivity;
+import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
@@ -52,16 +52,16 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-
         loginPresenter.onDestroy();
+
+        super.onDestroy();
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
-
         loginPresenter.onResume();
+
+        super.onResume();
     }
 
     @Override
@@ -103,7 +103,8 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
 
     private void showError(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
-        AlertDialog alertDialog = builder.setTitle(getString(R.string.error))
+        AlertDialog alertDialog = builder
+                .setTitle(getString(R.string.error))
                 .setMessage(message).show();
         alertDialog.show();
     }

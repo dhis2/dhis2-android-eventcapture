@@ -28,35 +28,13 @@
 
 package org.hisp.dhis.android.eventcapture.utils;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
+public class NetworkUtils {
 
-import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
-import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
-
-import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
-
-public final class ActivityUtils {
-
-    private ActivityUtils() {
+    private NetworkUtils() {
         // private constructor
     }
 
-    public static void changeDefaultActivity(Context context, boolean isLogIn) {
-        isNull(context, "Context must not be null");
+    public static void showErrorMessage(Throwable throwable) {
 
-        final ComponentName logInActivity = new ComponentName(context, LogInActivity.class);
-        final ComponentName homeActivity = new ComponentName(context, HomeActivity.class);
-
-        final int logInActivityState = isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        final int mainActivityState = !isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-
-        context.getPackageManager().setComponentEnabledSetting(logInActivity, logInActivityState,
-                PackageManager.DONT_KILL_APP);
-        context.getPackageManager().setComponentEnabledSetting(homeActivity, mainActivityState,
-                PackageManager.DONT_KILL_APP);
     }
 }

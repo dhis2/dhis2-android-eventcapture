@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
+import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
+import org.hisp.dhis.android.eventcapture.utils.PresenterManager;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
@@ -40,8 +42,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener {
-
+public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
     private final ILogInView loginView;
     private Subscription loginSubscription;
 
@@ -74,13 +75,21 @@ public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener
 
     @Override
     public void onCreate() {
+        PresenterManager.put(this);
     }
 
     @Override
     public void onDestroy() {
+        PresenterManager.remove(this);
+
         if (loginSubscription != null) {
             loginSubscription.unsubscribe();
         }
+    }
+
+    @Override
+    public String getKey() {
+        return LogInPresenter.class.getSimpleName();
     }
 
     @Override
@@ -94,6 +103,26 @@ public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener
                         onSuccess(null);
                     }
                 });
+    }
+
+    @Override
+    public void onServerError(String message) {
+        loginView.showServerError(message);
+    }
+
+    @Override
+    public void onUnexpectedError(String message) {
+        loginView.showUnexpectedError(message);
+    }
+
+    @Override
+    public void onInvalidCredentialsError() {
+        loginView.showInvalidCredentialsError();
+    }
+
+    @Override
+    public void onSuccess(UserAccount userAccount) {
+        loginView.navigateToHome();
     }
 
     private void handleError(final Throwable throwable) {
@@ -129,25 +158,5 @@ public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener
         } else {
             onUnexpectedError(throwable.getMessage());
         }
-    }
-
-    @Override
-    public void onServerError(String message) {
-        loginView.showServerError(message);
-    }
-
-    @Override
-    public void onUnexpectedError(String message) {
-        loginView.showUnexpectedError(message);
-    }
-
-    @Override
-    public void onInvalidCredentialsError() {
-        loginView.showInvalidCredentialsError();
-    }
-
-    @Override
-    public void onSuccess(UserAccount userAccount) {
-        loginView.navigateToHome();
     }
 }

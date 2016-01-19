@@ -44,7 +44,7 @@
         </activity>
 
         <activity
-            android:name=".activities.HomeActivity"
+            android:name=".activities.home.HomeActivity"
             android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
