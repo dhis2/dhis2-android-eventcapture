@@ -50,12 +50,12 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         setTitle("Event Capture");
 
         showBackButton(false);
+        showSelectorFragment();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        showSelectorFragment();
     }
 
     @Override

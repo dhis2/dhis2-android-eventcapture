@@ -1,9 +1,12 @@
 package org.hisp.dhis.android.eventcapture.fragments.settings;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
+import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.ISettingsPresenter;
@@ -33,8 +36,10 @@ public class SettingsPresenter implements ISettingsPresenter {
     }
 
     @Override
-    public void logout() {
+    public void logout(Context context) {
         D2.signOut();
+        ActivityUtils.changeDefaultActivity(context, true);
+        context.startActivity(new Intent(mSettingsFragment.getActivity(), LogInActivity.class));
     }
 
     @Override
