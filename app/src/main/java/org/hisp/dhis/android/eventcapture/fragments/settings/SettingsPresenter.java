@@ -14,7 +14,7 @@ import org.hisp.dhis.client.sdk.ui.fragments.ISettingsPresenter;
 /**
  * This is the presenter, using MVP.
  * This class controls what is shown in the view. (AbsSettingsFragment).
- *
+ * <p/>
  * Created by Vladislav Georgiev Alfredov on 1/15/16.
  */
 public class SettingsPresenter implements ISettingsPresenter {
@@ -44,7 +44,6 @@ public class SettingsPresenter implements ISettingsPresenter {
 
     @Override
     public void synchronize(Context context) {
-        
         Log.d("SettingsPresenter", "Synchronize clicked.");
     }
 

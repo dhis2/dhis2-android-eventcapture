@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
@@ -60,7 +59,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         mFloatingActionButton.setOnClickListener(this);
 
-        if(hiddenFloatingActionButton) {
+        if (hiddenFloatingActionButton) {
             mFloatingActionButton.hide();
         } else {
             mFloatingActionButton.show();
@@ -70,15 +69,15 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            mNavigationHandler.switchFragment(
-                    new SettingsFragment(), SettingsFragment.TAG, true);
-        }
-        else if (id == android.R.id.home) {
-            getFragmentManager().popBackStack();
-            return true;
-        }
+//        int id = item.getItemId();
+//        if (id == R.id.action_settings) {
+//            mNavigationHandler.switchFragment(
+//                    new SettingsFragment(), SettingsFragment.TAG, true);
+//        }
+//        else if (id == android.R.id.home) {
+//            getFragmentManager().popBackStack();
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
