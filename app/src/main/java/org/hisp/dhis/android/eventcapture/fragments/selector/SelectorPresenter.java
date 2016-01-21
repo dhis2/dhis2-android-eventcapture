@@ -8,6 +8,7 @@ import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
 import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.ui.fragments.ItemListCardViewFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickableItemClearListener;
@@ -19,6 +20,7 @@ import java.util.List;
 public class SelectorPresenter implements ISelectorPresenter, IPickableItemClearListener {
 
     private PickerFragment mPickerFragment;
+    private ItemListCardViewFragment mItemListFragment;
     private ISelectorView mSelectorView;
     private INewButtonActivator mNewButtonActivator;
 
@@ -98,6 +100,14 @@ public class SelectorPresenter implements ISelectorPresenter, IPickableItemClear
         mPickerFragment = PickerFragment.newInstance(pickerList);
 
         return mPickerFragment;
+    }
+
+    @Override
+    public Fragment createItemListFragment() {
+        mItemListFragment = ItemListCardViewFragment.newInstance();
+
+
+        return mItemListFragment;
     }
 
     @Override

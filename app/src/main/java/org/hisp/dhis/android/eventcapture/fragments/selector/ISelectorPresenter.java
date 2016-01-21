@@ -12,6 +12,8 @@ public interface ISelectorPresenter {
 
     void registerPickerCallbacks();
 
+    Fragment createItemListFragment();
+
     void onResume();
 
     Picker getProgramPicker();
