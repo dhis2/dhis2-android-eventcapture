@@ -11,7 +11,7 @@ import android.widget.FrameLayout;
 
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
-import org.hisp.dhis.client.sdk.ui.fragments.ItemListCardViewFragment;
+import org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
@@ -52,8 +52,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
             PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
             attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
 
-            ItemListCardViewFragment itemListCardView = (ItemListCardViewFragment) mSelectorPresenter.createItemListFragment();
-            attachFragment(R.id.itemFragment, itemListCardView, ItemListCardViewFragment.TAG);
+            ItemListFragment itemListFragment = (ItemListFragment) mSelectorPresenter.createItemListFragment();
+            attachFragment(R.id.itemFragment, itemListFragment, ItemListFragment.TAG);
             hiddenFloatingActionButton = true;
         } else {
             hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
