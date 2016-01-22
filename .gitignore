@@ -30,4 +30,3 @@ build
 
 # Secret keys
 secrets.properties
-fabric.properties
