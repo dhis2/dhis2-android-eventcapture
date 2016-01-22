@@ -29,10 +29,17 @@
 package org.hisp.dhis.android.eventcapture.activities.home;
 
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
@@ -40,17 +47,49 @@ import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
 public class HomeActivity extends AppCompatActivity implements INavigationHandler {
 
+    DrawerLayout mDrawerLayout;
+    NavigationView mNavigationView;
+    ActionBarDrawerToggle mDrawerToggle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.drawer_toolbar);
         setSupportActionBar(toolbar);
-        setTitle("Event Capture");
+        ActionBar actionBar = getSupportActionBar();
+
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
+                Snackbar.make(findViewById(R.id.content), menuItem.getTitle() + " pressed", Snackbar.LENGTH_LONG).show();
+                menuItem.setChecked(true);
+                mDrawerLayout.closeDrawers();
+                return true;
+            }
+        });
+
+        mDrawerToggle = new ActionBarDrawerToggle(this,  mDrawerLayout, toolbar,
+                R.string.drawer_open, R.string.drawer_close);
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
+        mDrawerToggle.syncState();
 
         showBackButton(false);
-//        showSelectorFragment();
+        showSelectorFragment();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -68,6 +107,24 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /*@Override //this shows the options menu button on the right. thus we don't need it here.
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_drawer, menu);
+        return true;
+    }*/
+
+    @Override
     public void addFragmentToLayout(int resId, Fragment fragment, String tag) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(resId, fragment, tag);
@@ -83,7 +140,6 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
             transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
                     .replace(R.id.fragment_container, fragment);
-            //getSupportActionBar().setSubtitle(fragment.getClass().getName());
             if (addToBackStack) {
                 transaction = transaction.addToBackStack(tag);
             }
