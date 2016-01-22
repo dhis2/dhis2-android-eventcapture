@@ -28,12 +28,37 @@
 
 package org.hisp.dhis.android.eventcapture.fragments.settings;
 
+import android.content.Context;
+import android.os.Bundle;
+
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 
 public class SettingsFragment extends AbsSettingsFragment {
+    SettingsPresenter mSettingsPresenter;
 
-    public SettingsFragment() {
+    @Override
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
         mSettingsPresenter = new SettingsPresenter(this);
-        setSettingsPresenter(mSettingsPresenter);
+    }
+
+    @Override
+    protected void logout(Context context) {
+        mSettingsPresenter.logout(context);
+    }
+
+    @Override
+    protected void synchronize(Context context) {
+        mSettingsPresenter.synchronize(context);
+    }
+
+    @Override
+    protected void setUpdateFrequency(Context context, int frequency) {
+        mSettingsPresenter.setUpdateFrequency(context, frequency);
+    }
+
+    @Override
+    protected int getUpdateFrequency(Context context) {
+        return mSettingsPresenter.getUpdateFrequency(context);
     }
 }
