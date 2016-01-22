@@ -1,9 +1,11 @@
-package org.hisp.dhis.android.eventcapture.fragments.selector;
+package org.hisp.dhis.android.eventcapture.presenters;
 
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
 
+import org.hisp.dhis.android.eventcapture.fragments.selector.INewButtonActivator;
+import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
 import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
 import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;

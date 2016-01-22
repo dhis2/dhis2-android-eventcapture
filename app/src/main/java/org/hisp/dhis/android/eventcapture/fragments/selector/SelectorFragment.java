@@ -9,6 +9,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment;
