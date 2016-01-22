@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.fragments.selector;
+package org.hisp.dhis.android.eventcapture.presenters;
 
 
 import android.support.v4.app.Fragment;
@@ -11,6 +11,8 @@ public interface ISelectorPresenter {
     Fragment createPickerFragment();
 
     void registerPickerCallbacks();
+
+    Fragment createItemListFragment();
 
     void onResume();
 
