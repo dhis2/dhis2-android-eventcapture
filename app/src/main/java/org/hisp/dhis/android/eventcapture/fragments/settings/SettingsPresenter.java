@@ -9,7 +9,6 @@ import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
-import org.hisp.dhis.client.sdk.ui.fragments.ISettingsPresenter;
 
 /**
  * This is the presenter, using MVP.
