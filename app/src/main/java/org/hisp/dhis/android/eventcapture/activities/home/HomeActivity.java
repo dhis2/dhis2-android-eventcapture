@@ -30,7 +30,6 @@ package org.hisp.dhis.android.eventcapture.activities.home;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -43,6 +42,7 @@ import android.view.MenuItem;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
@@ -67,8 +67,13 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
-                Snackbar.make(findViewById(R.id.content), menuItem.getTitle() + " pressed", Snackbar.LENGTH_LONG).show();
                 menuItem.setChecked(true);
+                switch (menuItem.getItemId()) {
+                    case R.id.drawer_settings:
+                        switchFragment(new SettingsFragment(), SettingsFragment.TAG, true);
+                        mDrawerLayout.closeDrawers();
+                        return true;
+                }
                 mDrawerLayout.closeDrawers();
                 return true;
             }
@@ -112,9 +117,9 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         switch (item.getItemId()) {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
+                getFragmentManager().popBackStack();
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
