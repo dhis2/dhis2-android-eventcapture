@@ -36,9 +36,10 @@ import android.support.v7.widget.Toolbar;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
+import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
-public class HomeActivity extends AppCompatActivity implements INavigationHandler {
+public class HomeActivity extends AppCompatActivity implements INavigationHandler, ISynchronizationManager {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,5 +110,10 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
         }
+    }
+
+    @Override
+    public void synchronize() {
+        D2.me().syncAssignedPrograms();
     }
 }
