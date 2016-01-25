@@ -9,11 +9,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
-import org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
@@ -39,6 +39,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         }
         mSelectorPresenter = new SelectorPresenter(this, this);
         mSelectorPresenter.onCreate();
+
         setHasOptionsMenu(true);
     }
 
