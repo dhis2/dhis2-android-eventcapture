@@ -55,11 +55,17 @@ android {
             buildConfigField "String", "SERVER_URL", '"https://play.dhis2.org/demo"'
             buildConfigField "String", "USERNAME", '"android"'
             buildConfigField "String", "PASSWORD", '"Android123"'
+
+            // disabling crashlytics for debug builds
+            ext.enableCrashlytics = false
         }
         release {
             buildConfigField "String", "SERVER_URL", '""'
             buildConfigField "String", "USERNAME", '""'
             buildConfigField "String", "PASSWORD", '""'
+
+            // enabling crashlytics for debug builds
+            ext.enableCrashlytics = true
         }
     }
 
@@ -89,7 +95,7 @@ dependencies {
     testCompile "junit:junit:${libs.junit}"
 
     // Fabric
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+    compile("com.crashlytics.sdk.android:crashlytics:${libs.crashlyticsVersion}@aar") {
         transitive = true;
     }
 

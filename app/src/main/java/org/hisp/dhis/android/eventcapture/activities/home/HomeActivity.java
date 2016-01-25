@@ -29,27 +29,68 @@
 package org.hisp.dhis.android.eventcapture.activities.home;
 
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
+import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
-public class HomeActivity extends AppCompatActivity implements INavigationHandler {
+public class HomeActivity extends AppCompatActivity implements INavigationHandler, ISynchronizationManager {
+
+    DrawerLayout mDrawerLayout;
+    NavigationView mNavigationView;
+    ActionBarDrawerToggle mDrawerToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.drawer_toolbar);
         setSupportActionBar(toolbar);
-        setTitle("Event Capture");
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
-        showBackButton(false);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
+                menuItem.setChecked(true);
+                switch (menuItem.getItemId()) {
+                    case R.id.drawer_settings:
+                        switchFragment(new SettingsFragment(), SettingsFragment.TAG, true);
+                        mDrawerLayout.closeDrawers();
+                        return true;
+                }
+                mDrawerLayout.closeDrawers();
+                return true;
+            }
+        });
+
+
+        mDrawerToggle = new ActionBarDrawerToggle(this,  mDrawerLayout, toolbar,
+                R.string.drawer_open, R.string.drawer_close);
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        actionBar.setHomeButtonEnabled(true);
+        mDrawerToggle.syncState();
+
+        showBackButton(true);
+
         showSelectorFragment();
     }
 
@@ -73,7 +114,19 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                getFragmentManager().popBackStack();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void addFragmentToLayout(int resId, Fragment fragment, String tag) {
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(resId, fragment, tag);
         fragmentTransaction.commit();
@@ -81,33 +134,39 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     @Override
     public void switchFragment(Fragment fragment, String tag, boolean addToBackStack) {
+
         if (fragment != null) {
             FragmentTransaction transaction =
                     getSupportFragmentManager().beginTransaction();
-
             transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
                     .replace(R.id.fragment_container, fragment);
-            //getSupportActionBar().setSubtitle(fragment.getClass().getName());
             if (addToBackStack) {
                 transaction = transaction.addToBackStack(tag);
             }
-
             transaction.commitAllowingStateLoss();
         }
     }
 
     private void showSelectorFragment() {
         setTitle("Event Capture");
-
-        showBackButton(true);
         switchFragment(new SelectorFragment(), SelectorFragment.TAG, true);
     }
 
     @Override
     public void showBackButton(Boolean enable) {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
+        if(getSupportActionBar() != null) {
+         /*   if (enable) {
+                mDrawerToggle.setDrawerIndicatorEnabled(!enable);
+            } else {
+                mDrawerToggle.setDrawerIndicatorEnabled(!enable);
+
+            }*/
         }
+    }
+
+    @Override
+    public void synchronize() {
+        D2.me().syncAssignedPrograms();
     }
 }

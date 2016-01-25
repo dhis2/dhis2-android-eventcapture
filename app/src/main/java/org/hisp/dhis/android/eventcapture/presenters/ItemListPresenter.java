@@ -47,7 +47,7 @@ public class ItemListPresenter extends AbsPresenter {
 
     public void getEventsList() {
         Subscriber<List<Event>> subscriber = new EventSubscriber();
-        showItemListRows(D2.event().list());
+        showItemListRows(D2.events().list());
     }
 
     public void showItemListRows(List<Event> eventList) {

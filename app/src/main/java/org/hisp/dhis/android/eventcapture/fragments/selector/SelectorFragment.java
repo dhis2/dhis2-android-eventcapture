@@ -1,6 +1,8 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -10,6 +12,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
+import org.hisp.dhis.android.eventcapture.activities.home.ISynchronizationManager;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
@@ -21,6 +24,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private FrameLayout mPickerFrameLayout;
     private PickerFragment mPickerFragment;
     private ISelectorPresenter mSelectorPresenter;
+    private ISynchronizationManager mSynchronizationManager;
 
     private FloatingActionButton mFloatingActionButton;
     private boolean hiddenFloatingActionButton; //to save the state of the action button.
@@ -41,12 +45,27 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         mSelectorPresenter.onCreate();
 
         setHasOptionsMenu(true);
+
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        Activity activity = (Activity) context;
+
+        if(activity instanceof ISynchronizationManager) {
+            mSynchronizationManager = (ISynchronizationManager) activity;
+        }
+        else {
+            throw new IllegalArgumentException("Activity must " +
+                    "implement ISynchronizationManager interface");
+        }
     }
 
     @Override
@@ -54,7 +73,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         if (savedInstanceState == null) {
             PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
             attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
-
             ItemListFragment itemListFragment = (ItemListFragment) mSelectorPresenter.createItemListFragment();
             attachFragment(R.id.itemFragment, itemListFragment, ItemListFragment.TAG);
             hiddenFloatingActionButton = true;
@@ -71,7 +89,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         } else {
             mFloatingActionButton.show();
         }
-
     }
 
     @Override
