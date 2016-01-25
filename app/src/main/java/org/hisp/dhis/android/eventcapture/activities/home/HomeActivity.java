@@ -60,13 +60,14 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         Toolbar toolbar = (Toolbar) findViewById(R.id.drawer_toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override public boolean onNavigationItemSelected(MenuItem menuItem) {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem menuItem) {
                 menuItem.setChecked(true);
                 switch (menuItem.getItemId()) {
                     case R.id.drawer_settings:
@@ -79,17 +80,17 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
             }
         });
 
+
         mDrawerToggle = new ActionBarDrawerToggle(this,  mDrawerLayout, toolbar,
                 R.string.drawer_open, R.string.drawer_close);
-
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         actionBar.setHomeButtonEnabled(true);
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
         mDrawerToggle.syncState();
 
-        showBackButton(false);
+        showBackButton(true);
+
         showSelectorFragment();
     }
 
@@ -123,15 +124,9 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         return super.onOptionsItemSelected(item);
     }
 
-    /*@Override //this shows the options menu button on the right. thus we don't need it here.
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_drawer, menu);
-        return true;
-    }*/
-
     @Override
     public void addFragmentToLayout(int resId, Fragment fragment, String tag) {
+
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(resId, fragment, tag);
         fragmentTransaction.commit();
@@ -139,32 +134,34 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     @Override
     public void switchFragment(Fragment fragment, String tag, boolean addToBackStack) {
+
         if (fragment != null) {
             FragmentTransaction transaction =
                     getSupportFragmentManager().beginTransaction();
-
             transaction
                     .setCustomAnimations(R.anim.open_enter, R.anim.open_exit)
                     .replace(R.id.fragment_container, fragment);
             if (addToBackStack) {
                 transaction = transaction.addToBackStack(tag);
             }
-
             transaction.commitAllowingStateLoss();
         }
     }
 
     private void showSelectorFragment() {
         setTitle("Event Capture");
-
-        showBackButton(true);
         switchFragment(new SelectorFragment(), SelectorFragment.TAG, true);
     }
 
     @Override
     public void showBackButton(Boolean enable) {
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(enable);
+        if(getSupportActionBar() != null) {
+         /*   if (enable) {
+                mDrawerToggle.setDrawerIndicatorEnabled(!enable);
+            } else {
+                mDrawerToggle.setDrawerIndicatorEnabled(!enable);
+
+            }*/
         }
     }
 
