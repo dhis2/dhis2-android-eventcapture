@@ -81,6 +81,6 @@ public class OrganisationUnitPickable implements IPickable {
     };
 
     public Observable<OrganisationUnit> getOrganisationUnit() {
-        return D2.organisationUnit().get(mId);
+        return D2.organisationUnits().get(mId);
     }
 }
