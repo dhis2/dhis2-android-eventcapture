@@ -39,18 +39,26 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
+
+import rx.functions.Action1;
 
 public class HomeActivity extends AppCompatActivity implements INavigationHandler, ISynchronizationManager {
 
     DrawerLayout mDrawerLayout;
     NavigationView mNavigationView;
+    ViewGroup mHeaderLayout;
     ActionBarDrawerToggle mDrawerToggle;
+    TextView mUsername;
+    TextView mUserInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +73,11 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
+        mHeaderLayout = (ViewGroup) getLayoutInflater().inflate(R.layout.drawer_header, null);
+
+
+        mNavigationView.addHeaderView(mHeaderLayout);
+
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
@@ -80,17 +93,27 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
             }
         });
 
-
         mDrawerToggle = new ActionBarDrawerToggle(this,  mDrawerLayout, toolbar,
                 R.string.drawer_open, R.string.drawer_close);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         actionBar.setHomeButtonEnabled(true);
+        mDrawerToggle.setDrawerIndicatorEnabled(true);
+
+        mUsername = (TextView) mHeaderLayout.findViewById(R.id.drawer_user_name);
+        mUserInfo = (TextView) mHeaderLayout.findViewById(R.id.drawer_user_info);
+
+        D2.me().account().subscribe(new Action1<UserAccount>() {
+            @Override
+            public void call(UserAccount userAccount) {
+                mUsername.setText(userAccount.getDisplayName());
+                mUserInfo.setText(userAccount.getEmail());
+            }
+        });
+
         mDrawerToggle.syncState();
-
         showBackButton(true);
-
         showSelectorFragment();
     }
 
@@ -126,7 +149,6 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     @Override
     public void addFragmentToLayout(int resId, Fragment fragment, String tag) {
-
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.add(resId, fragment, tag);
         fragmentTransaction.commit();
@@ -134,7 +156,6 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     @Override
     public void switchFragment(Fragment fragment, String tag, boolean addToBackStack) {
-
         if (fragment != null) {
             FragmentTransaction transaction =
                     getSupportFragmentManager().beginTransaction();
@@ -156,12 +177,7 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
     @Override
     public void showBackButton(Boolean enable) {
         if(getSupportActionBar() != null) {
-         /*   if (enable) {
-                mDrawerToggle.setDrawerIndicatorEnabled(!enable);
-            } else {
-                mDrawerToggle.setDrawerIndicatorEnabled(!enable);
-
-            }*/
+                 mDrawerToggle.setDrawerIndicatorEnabled(enable);
         }
     }
 
