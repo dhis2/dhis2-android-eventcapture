@@ -7,8 +7,15 @@ import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgr
 import org.hisp.dhis.android.eventcapture.fragments.selector.INewButtonActivator;
 import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
+import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickableItemClearListener;
+
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class SelectorPresenter extends AbsPresenter implements ISelectorPresenter, IPickableItemClearListener {
 
@@ -16,6 +23,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     private ItemListFragment mItemListFragment;
     private ISelectorView mSelectorView;
     private INewButtonActivator mNewButtonActivator;
+    private Subscription synchronizationSubscription;
 
 
     public SelectorPresenter(ISelectorView selectorView, INewButtonActivator newButtonActivator) {
@@ -58,6 +66,10 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
+            synchronizationSubscription.unsubscribe();
+            synchronizationSubscription = null;
+        }
     }
 
     @Override
@@ -87,4 +99,24 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
         mNewButtonActivator.deactivate();
     }
 
+    @Override
+    public void initializeSynchronization() {
+        if(synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
+            mSelectorView.onStartLoading();
+            synchronizationSubscription = D2.me().syncAssignedPrograms()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Void>() {
+                        @Override
+                        public void call(Void aVoid) {
+                            mSelectorView.onFinishLoading();
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            mSelectorView.onLoadingError();
+                        }
+                    });
+        }
+    }
 }

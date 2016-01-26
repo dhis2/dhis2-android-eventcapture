@@ -17,4 +17,6 @@ public interface ISelectorPresenter {
 
     void onResume();
 
+    void initializeSynchronization();
+
 }

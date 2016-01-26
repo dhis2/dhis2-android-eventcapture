@@ -51,7 +51,7 @@ import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
 
 import rx.functions.Action1;
 
-public class HomeActivity extends AppCompatActivity implements INavigationHandler, ISynchronizationManager {
+public class HomeActivity extends AppCompatActivity implements INavigationHandler {
 
     DrawerLayout mDrawerLayout;
     NavigationView mNavigationView;
@@ -179,10 +179,5 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         if(getSupportActionBar() != null) {
                  mDrawerToggle.setDrawerIndicatorEnabled(enable);
         }
-    }
-
-    @Override
-    public void synchronize() {
-        D2.me().syncAssignedPrograms();
     }
 }
