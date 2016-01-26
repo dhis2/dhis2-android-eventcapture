@@ -8,11 +8,11 @@ import java.util.List;
 public interface IItemListView {
 
     /**
-     * Render an event list in the UI.
+     * Render itemrowlist in the UI.
      *
      * @param itemListRowCollection The collection of {@link ItemListRow} that will be shown.
      */
-    void renderUserList(List<ItemListRow> itemListRowCollection);
+    void renderItemRowList(List<ItemListRow> itemListRowCollection);
 
     /**
      * View and edit an {@link Event} data entry model.
