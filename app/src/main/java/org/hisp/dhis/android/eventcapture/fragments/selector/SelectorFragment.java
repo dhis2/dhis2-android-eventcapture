@@ -1,9 +1,6 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
-import android.accounts.NetworkErrorException;
-import android.app.Activity;
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -23,14 +20,12 @@ import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
-import fr.castorflex.android.circularprogressbar.CircularProgressBar;
-
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private FrameLayout mPickerFrameLayout;
     private PickerFragment mPickerFragment;
     private ISelectorPresenter mSelectorPresenter;
-    private CircularProgressBar progressBar;
+//    private CircularProgressBar progressBar;
 
     private FloatingActionButton mFloatingActionButton;
     private boolean hiddenFloatingActionButton; //to save the state of the action button.
@@ -81,7 +76,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
             mFloatingActionButton.show();
         }
 
-        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
+//        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
         hideProgress();
         mSelectorPresenter.initializeSynchronization();
     }
@@ -112,7 +107,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void attachFragment(int resId, Fragment fragment, String tag) {
-        mNavigationHandler.addFragmentToLayout(resId, fragment, tag);
+        // mNavigationHandler.addFragmentToLayout(resId, fragment, tag);
     }
 
     @Override
@@ -133,17 +128,17 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private void hideProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
-            progressBar.startAnimation(anim);
+//            progressBar.startAnimation(anim);
         }
-        progressBar.setVisibility(View.GONE);
+//        progressBar.setVisibility(View.GONE);
     }
 
     private void showProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.in_up);
-            progressBar.startAnimation(anim);
+//            progressBar.startAnimation(anim);
         }
-        progressBar.setVisibility(View.VISIBLE);
+//        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
