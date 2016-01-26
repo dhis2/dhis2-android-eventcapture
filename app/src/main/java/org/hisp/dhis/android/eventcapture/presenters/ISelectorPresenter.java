@@ -17,9 +17,4 @@ public interface ISelectorPresenter {
 
     void onResume();
 
-    void onTakeView(View view);
-
-    Picker getProgramPicker();
-
-    Picker getOrganisationUnitPicker();
 }

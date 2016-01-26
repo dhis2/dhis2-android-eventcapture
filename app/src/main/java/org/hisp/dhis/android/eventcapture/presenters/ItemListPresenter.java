@@ -52,12 +52,12 @@ public class ItemListPresenter extends AbsPresenter {
 
     public void showItemListRows(List<Event> eventList) {
         List<ItemListRow> itemListRows = itemListRowMapper.transform(eventList);
-        mItemListView.renderUserList(itemListRows);
+        mItemListView.renderItemRowList(itemListRows);
     }
 
     public void showItemListRows(Observable<List<Event>> eventList) {
         List<ItemListRow> itemListRows = itemListRowMapper.transform(eventList);
-        mItemListView.renderUserList(itemListRows);
+        mItemListView.renderItemRowList(itemListRows);
     }
 
     private void showViewLoading() {

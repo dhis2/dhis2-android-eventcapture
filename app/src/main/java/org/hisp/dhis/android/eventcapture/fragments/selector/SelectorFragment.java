@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.activities.home.ISynchronizationManager;
+import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
@@ -71,8 +72,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
-            attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
+            OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = (OrganisationUnitProgramPickerFragment) mSelectorPresenter.createPickerFragment();
+            attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment, PickerFragment.TAG);
             ItemListFragment itemListFragment = (ItemListFragment) mSelectorPresenter.createItemListFragment();
             attachFragment(R.id.itemFragment, itemListFragment, ItemListFragment.TAG);
             hiddenFloatingActionButton = true;
