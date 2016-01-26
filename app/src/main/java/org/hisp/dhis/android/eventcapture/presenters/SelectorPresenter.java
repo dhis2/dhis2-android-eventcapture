@@ -101,7 +101,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void initializeSynchronization() {
-        if(synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
+        if(synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
             mSelectorView.onStartLoading();
             synchronizationSubscription = D2.me().syncAssignedPrograms()
                     .subscribeOn(Schedulers.io())

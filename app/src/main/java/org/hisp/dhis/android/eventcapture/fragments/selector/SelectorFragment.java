@@ -1,14 +1,18 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
+import android.accounts.NetworkErrorException;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
@@ -19,11 +23,14 @@ import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
+import fr.castorflex.android.circularprogressbar.CircularProgressBar;
+
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private FrameLayout mPickerFrameLayout;
     private PickerFragment mPickerFragment;
     private ISelectorPresenter mSelectorPresenter;
+    private CircularProgressBar progressBar;
 
     private FloatingActionButton mFloatingActionButton;
     private boolean hiddenFloatingActionButton; //to save the state of the action button.
@@ -54,7 +61,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mSelectorPresenter.initializeSynchronization();
         if (savedInstanceState == null) {
             OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = (OrganisationUnitProgramPickerFragment) mSelectorPresenter.createPickerFragment();
             attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment, PickerFragment.TAG);
@@ -74,6 +80,10 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         } else {
             mFloatingActionButton.show();
         }
+
+        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
+        hideProgress();
+        mSelectorPresenter.initializeSynchronization();
     }
 
     @Override
@@ -107,17 +117,33 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onFinishLoading() {
-
+        hideProgress();
     }
 
     @Override
     public void onLoadingError() {
-
+        throw new RuntimeException("loading error");
     }
 
     @Override
     public void onStartLoading() {
+        showProgress();
+    }
 
+    private void hideProgress() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
+            progressBar.startAnimation(anim);
+        }
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void showProgress() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.in_up);
+            progressBar.startAnimation(anim);
+        }
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
