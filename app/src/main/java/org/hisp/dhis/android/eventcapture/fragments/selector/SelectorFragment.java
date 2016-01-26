@@ -11,12 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.activities.home.ISynchronizationManager;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
-import org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
@@ -43,7 +43,9 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         }
         mSelectorPresenter = new SelectorPresenter(this, this);
         mSelectorPresenter.onCreate();
+
         setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -71,7 +73,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         if (savedInstanceState == null) {
             PickerFragment pickerFragment = (PickerFragment) mSelectorPresenter.createPickerFragment();
             attachFragment(R.id.pickerFragment, pickerFragment, PickerFragment.TAG);
-
             ItemListFragment itemListFragment = (ItemListFragment) mSelectorPresenter.createItemListFragment();
             attachFragment(R.id.itemFragment, itemListFragment, ItemListFragment.TAG);
             hiddenFloatingActionButton = true;
@@ -88,7 +89,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         } else {
             mFloatingActionButton.show();
         }
-
     }
 
     @Override
