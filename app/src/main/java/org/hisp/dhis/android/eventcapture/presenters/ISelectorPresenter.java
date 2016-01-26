@@ -17,9 +17,6 @@ public interface ISelectorPresenter {
 
     void onResume();
 
-    void onTakeView(View view);
+    void initializeSynchronization();
 
-    Picker getProgramPicker();
-
-    Picker getOrganisationUnitPicker();
 }

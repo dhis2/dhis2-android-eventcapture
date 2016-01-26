@@ -30,7 +30,7 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
     }
 
     @Override
-    public void renderUserList(List<ItemListRow> itemListRowCollection) {
+    public void renderItemRowList(List<ItemListRow> itemListRowCollection) {
         if(itemListRowCollection!= null) {
             mItemListRowAdapter = new ItemListRowAdapter(itemListRowCollection);
             mRecyclerView.setAdapter(mItemListRowAdapter);

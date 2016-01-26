@@ -9,4 +9,10 @@ public interface ISelectorView {
 
     void attachFragment(int resId, Fragment fragment, String tag);
 
+    void onFinishLoading();
+
+    void onLoadingError();
+
+    void onStartLoading();
+
 }
