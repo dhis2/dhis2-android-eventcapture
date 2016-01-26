@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 
+import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
@@ -45,8 +46,14 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // TODO make a SessionManager
+
         loginPresenter = new LogInPresenter(this);
         loginPresenter.onCreate();
+
+        getServerUrl().setText(BuildConfig.SERVER_URL);
+        getUsername().setText(BuildConfig.USERNAME);
+        getPassword().setText(BuildConfig.PASSWORD);
     }
 
     @Override

@@ -53,7 +53,7 @@ public class ProgramPickable implements IPickable {
     };
 
     public Observable<Program> getProgram() {
-        return D2.program().get(mId);
+        return D2.programs().get(mId);
     }
 
 }

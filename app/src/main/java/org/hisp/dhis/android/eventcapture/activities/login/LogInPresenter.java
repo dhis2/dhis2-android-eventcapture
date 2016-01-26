@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
+import android.os.Handler;
+
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
@@ -54,6 +56,13 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
         Configuration configuration = new Configuration(serverUrl);
 
         mLoginView.showProgress();
+        (new Handler()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mLoginView.hideProgress();
+            }
+        }, 3000);
+
         mLoginSubscription = D2.signIn(configuration, username, password)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

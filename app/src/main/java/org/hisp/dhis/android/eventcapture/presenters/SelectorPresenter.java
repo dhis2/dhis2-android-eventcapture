@@ -106,7 +106,7 @@ public class SelectorPresenter implements ISelectorPresenter, IPickableItemClear
 
     @Override
     public Fragment createItemListFragment() {
-        mItemListFragment = ItemListFragment.newInstance();
+        // mItemListFragment = ItemListFragment.newInstance();
 
 
         return mItemListFragment;
