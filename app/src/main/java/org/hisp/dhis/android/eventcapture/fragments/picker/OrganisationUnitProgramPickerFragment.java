@@ -2,7 +2,6 @@ package org.hisp.dhis.android.eventcapture.fragments.picker;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.presenters.OrganisationUnitProgramPickerPresenter;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
@@ -22,7 +21,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     }
 
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +32,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
     @Override
     public void renderPickers(List<Picker> pickers) {
-        super.setRootPickerList(pickers);
+        // super.setRootPickerList(pickers);
     }
 
 

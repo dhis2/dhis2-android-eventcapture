@@ -39,7 +39,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.R;
@@ -55,10 +54,10 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     DrawerLayout mDrawerLayout;
     NavigationView mNavigationView;
-    ViewGroup mHeaderLayout;
+    //    ViewGroup mHeaderLayout;
     ActionBarDrawerToggle mDrawerToggle;
-    TextView mUsername;
-    TextView mUserInfo;
+//    TextView mUsername;
+//    TextView mUserInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,10 +72,10 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         mNavigationView = (NavigationView) findViewById(R.id.navigation_view);
-        mHeaderLayout = (ViewGroup) getLayoutInflater().inflate(R.layout.drawer_header, null);
+//        mHeaderLayout = (ViewGroup) getLayoutInflater().inflate(R.layout.drawer_header, null);
 
 
-        mNavigationView.addHeaderView(mHeaderLayout);
+//        mNavigationView.addHeaderView(mHeaderLayout);
 
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -93,28 +92,28 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
             }
         });
 
-        mDrawerToggle = new ActionBarDrawerToggle(this,  mDrawerLayout, toolbar,
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar,
                 R.string.drawer_open, R.string.drawer_close);
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         actionBar.setHomeButtonEnabled(true);
         mDrawerToggle.setDrawerIndicatorEnabled(true);
-
-        mUsername = (TextView) mHeaderLayout.findViewById(R.id.drawer_user_name);
-        mUserInfo = (TextView) mHeaderLayout.findViewById(R.id.drawer_user_info);
+//
+//        mUsername = (TextView) mHeaderLayout.findViewById(R.id.drawer_user_name);
+//        mUserInfo = (TextView) mHeaderLayout.findViewById(R.id.drawer_user_info);
 
         D2.me().account().subscribe(new Action1<UserAccount>() {
             @Override
             public void call(UserAccount userAccount) {
-                mUsername.setText(userAccount.getDisplayName());
-                mUserInfo.setText(userAccount.getEmail());
+//                mUsername.setText(userAccount.getDisplayName());
+//                mUserInfo.setText(userAccount.getEmail());
             }
         });
 
         mDrawerToggle.syncState();
         showBackButton(true);
-        showSelectorFragment();
+//        showSelectorFragment();
     }
 
     @Override
@@ -176,8 +175,8 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
 
     @Override
     public void showBackButton(Boolean enable) {
-        if(getSupportActionBar() != null) {
-                 mDrawerToggle.setDrawerIndicatorEnabled(enable);
+        if (getSupportActionBar() != null) {
+            mDrawerToggle.setDrawerIndicatorEnabled(enable);
         }
     }
 }
