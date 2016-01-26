@@ -37,6 +37,7 @@ import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
+import org.hisp.dhis.android.eventcapture.utils.PresenterManager;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 public class LogInActivity extends AbsLoginActivity implements ILogInView {
@@ -48,7 +49,12 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
 
         // TODO make a SessionManager
 
-        loginPresenter = new LogInPresenter(this);
+        if (PresenterManager.get(LogInPresenter.TAG) != null) {
+            loginPresenter = (LogInPresenter) PresenterManager.remove(LogInPresenter.TAG);
+        } else {
+            loginPresenter = new LogInPresenter(this);
+        }
+
         loginPresenter.onCreate();
 
         getServerUrl().setText(BuildConfig.SERVER_URL);
