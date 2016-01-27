@@ -20,7 +20,8 @@ import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 
-public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
+public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, OnAllPickersSelectedListener, View.OnClickListener {
+
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private ISelectorPresenter mSelectorPresenter;
     private CircularProgressBar progressBar;
@@ -85,7 +86,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         super.onResume();
     }
 
-    @Override
     public void attachFragment(int resId, Fragment fragment, String tag) {
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().add(resId, fragment, tag).commit();
@@ -145,7 +145,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public Fragment createPickerFragment() {
         OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
         organisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
-
+        organisationUnitProgramPickerFragment.setSelectorView(this);
         return organisationUnitProgramPickerFragment;
     }
 

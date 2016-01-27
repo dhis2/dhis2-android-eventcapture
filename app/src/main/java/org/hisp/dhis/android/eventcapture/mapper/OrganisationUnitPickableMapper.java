@@ -32,26 +32,4 @@ public class OrganisationUnitPickableMapper {
 
         return organisationUnitPickables;
     }
-
-    public List<IPickable> transform(Observable<List<OrganisationUnit>> organisationUnits) {
-        List<IPickable> organisationUnitPickables = new ArrayList<>();
-
-        OrganisationUnit matSouth = new OrganisationUnit();
-        matSouth.setName("Matabeleland South");
-        matSouth.setUId("abc123");
-
-        OrganisationUnit mashWest = new OrganisationUnit();
-        mashWest.setName("Mash west");
-        mashWest.setUId("def345");
-
-        OrganisationUnit matNorth = new OrganisationUnit();
-        matNorth.setName("Matabeleland North");
-        matNorth.setUId("ghi678");
-
-        organisationUnitPickables.add(transform(matNorth));
-        organisationUnitPickables.add(transform(matSouth));
-        organisationUnitPickables.add(transform(mashWest));
-
-        return organisationUnitPickables;
-    }
 }

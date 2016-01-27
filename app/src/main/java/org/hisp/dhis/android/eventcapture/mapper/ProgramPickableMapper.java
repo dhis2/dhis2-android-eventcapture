@@ -30,26 +30,4 @@ public class ProgramPickableMapper {
 
         return programPickables;
     }
-
-    public List<IPickable> transform(Observable<List<Program>> programs) {
-        List<IPickable> programPickables = new ArrayList<>();
-        Program malariaProgramme = new Program();
-        malariaProgramme.setName("Malaria Programme");
-        malariaProgramme.setUId("aaa123");
-
-        Program tbProgramme = new Program();
-        tbProgramme.setName("TB Programme");
-        tbProgramme.setUId("bbb123");
-
-        Program entolomogicalInvestigation = new Program();
-        entolomogicalInvestigation.setName("Entolomogical Investigation");
-        entolomogicalInvestigation.setUId("ccc123");
-
-
-        programPickables.add(transform(malariaProgramme));
-        programPickables.add(transform(tbProgramme));
-        programPickables.add(transform(entolomogicalInvestigation));
-        return programPickables;
-    }
-
 }

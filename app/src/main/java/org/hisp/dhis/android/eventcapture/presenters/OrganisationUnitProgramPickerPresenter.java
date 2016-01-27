@@ -3,21 +3,28 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.mapper.OrganisationUnitPickableMapper;
 import org.hisp.dhis.android.eventcapture.mapper.ProgramPickableMapper;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
+import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitPickableListener;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
 import java.util.List;
 
-import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
-public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
+public class OrganisationUnitProgramPickerPresenter extends AbsPresenter implements IOrganisationUnitPickableListener {
 
     private IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
     private OrganisationUnitPickableMapper mOrganisationUnitPickableMapper;
     private ProgramPickableMapper mProgramPickableMapper;
+    private Subscription programSubscription;
+    private Subscription organisationUnitSubscription;
 
 
     public OrganisationUnitProgramPickerPresenter() {
@@ -30,13 +37,21 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
         super.onCreate();
 
         this.loadOrganisationUnits();
-        this.loadPrograms();
-
+//        this.loadPrograms();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if(organisationUnitSubscription != null && !organisationUnitSubscription.isUnsubscribed()) {
+            organisationUnitSubscription.unsubscribe();
+            organisationUnitSubscription = null;
+        }
+
+        if(programSubscription != null && !programSubscription.isUnsubscribed()) {
+            programSubscription.unsubscribe();
+            programSubscription = null;
+        }
     }
 
     @Override
@@ -47,29 +62,64 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
 
 
     public void loadOrganisationUnits() {
-        Observable<List<OrganisationUnit>> organisationUnits = D2.organisationUnits().list();
-        setOrganisationUnitPickables(organisationUnits);
+        if(organisationUnitSubscription == null || organisationUnitSubscription.isUnsubscribed()) {
+            mOrganisationUnitProgramPickerView.onStartLoading();
+
+            organisationUnitSubscription = D2.organisationUnits().list()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<List<OrganisationUnit>>() {
+                @Override
+                public void call(List<OrganisationUnit> organisationUnits) {
+                    setOrganisationUnitPickables(organisationUnits);
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    mOrganisationUnitProgramPickerView.onLoadingError(); // (throwable);
+                }
+            });
+        }
     }
 
-    public void loadPrograms() {
-        Observable<List<Program>> programs = D2.programs().list();
-        setProgramPickables(programs);
+    public void loadPrograms(OrganisationUnit organisationUnit) {
+        if(programSubscription == null || programSubscription.isUnsubscribed()) {
+            mOrganisationUnitProgramPickerView.onStartLoading();
+            programSubscription = D2.programs().list(organisationUnit, ProgramType.WITHOUT_REGISTRATION)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(new Action1<List<Program>>() {
+                @Override
+                public void call(List<Program> programs) {
+                    setProgramPickables(programs);
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    mOrganisationUnitProgramPickerView.onLoadingError(); //(throwable);
+                }
+            });
+        }
     }
 
-    public void setOrganisationUnitPickables(Observable<List<OrganisationUnit>> organisationUnits) {
+    public void setOrganisationUnitPickables(List<OrganisationUnit> organisationUnits) {
         List<IPickable> organisationUnitPickables = mOrganisationUnitPickableMapper.transform(organisationUnits);
         mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables(organisationUnitPickables);
-//        mOrganisationUnitPicker.setPickableItems(organisationUnitPickables);
+
     }
 
-    public void setProgramPickables(Observable<List<Program>> programs) {
+    public void setProgramPickables(List<Program> programs) {
         List<IPickable> programPickables = mProgramPickableMapper.transform(programs);
         mOrganisationUnitProgramPickerView.renderProgramPickables(programPickables);
-//        mProgramPicker.setPickableItems(programPickables);
+
     }
 
     public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView) {
         this.mOrganisationUnitProgramPickerView = mOrganisationUnitProgramPickerView;
     }
 
+    @Override
+    public OrganisationUnit getOrganisationUnitPicked() {
+        return null;
+    }
 }

@@ -12,4 +12,10 @@ public interface IOrganisationUnitProgramPickerView {
     void renderOrganisationUnitPickables(List<IPickable> organisationUnitPickables);
 
     void renderProgramPickables(List<IPickable> programPickables);
+
+    void onFinishLoading();
+
+    void onLoadingError();
+
+    void onStartLoading();
 }
