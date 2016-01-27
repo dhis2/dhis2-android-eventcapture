@@ -180,10 +180,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                 }
 
                 String value = dataValue.getValue();
-                if(dataElement.isOptionSetValue()) {
-                    if(dataElement.getOptionSet() == null) {
-                        continue;
-                    }
+                if(dataElement.getOptionSet() != null) {
                     OptionSet optionSet = MetaDataController.getOptionSet(dataElement.getOptionSet());
                     if(optionSet == null) {
                         continue;
