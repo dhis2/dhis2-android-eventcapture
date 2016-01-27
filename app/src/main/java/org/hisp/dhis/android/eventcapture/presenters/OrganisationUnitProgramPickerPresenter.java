@@ -8,10 +8,7 @@ import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Picker;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
@@ -21,8 +18,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     private IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
     private OrganisationUnitPickableMapper mOrganisationUnitPickableMapper;
     private ProgramPickableMapper mProgramPickableMapper;
-    private Picker mProgramPicker;
-    private Picker mOrganisationUnitPicker;
+
 
     public OrganisationUnitProgramPickerPresenter() {
         mOrganisationUnitPickableMapper = new OrganisationUnitPickableMapper();
@@ -33,11 +29,9 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     public void onCreate() {
         super.onCreate();
 
-        this.createPickers();
         this.loadOrganisationUnits();
         this.loadPrograms();
 
-        mOrganisationUnitProgramPickerView.renderPickers(Collections.singletonList(mOrganisationUnitPicker));
     }
 
     @Override
@@ -50,12 +44,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
         return getClass().getSimpleName();
     }
 
-    public void createPickers() {
 
-        mOrganisationUnitPicker = new Picker(new ArrayList<IPickable>(), OrganisationUnit.class.getSimpleName(), OrganisationUnit.class.getName());
-        mProgramPicker = new Picker(new ArrayList<IPickable>(), Program.class.getSimpleName(), Program.class.getName());
-        mOrganisationUnitPicker.setNextLinkedSibling(mProgramPicker);
-    }
 
     public void loadOrganisationUnits() {
         Observable<List<OrganisationUnit>> organisationUnits = D2.organisationUnits().list();
@@ -69,12 +58,14 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
 
     public void setOrganisationUnitPickables(Observable<List<OrganisationUnit>> organisationUnits) {
         List<IPickable> organisationUnitPickables = mOrganisationUnitPickableMapper.transform(organisationUnits);
-        mOrganisationUnitPicker.setPickableItems(organisationUnitPickables);
+        mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables(organisationUnitPickables);
+//        mOrganisationUnitPicker.setPickableItems(organisationUnitPickables);
     }
 
     public void setProgramPickables(Observable<List<Program>> programs) {
         List<IPickable> programPickables = mProgramPickableMapper.transform(programs);
-        mProgramPicker.setPickableItems(programPickables);
+        mOrganisationUnitProgramPickerView.renderProgramPickables(programPickables);
+//        mProgramPicker.setPickableItems(programPickables);
     }
 
     public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView) {
