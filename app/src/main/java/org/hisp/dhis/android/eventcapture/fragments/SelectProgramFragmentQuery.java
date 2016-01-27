@@ -36,6 +36,8 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
+import org.hisp.dhis.android.sdk.persistence.models.DataElement;
+import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
@@ -119,10 +121,10 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             return fragmentForm;
         }
 
-        List<Option> options = new Select().from(Option.class).queryList();
-        Map<String, String> codeToName = new HashMap<>();
-        for (Option option : options) {
-            codeToName.put(option.getCode(), option.getName());
+        List<DataElement> dataElements = new Select().from(DataElement.class).queryList();
+        Map<String, DataElement> dataElementMap = new HashMap<>();
+        for(DataElement dataElement : dataElements) {
+            dataElementMap.put(dataElement.getUid(), dataElement);
         }
 
         List<FailedItem> failedEvents = TrackerController.getFailedItems(FailedItem.EVENT);
@@ -142,8 +144,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         Collections.sort(events, new EventComparator());
         for (Event event : events) {
             eventEventRows.add(createEventItem(context,
-                    event, elementsToShow,
-                    codeToName, failedEventIds));
+                    event, elementsToShow, dataElementMap, failedEventIds));
         }
 
         fragmentForm.setEventRowList(eventEventRows);
@@ -153,7 +154,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     }
 
     private EventItemRow createEventItem(Context context, Event event, List<String> elementsToShow,
-                                         Map<String, String> codeToName,
+                                         Map<String, DataElement> dataElementMap,
                                          Set<String> failedEventIds) {
         EventItemRow eventItem = new EventItemRow(context);
         eventItem.setEvent(event);
@@ -170,22 +171,40 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             if (i >= elementsToShow.size()) {
                 break;
             }
-            String dataElement = elementsToShow.get(i);
-            if (dataElement != null) {
-                DataValue dataValue = getDataValue(event, dataElement);
-                if (dataValue == null) {
+            String dataElementUid = elementsToShow.get(i);
+            if (dataElementUid != null) {
+                DataValue dataValue = getDataValue(event, dataElementUid);
+                DataElement dataElement = dataElementMap.get(dataElementUid);
+                if (dataValue == null || dataElement == null) {
                     continue;
                 }
 
-                String code = dataValue.getValue();
-                String name = codeToName.get(code) == null ? code : codeToName.get(code);
+                String value = dataValue.getValue();
+                if(dataElement.isOptionSetValue()) {
+                    if(dataElement.getOptionSet() == null) {
+                        continue;
+                    }
+                    OptionSet optionSet = MetaDataController.getOptionSet(dataElement.getOptionSet());
+                    if(optionSet == null) {
+                        continue;
+                    }
+                    List<Option> options = MetaDataController.getOptions(optionSet.getUid());
+                    if(options == null) {
+                        continue;
+                    }
+                    for(Option option : options) {
+                        if(option.getCode().equals(value)) {
+                            value = option.getName();
+                        }
+                    }
+                }
 
                 if (i == 0) {
-                    eventItem.setFirstItem(name);
+                    eventItem.setFirstItem(value);
                 } else if (i == 1) {
-                    eventItem.setSecondItem(name);
+                    eventItem.setSecondItem(value);
                 } else if (i == 2) {
-                    eventItem.setThirdItem(name);
+                    eventItem.setThirdItem(value);
                 }
             }
         }
