@@ -39,6 +39,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -48,6 +49,7 @@ import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationHandler;
+import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 import rx.functions.Action1;
 
@@ -179,5 +181,16 @@ public class HomeActivity extends AppCompatActivity implements INavigationHandle
         if(getSupportActionBar() != null) {
                  mDrawerToggle.setDrawerIndicatorEnabled(enable);
         }
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            PickerFragment pickerFragment = (PickerFragment) getSupportFragmentManager().findFragmentByTag(PickerFragment.TAG);
+            if(pickerFragment != null) {
+                pickerFragment.dispatchTouchEvent(event);
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 }
