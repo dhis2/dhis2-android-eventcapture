@@ -18,10 +18,12 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
+import fr.castorflex.android.circularprogressbar.CircularProgressBar;
+
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private ISelectorPresenter mSelectorPresenter;
-//    private CircularProgressBar progressBar;
+    private CircularProgressBar progressBar;
 
 
     private FloatingActionButton mFloatingActionButton;
@@ -68,7 +70,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
             mFloatingActionButton.show();
         }
 
-//        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
+        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
         hideProgress();
         mSelectorPresenter.initializeSynchronization();
     }
@@ -107,17 +109,17 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private void hideProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
-//            progressBar.startAnimation(anim);
+            progressBar.startAnimation(anim);
         }
-//        progressBar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
     }
 
     private void showProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.in_up);
-//            progressBar.startAnimation(anim);
+            progressBar.startAnimation(anim);
         }
-//        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
