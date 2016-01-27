@@ -1,36 +1,28 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
-import android.accounts.NetworkErrorException;
-import android.app.Activity;
-import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 
-import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
-import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
-
-import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, INewButtonActivator, View.OnClickListener {
     public static final String TAG = SelectorFragment.class.getSimpleName();
-    private FrameLayout mPickerFrameLayout;
-    private PickerFragment mPickerFragment;
     private ISelectorPresenter mSelectorPresenter;
-    private CircularProgressBar progressBar;
+//    private CircularProgressBar progressBar;
+
 
     private FloatingActionButton mFloatingActionButton;
     private boolean hiddenFloatingActionButton; //to save the state of the action button.
@@ -47,9 +39,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
             hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
             //restore mSelectorPresenter ! (instead of getting the instance...)
         }
-        mSelectorPresenter = new SelectorPresenter(this, this);
-        mSelectorPresenter.onCreate();
-
+        mSelectorPresenter = new SelectorPresenter(this);
         setHasOptionsMenu(true);
 
     }
@@ -62,14 +52,11 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = (OrganisationUnitProgramPickerFragment) mSelectorPresenter.createPickerFragment();
-            attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment, PickerFragment.TAG);
-            ItemListFragment itemListFragment = (ItemListFragment) mSelectorPresenter.createItemListFragment();
-            attachFragment(R.id.itemFragment, itemListFragment, ItemListFragment.TAG);
+            OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = (OrganisationUnitProgramPickerFragment) createPickerFragment();
+            attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment, OrganisationUnitProgramPickerFragment.TAG);
             hiddenFloatingActionButton = true;
         } else {
             hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
-            mSelectorPresenter.registerPickerCallbacks();
         }
 
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
@@ -81,22 +68,13 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
             mFloatingActionButton.show();
         }
 
-        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
+//        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
         hideProgress();
         mSelectorPresenter.initializeSynchronization();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//        if (id == R.id.action_settings) {
-//            mNavigationHandler.switchFragment(
-//                    new SettingsFragment(), SettingsFragment.TAG, true);
-//        }
-//        else if (id == android.R.id.home) {
-//            getFragmentManager().popBackStack();
-//            return true;
-//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -106,13 +84,9 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     }
 
     @Override
-    public PickerFragment getPickerFragment() {
-        return mPickerFragment = (PickerFragment) getFragmentManager().findFragmentByTag(PickerFragment.TAG);
-    }
-
-    @Override
     public void attachFragment(int resId, Fragment fragment, String tag) {
-        mNavigationHandler.addFragmentToLayout(resId, fragment, tag);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().add(resId, fragment, tag).commit();
     }
 
     @Override
@@ -133,24 +107,25 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private void hideProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
-            progressBar.startAnimation(anim);
+//            progressBar.startAnimation(anim);
         }
-        progressBar.setVisibility(View.GONE);
+//        progressBar.setVisibility(View.GONE);
     }
 
     private void showProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.in_up);
-            progressBar.startAnimation(anim);
+//            progressBar.startAnimation(anim);
         }
-        progressBar.setVisibility(View.VISIBLE);
+//        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onClick(View v) {
-        //Log.d("FloatingActionButton", "onClick");
-        // Add new event for orgUnit and program
-        //mSelectorPresenter.getOrganisationUnitPicker().getPickedItem();
+        // on phone(portrait): go to ItemListFragment
+        // on phone(landscape): hide FAbutton (if it doesn't look good, go to ItemListFragment)
+        // on tablet(portrait): go to ItemListFragment
+        // on tablet(landscape): hide FAbutton
     }
 
     @Override
@@ -163,6 +138,13 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void deactivate() {
         mFloatingActionButton.hide();
         hiddenFloatingActionButton = true;
+    }
+
+    public Fragment createPickerFragment() {
+        OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
+        organisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
+
+        return organisationUnitProgramPickerFragment;
     }
 
     @Override

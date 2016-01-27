@@ -44,6 +44,8 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
+    public static final String TAG = LogInPresenter.class.getSimpleName();
+
     private final ILogInView mLoginView;
     private Subscription mLoginSubscription;
 
@@ -88,7 +90,7 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
 
     @Override
     public String getKey() {
-        return LogInPresenter.class.getSimpleName();
+        return TAG;
     }
 
     @Override
