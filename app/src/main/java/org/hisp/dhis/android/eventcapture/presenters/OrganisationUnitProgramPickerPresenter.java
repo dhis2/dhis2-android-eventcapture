@@ -3,7 +3,6 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.mapper.OrganisationUnitPickableMapper;
 import org.hisp.dhis.android.eventcapture.mapper.ProgramPickableMapper;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
-import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitPickableListener;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
@@ -19,7 +18,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class OrganisationUnitProgramPickerPresenter extends AbsPresenter implements IOrganisationUnitPickableListener {
+public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
 
     private IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
     private OrganisationUnitPickableMapper mOrganisationUnitPickableMapper;
@@ -39,7 +38,6 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter impleme
         super.onCreate();
 
         this.loadOrganisationUnits();
-//        this.loadPrograms();
     }
 
     @Override
@@ -60,8 +58,6 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter impleme
     public String getKey() {
         return getClass().getSimpleName();
     }
-
-
 
     public void loadOrganisationUnits() {
         if(organisationUnitSubscription == null || organisationUnitSubscription.isUnsubscribed()) {
@@ -119,10 +115,5 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter impleme
 
     public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView) {
         this.mOrganisationUnitProgramPickerView = mOrganisationUnitProgramPickerView;
-    }
-
-    @Override
-    public OrganisationUnit getOrganisationUnitPicked() {
-        return null;
     }
 }

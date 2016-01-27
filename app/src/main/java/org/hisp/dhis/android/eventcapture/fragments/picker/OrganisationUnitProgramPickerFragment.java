@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import timber.log.Timber;
-
 public class OrganisationUnitProgramPickerFragment extends PickerFragment implements IOrganisationUnitProgramPickerView {
     private OrganisationUnitProgramPickerPresenter mOrganisationUnitProgramPickerPresenter;
     private Picker mProgramPicker;
@@ -104,19 +102,16 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
     @Override
     public void onFinishLoading() {
-        Timber.d("onFinishLoading from orgUnitProgramFrag");
         selectorView.onFinishLoading();
     }
 
     @Override
     public void onLoadingError() {
-        Timber.d("onLoadingError from orgUnitProgramFrag");
         selectorView.onLoadingError();
     }
 
     @Override
     public void onStartLoading() {
-        Timber.d("onStartLoading from orgUnitProgramFrag");
         selectorView.onStartLoading();
     }
 
