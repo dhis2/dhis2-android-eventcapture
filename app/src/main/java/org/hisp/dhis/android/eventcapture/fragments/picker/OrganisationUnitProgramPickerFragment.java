@@ -60,7 +60,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(mOrganisationUnitPicker.getPickedItem() != null) {
                     OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) mOrganisationUnitPicker.getPickableItems();
-                    mOrganisationUnitProgramPickerPresenter.loadPrograms(organisationUnitPickable.getOrganisationUnit().toBlocking().first());
+                    mOrganisationUnitProgramPickerPresenter.loadPrograms(organisationUnitPickable.getOrganisationUnit());
                 }
             }
         });

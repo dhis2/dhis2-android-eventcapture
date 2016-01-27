@@ -13,6 +13,7 @@ import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
 import java.util.List;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -25,6 +26,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter impleme
     private ProgramPickableMapper mProgramPickableMapper;
     private Subscription programSubscription;
     private Subscription organisationUnitSubscription;
+    private Subscription pickedOrganisationUnitSubscription;
 
 
     public OrganisationUnitProgramPickerPresenter() {
@@ -82,10 +84,11 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter impleme
         }
     }
 
-    public void loadPrograms(OrganisationUnit organisationUnit) {
+    public void loadPrograms(Observable<OrganisationUnit> organisationUnit) {
+        OrganisationUnit pickedOrganisationUnit = organisationUnit.toBlocking().first();
         if(programSubscription == null || programSubscription.isUnsubscribed()) {
             mOrganisationUnitProgramPickerView.onStartLoading();
-            programSubscription = D2.programs().list(organisationUnit, ProgramType.WITHOUT_REGISTRATION)
+            programSubscription = D2.programs().list(pickedOrganisationUnit, ProgramType.WITHOUT_REGISTRATION)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<List<Program>>() {
