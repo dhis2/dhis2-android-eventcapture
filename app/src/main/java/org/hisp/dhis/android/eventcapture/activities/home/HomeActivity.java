@@ -34,32 +34,27 @@ import android.view.MenuItem;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
-import org.hisp.dhis.client.sdk.android.common.D2;
-import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-
-public class HomeActivity extends AbsHomeActivity {
+public class HomeActivity extends AbsHomeActivity implements IHomeView {
+    private IHomePresenter homePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        D2.me().account()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<UserAccount>() {
-                    @Override
-                    public void call(UserAccount userAccount) {
-                        getUsernameTextView().setText(userAccount.getDisplayName());
-                        getUserInfoTextView().setText(userAccount.getEmail());
-                    }
-                });
+        homePresenter = new HomePresenter(this);
+        homePresenter.onCreate(savedInstanceState);
 
-        attachFragmentDelayed(new SelectorFragment());
+        onNavigationItemSelected(getNavigationView()
+                .getMenu().findItem(R.id.drawer_selector));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        homePresenter.onDestroy();
     }
 
     @Override
@@ -69,14 +64,32 @@ public class HomeActivity extends AbsHomeActivity {
 
     @Override
     protected boolean onItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.drawer_selector) {
-            attachFragmentDelayed(new SelectorFragment());
-        }
-
-        if (item.getItemId() == R.id.drawer_settings) {
-            attachFragmentDelayed(new SettingsFragment());
+        switch (item.getItemId()) {
+            case R.id.drawer_selector: {
+                attachFragmentDelayed(new SelectorFragment());
+                break;
+            }
+            case R.id.drawer_settings: {
+                attachFragmentDelayed(new SettingsFragment());
+                break;
+            }
         }
 
         return true;
+    }
+
+    @Override
+    public void setUsername(CharSequence username) {
+        getUsernameTextView().setText(username);
+    }
+
+    @Override
+    public void setUserInfo(CharSequence userInfo) {
+        getUserInfoTextView().setText(userInfo);
+    }
+
+    @Override
+    public void setUserLetter(CharSequence userLetters) {
+        getUsernameLetterTextView().setText(userLetters);
     }
 }
