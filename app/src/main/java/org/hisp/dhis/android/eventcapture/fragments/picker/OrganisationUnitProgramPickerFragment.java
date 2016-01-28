@@ -58,7 +58,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(mOrganisationUnitPicker.getPickedItem() != null) {
                     OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) mOrganisationUnitPicker.getPickableItems();
-                    mOrganisationUnitProgramPickerPresenter.loadPrograms(organisationUnitPickable.getOrganisationUnit());
+                    mOrganisationUnitProgramPickerPresenter.setPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
                 }
             }
         });
@@ -76,7 +76,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
                     }
                 }
-
         );
         mProgramPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
             @Override
