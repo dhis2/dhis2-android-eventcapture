@@ -57,7 +57,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(mOrganisationUnitPicker.getPickedItem() != null) {
-                    OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) mOrganisationUnitPicker.getPickableItems();
+                    OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) mOrganisationUnitPicker.getPickedItem();
                     mOrganisationUnitProgramPickerPresenter.setPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
                 }
             }
