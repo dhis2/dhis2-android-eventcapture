@@ -52,6 +52,11 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
             programSubscription.unsubscribe();
             programSubscription = null;
         }
+
+        if(pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription.isUnsubscribed()) {
+            pickedOrganisationUnitSubscription.unsubscribe();
+            pickedOrganisationUnitSubscription = null;
+        }
     }
 
     @Override
@@ -80,11 +85,10 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
         }
     }
 
-    public void loadPrograms(Observable<OrganisationUnit> organisationUnit) {
-        OrganisationUnit pickedOrganisationUnit = organisationUnit.toBlocking().first();
+    public void loadPrograms(OrganisationUnit organisationUnit) {
         if(programSubscription == null || programSubscription.isUnsubscribed()) {
             mOrganisationUnitProgramPickerView.onStartLoading();
-            programSubscription = D2.programs().list(pickedOrganisationUnit, ProgramType.WITHOUT_REGISTRATION)
+            programSubscription = D2.programs().list(organisationUnit, ProgramType.WITHOUT_REGISTRATION)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Action1<List<Program>>() {
@@ -115,5 +119,20 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
 
     public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView) {
         this.mOrganisationUnitProgramPickerView = mOrganisationUnitProgramPickerView;
+    }
+
+    public void setPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnit) {
+        if(pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription.isUnsubscribed()) {
+            pickedOrganisationUnitSubscription = organisationUnit.
+                    subscribeOn(Schedulers.io()).
+                    observeOn(AndroidSchedulers.mainThread()).
+                    subscribe(new Action1<OrganisationUnit>() {
+                    @Override
+                    public void call(OrganisationUnit organisationUnit) {
+                        loadPrograms(organisationUnit);
+                    }
+                });
+
+        }
     }
 }
