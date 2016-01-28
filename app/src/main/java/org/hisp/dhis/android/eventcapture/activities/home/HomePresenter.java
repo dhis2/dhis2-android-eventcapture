@@ -38,7 +38,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-import static org.hisp.dhis.client.sdk.core.utils.StringUtils.isEmpty;
+import static android.text.TextUtils.isEmpty;
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 
 public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
