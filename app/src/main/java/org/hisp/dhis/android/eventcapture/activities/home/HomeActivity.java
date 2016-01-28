@@ -30,11 +30,13 @@ package org.hisp.dhis.android.eventcapture.activities.home;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
+import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
     private IHomePresenter homePresenter;
@@ -91,5 +93,15 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
     @Override
     public void setUserLetter(CharSequence userLetters) {
         getUsernameLetterTextView().setText(userLetters);
+    }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            PickerFragment pickerFragment = (PickerFragment) getSupportFragmentManager().findFragmentByTag(PickerFragment.TAG);
+            if(pickerFragment != null) {
+                pickerFragment.dispatchTouchEvent(event);
+            }
+        }
+        return super.dispatchTouchEvent(event);
     }
 }
