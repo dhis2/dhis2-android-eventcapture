@@ -1,6 +1,8 @@
 # dhis2-android-eventcapture
 Android application for DHIS 2 for capturing events.
 
+The refactored version of Event Capture, utilizing our new SDK is supposed to be finished by 1st March 2016
+
 Get the APK from the release page:
 
 https://github.com/dhis2/dhis2-android-eventcapture/releases
