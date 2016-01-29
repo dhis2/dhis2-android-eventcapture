@@ -29,36 +29,67 @@
 package org.hisp.dhis.android.eventcapture.fragments.settings;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
+import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.client.sdk.ui.activities.INavigationCallback;
+import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment2;
 
-public class SettingsFragment extends AbsSettingsFragment {
-    SettingsPresenter mSettingsPresenter;
+public class SettingsFragment extends Fragment implements View.OnClickListener {
+    INavigationCallback mNavigationCallback;
 
     @Override
-    public void onCreate(Bundle bundle) {
-        super.onCreate(bundle);
-        mSettingsPresenter = new SettingsPresenter(this);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof INavigationCallback) {
+            mNavigationCallback = (INavigationCallback) context;
+        }
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_settings, container, false);
     }
 
     @Override
-    protected void logout(Context context) {
-        mSettingsPresenter.logout(context);
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Drawable buttonDrawable = DrawableCompat.wrap(ContextCompat
+                .getDrawable(getActivity(), R.drawable.ic_menu));
+        DrawableCompat.setTint(buttonDrawable, ContextCompat
+                .getColor(getContext(), R.color.white));
+
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(buttonDrawable);
+        toolbar.setTitle(R.string.settings);
+        toolbar.setNavigationOnClickListener(this);
+
+        getFragmentManager().beginTransaction()
+                .replace(R.id.settings_content_frame, new AbsSettingsFragment2())
+                .commit();
     }
 
     @Override
-    protected void synchronize(Context context) {
-        mSettingsPresenter.synchronize(context);
+    public void onClick(View v) {
+        if (mNavigationCallback != null) {
+            mNavigationCallback.toggleNavigationDrawer();
+        }
     }
 
     @Override
-    protected void setUpdateFrequency(Context context, int frequency) {
-        mSettingsPresenter.setUpdateFrequency(context, frequency);
-    }
+    public void onDetach() {
+        super.onDetach();
 
-    @Override
-    protected int getUpdateFrequency(Context context) {
-        return mSettingsPresenter.getUpdateFrequency(context);
+        mNavigationCallback = null;
     }
 }

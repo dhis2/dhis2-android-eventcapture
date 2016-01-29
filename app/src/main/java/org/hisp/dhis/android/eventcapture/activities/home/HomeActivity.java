@@ -34,8 +34,8 @@ import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
-import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment2;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
@@ -72,7 +72,7 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                 break;
             }
             case R.id.drawer_settings: {
-                attachFragmentDelayed(new AbsSettingsFragment2());
+                attachFragmentDelayed(new SettingsFragment());
                 break;
             }
         }
