@@ -75,6 +75,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
                 @Override
                 public void call(List<OrganisationUnit> organisationUnits) {
                     setOrganisationUnitPickables(organisationUnits);
+                    mOrganisationUnitProgramPickerView.onFinishLoading();
                 }
             }, new Action1<Throwable>() {
                 @Override
@@ -95,6 +96,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
                 @Override
                 public void call(List<Program> programs) {
                     setProgramPickables(programs);
+                    mOrganisationUnitProgramPickerView.onFinishLoading();
                 }
             }, new Action1<Throwable>() {
                 @Override

@@ -51,6 +51,7 @@ ext {
             dbFlowVersion     : "2.2.1",
             progressBarVersion: "1.2.0",
             crashlyticsVersion: "2.5.5",
+            jexlVersion       : "2.1.1",
     ]
 }
 
