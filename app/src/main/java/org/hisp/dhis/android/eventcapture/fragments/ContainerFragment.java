@@ -26,11 +26,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.fragments.settings;
+package org.hisp.dhis.android.eventcapture.fragments;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -44,8 +45,28 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationCallback;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment2;
 
-public class SettingsFragment extends Fragment implements View.OnClickListener {
+import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
+
+public class ContainerFragment extends Fragment implements View.OnClickListener {
+    private static final String ARG_TITLE = "arg:title";
+    private static final String ARG_NESTED_FRAGMENT = "arg:nestedFragment";
+    private static final String ARG_SETTINGS = "arg:settings";
+
     INavigationCallback mNavigationCallback;
+
+    @NonNull
+    public static ContainerFragment newInstanceWithSettingsFragment(@NonNull Context context) {
+        isNull(context, "context must bot be null");
+
+        Bundle arguments = new Bundle();
+        arguments.putString(ARG_TITLE, context.getString(R.string.drawer_settings));
+        arguments.putString(ARG_NESTED_FRAGMENT, ARG_SETTINGS);
+
+        ContainerFragment containerFragment = new ContainerFragment();
+        containerFragment.setArguments(arguments);
+
+        return containerFragment;
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -59,24 +80,28 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        return inflater.inflate(R.layout.fragment_container, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        Drawable buttonDrawable = DrawableCompat.wrap(ContextCompat
+        final Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        final Drawable buttonDrawable = DrawableCompat.wrap(ContextCompat
                 .getDrawable(getActivity(), R.drawable.ic_menu));
+
         DrawableCompat.setTint(buttonDrawable, ContextCompat
                 .getColor(getContext(), R.color.white));
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(buttonDrawable);
-        toolbar.setTitle(R.string.settings);
         toolbar.setNavigationOnClickListener(this);
 
-        getFragmentManager().beginTransaction()
-                .replace(R.id.settings_content_frame, new AbsSettingsFragment2())
-                .commit();
+        switch (getFragment()) {
+            case ARG_SETTINGS: {
+                toolbar.setTitle(getTitle());
+                attachFragment(new AbsSettingsFragment2());
+                break;
+            }
+        }
     }
 
     @Override
@@ -91,5 +116,29 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         super.onDetach();
 
         mNavigationCallback = null;
+    }
+
+    @NonNull
+    private String getTitle() {
+        if (isAdded() && getArguments() != null) {
+            return getArguments().getString(ARG_TITLE, "");
+        }
+
+        return "";
+    }
+
+    @NonNull
+    private String getFragment() {
+        if (isAdded() && getArguments() != null) {
+            return getArguments().getString(ARG_NESTED_FRAGMENT, "");
+        }
+
+        return "";
+    }
+
+    private void attachFragment(Fragment fragment) {
+        getFragmentManager().beginTransaction()
+                .replace(R.id.container_fragment_frame, fragment)
+                .commit();
     }
 }
