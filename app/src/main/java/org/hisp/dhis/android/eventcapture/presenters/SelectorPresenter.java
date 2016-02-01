@@ -3,7 +3,10 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
+import org.hisp.dhis.client.sdk.models.program.Program;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -13,6 +16,8 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     private ISelectorView mSelectorView;
     private Subscription synchronizationSubscription;
+    private Subscription pickedOrganisationUnitSubscription;
+    private Subscription pickedProgramSubscription;
 
     public SelectorPresenter(ISelectorView selectorView) {
         this.mSelectorView = selectorView;
@@ -40,6 +45,14 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             synchronizationSubscription.unsubscribe();
             synchronizationSubscription = null;
         }
+        if(pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription.isUnsubscribed()) {
+            pickedOrganisationUnitSubscription.unsubscribe();
+            pickedOrganisationUnitSubscription = null;
+        }
+        if(pickedProgramSubscription != null && !pickedProgramSubscription.isUnsubscribed()) {
+            pickedProgramSubscription.unsubscribe();
+            pickedProgramSubscription = null;
+        }
     }
 
 
@@ -63,4 +76,37 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                     });
         }
     }
+
+    @Override
+    public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
+        if(pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription.isUnsubscribed()) {
+            pickedOrganisationUnitSubscription = organisationUnitObservable.
+                    subscribeOn(Schedulers.io()).
+                    observeOn(AndroidSchedulers.mainThread()).
+                    subscribe(new Action1<OrganisationUnit>() {
+                        @Override
+                        public void call(OrganisationUnit organisationUnit) {
+                            mSelectorView.setPickedOrganisationUnit(organisationUnit);
+                        }
+                    });
+
+        }
+    }
+
+    @Override
+    public void onPickedProgram(Observable<Program> programObservable) {
+        if(pickedProgramSubscription == null || pickedProgramSubscription.isUnsubscribed()) {
+            pickedOrganisationUnitSubscription = programObservable.
+                    subscribeOn(Schedulers.io()).
+                    observeOn(AndroidSchedulers.mainThread()).
+                    subscribe(new Action1<Program>() {
+                        @Override
+                        public void call(Program program) {
+                            mSelectorView.setPickedProgram(program);
+                        }
+                    });
+        }
+    }
+
+
 }

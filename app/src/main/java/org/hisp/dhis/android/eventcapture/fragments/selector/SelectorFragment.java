@@ -1,6 +1,8 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,19 +14,26 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import org.hisp.dhis.android.eventcapture.activities.home.DetailsActivity;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
+import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
+import rx.Observable;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private ISelectorPresenter mSelectorPresenter;
     private CircularProgressBar progressBar;
+
+    private OrganisationUnit pickedOrganisationUnit;
+    private Program pickedProgram;
 
 
     private FloatingActionButton mFloatingActionButton;
@@ -65,10 +74,15 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         mFloatingActionButton.setOnClickListener(this);
 
-        if (hiddenFloatingActionButton) {
+        boolean  onTablet = getResources().getBoolean(org.hisp.dhis.android.eventcapture.R.bool.isTablet);
+        if(!onTablet  && getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (hiddenFloatingActionButton) {
+                //mFloatingActionButton.hide();
+            } else {
+                mFloatingActionButton.show();
+            }
+        } else { //hide in landscape
             mFloatingActionButton.hide();
-        } else {
-            mFloatingActionButton.show();
         }
 
         progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
@@ -106,6 +120,27 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         showProgress();
     }
 
+    @Override
+    public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
+        mSelectorPresenter.onPickedOrganisationUnit(organisationUnitObservable);
+    }
+
+    @Override
+    public void onPickedProgram(Observable<Program> programObservable) {
+        mSelectorPresenter.onPickedProgram(programObservable);
+    }
+
+    @Override
+    public void setPickedOrganisationUnit(OrganisationUnit organisationUnit) {
+        this.pickedOrganisationUnit = organisationUnit;
+    }
+
+    @Override
+    public void setPickedProgram(Program program) {
+        this.pickedProgram = program;
+    }
+
+
     private void hideProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
@@ -125,15 +160,23 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onClick(View v) {
         // on phone(portrait): go to ItemListFragment
+        Intent itemsList = new Intent(getActivity(), DetailsActivity.class); //switch to activity.
+        startActivity(itemsList);
+
         // on phone(landscape): hide FAbutton (if it doesn't look good, go to ItemListFragment)
         // on tablet(portrait): go to ItemListFragment
         // on tablet(landscape): hide FAbutton
+
+
     }
 
     @Override
     public void activate() {
-        mFloatingActionButton.show();
-        hiddenFloatingActionButton = false;
+        // don't show unless in portrait.
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mFloatingActionButton.show();
+            hiddenFloatingActionButton = false;
+        }
     }
 
     @Override

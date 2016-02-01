@@ -33,8 +33,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.fragments.ContainerFragment;
-import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.fragments.WrapperFragment;
+import org.hisp.dhis.android.eventcapture.fragments.selector.ContainerFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
@@ -68,16 +68,16 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
     protected boolean onItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.drawer_selector: {
-                attachFragmentDelayed(new SelectorFragment());
+                attachFragmentDelayed(new ContainerFragment());
                 break;
             }
             case R.id.drawer_settings: {
-                attachFragmentDelayed(ContainerFragment
+                attachFragmentDelayed(WrapperFragment
                         .newInstanceWithSettingsFragment(this));
                 break;
             }
             case R.id.drawer_profile: {
-                attachFragmentDelayed(ContainerFragment
+                attachFragmentDelayed(WrapperFragment
                         .newInstanceWithProfileFragment(this));
                 break;
             }

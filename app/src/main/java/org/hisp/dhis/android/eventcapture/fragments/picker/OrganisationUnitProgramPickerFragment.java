@@ -10,6 +10,7 @@ import org.hisp.dhis.android.eventcapture.presenters.OrganisationUnitProgramPick
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitPickableListener;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
 import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
+import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
@@ -27,8 +28,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     private Picker mOrganisationUnitPicker;
     private OnAllPickersSelectedListener onPickerClickedListener;
     private ISelectorView selectorView;
-    private IOrganisationUnitPickableListener organisationUnitPickableListener;
-
 
     public OrganisationUnitProgramPickerFragment() {
         super();
@@ -59,6 +58,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
                 if(mOrganisationUnitPicker.getPickedItem() != null) {
                     OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) mOrganisationUnitPicker.getPickedItem();
                     mOrganisationUnitProgramPickerPresenter.setPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
+                    selectorView.onPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
                 }
             }
         });
@@ -70,6 +70,8 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
                         if (mProgramPicker.getPickedItem() != null) {
                             onPickerClickedListener.activate();
+                            ProgramPickable programPickable = (ProgramPickable) mProgramPicker.getPickedItem();
+                            selectorView.onPickedProgram(programPickable.getProgram());
                         } else {
                             onPickerClickedListener.deactivate();
                         }

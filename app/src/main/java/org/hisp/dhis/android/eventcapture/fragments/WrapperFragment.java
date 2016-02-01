@@ -48,7 +48,7 @@ import org.hisp.dhis.client.sdk.ui.activities.INavigationCallback;
 
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 
-public class ContainerFragment extends Fragment implements View.OnClickListener {
+public class WrapperFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_TITLE = "arg:title";
     private static final String ARG_NESTED_FRAGMENT = "arg:nestedFragment";
 
@@ -58,16 +58,16 @@ public class ContainerFragment extends Fragment implements View.OnClickListener 
     INavigationCallback mNavigationCallback;
 
     @NonNull
-    public static ContainerFragment newInstanceWithSettingsFragment(@NonNull Context context) {
+    public static WrapperFragment newInstanceWithSettingsFragment(@NonNull Context context) {
         return newInstance(context, R.string.drawer_settings, ARG_SETTINGS);
     }
 
     @NonNull
-    public static ContainerFragment newInstanceWithProfileFragment(@NonNull Context context) {
+    public static WrapperFragment newInstanceWithProfileFragment(@NonNull Context context) {
         return newInstance(context, R.string.drawer_profile, ARG_PROFILE);
     }
 
-    private static ContainerFragment newInstance(@NonNull Context context, @StringRes int titleId,
+    private static WrapperFragment newInstance(@NonNull Context context, @StringRes int titleId,
                                                  String fragment) {
         isNull(context, "context must bot be null");
 
@@ -75,10 +75,10 @@ public class ContainerFragment extends Fragment implements View.OnClickListener 
         arguments.putString(ARG_TITLE, context.getString(titleId));
         arguments.putString(ARG_NESTED_FRAGMENT, fragment);
 
-        ContainerFragment containerFragment = new ContainerFragment();
-        containerFragment.setArguments(arguments);
+        WrapperFragment wrapperFragment = new WrapperFragment();
+        wrapperFragment.setArguments(arguments);
 
-        return containerFragment;
+        return wrapperFragment;
     }
 
     @Override
