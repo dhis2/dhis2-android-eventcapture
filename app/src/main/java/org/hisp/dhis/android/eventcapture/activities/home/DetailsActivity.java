@@ -7,8 +7,6 @@ import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 
 public class DetailsActivity extends HomeActivity {
 
-    //ItemListFragment mItemListFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

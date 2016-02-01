@@ -9,13 +9,11 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-//import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.DetailsActivity;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
@@ -162,9 +160,9 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onClick(View v) {
         // on phone(portrait): go to ItemListFragment
-
         Intent itemsList = new Intent(getActivity(), DetailsActivity.class); //switch to activity.
         startActivity(itemsList);
+
         // on phone(landscape): hide FAbutton (if it doesn't look good, go to ItemListFragment)
         // on tablet(portrait): go to ItemListFragment
         // on tablet(landscape): hide FAbutton
