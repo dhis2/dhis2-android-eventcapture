@@ -55,7 +55,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
         }
     }
 
-
     @Override
     public void initializeSynchronization() {
         if(synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
@@ -89,7 +88,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             mSelectorView.setPickedOrganisationUnit(organisationUnit);
                         }
                     });
-
         }
     }
 
@@ -107,6 +105,4 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                     });
         }
     }
-
-
 }

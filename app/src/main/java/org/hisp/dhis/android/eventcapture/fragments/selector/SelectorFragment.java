@@ -49,7 +49,6 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
-            //restore mSelectorPresenter ! (instead of getting the instance...)
         }
         mSelectorPresenter = new SelectorPresenter(this);
         setHasOptionsMenu(true);
@@ -75,18 +74,19 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         mFloatingActionButton.setOnClickListener(this);
 
         boolean  onTablet = getResources().getBoolean(org.hisp.dhis.android.eventcapture.R.bool.isTablet);
-        if(!onTablet  && getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if(!onTablet) {
             if (hiddenFloatingActionButton) {
                 //mFloatingActionButton.hide();
             } else {
                 mFloatingActionButton.show();
             }
-        } else { //hide in landscape
+        } else { //hide it
             mFloatingActionButton.hide();
         }
 
         progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
         hideProgress();
+
         mSelectorPresenter.initializeSynchronization();
     }
 
@@ -186,10 +186,11 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     }
 
     public Fragment createPickerFragment() {
-        OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
-        organisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
-        organisationUnitProgramPickerFragment.setSelectorView(this);
-        return organisationUnitProgramPickerFragment;
+        OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
+        //these callbacks are lost. (part of the problem)
+        mOrganisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
+        mOrganisationUnitProgramPickerFragment.setSelectorView(this);
+        return mOrganisationUnitProgramPickerFragment;
     }
 
     @Override

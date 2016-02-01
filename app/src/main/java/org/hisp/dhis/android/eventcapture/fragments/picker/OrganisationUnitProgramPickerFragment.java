@@ -1,9 +1,11 @@
 package org.hisp.dhis.android.eventcapture.fragments.picker;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
+import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
 import org.hisp.dhis.android.eventcapture.fragments.selector.OnAllPickersSelectedListener;
 import org.hisp.dhis.android.eventcapture.presenters.OrganisationUnitProgramPickerPresenter;
@@ -37,17 +39,16 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.createPickers();
-
-
         mOrganisationUnitProgramPickerPresenter = new OrganisationUnitProgramPickerPresenter();
         mOrganisationUnitProgramPickerPresenter.setOrganisationUnitProgramPickerView(this);
         mOrganisationUnitProgramPickerPresenter.onCreate();
-    }
 
+        this.createPickers();
+    }
 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
     }
 
     public void createPickers() {
@@ -75,10 +76,10 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
                         } else {
                             onPickerClickedListener.deactivate();
                         }
-
                     }
                 }
         );
+
         mProgramPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
             @Override
             public void clearedCallback() {
@@ -89,7 +90,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
         super.setRootPickerList(Collections.singletonList(mOrganisationUnitPicker));
     }
-
 
     @Override
     public void renderOrganisationUnitPickables(List<IPickable> organisationUnitPickables) {
@@ -103,19 +103,22 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
     @Override
     public void onFinishLoading() {
-        selectorView.onFinishLoading();
+        /* TODO: Find another way to show/hide the spinners instead of callbacks.
+        if (selectorView != null)
+            selectorView.onFinishLoading();*/
     }
 
     @Override
     public void onLoadingError() {
-        selectorView.onLoadingError();
+        /*if(selectorView != null)
+            selectorView.onLoadingError();*/
     }
 
     @Override
     public void onStartLoading() {
-        selectorView.onStartLoading();
+        /*if(selectorView != null)
+            selectorView.onStartLoading();*/
     }
-
 
     public void setOnPickerClickedListener(OnAllPickersSelectedListener onPickerClickedListener) {
         this.onPickerClickedListener = onPickerClickedListener;
@@ -124,5 +127,4 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     public void setSelectorView(ISelectorView selectorView) {
         this.selectorView = selectorView;
     }
-
 }
