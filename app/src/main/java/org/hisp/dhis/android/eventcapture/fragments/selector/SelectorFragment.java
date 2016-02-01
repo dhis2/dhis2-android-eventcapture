@@ -15,16 +15,22 @@ import android.view.animation.AnimationUtils;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
+import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.R;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
+import rx.Observable;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
     private ISelectorPresenter mSelectorPresenter;
     private CircularProgressBar progressBar;
+
+    private OrganisationUnit pickedOrganisationUnit;
+    private Program pickedProgram;
 
 
     private FloatingActionButton mFloatingActionButton;
@@ -106,6 +112,27 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         showProgress();
     }
 
+    @Override
+    public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
+        mSelectorPresenter.onPickedOrganisationUnit(organisationUnitObservable);
+    }
+
+    @Override
+    public void onPickedProgram(Observable<Program> programObservable) {
+        mSelectorPresenter.onPickedProgram(programObservable);
+    }
+
+    @Override
+    public void setPickedOrganisationUnit(OrganisationUnit organisationUnit) {
+        this.pickedOrganisationUnit = organisationUnit;
+    }
+
+    @Override
+    public void setPickedProgram(Program program) {
+        this.pickedProgram = program;
+    }
+
+
     private void hideProgress() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
@@ -128,6 +155,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         // on phone(landscape): hide FAbutton (if it doesn't look good, go to ItemListFragment)
         // on tablet(portrait): go to ItemListFragment
         // on tablet(landscape): hide FAbutton
+
+
     }
 
     @Override
