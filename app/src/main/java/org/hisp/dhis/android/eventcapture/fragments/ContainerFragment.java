@@ -33,6 +33,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -50,17 +51,29 @@ import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 public class ContainerFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_TITLE = "arg:title";
     private static final String ARG_NESTED_FRAGMENT = "arg:nestedFragment";
+
+    private static final String ARG_PROFILE = "arg:profile";
     private static final String ARG_SETTINGS = "arg:settings";
 
     INavigationCallback mNavigationCallback;
 
     @NonNull
     public static ContainerFragment newInstanceWithSettingsFragment(@NonNull Context context) {
+        return newInstance(context, R.string.drawer_settings, ARG_SETTINGS);
+    }
+
+    @NonNull
+    public static ContainerFragment newInstanceWithProfileFragment(@NonNull Context context) {
+        return newInstance(context, R.string.drawer_profile, ARG_PROFILE);
+    }
+
+    private static ContainerFragment newInstance(@NonNull Context context, @StringRes int titleId,
+                                                 String fragment) {
         isNull(context, "context must bot be null");
 
         Bundle arguments = new Bundle();
-        arguments.putString(ARG_TITLE, context.getString(R.string.drawer_settings));
-        arguments.putString(ARG_NESTED_FRAGMENT, ARG_SETTINGS);
+        arguments.putString(ARG_TITLE, context.getString(titleId));
+        arguments.putString(ARG_NESTED_FRAGMENT, fragment);
 
         ContainerFragment containerFragment = new ContainerFragment();
         containerFragment.setArguments(arguments);
@@ -94,10 +107,15 @@ public class ContainerFragment extends Fragment implements View.OnClickListener 
 
         toolbar.setNavigationIcon(buttonDrawable);
         toolbar.setNavigationOnClickListener(this);
+        toolbar.setTitle(getTitle());
 
         switch (getFragment()) {
+            case ARG_PROFILE: {
+                toolbar.inflateMenu(R.menu.menu_profile);
+                attachFragment(new ProfileFragment());
+                break;
+            }
             case ARG_SETTINGS: {
-                toolbar.setTitle(getTitle());
                 attachFragment(new SettingsFragment());
                 break;
             }

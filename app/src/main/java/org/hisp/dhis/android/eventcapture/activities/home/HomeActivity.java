@@ -77,7 +77,8 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                 break;
             }
             case R.id.drawer_profile: {
-                // attachFragmentDelayed(new AbsProfileFragment());
+                attachFragmentDelayed(ContainerFragment
+                        .newInstanceWithProfileFragment(this));
                 break;
             }
         }
