@@ -42,8 +42,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationCallback;
-import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment2;
 
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 
@@ -98,7 +98,7 @@ public class ContainerFragment extends Fragment implements View.OnClickListener 
         switch (getFragment()) {
             case ARG_SETTINGS: {
                 toolbar.setTitle(getTitle());
-                attachFragment(new AbsSettingsFragment2());
+                attachFragment(new SettingsFragment());
                 break;
             }
         }
