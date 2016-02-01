@@ -36,6 +36,7 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
+import org.hisp.dhis.client.sdk.ui.fragments.AbsProfileFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
@@ -73,6 +74,10 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
             }
             case R.id.drawer_settings: {
                 attachFragmentDelayed(new SettingsFragment());
+                break;
+            }
+            case R.id.drawer_profile: {
+                attachFragmentDelayed(new AbsProfileFragment());
                 break;
             }
         }

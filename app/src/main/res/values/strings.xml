@@ -28,6 +28,10 @@
   -->
 
 <resources>
+    <string name="drawer_create_event">Create event</string>
+    <string name="drawer_settings">Settings</string>
+    <string name="drawer_profile">Profile</string>
+
     <string name="settings">Settings</string>
     <string name="app_name">dhis2-android-eventcapture</string>
 

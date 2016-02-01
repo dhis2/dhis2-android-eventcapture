@@ -31,11 +31,16 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/drawer_selector"
-            android:icon="@drawable/ic_settings"
-            android:title="Single event" />
+            android:icon="@drawable/ic_add"
+            android:title="@string/drawer_create_event" />
+        <item
+            android:id="@+id/drawer_profile"
+            android:icon="@drawable/ic_profile"
+            android:title="@string/drawer_profile">
+        </item>
         <item
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_settings"
-            android:title="@string/settings" />
+            android:title="@string/drawer_settings" />
     </group>
 </menu>
