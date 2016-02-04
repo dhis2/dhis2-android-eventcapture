@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationCallback;
 

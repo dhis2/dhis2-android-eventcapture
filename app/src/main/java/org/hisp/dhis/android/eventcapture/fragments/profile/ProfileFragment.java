@@ -26,25 +26,52 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.fragments;
+package org.hisp.dhis.android.eventcapture.fragments.profile;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class ProfileFragment extends Fragment {
+import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
+
+import java.util.List;
+
+public class ProfileFragment extends Fragment implements IProfileView {
+    RowViewAdapter rowViewAdapter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        rowViewAdapter = new RowViewAdapter();
+
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_profile);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(rowViewAdapter);
+
+        IProfilePresenter profilePresenter = new ProfilePresenter(this);
+        profilePresenter.onCreate();
+        profilePresenter.listUserAccountFields();
+    }
+
+    @Override
+    @UiThread
+    public void setProfileFields(List<DataEntity> dataEntities) {
+        rowViewAdapter.update(dataEntities);
     }
 }
