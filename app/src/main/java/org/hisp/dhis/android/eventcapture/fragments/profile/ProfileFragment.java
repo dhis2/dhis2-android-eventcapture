@@ -58,7 +58,7 @@ public class ProfileFragment extends Fragment implements IProfileView {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        rowViewAdapter = new RowViewAdapter();
+        rowViewAdapter = new RowViewAdapter(getFragmentManager());
 
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_profile);
         recyclerView.setLayoutManager(layoutManager);

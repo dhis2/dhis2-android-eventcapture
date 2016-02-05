@@ -101,7 +101,7 @@ public class ProfilePresenter extends AbsPresenter
         dataEntities.add(DataEntity.create("First name", account.getFirstName(), Type.TEXT));
         dataEntities.add(DataEntity.create("Surname", account.getSurname(), Type.TEXT));
         dataEntities.add(DataEntity.create("Gender", account.getGender(), Type.TEXT));
-        dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.DATE));
         dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(), Type.TEXT));
         dataEntities.add(DataEntity.create("Education", account.getEducation(), Type.TEXT));
         dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT));
