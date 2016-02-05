@@ -32,5 +32,4 @@
     android:id="@+id/recyclerview_profile"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipToPadding="false"
-    android:paddingTop="@dimen/keyline_default" />
+    android:clipToPadding="false" />

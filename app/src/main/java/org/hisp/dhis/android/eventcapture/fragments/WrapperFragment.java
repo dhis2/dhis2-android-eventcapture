@@ -58,7 +58,7 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_PROFILE = "arg:profile";
     private static final String ARG_SETTINGS = "arg:settings";
     private static final String ARG_SELECTOR = "arg:selector";
-    private static final String ARG_ITEMSLIST = "arg:itemlist";
+    private static final String ARG_ITEMS_LIST = "arg:itemsList";
 
     INavigationCallback mNavigationCallback;
 
@@ -79,7 +79,7 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
 
     @NonNull
     public static WrapperFragment newInstanceWithItemlistFragment(@NonNull Context context) {
-        return newInstance(context, R.string.drawer_profile, ARG_ITEMSLIST);
+        return newInstance(context, R.string.drawer_profile, ARG_ITEMS_LIST);
     }
 
     private static WrapperFragment newInstance(@NonNull Context context, @StringRes int titleId,
@@ -138,7 +138,7 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
                 attachFragment(new ContainerFragment());
                 break;
             }
-            case ARG_ITEMSLIST: {
+            case ARG_ITEMS_LIST: {
                 attachFragment(new ItemListFragment());
                 break;
             }

@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
+import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class ProfileFragment extends Fragment implements IProfileView {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_profile);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(rowViewAdapter);
+        recyclerView.addItemDecoration(new DividerDecoration(getContext()));
 
         IProfilePresenter profilePresenter = new ProfilePresenter(this);
         profilePresenter.onCreate();
