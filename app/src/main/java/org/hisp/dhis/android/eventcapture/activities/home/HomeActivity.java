@@ -68,7 +68,8 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
     protected boolean onItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.drawer_selector: {
-                attachFragmentDelayed(new ContainerFragment());
+                attachFragmentDelayed(WrapperFragment
+                        .newInstanceWithSelectorFragment(this));
                 break;
             }
             case R.id.drawer_settings: {

@@ -43,7 +43,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
+import org.hisp.dhis.android.eventcapture.fragments.selector.ContainerFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.INavigationCallback;
 
@@ -55,6 +57,8 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
 
     private static final String ARG_PROFILE = "arg:profile";
     private static final String ARG_SETTINGS = "arg:settings";
+    private static final String ARG_SELECTOR = "arg:selector";
+    private static final String ARG_ITEMSLIST = "arg:itemlist";
 
     INavigationCallback mNavigationCallback;
 
@@ -68,8 +72,18 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
         return newInstance(context, R.string.drawer_profile, ARG_PROFILE);
     }
 
+    @NonNull
+    public static WrapperFragment newInstanceWithSelectorFragment(@NonNull Context context) {
+        return newInstance(context, R.string.drawer_profile, ARG_SELECTOR);
+    }
+
+    @NonNull
+    public static WrapperFragment newInstanceWithItemlistFragment(@NonNull Context context) {
+        return newInstance(context, R.string.drawer_profile, ARG_ITEMSLIST);
+    }
+
     private static WrapperFragment newInstance(@NonNull Context context, @StringRes int titleId,
-                                                 String fragment) {
+                                               String fragment) {
         isNull(context, "context must bot be null");
 
         Bundle arguments = new Bundle();
@@ -118,6 +132,14 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
             }
             case ARG_SETTINGS: {
                 attachFragment(new SettingsFragment());
+                break;
+            }
+            case ARG_SELECTOR: {
+                attachFragment(new ContainerFragment());
+                break;
+            }
+            case ARG_ITEMSLIST: {
+                attachFragment(new ItemListFragment());
                 break;
             }
         }
