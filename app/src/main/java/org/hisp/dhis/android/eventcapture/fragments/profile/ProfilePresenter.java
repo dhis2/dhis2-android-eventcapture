@@ -32,6 +32,7 @@ import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,7 @@ public class ProfilePresenter extends AbsPresenter
         implements IProfilePresenter {
 
     private IProfileView profileView;
-    private Subscription profileSubscribtion;
+    private Subscription profileSubscription;
 
     public ProfilePresenter(IProfileView profileView) {
         this.profileView = profileView;
@@ -55,7 +56,7 @@ public class ProfilePresenter extends AbsPresenter
 
     @Override
     public void listUserAccountFields() {
-        profileSubscribtion = D2.me().account()
+        profileSubscription = D2.me().account()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<UserAccount, List<DataEntity>>() {
@@ -81,12 +82,12 @@ public class ProfilePresenter extends AbsPresenter
 
     @Override
     public void onDestroy() {
-        if (profileSubscribtion != null && !profileSubscribtion.isUnsubscribed()) {
-            profileSubscribtion.isUnsubscribed();
+        if (profileSubscription != null && !profileSubscription.isUnsubscribed()) {
+            profileSubscription.isUnsubscribed();
         }
 
         profileView = null;
-        profileSubscribtion = null;
+        profileSubscription = null;
     }
 
     @Override
@@ -97,8 +98,18 @@ public class ProfilePresenter extends AbsPresenter
     private static List<DataEntity> transformUserAccount(UserAccount account) {
         List<DataEntity> dataEntities = new ArrayList<>();
 
-        dataEntities.add(DataEntity.create("Username", account.getDisplayName(),
-                DataEntity.Type.TEXT));
+        dataEntities.add(DataEntity.create("First name", account.getFirstName(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Surname", account.getSurname(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Gender", account.getGender(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Education", account.getEducation(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Interests", account.getIntroduction(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Job title", account.getIntroduction(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Email", account.getEmail(), Type.TEXT));
+        dataEntities.add(DataEntity.create("Phone number", account.getPhoneNumber(), Type.TEXT));
 
         return dataEntities;
     }
