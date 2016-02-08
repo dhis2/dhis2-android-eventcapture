@@ -28,28 +28,40 @@
 
 package org.hisp.dhis.android.eventcapture.activities.home;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.WrapperFragment;
-import org.hisp.dhis.android.eventcapture.fragments.selector.ContainerFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
     private IHomePresenter homePresenter;
+    // Constants
+    public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.datasync.provider";
+    public static final String ACCOUNT_TYPE = "example.com";
+    public static final String ACCOUNT_NAME = "dummyaccount";
+    // Instance fields
+    Account mAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Create the dummy account
+        mAccount = createSyncAccount(this);
 
         homePresenter = new HomePresenter(this);
         homePresenter.onCreate(savedInstanceState);
 
         onNavigationItemSelected(getNavigationView()
                 .getMenu().findItem(R.id.drawer_selector));
+
     }
 
     @Override
@@ -113,5 +125,36 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
             }
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    //Since this will be used only once maybe it is best to not define this ?
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+    public static Account createSyncAccount(Context context) {
+        // Create the account type and default account
+        Account newAccount = new Account(ACCOUNT_NAME, ACCOUNT_TYPE);
+        // Get an instance of the Android account manager
+        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call context.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+        } else {
+            /*
+             * The account exists or some other error occurred. Log this, report it,
+             * or handle it internally.
+             */
+        }
+        return null;
     }
 }
