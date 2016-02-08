@@ -28,13 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.activities.home;
 
-<<<<<<< HEAD
-import android.content.pm.PackageManager;
-=======
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
->>>>>>> 42df37cc08728f4d7b118a9d10b31a3fbbd63b91
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Menu;
@@ -48,10 +45,12 @@ import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
     private IHomePresenter homePresenter;
+
     // Constants
     public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.datasync.provider";
     public static final String ACCOUNT_TYPE = "example.com";
     public static final String ACCOUNT_NAME = "dummyaccount";
+
     // Instance fields
     Account mAccount;
 
@@ -67,11 +66,7 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
 
         onNavigationItemSelected(getNavigationView()
                 .getMenu().findItem(R.id.drawer_selector));
-<<<<<<< HEAD
         addAppsToMenu();
-=======
-
->>>>>>> 42df37cc08728f4d7b118a9d10b31a3fbbd63b91
     }
 
     @Override
@@ -137,7 +132,6 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
         return super.dispatchTouchEvent(event);
     }
 
-<<<<<<< HEAD
     private void addAppsToMenu() {
         if (getAppsMenu() != null) {
 
@@ -193,8 +187,11 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
             }
         }
 
-=======
+        return null;
+    }
+
     //Since this will be used only once maybe it is best to not define this ?
+
     /**
      * Create a new dummy account for the sync adapter
      *
@@ -222,7 +219,6 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
              * or handle it internally.
              */
         }
->>>>>>> 42df37cc08728f4d7b118a9d10b31a3fbbd63b91
         return null;
     }
 }
