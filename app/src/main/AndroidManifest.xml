@@ -25,10 +25,15 @@
   ~ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.hisp.dhis.android.eventcapture">
+<manifest package="org.hisp.dhis.android.eventcapture"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- TODO consider backing up user data through 23+ APIs -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
     <application
         android:name=".EventCaptureApp"
         android:allowBackup="true"
@@ -38,8 +43,8 @@
 
         <activity android:name=".activities.login.LogInActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
@@ -47,15 +52,46 @@
             android:name=".activities.home.HomeActivity"
             android:enabled="false">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
+        <!--Details activity that shows itemList. -->
         <activity
             android:name=".activities.home.DetailsActivity"
             />
 
-    </application>
+        <!-- stub Authenticator service -->
+        <service
+            android:name=".datasync.AuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
 
+        <!-- stub provider: -->
+        <provider
+            android:name=".datasync.Provider"
+            android:authorities="org.hisp.dhis.android.eventcapture.datasync.provider"
+            android:exported="false"
+            android:syncable="true"/>
+
+        <!-- Sync service : -->
+        <service
+            android:name=".datasync.SyncService"
+            android:exported="true"
+            android:process=":sync">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter"/>
+        </service>
+
+    </application>
 </manifest>
