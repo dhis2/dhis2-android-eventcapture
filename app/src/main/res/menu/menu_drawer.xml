@@ -27,9 +27,7 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group
-        android:id="@+id/menu_top"
-        android:checkableBehavior="single">
+    <group android:checkableBehavior="single">
         <item
             android:id="@+id/drawer_selector"
             android:icon="@drawable/ic_add"
@@ -48,9 +46,7 @@
         android:id="@+id/drawer_section_other"
         android:title="@string/drawer_section_other">
         <menu>
-            <group
-                android:id="@+id/menu_other"
-                android:checkableBehavior="single">
+            <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/drawer_settings"
                     android:icon="@drawable/ic_settings"
@@ -70,9 +66,7 @@
         android:id="@+id/drawer_section_status"
         android:title="@string/drawer_section_status">
         <menu>
-            <group
-                android:id="@+id/something_here"
-                android:checkableBehavior="none">
+            <group android:checkableBehavior="none">
                 <item
                     android:id="@+id/drawer_synchronization"
                     android:enabled="false"
