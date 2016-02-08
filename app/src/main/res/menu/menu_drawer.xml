@@ -27,18 +27,58 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/menu_top"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/drawer_selector"
             android:icon="@drawable/ic_add"
-            android:title="@string/drawer_create_event" />
+            android:title="@string/drawer_item_events" />
         <item
             android:id="@+id/drawer_profile"
             android:icon="@drawable/ic_profile"
-            android:title="@string/drawer_profile" />
-        <item
-            android:id="@+id/drawer_settings"
-            android:icon="@drawable/ic_settings"
-            android:title="@string/drawer_settings" />
+            android:title="@string/drawer_item_profile" />
     </group>
+    <item
+        android:id="@+id/drawer_section_apps"
+        android:title="@string/drawer_section_apps">
+        <menu />
+    </item>
+    <item
+        android:id="@+id/drawer_section_other"
+        android:title="@string/drawer_section_other">
+        <menu>
+            <group
+                android:id="@+id/menu_other"
+                android:checkableBehavior="single">
+                <item
+                    android:id="@+id/drawer_settings"
+                    android:icon="@drawable/ic_settings"
+                    android:title="@string/drawer_item_settings" />
+                <item
+                    android:id="@+id/drawer_item_help"
+                    android:icon="@drawable/ic_help"
+                    android:title="@string/drawer_item_help" />
+                <item
+                    android:id="@+id/drawer_item_about"
+                    android:icon="@drawable/ic_about"
+                    android:title="@string/drawer_item_about" />
+            </group>
+        </menu>
+    </item>
+    <item
+        android:id="@+id/drawer_section_status"
+        android:title="@string/drawer_section_status">
+        <menu>
+            <group
+                android:id="@+id/something_here"
+                android:checkableBehavior="none">
+                <item
+                    android:id="@+id/drawer_synchronization"
+                    android:enabled="false"
+                    android:icon="@drawable/ic_synchronized"
+                    android:title="@string/drawer_item_synchronized" />
+            </group>
+        </menu>
+    </item>
 </menu>

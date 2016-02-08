@@ -28,13 +28,15 @@
 
 package org.hisp.dhis.android.eventcapture.activities.home;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.WrapperFragment;
-import org.hisp.dhis.android.eventcapture.fragments.selector.ContainerFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
@@ -50,6 +52,7 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
 
         onNavigationItemSelected(getNavigationView()
                 .getMenu().findItem(R.id.drawer_selector));
+        addAppsToMenu();
     }
 
     @Override
@@ -113,5 +116,63 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
             }
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    private void addAppsToMenu() {
+        if (getAppsMenu() != null) {
+
+            if (isAppInstalled("org.hisp.dhis.android.dashboard")) {
+                MenuItem menuItem = getAppsMenu().add("Dashboard");
+                menuItem.setIcon(R.drawable.ic_dashboard);
+            }
+
+            if (isAppInstalled("org.hisp.dhis.android.eventcapture")) {
+                MenuItem menuItem = getAppsMenu().add("Event capture");
+                menuItem.setIcon(R.drawable.ic_event_capture);
+            }
+
+            if (isAppInstalled("org.hisp.dhis.android.trackercapture")) {
+                MenuItem menuItem = getAppsMenu().add("Tracker capture");
+                menuItem.setIcon(R.drawable.ic_tracker_capture);
+            }
+
+            if (isAppInstalled("org.dhis2.mobile")) {
+                MenuItem menuItem = getAppsMenu().add("Data capture");
+                menuItem.setIcon(R.drawable.ic_data_capture);
+            }
+        }
+    }
+
+    private boolean isAppInstalled(String packageName) {
+        String currentApp = getApplicationContext().getPackageName();
+        if (currentApp.equals(packageName)) {
+            return false;
+        }
+
+        PackageManager packageManager = getBaseContext().getPackageManager();
+        try {
+            // using side effect of calling getPackageInfo() method
+            packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    @Nullable
+    private Menu getAppsMenu() {
+        Menu menu = getNavigationView().getMenu();
+        if (menu == null) {
+            return null;
+        }
+
+        for (int index = 0; index < menu.size(); index++) {
+            MenuItem item = menu.getItem(index);
+            if (item.getItemId() == R.id.drawer_section_apps) {
+                return item.getSubMenu();
+            }
+        }
+
+        return null;
     }
 }

@@ -64,22 +64,22 @@ public class WrapperFragment extends Fragment implements View.OnClickListener {
 
     @NonNull
     public static WrapperFragment newInstanceWithSettingsFragment(@NonNull Context context) {
-        return newInstance(context, R.string.drawer_settings, ARG_SETTINGS);
+        return newInstance(context, R.string.drawer_item_settings, ARG_SETTINGS);
     }
 
     @NonNull
     public static WrapperFragment newInstanceWithProfileFragment(@NonNull Context context) {
-        return newInstance(context, R.string.drawer_profile, ARG_PROFILE);
+        return newInstance(context, R.string.drawer_item_profile, ARG_PROFILE);
     }
 
     @NonNull
     public static WrapperFragment newInstanceWithSelectorFragment(@NonNull Context context) {
-        return newInstance(context, R.string.drawer_profile, ARG_SELECTOR);
+        return newInstance(context, R.string.drawer_item_profile, ARG_SELECTOR);
     }
 
     @NonNull
     public static WrapperFragment newInstanceWithItemlistFragment(@NonNull Context context) {
-        return newInstance(context, R.string.drawer_profile, ARG_ITEMS_LIST);
+        return newInstance(context, R.string.drawer_item_profile, ARG_ITEMS_LIST);
     }
 
     private static WrapperFragment newInstance(@NonNull Context context, @StringRes int titleId,
