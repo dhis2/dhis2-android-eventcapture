@@ -31,6 +31,7 @@ package org.hisp.dhis.android.eventcapture.activities.home;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -44,6 +45,22 @@ import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
+    private static final int APPS_GROUP_ID = 234253562;
+    private static final int APPS_DATA_CAPTURE_ID = 234534541;
+    private static final int APPS_EVENT_CAPTURE_ID = 777221321;
+    private static final int APPS_TRACKER_CAPTURE_ID = 88234512;
+    private static final int APPS_DASHBOARD_ID = 45345124;
+
+    private static final int APPS_DATA_CAPTURE_ORDER = 100;
+    private static final int APPS_EVENT_CAPTURE_ORDER = 101;
+    private static final int APPS_TRACKER_CAPTURE_ORDER = 102;
+    private static final int APPS_DASHBOARD_ORDER = 103;
+
+    private static final String APPS_DATA_CAPTURE_PACKAGE = "org.dhis2.mobile";
+    private static final String APPS_EVENT_CAPTURE_PACKAGE = "org.hisp.dhis.android.eventcapture";
+    private static final String APPS_TRACKER_CAPTURE_PACKAGE = "org.hisp.dhis.android.trackercapture";
+    private static final String APPS_DASHBOARD_PACKAGE = "org.hisp.dhis.android.dashboard";
+
     private IHomePresenter homePresenter;
 
     // Constants
@@ -99,6 +116,22 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                         .newInstanceWithProfileFragment(this));
                 break;
             }
+            case APPS_DATA_CAPTURE_ID: {
+                openApp(APPS_DATA_CAPTURE_PACKAGE);
+                break;
+            }
+            case APPS_EVENT_CAPTURE_ID: {
+                openApp(APPS_EVENT_CAPTURE_PACKAGE);
+                break;
+            }
+            case APPS_TRACKER_CAPTURE_ID: {
+                openApp(APPS_TRACKER_CAPTURE_PACKAGE);
+                break;
+            }
+            case APPS_DASHBOARD_ID: {
+                openApp(APPS_DASHBOARD_PACKAGE);
+                break;
+            }
         }
 
         return true;
@@ -134,24 +167,27 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
 
     private void addAppsToMenu() {
         if (getAppsMenu() != null) {
-
-            if (isAppInstalled("org.hisp.dhis.android.dashboard")) {
-                MenuItem menuItem = getAppsMenu().add("Dashboard");
+            if (isAppInstalled(APPS_DASHBOARD_PACKAGE)) {
+                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_DASHBOARD_ID,
+                        APPS_DASHBOARD_ORDER, R.string.app_dashboard);
                 menuItem.setIcon(R.drawable.ic_dashboard);
             }
 
-            if (isAppInstalled("org.hisp.dhis.android.eventcapture")) {
-                MenuItem menuItem = getAppsMenu().add("Event capture");
+            if (isAppInstalled(APPS_EVENT_CAPTURE_PACKAGE)) {
+                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_EVENT_CAPTURE_ID,
+                        APPS_EVENT_CAPTURE_ORDER, R.string.app_event_capture);
                 menuItem.setIcon(R.drawable.ic_event_capture);
             }
 
-            if (isAppInstalled("org.hisp.dhis.android.trackercapture")) {
-                MenuItem menuItem = getAppsMenu().add("Tracker capture");
+            if (isAppInstalled(APPS_TRACKER_CAPTURE_PACKAGE)) {
+                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_TRACKER_CAPTURE_ID,
+                        APPS_TRACKER_CAPTURE_ORDER, R.string.app_tracker_capture);
                 menuItem.setIcon(R.drawable.ic_tracker_capture);
             }
 
-            if (isAppInstalled("org.dhis2.mobile")) {
-                MenuItem menuItem = getAppsMenu().add("Data capture");
+            if (isAppInstalled(APPS_DATA_CAPTURE_PACKAGE)) {
+                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_DATA_CAPTURE_ID,
+                        APPS_DATA_CAPTURE_ORDER, R.string.app_data_capture);
                 menuItem.setIcon(R.drawable.ic_data_capture);
             }
         }
@@ -188,6 +224,18 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
         }
 
         return null;
+    }
+
+    private boolean openApp(String packageName) {
+        Intent intent = getBaseContext().getPackageManager()
+                .getLaunchIntentForPackage(packageName);
+        if (intent != null) {
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+            getBaseContext().startActivity(intent);
+            return true;
+        }
+
+        return false;
     }
 
     //Since this will be used only once maybe it is best to not define this ?
