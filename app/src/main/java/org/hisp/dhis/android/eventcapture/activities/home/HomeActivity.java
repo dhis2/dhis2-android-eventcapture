@@ -31,37 +31,22 @@ package org.hisp.dhis.android.eventcapture.activities.home;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.view.Menu;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.fragments.WrapperFragment;
+import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
+import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
+import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
-    private static final int APPS_GROUP_ID = 234253562;
-    private static final int APPS_DATA_CAPTURE_ID = 234534541;
-    private static final int APPS_EVENT_CAPTURE_ID = 777221321;
-    private static final int APPS_TRACKER_CAPTURE_ID = 88234512;
-    private static final int APPS_DASHBOARD_ID = 45345124;
-
-    private static final int APPS_DATA_CAPTURE_ORDER = 100;
-    private static final int APPS_EVENT_CAPTURE_ORDER = 101;
-    private static final int APPS_TRACKER_CAPTURE_ORDER = 102;
-    private static final int APPS_DASHBOARD_ORDER = 103;
-
-    private static final String APPS_DATA_CAPTURE_PACKAGE = "org.dhis2.mobile";
-    private static final String APPS_EVENT_CAPTURE_PACKAGE = "org.hisp.dhis.android.eventcapture";
-    private static final String APPS_TRACKER_CAPTURE_PACKAGE = "org.hisp.dhis.android.trackercapture";
-    private static final String APPS_DASHBOARD_PACKAGE = "org.hisp.dhis.android.dashboard";
-
-    private IHomePresenter homePresenter;
+    private static final int DRAWER_ITEM_EVENTS_ID = 34675426;
 
     // Constants
     public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.datasync.provider";
@@ -69,7 +54,8 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
     public static final String ACCOUNT_NAME = "dummyaccount";
 
     // Instance fields
-    Account mAccount;
+    private IHomePresenter homePresenter;
+    private Account mAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,9 +67,26 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
         homePresenter = new HomePresenter(this);
         homePresenter.onCreate(savedInstanceState);
 
-        onNavigationItemSelected(getNavigationView()
-                .getMenu().findItem(R.id.drawer_selector));
-        addAppsToMenu();
+        addMenuItem(DRAWER_ITEM_EVENTS_ID, R.drawable.ic_add,
+                R.string.drawer_item_events);
+        setSynchronizedMessage("Never");
+//
+//        onNavigationItemSelected(getNavigationView()
+//                .getMenu().findItem(R.id.drawer_selector));
+    }
+
+    @NonNull
+    @Override
+    protected Fragment getProfileFragment() {
+        return WrapperFragment.newInstance(ProfileFragment.class,
+                getString(R.string.drawer_item_profile));
+    }
+
+    @NonNull
+    @Override
+    protected Fragment getSettingsFragment() {
+        return WrapperFragment.newInstance(SettingsFragment.class,
+                getString(R.string.drawer_item_settings));
     }
 
     @Override
@@ -94,42 +97,11 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
     }
 
     @Override
-    protected int getNavigationMenu() {
-        return R.menu.menu_drawer;
-    }
-
-    @Override
-    protected boolean onItemSelected(MenuItem item) {
+    protected boolean onItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.drawer_selector: {
-                attachFragmentDelayed(WrapperFragment
-                        .newInstanceWithSelectorFragment(this));
-                break;
-            }
-            case R.id.drawer_settings: {
-                attachFragmentDelayed(WrapperFragment
-                        .newInstanceWithSettingsFragment(this));
-                break;
-            }
-            case R.id.drawer_profile: {
-                attachFragmentDelayed(WrapperFragment
-                        .newInstanceWithProfileFragment(this));
-                break;
-            }
-            case APPS_DATA_CAPTURE_ID: {
-                openApp(APPS_DATA_CAPTURE_PACKAGE);
-                break;
-            }
-            case APPS_EVENT_CAPTURE_ID: {
-                openApp(APPS_EVENT_CAPTURE_PACKAGE);
-                break;
-            }
-            case APPS_TRACKER_CAPTURE_ID: {
-                openApp(APPS_TRACKER_CAPTURE_PACKAGE);
-                break;
-            }
-            case APPS_DASHBOARD_ID: {
-                openApp(APPS_DASHBOARD_PACKAGE);
+            case DRAWER_ITEM_EVENTS_ID: {
+                attachFragmentDelayed(WrapperFragment.newInstance(SelectorFragment.class,
+                        getString(R.string.drawer_item_events)));
                 break;
             }
         }
@@ -162,80 +134,8 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                 pickerFragment.dispatchTouchEvent(event);
             }
         }
+
         return super.dispatchTouchEvent(event);
-    }
-
-    private void addAppsToMenu() {
-        if (getAppsMenu() != null) {
-            if (isAppInstalled(APPS_DASHBOARD_PACKAGE)) {
-                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_DASHBOARD_ID,
-                        APPS_DASHBOARD_ORDER, R.string.app_dashboard);
-                menuItem.setIcon(R.drawable.ic_dashboard);
-            }
-
-            if (isAppInstalled(APPS_EVENT_CAPTURE_PACKAGE)) {
-                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_EVENT_CAPTURE_ID,
-                        APPS_EVENT_CAPTURE_ORDER, R.string.app_event_capture);
-                menuItem.setIcon(R.drawable.ic_event_capture);
-            }
-
-            if (isAppInstalled(APPS_TRACKER_CAPTURE_PACKAGE)) {
-                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_TRACKER_CAPTURE_ID,
-                        APPS_TRACKER_CAPTURE_ORDER, R.string.app_tracker_capture);
-                menuItem.setIcon(R.drawable.ic_tracker_capture);
-            }
-
-            if (isAppInstalled(APPS_DATA_CAPTURE_PACKAGE)) {
-                MenuItem menuItem = getAppsMenu().add(APPS_GROUP_ID, APPS_DATA_CAPTURE_ID,
-                        APPS_DATA_CAPTURE_ORDER, R.string.app_data_capture);
-                menuItem.setIcon(R.drawable.ic_data_capture);
-            }
-        }
-    }
-
-    private boolean isAppInstalled(String packageName) {
-        String currentApp = getApplicationContext().getPackageName();
-        if (currentApp.equals(packageName)) {
-            return false;
-        }
-
-        PackageManager packageManager = getBaseContext().getPackageManager();
-        try {
-            // using side effect of calling getPackageInfo() method
-            packageManager.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES);
-            return true;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
-        }
-    }
-
-    @Nullable
-    private Menu getAppsMenu() {
-        Menu menu = getNavigationView().getMenu();
-        if (menu == null) {
-            return null;
-        }
-
-        for (int index = 0; index < menu.size(); index++) {
-            MenuItem item = menu.getItem(index);
-            if (item.getItemId() == R.id.drawer_section_apps) {
-                return item.getSubMenu();
-            }
-        }
-
-        return null;
-    }
-
-    private boolean openApp(String packageName) {
-        Intent intent = getBaseContext().getPackageManager()
-                .getLaunchIntentForPackage(packageName);
-        if (intent != null) {
-            intent.addCategory(Intent.CATEGORY_LAUNCHER);
-            getBaseContext().startActivity(intent);
-            return true;
-        }
-
-        return false;
     }
 
     //Since this will be used only once maybe it is best to not define this ?
