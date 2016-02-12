@@ -28,9 +28,19 @@
 
 package org.hisp.dhis.android.eventcapture.fragments.settings;
 
+import android.os.Bundle;
+
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 
 public class SettingsFragment extends AbsSettingsFragment {
+    SettingsPresenter mSettingsPresenter;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mSettingsPresenter = new SettingsPresenter(this);
+        mSettingsPresenter.setSettingsFragment(this);
+    }
 
     @Override
     public boolean onBackgroundSynchronizationClick() {
@@ -39,6 +49,7 @@ public class SettingsFragment extends AbsSettingsFragment {
 
     @Override
     public boolean onBackgroundSynchronizationChanged(boolean isEnabled) {
+        mSettingsPresenter.setBackgroundSynchronisation(getContext(), isEnabled);
         return false;
     }
 
@@ -49,6 +60,7 @@ public class SettingsFragment extends AbsSettingsFragment {
 
     @Override
     public boolean onSynchronizationPeriodChanged(String newPeriod) {
+        mSettingsPresenter.setUpdateFrequency(getContext(), Integer.parseInt(newPeriod));
         return false;
     }
 
@@ -59,6 +71,7 @@ public class SettingsFragment extends AbsSettingsFragment {
 
     @Override
     public boolean onCrashReportsChanged(boolean isEnabled) {
+        mSettingsPresenter.setCrashReports(getContext(), isEnabled);
         return false;
     }
 }

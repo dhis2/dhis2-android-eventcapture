@@ -14,10 +14,7 @@ public class SyncService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        /*
-        Create syncAdapter as a singleton.
-
-         */
+        /* Create syncAdapter as a singleton. */
         synchronized (sSyncAdapterLock) {
             if (sSyncAdapter == null) {
                 sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
