@@ -29,8 +29,6 @@
 package org.hisp.dhis.android.eventcapture.activities.home;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -46,6 +44,7 @@ import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
+
     private static final int DRAWER_ITEM_EVENTS_ID = 34675426;
 
     // Constants
@@ -60,9 +59,6 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Create the dummy account
-        mAccount = createSyncAccount(this);
 
         homePresenter = new HomePresenter(this);
         homePresenter.onCreate(savedInstanceState);
@@ -138,35 +134,41 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
         return super.dispatchTouchEvent(event);
     }
 
-    //Since this will be used only once maybe it is best to not define this ?
+    /**
+     * A method to set the sync period for the app.
+     *
+     * @param interval in seconds
+     */
+/*    public void setPeriodicSync(Long interval) {
+        //TODO  Supposedly the Settings fragment will call this ? Or how should I do this... need to plan this out better. Or use observable.
+
+        //ContentResolver.removePeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY);
+
+        ContentResolver.addPeriodicSync(
+                mAccount,
+                AUTHORITY,
+                Bundle.EMPTY,
+                interval);
+    }*/
 
     /**
-     * Create a new dummy account for the sync adapter
-     *
-     * @param context The application context
+     * Manually sync by calling requestSync(). This is an
+     * asynchronous operation.
+     * <p/>
+     * This method is attached to the refresh button in the layout
+     * XML file
      */
-    public static Account createSyncAccount(Context context) {
-        // Create the account type and default account
-        Account newAccount = new Account(ACCOUNT_NAME, ACCOUNT_TYPE);
-        // Get an instance of the Android account manager
-        AccountManager accountManager = (AccountManager) context.getSystemService(ACCOUNT_SERVICE);
+/*    public void manualSync() {
+        // Pass the settings flags by inserting them in a bundle
+        Bundle settingsBundle = new Bundle();
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        settingsBundle.putBoolean(
+                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         /*
-         * Add the account and account type, no password or user data
-         * If successful, return the Account object, otherwise report an error.
-         */
-        if (accountManager.addAccountExplicitly(newAccount, null, null)) {
-            /*
-             * If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.
-             */
-        } else {
-            /*
-             * The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.
-             */
-        }
-        return null;
-    }
+         * Request the sync for the default account, authority, and
+         * manual sync settings
+         *
+        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
+    }*/
 }

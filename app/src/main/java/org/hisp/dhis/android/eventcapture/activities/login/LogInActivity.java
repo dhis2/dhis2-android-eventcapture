@@ -29,8 +29,10 @@
 package org.hisp.dhis.android.eventcapture.activities.login;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.BuildConfig;
@@ -111,6 +113,11 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
     public void navigateToHome() {
         ActivityUtils.changeDefaultActivity(getBaseContext(), false);
         startActivity(new Intent(this, HomeActivity.class));
+    }
+
+    @Override
+    public Context getContext() {
+        return getApplicationContext();
     }
 
     private void showError(String message) {
