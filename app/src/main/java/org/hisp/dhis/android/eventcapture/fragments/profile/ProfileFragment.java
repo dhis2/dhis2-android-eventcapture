@@ -46,11 +46,12 @@ import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import java.util.List;
 
 public class ProfileFragment extends Fragment implements IProfileView {
-    RowViewAdapter rowViewAdapter;
+    private RowViewAdapter rowViewAdapter;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
@@ -74,6 +75,6 @@ public class ProfileFragment extends Fragment implements IProfileView {
     @Override
     @UiThread
     public void setProfileFields(List<DataEntity> dataEntities) {
-        rowViewAdapter.update(dataEntities);
+        rowViewAdapter.swap(dataEntities);
     }
 }
