@@ -74,6 +74,6 @@ public class ProfileFragment extends Fragment implements IProfileView {
     @Override
     @UiThread
     public void setProfileFields(List<DataEntity> dataEntities) {
-        rowViewAdapter.update(dataEntities);
+        rowViewAdapter.swap(dataEntities);
     }
 }
