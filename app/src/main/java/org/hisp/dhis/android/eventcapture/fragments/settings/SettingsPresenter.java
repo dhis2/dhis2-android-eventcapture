@@ -11,6 +11,7 @@ import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 import org.hisp.dhis.android.eventcapture.activities.login.LogInPresenter;
+import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
@@ -63,17 +64,8 @@ public class SettingsPresenter implements ISettingsPresenter {
         editor.apply();
         Log.e(CLASS_TAG, "updateFrequency: " + frequency);
 
-        Account mAccount;
-        AccountManager accountManager = (AccountManager) context.getSystemService(context.ACCOUNT_SERVICE);
+        AppAccountManager.getInstance().setPeriodicSync((long) frequency * 60);
 
-        Account all[] = accountManager.getAccounts();
-        for (Account account : all) {
-            ContentResolver.addPeriodicSync(
-                    account,
-                    LogInPresenter.AUTHORITY,
-                    Bundle.EMPTY,
-                    frequency * 60);
-        }
         Log.d("SettingsFragmeent", "sync period = " + frequency + " in seconds: " + (frequency * 60));
 
     }

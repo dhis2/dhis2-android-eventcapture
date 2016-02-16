@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
+import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.common.D2;
@@ -55,13 +56,7 @@ import rx.schedulers.Schedulers;
 public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
     public static final String TAG = LogInPresenter.class.getSimpleName();
 
-    public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.datasync.provider";
-    public static final String ACCOUNT_TYPE = "example.com";
-
-    public static String accountName = "dummyaccount";
-
-    public static Account mAccount;
-    private static int defaultUpdateFrequency = 30;
+    public static String accountName;
 
     private final ILogInView mLoginView;
     private Subscription mLoginSubscription;
@@ -73,7 +68,9 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     @Override
     public void onCreate() {
         super.onCreate();
-        initSyncAccount(); //TODO: remove this when app starts fine without special run configuratoins
+        ///initSyncAccount(); //TODO: remove this when app starts fine without special run configuratoins
+        AppAccountManager.getInstance().createAccount(mLoginView.getContext(), accountName);
+
     }
 
     @Override
@@ -152,7 +149,8 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     public void onSuccess() {
         mLoginView.hideProgress();
 
-        initSyncAccount();
+        //initSyncAccount(); ////////////
+        AppAccountManager.getInstance().createAccount(mLoginView.getContext(), accountName);
 
         mLoginView.navigateToHome();
     }
@@ -190,56 +188,5 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
         } else {
             onUnexpectedError(throwable.getMessage());
         }
-    }
-
-    void initSyncAccount() {
-        mAccount = createSyncAccount(mLoginView.getContext());
-
-        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
-        ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
-
-        SettingPreferences.init(mLoginView.getContext());
-        if(SettingPreferences.backgroundSynchronization()) {
-            long interval = Long.parseLong(SettingPreferences.synchronizationPeriod());
-            Log.d("LoginPresenter", "Initializing sync account, sync interval = " + interval);
-            //long interval = 5;
-
-            ContentResolver.addPeriodicSync(
-                    mAccount,
-                    AUTHORITY,
-                    Bundle.EMPTY,
-                    interval);
-        }
-    }
-
-    /**
-     * Create a new dummy account for the sync adapter
-     *
-     * @param context The application context
-     */
-    public static Account createSyncAccount(Context context) {
-        // Create the account type and default account
-        Account newAccount = new Account(accountName, ACCOUNT_TYPE);
-        // Get an instance of the Android account manager
-        AccountManager accountManager = (AccountManager) context.getSystemService(context.ACCOUNT_SERVICE);
-
-        Boolean doesntExist = accountManager.addAccountExplicitly(newAccount, null, null);
-        if (doesntExist) {
-            /* If you don't set android:syncable="true" in
-             * in your <provider> element in the manifest,
-             * then call context.setIsSyncable(account, AUTHORITY, 1)
-             * here.*/
-            return newAccount;
-        } else {
-            /* The account exists or some other error occurred. Log this, report it,
-             * or handle it internally.*/
-            Account all[] = accountManager.getAccountsByType(ACCOUNT_TYPE);
-            for (Account found : all) {
-                if (found.equals(newAccount)) {
-                    return found;
-                }
-            }
-        }
-        return null; //Not in accounts and existing. this shouldn't happen.
     }
 }

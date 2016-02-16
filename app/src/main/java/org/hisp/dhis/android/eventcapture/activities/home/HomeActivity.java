@@ -28,7 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.activities.home;
 
-import android.accounts.Account;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -47,14 +46,8 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
 
     private static final int DRAWER_ITEM_EVENTS_ID = 34675426;
 
-    // Constants
-    public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.datasync.provider";
-    public static final String ACCOUNT_TYPE = "example.com";
-    public static final String ACCOUNT_NAME = "dummyaccount";
-
     // Instance fields
     private IHomePresenter homePresenter;
-    private Account mAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +62,7 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
 //
 //        onNavigationItemSelected(getNavigationView()
 //                .getMenu().findItem(R.id.drawer_selector));
+
     }
 
     @NonNull
@@ -101,7 +95,6 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                 break;
             }
         }
-
         return true;
     }
 
@@ -130,45 +123,6 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                 pickerFragment.dispatchTouchEvent(event);
             }
         }
-
         return super.dispatchTouchEvent(event);
     }
-
-    /**
-     * A method to set the sync period for the app.
-     *
-     * @param interval in seconds
-     */
-/*    public void setPeriodicSync(Long interval) {
-        //TODO  Supposedly the Settings fragment will call this ? Or how should I do this... need to plan this out better. Or use observable.
-
-        //ContentResolver.removePeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY);
-
-        ContentResolver.addPeriodicSync(
-                mAccount,
-                AUTHORITY,
-                Bundle.EMPTY,
-                interval);
-    }*/
-
-    /**
-     * Manually sync by calling requestSync(). This is an
-     * asynchronous operation.
-     * <p/>
-     * This method is attached to the refresh button in the layout
-     * XML file
-     */
-/*    public void manualSync() {
-        // Pass the settings flags by inserting them in a bundle
-        Bundle settingsBundle = new Bundle();
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_MANUAL, true);
-        settingsBundle.putBoolean(
-                ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
-        /*
-         * Request the sync for the default account, authority, and
-         * manual sync settings
-         *
-        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
-    }*/
 }
