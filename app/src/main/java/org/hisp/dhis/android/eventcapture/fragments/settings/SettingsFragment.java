@@ -30,6 +30,7 @@ package org.hisp.dhis.android.eventcapture.fragments.settings;
 
 import android.content.ContentResolver;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
@@ -55,6 +56,8 @@ public class SettingsFragment extends AbsSettingsFragment {
         if (!ContentResolver.getMasterSyncAutomatically() && isEnabled) {
             //warn the user that synchronization is globally off.
         }
+
+
         return true;
     }
 
@@ -79,5 +82,9 @@ public class SettingsFragment extends AbsSettingsFragment {
     public boolean onCrashReportsChanged(boolean isEnabled) {
         mSettingsPresenter.setCrashReports(getContext(), isEnabled);
         return true;
+    }
+
+    public void showMessage(CharSequence msg) {
+        Snackbar.make(getView(), msg, Snackbar.LENGTH_LONG).show();
     }
 }
