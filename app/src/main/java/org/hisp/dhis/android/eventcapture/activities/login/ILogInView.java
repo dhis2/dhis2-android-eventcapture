@@ -28,8 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-import android.content.Context;
-
 public interface ILogInView {
     void showProgress();
 
@@ -43,5 +41,4 @@ public interface ILogInView {
 
     void navigateToHome();
 
-    Context getContext(); //TODO: remove when moving to using Dagger
 }

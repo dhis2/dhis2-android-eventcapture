@@ -30,6 +30,7 @@ package org.hisp.dhis.android.eventcapture.activities.home;
 
 import android.os.Bundle;
 
+import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 
@@ -55,6 +56,9 @@ public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this);
+
+        //init the user account for synchronization:
+        AppAccountManager.getInstance().createAccount(homeView.getContext(), D2.configuration().getUsername());
     }
 
     @Override
@@ -62,7 +66,6 @@ public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
-
         subscription = null;
     }
 

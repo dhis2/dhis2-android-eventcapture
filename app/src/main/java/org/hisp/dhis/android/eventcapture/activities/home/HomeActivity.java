@@ -28,19 +28,27 @@
 
 package org.hisp.dhis.android.eventcapture.activities.home;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.activities.login.LogInPresenter;
+import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
+import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
+
+import rx.functions.Action1;
 
 public class HomeActivity extends AbsHomeActivity implements IHomeView {
 
@@ -59,10 +67,9 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
         addMenuItem(DRAWER_ITEM_EVENTS_ID, R.drawable.ic_add,
                 R.string.drawer_item_events);
         setSynchronizedMessage("Never");
-//
+
 //        onNavigationItemSelected(getNavigationView()
 //                .getMenu().findItem(R.id.drawer_selector));
-
     }
 
     @NonNull
@@ -124,5 +131,10 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
             }
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public Context getContext() {
+        return getApplicationContext();
     }
 }

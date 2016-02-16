@@ -28,7 +28,9 @@
 
 package org.hisp.dhis.android.eventcapture.fragments.settings;
 
+import android.content.ContentResolver;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 
@@ -50,7 +52,10 @@ public class SettingsFragment extends AbsSettingsFragment {
     @Override
     public boolean onBackgroundSynchronizationChanged(boolean isEnabled) {
         mSettingsPresenter.setBackgroundSynchronisation(getContext(), isEnabled);
-        return false;
+        if (!ContentResolver.getMasterSyncAutomatically() && isEnabled) {
+            //warn the user that synchronization is globally off.
+        }
+        return true;
     }
 
     @Override
@@ -60,8 +65,9 @@ public class SettingsFragment extends AbsSettingsFragment {
 
     @Override
     public boolean onSynchronizationPeriodChanged(String newPeriod) {
+        Log.d("SettingsFragment", "newPeriod = " + newPeriod);
         mSettingsPresenter.setUpdateFrequency(getContext(), Integer.parseInt(newPeriod));
-        return false;
+        return true;
     }
 
     @Override
@@ -72,6 +78,6 @@ public class SettingsFragment extends AbsSettingsFragment {
     @Override
     public boolean onCrashReportsChanged(boolean isEnabled) {
         mSettingsPresenter.setCrashReports(getContext(), isEnabled);
-        return false;
+        return true;
     }
 }

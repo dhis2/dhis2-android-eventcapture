@@ -28,23 +28,13 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 
-import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
-import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.common.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
-import org.hisp.dhis.client.sdk.ui.SettingPreferences;
 
 import java.net.HttpURLConnection;
 
@@ -68,9 +58,6 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     @Override
     public void onCreate() {
         super.onCreate();
-        ///initSyncAccount(); //TODO: remove this when app starts fine without special run configuratoins
-        AppAccountManager.getInstance().createAccount(mLoginView.getContext(), accountName);
-
     }
 
     @Override
@@ -148,9 +135,6 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     @Override
     public void onSuccess() {
         mLoginView.hideProgress();
-
-        //initSyncAccount(); ////////////
-        AppAccountManager.getInstance().createAccount(mLoginView.getContext(), accountName);
 
         mLoginView.navigateToHome();
     }
