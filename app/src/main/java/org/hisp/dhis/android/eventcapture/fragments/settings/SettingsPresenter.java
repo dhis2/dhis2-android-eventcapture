@@ -41,6 +41,12 @@ public class SettingsPresenter implements ISettingsPresenter {
         D2.signOut();
         ActivityUtils.changeDefaultActivity(context, true);
         context.startActivity(new Intent(mSettingsFragment.getActivity(), LogInActivity.class));
+
+        //TODO: When loging out functionality works test the following:
+        //log in with 1 user, log out and log in with another.
+        //Now sync triggers twice, once for each account. But the app is only logged in with one.
+        // Maybe we should remove the account before/during logging out ?
+        //removeAccountExplicitly(Account account)
     }
 
     @Override
