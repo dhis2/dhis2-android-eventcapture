@@ -1,10 +1,13 @@
 package org.hisp.dhis.android.eventcapture.fragments.itemlist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import org.hisp.dhis.android.eventcapture.fragments.dataentry.DataEntryActivity;
 import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
+import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
@@ -35,6 +38,14 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
             mItemListRowAdapter = new ItemListRowAdapter(itemListRowCollection);
             mRecyclerView.setAdapter(mItemListRowAdapter);
 
+            for(ItemListRow itemListRow : itemListRowCollection) {
+                itemListRow.setOnRowClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        getContext().startActivity(new Intent(getContext(), DataEntryActivity.class));
+                    }
+                });
+            }
         }
     }
 

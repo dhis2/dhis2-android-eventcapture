@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
@@ -15,6 +16,7 @@ import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
 import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickableItemClearListener;
@@ -24,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class OrganisationUnitProgramPickerFragment extends PickerFragment implements IOrganisationUnitProgramPickerView {
+public class OrganisationUnitProgramPickerFragment extends PickerFragment implements IOrganisationUnitProgramPickerView, AutoCompleteDialogFragment.OnOptionSelectedListener {
+    public static final String TAG = OrganisationUnitProgramPickerFragment.class.getSimpleName();
     private OrganisationUnitProgramPickerPresenter mOrganisationUnitProgramPickerPresenter;
     private Picker mProgramPicker;
     private Picker mOrganisationUnitPicker;
@@ -53,32 +56,45 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
     public void createPickers() {
         mOrganisationUnitPicker = new Picker(new ArrayList<IPickable>(), OrganisationUnit.class.getSimpleName(), OrganisationUnit.class.getName());
-        mOrganisationUnitPicker.setListener(new AdapterView.OnItemClickListener() {
+        mOrganisationUnitPicker.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(mOrganisationUnitPicker.getPickedItem() != null) {
-                    OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) mOrganisationUnitPicker.getPickedItem();
-                    mOrganisationUnitProgramPickerPresenter.setPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
-                    selectorView.onPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
+            public void onClick(View v) {
+                showDialog(OrganisationUnit.class.getSimpleName(),
+                        mOrganisationUnitPicker.getPickableItems(),
+                        OrganisationUnitProgramPickerFragment.this);
+            }
+        });
+        mOrganisationUnitPicker.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    showDialog(OrganisationUnit.class.getSimpleName(),
+                            mOrganisationUnitPicker.getPickableItems(),
+                            OrganisationUnitProgramPickerFragment.this);
                 }
             }
         });
-        mProgramPicker = new Picker(new ArrayList<IPickable>(), Program.class.getSimpleName(), Program.class.getName());
-        mProgramPicker.setListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        if (mProgramPicker.getPickedItem() != null) {
-                            onPickerClickedListener.activate();
-                            ProgramPickable programPickable = (ProgramPickable) mProgramPicker.getPickedItem();
-                            selectorView.onPickedProgram(programPickable.getProgram());
-                        } else {
-                            onPickerClickedListener.deactivate();
-                        }
-                    }
+        mProgramPicker = new Picker(new ArrayList<IPickable>(), Program.class.getSimpleName(), Program.class.getName());
+        mProgramPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog(Program.class.getSimpleName(),
+                        mProgramPicker.getPickableItems(),
+                        OrganisationUnitProgramPickerFragment.this);
+            }
+        });
+        mProgramPicker.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus) {
+                    showDialog(Program.class.getSimpleName(),
+                            mProgramPicker.getPickableItems(),
+                            OrganisationUnitProgramPickerFragment.this);
                 }
-        );
+            }
+        });
+
 
         mProgramPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
             @Override
@@ -126,5 +142,35 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
     public void setSelectorView(ISelectorView selectorView) {
         this.selectorView = selectorView;
+    }
+
+    @Override
+    public void onOptionSelected(IPickable pickable) {
+        if(pickable instanceof OrganisationUnitPickable) {
+            OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) pickable;
+            mOrganisationUnitProgramPickerPresenter.setPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
+            selectorView.onPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
+            mOrganisationUnitPicker.setPickedItem(organisationUnitPickable);
+            mOrganisationUnitPicker.showNext();
+        }
+        else if(pickable instanceof ProgramPickable) {
+            ProgramPickable programPickable = (ProgramPickable) pickable;
+            if(pickable != null) {
+                selectorView.onPickedProgram(programPickable.getProgram());
+                mProgramPicker.setPickedItem(programPickable);
+                onPickerClickedListener.activate();
+            }
+            else {
+                onPickerClickedListener.deactivate();
+            }
+
+        }
+    }
+
+    public void showDialog(String title, List<IPickable> pickables,
+                           AutoCompleteDialogFragment.OnOptionSelectedListener
+                                   onOptionSelectedListener) {
+        AutoCompleteDialogFragment.newInstance(title, pickables, onOptionSelectedListener)
+        .show(getFragmentManager(), TAG + title);
     }
 }

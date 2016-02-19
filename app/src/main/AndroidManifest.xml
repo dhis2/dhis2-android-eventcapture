@@ -63,6 +63,9 @@
         <!--Details activity that shows itemList. -->
         <activity android:name=".activities.home.DetailsActivity" />
 
+        <!-- DataEntryFragment -->
+        <activity android:name=".fragments.dataentry.DataEntryActivity"/>
+
         <!-- stub Authenticator service -->
         <service android:name=".datasync.AuthenticatorService">
             <intent-filter>
