@@ -42,6 +42,7 @@ android {
         targetSdkVersion cfg.targetSdkVersion
         versionCode cfg.versionCode
         versionName cfg.versionName
+
         multiDexEnabled true
     }
 
@@ -82,17 +83,14 @@ android {
 dependencies {
 
     // Local
-    compile project(':core-android')
-    compile project(':ui')
+    compile project(":core-android")
+    compile project(":ui")
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
     // Square/Jake Wharton
     compile "com.jakewharton.timber:timber:${libs.timberVersion}"
-
-    // Test
-    testCompile "junit:junit:${libs.jUnitVersion}"
 
     // Fabric
     compile("com.crashlytics.sdk.android:crashlytics:${libs.crashlyticsVersion}@aar") {
@@ -102,4 +100,7 @@ dependencies {
     // Stetho
     debugCompile "com.facebook.stetho:stetho:${libs.stethoVersion}"
     debugCompile "com.facebook.stetho:stetho-okhttp:${libs.stethoVersion}"
+
+    // Test
+    testCompile "junit:junit:${libs.jUnitVersion}"
 }
