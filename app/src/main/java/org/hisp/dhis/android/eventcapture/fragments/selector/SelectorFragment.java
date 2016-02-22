@@ -29,20 +29,17 @@ import rx.Observable;
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
+    public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
+
     private ISelectorPresenter mSelectorPresenter;
     private CircularProgressBar progressBar;
 
     private OrganisationUnit pickedOrganisationUnit;
     private Program pickedProgram;
 
-
     private FloatingActionButton mFloatingActionButton;
-    private boolean hiddenFloatingActionButton; //to save the state of the action button.
-    public static final String FLOATING_BUTTON_STATE = "extra:FloatingButtonState";
-
-    public SelectorFragment() {
-
-    }
+    private boolean hiddenFloatingActionButton;
+    //to save the state of the action button.
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
