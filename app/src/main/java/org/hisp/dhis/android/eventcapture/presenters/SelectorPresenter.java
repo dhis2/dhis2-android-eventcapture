@@ -45,7 +45,8 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             synchronizationSubscription.unsubscribe();
             synchronizationSubscription = null;
         }
-        if (pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription.isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription
+                .isUnsubscribed()) {
             pickedOrganisationUnitSubscription.unsubscribe();
             pickedOrganisationUnitSubscription = null;
         }
@@ -78,7 +79,8 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
-        if (pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription.isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription
+                .isUnsubscribed()) {
             pickedOrganisationUnitSubscription = organisationUnitObservable.
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).
