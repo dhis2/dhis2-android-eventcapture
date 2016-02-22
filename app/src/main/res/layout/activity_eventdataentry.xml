@@ -41,16 +41,78 @@
 
     <include layout="@layout/toolbar"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal">
 
-      <!--<android.support.design.widget.TabLayout-->
-          <!--android:id="@+id/tabLayout"-->
-          <!--android:layout_height="wrap_content"-->
-          <!--android:layout_width="match_parent"-->
-          <!--app:tabContentStart="64dp"-->
-          <!--app:tabMode="scrollable"-->
-          <!--app:tabTextColor="@android:color/white"-->
-          <!--app:tabGravity="center"-->
-          <!--/>-->
+            <!--<TextSwitcher-->
+                <!--android:id="@+id/back_button_textswitcher_eventdataentry"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_gravity="start">-->
+
+                <!--<TextView-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:textSize="20sp" />-->
+
+                <!--<TextView-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--android:textSize="20sp"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:layout_height="wrap_content" />-->
+
+            <!--</TextSwitcher>-->
+
+            <TextSwitcher
+                android:id="@+id/textswitcher_eventdataentry"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center">
+
+                <TextView
+                    android:textColor="@android:color/white"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_height="wrap_content" />
+
+            </TextSwitcher>
+
+            <!--<TextSwitcher-->
+                <!--android:id="@+id/forward_button_textswitcher_eventdataentry"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_gravity="end">-->
+
+                <!--<TextView-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:textSize="20sp" />-->
+
+                <!--<TextView-->
+                    <!--android:textColor="@android:color/white"-->
+                    <!--android:textSize="20sp"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:layout_height="wrap_content" />-->
+
+            <!--</TextSwitcher>-->
+        </LinearLayout>
+
 
   </android.support.design.widget.AppBarLayout>
 
@@ -64,17 +126,19 @@
       app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
-  <android.support.v4.view.PagerTitleStrip
-      android:id="@+id/pagerTitleStrip"
-      android:layout_height="48dp"
-      android:layout_width="match_parent"
-      android:background="@color/color_primary_default"
-      android:paddingTop="8dp"
-      android:paddingBottom="8dp"
-      app:paddingStart="64dp"
-      app:paddingEnd="64dp"
+  <!--<android.support.v4.view.PagerTitleStrip-->
+      <!--android:id="@+id/pagerTitleStrip"-->
+      <!--android:layout_height="48dp"-->
+      <!--android:layout_width="match_parent"-->
+      <!--android:background="@color/color_primary_default"-->
+      <!--android:paddingTop="8dp"-->
+      <!--android:paddingBottom="8dp"-->
+      <!--app:paddingStart="64dp"-->
+      <!--app:paddingEnd="64dp"-->
 
-      />
+      <!--/>-->
+
+
 
 
   </android.support.v4.view.ViewPager>
