@@ -26,7 +26,8 @@ import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
 
-public class SelectorFragment extends AbsSelectorFragment implements ISelectorView, OnAllPickersSelectedListener, View.OnClickListener {
+public class SelectorFragment extends AbsSelectorFragment implements ISelectorView,
+        OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
     public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
@@ -45,7 +46,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
+            hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE,
+                    hiddenFloatingActionButton);
         }
         mSelectorPresenter = new SelectorPresenter(this);
         setHasOptionsMenu(true);
@@ -60,18 +62,22 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment = (OrganisationUnitProgramPickerFragment) createPickerFragment();
-            attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment, OrganisationUnitProgramPickerFragment.TAG);
+            OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment =
+                    (OrganisationUnitProgramPickerFragment) createPickerFragment();
+            attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment,
+                    OrganisationUnitProgramPickerFragment.TAG);
             hiddenFloatingActionButton = true;
         } else {
-            hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
+            hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE,
+                    hiddenFloatingActionButton);
         }
 
         mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
         mFloatingActionButton.setOnClickListener(this);
 
-        boolean  onTablet = getResources().getBoolean(org.hisp.dhis.android.eventcapture.R.bool.isTablet);
-        if(!onTablet) {
+        boolean onTablet = getResources().getBoolean(org.hisp.dhis.android.eventcapture.R.bool
+                .isTablet);
+        if (!onTablet) {
             if (hiddenFloatingActionButton) {
                 //mFloatingActionButton.hide();
             } else {
@@ -170,7 +176,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void activate() {
         // don't show unless in portrait.
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             mFloatingActionButton.show();
             hiddenFloatingActionButton = false;
         }
@@ -183,7 +189,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     }
 
     public Fragment createPickerFragment() {
-        OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
+        OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment = new
+                OrganisationUnitProgramPickerFragment();
         //these callbacks are lost. (part of the problem)
         mOrganisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
         mOrganisationUnitProgramPickerFragment.setSelectorView(this);
