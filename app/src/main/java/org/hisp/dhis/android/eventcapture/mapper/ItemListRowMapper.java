@@ -41,24 +41,24 @@ public class ItemListRowMapper {
     }
 
     public List<ItemListRow> transform(Observable<List<Event>> events) {
-        List<Pair<String,Integer>> valuesPos = new ArrayList<>();
-        valuesPos.add(new Pair<String, Integer>("Erling", 1));
-        valuesPos.add(new Pair<String, Integer>("Fjelstad", 2));
-        valuesPos.add(new Pair<String, Integer>("Mann", 3));
-        ItemListRow itemCardRow1 = new ItemListRow(null, valuesPos, EItemListRowStatus.OFFLINE.toString());
+        List<Pair<String,Integer>> itemListRow1Values = new ArrayList<>();
+        itemListRow1Values.add(new Pair<String, Integer>("Erling", 1));
+        itemListRow1Values.add(new Pair<String, Integer>("Fjelstad", 2));
+        itemListRow1Values.add(new Pair<String, Integer>("Mann", 3));
+        ItemListRow itemListRow1 = new ItemListRow(null, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
 
-        List<Pair<String,Integer>> valuesPos1 = new ArrayList<>();
-        valuesPos1.add(new Pair<String, Integer>("Simen", 1));
-        valuesPos1.add(new Pair<String, Integer>("R", 1));
-        valuesPos1.add(new Pair<String, Integer>("Russnes", 2));
-        valuesPos1.add(new Pair<String, Integer>("Mann", 3));
-        ItemListRow itemCardRow2 = new ItemListRow(null, valuesPos1, EItemListRowStatus.SENT.toString());
-        List<Pair<String,Integer>> valuesPos2 = new ArrayList<>();
-        valuesPos2.add(new Pair<String, Integer>("Araz", 1));
-        valuesPos2.add(new Pair<String, Integer>("AB", 1));
-        valuesPos2.add(new Pair<String, Integer>("Abishov", 2));
-        valuesPos2.add(new Pair<String, Integer>("Man", 3));
-        ItemListRow itemCardRow3 = new ItemListRow(null, valuesPos2, EItemListRowStatus.ERROR.toString());
+        List<Pair<String,Integer>> itemListRow2Values = new ArrayList<>();
+        itemListRow2Values.add(new Pair<String, Integer>("Simen", 1));
+        itemListRow2Values.add(new Pair<String, Integer>("R", 1));
+        itemListRow2Values.add(new Pair<String, Integer>("Russnes", 2));
+        itemListRow2Values.add(new Pair<String, Integer>("Mann", 3));
+        ItemListRow itemListRow2 = new ItemListRow(null, itemListRow2Values, EItemListRowStatus.SENT.toString());
+        List<Pair<String,Integer>> itemListRow3Values = new ArrayList<>();
+        itemListRow3Values.add(new Pair<String, Integer>("Araz", 1));
+        itemListRow3Values.add(new Pair<String, Integer>("AB", 1));
+        itemListRow3Values.add(new Pair<String, Integer>("Abishov", 2));
+        itemListRow3Values.add(new Pair<String, Integer>("Man", 3));
+        ItemListRow itemListRow3 = new ItemListRow(null, itemListRow3Values, EItemListRowStatus.ERROR.toString());
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,21 +78,21 @@ public class ItemListRowMapper {
                 return true;
             }
         };
-        itemCardRow1.setOnRowClickListener(onClickListener);
-        itemCardRow1.setOnStatusClickListener(onStatusClickListener);
-        itemCardRow1.setOnLongClickListener(onLongClickListener);
-        itemCardRow2.setOnRowClickListener(onClickListener);
-        itemCardRow2.setOnStatusClickListener(onStatusClickListener);
-        itemCardRow2.setOnLongClickListener(onLongClickListener);
-        itemCardRow3.setOnRowClickListener(onClickListener);
-        itemCardRow3.setOnStatusClickListener(onStatusClickListener);
-        itemCardRow3.setOnLongClickListener(onLongClickListener);
-        List<ItemListRow> itemCardRowList = new ArrayList<>();
-        itemCardRowList.add(itemCardRow1);
-        itemCardRowList.add(itemCardRow2);
-        itemCardRowList.add(itemCardRow3);
+        itemListRow1.setOnRowClickListener(onClickListener);
+        itemListRow1.setOnStatusClickListener(onStatusClickListener);
+        itemListRow1.setOnLongClickListener(onLongClickListener);
+        itemListRow2.setOnRowClickListener(onClickListener);
+        itemListRow2.setOnStatusClickListener(onStatusClickListener);
+        itemListRow2.setOnLongClickListener(onLongClickListener);
+        itemListRow3.setOnRowClickListener(onClickListener);
+        itemListRow3.setOnStatusClickListener(onStatusClickListener);
+        itemListRow3.setOnLongClickListener(onLongClickListener);
+        List<ItemListRow> itemListRows = new ArrayList<>();
+        itemListRows.add(itemListRow1);
+        itemListRows.add(itemListRow2);
+        itemListRows.add(itemListRow3);
 
-        return itemCardRowList;
+        return itemListRows;
     }
 
 }
