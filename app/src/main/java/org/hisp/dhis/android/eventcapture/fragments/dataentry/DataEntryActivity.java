@@ -7,11 +7,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
@@ -20,11 +21,9 @@ import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 public class DataEntryActivity extends FragmentActivity {
 
     private ViewPager viewPager;
-    private PagerAdapter pagerAdapter;
     private AppBarLayout appBarLayout;
-    private TextSwitcher backButtonTextSwitcher,
-                         forwardButtonTextSwitcher,
-                         sectionLabelTextSwitcher;
+    private TextSwitcher sectionLabelTextSwitcher;
+    private ImageView previousSectionButton, nextSectionButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,17 +31,19 @@ public class DataEntryActivity extends FragmentActivity {
         setContentView(R.layout.activity_eventdataentry);
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
-//        backButtonTextSwitcher = (TextSwitcher) findViewById(R.id.back_button_textswitcher_eventdataentry);
-//        forwardButtonTextSwitcher = (TextSwitcher) findViewById(R.id.forward_button_textswitcher_eventdataentry);
+
+
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
+        previousSectionButton = (ImageView) findViewById(R.id.previous_section);
+        nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
 
-        viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
-                        backButtonTextSwitcher,
-                        forwardButtonTextSwitcher,
-                        sectionLabelTextSwitcher));
 
         viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
+        viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
+                previousSectionButton,
+                nextSectionButton,
+                sectionLabelTextSwitcher));
     }
 
     @Override
@@ -66,7 +67,6 @@ public class DataEntryActivity extends FragmentActivity {
             return new ProfileFragment();
         }
 
-
         @Override
         public int getCount() {
             return 7;
@@ -74,20 +74,18 @@ public class DataEntryActivity extends FragmentActivity {
     }
 
     private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener {
-        private TextSwitcher backButtonTextSwitcher,
-                forwardButtonTextSwitcher,
-                sectionLabelTextSwitcher;
-
+        private ImageView nextSectionButton, previousSectionButton;
+        private TextSwitcher sectionLabelTextSwitcher;
         private int lastPosition;
-        private final static int MAX_PAGES = 7;
+        private int numberOfPages;
         private Animation slideOut, slideIn;
 
-        public DataEntrySectionPageChangedListener(TextSwitcher backButtonTextSwitcher,
-                                                   TextSwitcher forwardButtonTextSwitcher,
+        public DataEntrySectionPageChangedListener(ImageView previousSectionButton,
+                                                   ImageView nextSectionButton,
                                                    TextSwitcher sectionLabelTextSwitcher) {
             super();
-            this.backButtonTextSwitcher = backButtonTextSwitcher;
-            this.forwardButtonTextSwitcher = forwardButtonTextSwitcher;
+            this.previousSectionButton = previousSectionButton;
+            this.nextSectionButton = nextSectionButton;
             this.sectionLabelTextSwitcher = sectionLabelTextSwitcher;
             this.slideOut = AnimationUtils.
                     loadAnimation(
@@ -95,6 +93,17 @@ public class DataEntryActivity extends FragmentActivity {
             this.slideIn = AnimationUtils
                     .loadAnimation(
                             sectionLabelTextSwitcher.getContext(), android.R.anim.slide_in_left);
+
+            this.sectionLabelTextSwitcher.setText(viewPager.getAdapter().getPageTitle(lastPosition));
+            this.previousSectionButton.setVisibility(View.INVISIBLE);
+            this.nextSectionButton.setVisibility(View.INVISIBLE);
+
+            this.numberOfPages = viewPager.getAdapter().getCount() - 1;
+
+            if(viewPager.getAdapter().getCount() > 0) {
+                this.nextSectionButton.setVisibility(View.VISIBLE);
+            }
+
         }
 
         @Override
@@ -104,47 +113,31 @@ public class DataEntryActivity extends FragmentActivity {
         }
 
         private void animateUiChanges(int position) {
-            sectionLabelTextSwitcher.setText("Section " + position);
+            sectionLabelTextSwitcher.setText(viewPager.getAdapter().getPageTitle(position));
 
-//            switch (position) {
-//                case 0: {
-//                    backButtonTextSwitcher.setText("");
-//                    forwardButtonTextSwitcher.setText(">");
-//                }
-//                case (MAX_PAGES): {
-//                    backButtonTextSwitcher.setText("<");
-//                    forwardButtonTextSwitcher.setText("");
-//                }
-//                default: {
-//                    backButtonTextSwitcher.setText("<");
-//                    forwardButtonTextSwitcher.setText(">");
-//                }
-//            }
-
+            if(position == 0) {
+                previousSectionButton.setVisibility(View.INVISIBLE);
+                nextSectionButton.setVisibility(View.VISIBLE);
+            }
+            else if(position == numberOfPages) {
+                previousSectionButton.setVisibility(View.VISIBLE);
+                nextSectionButton.setVisibility(View.INVISIBLE);
+            }
+            else {
+                previousSectionButton.setVisibility(View.VISIBLE);
+                nextSectionButton.setVisibility(View.VISIBLE);
+            }
 
             if(position >= lastPosition) {
                 sectionLabelTextSwitcher.setInAnimation(slideOut);
                 sectionLabelTextSwitcher.setOutAnimation(slideIn);
-
-//                backButtonTextSwitcher.setInAnimation(slideOut);
-//                backButtonTextSwitcher.setOutAnimation(slideIn);
-//
-//                forwardButtonTextSwitcher.setInAnimation(slideOut);
-//                forwardButtonTextSwitcher.setOutAnimation(slideIn);
             }
             else {
                 sectionLabelTextSwitcher.setInAnimation(slideIn);
                 sectionLabelTextSwitcher.setOutAnimation(slideOut);
-
-//                backButtonTextSwitcher.setInAnimation(slideIn);
-//                backButtonTextSwitcher.setOutAnimation(slideOut);
-//
-//                forwardButtonTextSwitcher.setInAnimation(slideIn);
-//                forwardButtonTextSwitcher.setOutAnimation(slideOut);
             }
 
             lastPosition = position;
         }
-
     }
 }

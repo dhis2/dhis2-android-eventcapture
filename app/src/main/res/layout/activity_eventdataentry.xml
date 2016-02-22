@@ -44,35 +44,27 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="1">
 
-            <!--<TextSwitcher-->
-                <!--android:id="@+id/back_button_textswitcher_eventdataentry"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:layout_gravity="start">-->
-
-                <!--<TextView-->
-                    <!--android:textColor="@android:color/white"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_gravity="center"-->
-                    <!--android:textSize="20sp" />-->
-
-                <!--<TextView-->
-                    <!--android:textColor="@android:color/white"-->
-                    <!--android:textSize="20sp"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_gravity="center"-->
-                    <!--android:layout_height="wrap_content" />-->
-
-            <!--</TextSwitcher>-->
+            <ImageView
+                android:id="@+id/previous_section"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="@drawable/transparent_selector"
+                android:visibility="gone"
+                android:clickable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_arrow_back"
+                android:layout_weight="0.1"/>
 
             <TextSwitcher
                 android:id="@+id/textswitcher_eventdataentry"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_gravity="center">
+                android:layout_gravity="center"
+                android:layout_weight="0.8">
 
                 <TextView
                     android:textColor="@android:color/white"
@@ -90,57 +82,26 @@
 
             </TextSwitcher>
 
-            <!--<TextSwitcher-->
-                <!--android:id="@+id/forward_button_textswitcher_eventdataentry"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:layout_gravity="end">-->
+            <ImageView
+                android:id="@+id/next_section"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.1"
+                android:adjustViewBounds="true"
+                android:background="@drawable/transparent_selector"
+                android:visibility="gone"
+                android:clickable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_arrow_forward" />
 
-                <!--<TextView-->
-                    <!--android:textColor="@android:color/white"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_gravity="center"-->
-                    <!--android:textSize="20sp" />-->
-
-                <!--<TextView-->
-                    <!--android:textColor="@android:color/white"-->
-                    <!--android:textSize="20sp"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_gravity="center"-->
-                    <!--android:layout_height="wrap_content" />-->
-
-            <!--</TextSwitcher>-->
         </LinearLayout>
-
-
   </android.support.design.widget.AppBarLayout>
-
-
-
 
   <android.support.v4.view.ViewPager
       android:id="@+id/viewpager_eventdataentry_fragment"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-
-  <!--<android.support.v4.view.PagerTitleStrip-->
-      <!--android:id="@+id/pagerTitleStrip"-->
-      <!--android:layout_height="48dp"-->
-      <!--android:layout_width="match_parent"-->
-      <!--android:background="@color/color_primary_default"-->
-      <!--android:paddingTop="8dp"-->
-      <!--android:paddingBottom="8dp"-->
-      <!--app:paddingStart="64dp"-->
-      <!--app:paddingEnd="64dp"-->
-
-      <!--/>-->
-
-
-
-
   </android.support.v4.view.ViewPager>
 
 
