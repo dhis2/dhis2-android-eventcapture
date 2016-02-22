@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import org.hisp.dhis.android.eventcapture.mapper.ItemListRowMapper;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 
@@ -26,6 +26,7 @@ public class ItemListPresenter extends AbsPresenter {
     public void setItemListView(@NonNull IItemListView mItemListView) {
         this.mItemListView = mItemListView;
     }
+
     @Override
     public void onCreate() {
         this.loadEventList();

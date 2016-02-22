@@ -30,7 +30,7 @@ package org.hisp.dhis.android.eventcapture;
 
 import android.app.Application;
 
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 
 import timber.log.Timber;
 

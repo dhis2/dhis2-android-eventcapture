@@ -3,7 +3,7 @@ package org.hisp.dhis.android.eventcapture.views;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
@@ -55,5 +55,4 @@ public class ProgramPickable implements IPickable {
     public Observable<Program> getProgram() {
         return D2.programs().get(mId);
     }
-
 }

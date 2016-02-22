@@ -1,16 +1,13 @@
 package org.hisp.dhis.android.eventcapture.fragments.picker;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 
-import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
 import org.hisp.dhis.android.eventcapture.fragments.selector.OnAllPickersSelectedListener;
 import org.hisp.dhis.android.eventcapture.presenters.OrganisationUnitProgramPickerPresenter;
-import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitPickableListener;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
 import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
 import org.hisp.dhis.android.eventcapture.views.ProgramPickable;

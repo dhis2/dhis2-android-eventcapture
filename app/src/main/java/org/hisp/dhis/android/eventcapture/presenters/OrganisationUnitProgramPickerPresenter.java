@@ -4,7 +4,7 @@ import org.hisp.dhis.android.eventcapture.mapper.OrganisationUnitPickableMapper;
 import org.hisp.dhis.android.eventcapture.mapper.ProgramPickableMapper;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;

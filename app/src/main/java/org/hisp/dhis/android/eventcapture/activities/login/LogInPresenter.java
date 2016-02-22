@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture.activities.login;
 import android.os.Handler;
 
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
