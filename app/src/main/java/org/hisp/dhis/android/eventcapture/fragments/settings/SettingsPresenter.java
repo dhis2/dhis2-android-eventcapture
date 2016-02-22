@@ -10,12 +10,12 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 
 /**
  * This is the presenter, using MVP.
  * This class controls what is shown in the view. (AbsSettingsFragment).
- * <p/>
+ * <p>
  * Created by Vladislav Georgiev Alfredov on 1/15/16.
  */
 public class SettingsPresenter implements ISettingsPresenter {

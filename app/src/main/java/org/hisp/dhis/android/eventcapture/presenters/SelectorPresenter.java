@@ -2,7 +2,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.fragments.selector.ISelectorView;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 
@@ -41,15 +41,15 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
+        if (synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
             synchronizationSubscription.unsubscribe();
             synchronizationSubscription = null;
         }
-        if(pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription.isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription.isUnsubscribed()) {
             pickedOrganisationUnitSubscription.unsubscribe();
             pickedOrganisationUnitSubscription = null;
         }
-        if(pickedProgramSubscription != null && !pickedProgramSubscription.isUnsubscribed()) {
+        if (pickedProgramSubscription != null && !pickedProgramSubscription.isUnsubscribed()) {
             pickedProgramSubscription.unsubscribe();
             pickedProgramSubscription = null;
         }
@@ -57,7 +57,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void initializeSynchronization() {
-        if(synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
+        if (synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
             mSelectorView.onStartLoading();
             synchronizationSubscription = D2.me().syncAssignedPrograms()
                     .subscribeOn(Schedulers.io())
@@ -78,7 +78,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
-        if(pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription.isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription.isUnsubscribed()) {
             pickedOrganisationUnitSubscription = organisationUnitObservable.
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).
@@ -93,7 +93,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void onPickedProgram(Observable<Program> programObservable) {
-        if(pickedProgramSubscription == null || pickedProgramSubscription.isUnsubscribed()) {
+        if (pickedProgramSubscription == null || pickedProgramSubscription.isUnsubscribed()) {
             pickedOrganisationUnitSubscription = programObservable.
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).

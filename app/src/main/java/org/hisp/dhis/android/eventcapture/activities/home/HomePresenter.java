@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture.activities.home;
 import android.os.Bundle;
 
 import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 
 import rx.Subscription;

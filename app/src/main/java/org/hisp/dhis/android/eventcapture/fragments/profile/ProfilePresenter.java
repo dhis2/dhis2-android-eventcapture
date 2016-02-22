@@ -29,7 +29,7 @@
 package org.hisp.dhis.android.eventcapture.fragments.profile;
 
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
-import org.hisp.dhis.client.sdk.android.common.D2;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
