@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
@@ -41,6 +42,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     private FloatingActionButton mFloatingActionButton;
     private boolean hiddenFloatingActionButton;
     //to save the state of the action button.
+
+    private OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,7 +91,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         }
 
         progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
-        hideProgress();
+        //hideProgress();
 
         mSelectorPresenter.initializeSynchronization();
     }
@@ -145,6 +148,12 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
 
     private void hideProgress() {
+
+        //show the selector fragment.
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.show(mOrganisationUnitProgramPickerFragment);
+        ft.commit();
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
             progressBar.startAnimation(anim);
@@ -153,6 +162,15 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     }
 
     private void showProgress() {
+
+        //TODO: show the progress bar in the mtiddle of the fragment.
+        //hide the Floating action button:
+        mFloatingActionButton.hide();
+        //hide the pickers:
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.hide(mOrganisationUnitProgramPickerFragment);
+        ft.commit();
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.in_up);
             progressBar.startAnimation(anim);
@@ -189,8 +207,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     }
 
     public Fragment createPickerFragment() {
-        OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment = new
-                OrganisationUnitProgramPickerFragment();
+        mOrganisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
         //these callbacks are lost. (part of the problem)
         mOrganisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
         mOrganisationUnitProgramPickerFragment.setSelectorView(this);
