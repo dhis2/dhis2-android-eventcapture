@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
+import android.view.Menu;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -37,13 +38,16 @@ public class DataEntryActivity extends FragmentActivity {
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
-
-
         viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
         viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
                 previousSectionButton,
                 nextSectionButton,
                 sectionLabelTextSwitcher));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

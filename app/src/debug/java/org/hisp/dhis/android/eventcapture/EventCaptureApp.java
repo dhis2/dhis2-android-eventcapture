@@ -30,12 +30,13 @@ package org.hisp.dhis.android.eventcapture;
 
 import android.app.Application;
 
+import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.android.api.D2;
 
 import timber.log.Timber;
 
 public final class EventCaptureApp extends Application {
-
+    private RxBus rxBus = null;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -45,10 +46,20 @@ public final class EventCaptureApp extends Application {
         // Feed context to D2
         D2.init(this);
 
+        //init rxBus
+        rxBus = new RxBus();
+
         // TODO Add stetho initialization code here
         // TODO Add LeakCanary support
         // TODO Start writing unit tests for application
         // TODO implement debug navigation drawer
         // TODO integrate DI library.
     }
+    public RxBus getRxBusSingleton() {
+        if (rxBus == null) {
+            rxBus = new RxBus();
+        }
+        return rxBus;
+    }
+
 }

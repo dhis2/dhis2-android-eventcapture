@@ -14,10 +14,12 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.activities.home.DetailsActivity;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.R;
@@ -25,12 +27,15 @@ import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
+import rx.subscriptions.CompositeSubscription;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView,
         OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
     public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
+
+    private RxBus rxBus;
 
     private ISelectorPresenter mSelectorPresenter;
     private CircularProgressBar progressBar;
@@ -57,6 +62,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        rxBus = ((EventCaptureApp) getActivity().getApplication()).getRxBusSingleton();
     }
 
     @Override
@@ -126,11 +132,17 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
         mSelectorPresenter.onPickedOrganisationUnit(organisationUnitObservable);
+        if(rxBus.hasObservers()) {
+            rxBus.send(new OnOrganisationUnitPickerValueUpdated(organisationUnitObservable));
+        }
     }
 
     @Override
     public void onPickedProgram(Observable<Program> programObservable) {
         mSelectorPresenter.onPickedProgram(programObservable);
+        if(rxBus.hasObservers()) {
+            rxBus.send(new OnProgramPickerValueUpdated(programObservable));
+        }
     }
 
     @Override
@@ -163,6 +175,7 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     @Override
     public void onClick(View v) {
         // on phone(portrait): go to ItemListFragment
+
         Intent itemsList = new Intent(getActivity(), DetailsActivity.class); //switch to activity.
         startActivity(itemsList);
 
@@ -201,5 +214,19 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putBoolean(FLOATING_BUTTON_STATE, hiddenFloatingActionButton);
+    }
+
+    public static class OnOrganisationUnitPickerValueUpdated {
+        private final Observable<OrganisationUnit> organisationUnitObservable;
+        public OnOrganisationUnitPickerValueUpdated(Observable<OrganisationUnit> organisationUnitObservable) {
+            this.organisationUnitObservable = organisationUnitObservable;
+        }
+    }
+
+    public static class OnProgramPickerValueUpdated {
+        private final Observable<Program> programObservable;
+        public OnProgramPickerValueUpdated(Observable<Program> programObservable) {
+            this.programObservable = programObservable;
+        }
     }
 }
