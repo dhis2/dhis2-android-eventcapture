@@ -29,6 +29,8 @@
 package org.hisp.dhis.android.eventcapture;
 
 import android.app.Application;
+import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -55,6 +57,7 @@ public final class EventCaptureApp extends Application {
         // TODO implement debug navigation drawer
         // TODO integrate DI library.
     }
+
     public RxBus getRxBusSingleton() {
         if (rxBus == null) {
             rxBus = new RxBus();
@@ -62,4 +65,9 @@ public final class EventCaptureApp extends Application {
         return rxBus;
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 }
