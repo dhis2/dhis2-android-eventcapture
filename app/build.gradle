@@ -101,8 +101,11 @@ dependencies {
         transitive = true;
     }
 
+    //Multidex:
+    compile 'com.android.support:multidex:1.0.1'
+
     // Stetho
-    debugCompile "com.facebook.stetho:stetho:${libs.stethoVersion}"
+    debugCompile "com.facebook.stetho:stetho:${libs.stethoVeirsion}"
     debugCompile "com.facebook.stetho:stetho-okhttp:${libs.stethoVersion}"
 
     // Test
