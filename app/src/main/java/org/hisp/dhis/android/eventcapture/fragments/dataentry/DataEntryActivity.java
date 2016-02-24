@@ -73,7 +73,7 @@ public class DataEntryActivity extends FragmentActivity {
         }
     }
 
-    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener {
+    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements View.OnClickListener{
         private ImageView nextSectionButton, previousSectionButton;
         private TextSwitcher sectionLabelTextSwitcher;
         private int lastPosition;
@@ -97,6 +97,8 @@ public class DataEntryActivity extends FragmentActivity {
             this.sectionLabelTextSwitcher.setText(viewPager.getAdapter().getPageTitle(lastPosition));
             this.previousSectionButton.setVisibility(View.INVISIBLE);
             this.nextSectionButton.setVisibility(View.INVISIBLE);
+            this.previousSectionButton.setOnClickListener(this);
+            this.nextSectionButton.setOnClickListener(this);
 
             this.numberOfPages = viewPager.getAdapter().getCount() - 1;
 
@@ -110,6 +112,7 @@ public class DataEntryActivity extends FragmentActivity {
         public void onPageSelected(int position) {
             super.onPageSelected(position);
             animateUiChanges(position);
+
         }
 
         private void animateUiChanges(int position) {
@@ -138,6 +141,25 @@ public class DataEntryActivity extends FragmentActivity {
             }
 
             lastPosition = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.previous_section: {
+                    if(viewPager.getCurrentItem() > 0) {
+                        viewPager.setCurrentItem((viewPager.getCurrentItem() - 1), true);
+                        viewPager.getAdapter().notifyDataSetChanged();
+                        break;
+                    }
+                }
+                case R.id.next_section: {
+                    if(viewPager.getCurrentItem() < numberOfPages)
+                    viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+                    viewPager.getAdapter().notifyDataSetChanged();
+                    break;
+                }
+            }
         }
     }
 }
