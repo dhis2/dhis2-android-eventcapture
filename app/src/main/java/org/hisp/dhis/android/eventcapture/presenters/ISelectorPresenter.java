@@ -16,10 +16,4 @@ public interface ISelectorPresenter {
     void onResume();
 
     void initializeSynchronization();
-
-    void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable);
-
-    void onPickedProgram(Observable<Program> programObservable);
-
-
 }

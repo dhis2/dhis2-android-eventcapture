@@ -28,6 +28,7 @@ import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
+import rx.subscriptions.CompositeSubscription;
 
 public class SelectorFragment extends AbsSelectorFragment implements ISelectorView,
         OnAllPickersSelectedListener, View.OnClickListener {
@@ -36,6 +37,8 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
     public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
 
     private RxBus rxBus;
+    private CompositeSubscription compositeSubscription;
+
 
     private ISelectorPresenter mSelectorPresenter;
     private CircularProgressBar progressBar;
@@ -59,6 +62,11 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         mSelectorPresenter = new SelectorPresenter(this);
         setHasOptionsMenu(true);
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -133,27 +141,13 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
 
     @Override
     public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
-        mSelectorPresenter.onPickedOrganisationUnit(organisationUnitObservable);
         rxBus.send(new OnOrganisationUnitPickerValueUpdated(organisationUnitObservable));
     }
 
     @Override
     public void onPickedProgram(Observable<Program> programObservable) {
-        mSelectorPresenter.onPickedProgram(programObservable);
         rxBus.send(new OnProgramPickerValueUpdated(programObservable));
-
     }
-
-    @Override
-    public void setPickedOrganisationUnit(OrganisationUnit organisationUnit) {
-        this.pickedOrganisationUnit = organisationUnit;
-    }
-
-    @Override
-    public void setPickedProgram(Program program) {
-        this.pickedProgram = program;
-    }
-
 
     private void hideProgress() {
 
@@ -234,12 +228,20 @@ public class SelectorFragment extends AbsSelectorFragment implements ISelectorVi
         public OnOrganisationUnitPickerValueUpdated(Observable<OrganisationUnit> organisationUnitObservable) {
             this.organisationUnitObservable = organisationUnitObservable;
         }
+
+        public Observable<OrganisationUnit> getOrganisationUnitObservable() {
+            return this.organisationUnitObservable;
+        }
     }
 
     public static class OnProgramPickerValueUpdated {
         private final Observable<Program> programObservable;
         public OnProgramPickerValueUpdated(Observable<Program> programObservable) {
             this.programObservable = programObservable;
+        }
+
+        public Observable<Program> getProgramObservable() {
+            return this.programObservable;
         }
     }
 }

@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.eventcapture.fragments.dataentry;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -9,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.animation.Animation;
@@ -17,9 +19,12 @@ import android.widget.ImageView;
 import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 
 public class DataEntryActivity extends FragmentActivity {
+    private String organisationUnitUid;
+    private String programUid;
 
     private ViewPager viewPager;
     private AppBarLayout appBarLayout;
@@ -30,10 +35,16 @@ public class DataEntryActivity extends FragmentActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_eventdataentry);
+
+        Intent intent = getIntent();
+        organisationUnitUid = intent.getStringExtra(ItemListFragment.ORG_UNIT_ID);
+        programUid = intent.getStringExtra(ItemListFragment.PROGRAM_ID);
+
+        Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
+        Log.d("PROGRAM DATAENTRY", programUid);
+
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
         appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
-
-
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);

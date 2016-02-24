@@ -7,6 +7,8 @@ import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
+import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 
 import java.util.List;
@@ -29,7 +31,7 @@ public class ItemListPresenter extends AbsPresenter {
 
     @Override
     public void onCreate() {
-        this.loadEventList();
+//        this.loadEventList();
     }
 
     @Override
@@ -42,13 +44,14 @@ public class ItemListPresenter extends AbsPresenter {
         super.onDestroy();
     }
 
-    public void loadEventList() {
-        this.getEventsList();
+    public void loadEventList(OrganisationUnit organisationUnit, Program program) {
+        this.getEventsList(organisationUnit, program);
     }
 
-    public void getEventsList() {
+    public void getEventsList(OrganisationUnit organisationUnit, Program program) {
         Subscriber<List<Event>> subscriber = new EventSubscriber();
-        showItemListRows(D2.events().list());
+        showItemListRows(D2.events().list(organisationUnit, program));
+
     }
 
     public void showItemListRows(List<Event> eventList) {

@@ -18,8 +18,4 @@ public interface ISelectorView {
     void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable);
 
     void onPickedProgram(Observable<Program> programObservable);
-
-    void setPickedOrganisationUnit(OrganisationUnit organisationUnit);
-
-    void setPickedProgram(Program program);
 }

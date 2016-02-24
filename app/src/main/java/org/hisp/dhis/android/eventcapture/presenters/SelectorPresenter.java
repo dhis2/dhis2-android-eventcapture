@@ -76,35 +76,4 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                     });
         }
     }
-
-    @Override
-    public void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable) {
-        if (pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription
-                .isUnsubscribed()) {
-            pickedOrganisationUnitSubscription = organisationUnitObservable.
-                    subscribeOn(Schedulers.io()).
-                    observeOn(AndroidSchedulers.mainThread()).
-                    subscribe(new Action1<OrganisationUnit>() {
-                        @Override
-                        public void call(OrganisationUnit organisationUnit) {
-                            mSelectorView.setPickedOrganisationUnit(organisationUnit);
-                        }
-                    });
-        }
-    }
-
-    @Override
-    public void onPickedProgram(Observable<Program> programObservable) {
-        if (pickedProgramSubscription == null || pickedProgramSubscription.isUnsubscribed()) {
-            pickedOrganisationUnitSubscription = programObservable.
-                    subscribeOn(Schedulers.io()).
-                    observeOn(AndroidSchedulers.mainThread()).
-                    subscribe(new Action1<Program>() {
-                        @Override
-                        public void call(Program program) {
-                            mSelectorView.setPickedProgram(program);
-                        }
-                    });
-        }
-    }
 }

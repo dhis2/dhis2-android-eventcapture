@@ -72,6 +72,14 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             }
         });
 
+        mOrganisationUnitPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
+            @Override
+            public void clearedCallback() {
+                onPickerClickedListener.deactivate();
+                selectorView.onPickedOrganisationUnit(null);
+            }
+        });
+
         mProgramPicker = new Picker(new ArrayList<IPickable>(), Program.class.getSimpleName(), Program.class.getName());
         mProgramPicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,11 +100,12 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             }
         });
 
-
         mProgramPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
             @Override
             public void clearedCallback() {
                 onPickerClickedListener.deactivate();
+                selectorView.onPickedProgram(null);
+
             }
         });
         mOrganisationUnitPicker.setNextLinkedSibling(mProgramPicker);
@@ -145,6 +154,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     public void onOptionSelected(IPickable pickable) {
         if(pickable instanceof OrganisationUnitPickable) {
             OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) pickable;
+
             mOrganisationUnitProgramPickerPresenter.setPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
             selectorView.onPickedOrganisationUnit(organisationUnitPickable.getOrganisationUnit());
             mOrganisationUnitPicker.setPickedItem(organisationUnitPickable);
@@ -152,15 +162,10 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
         }
         else if(pickable instanceof ProgramPickable) {
             ProgramPickable programPickable = (ProgramPickable) pickable;
-            if(pickable != null) {
-                selectorView.onPickedProgram(programPickable.getProgram());
-                mProgramPicker.setPickedItem(programPickable);
-                onPickerClickedListener.activate();
-            }
-            else {
-                onPickerClickedListener.deactivate();
-            }
 
+            selectorView.onPickedProgram(programPickable.getProgram());
+            mProgramPicker.setPickedItem(programPickable);
+            onPickerClickedListener.activate();
         }
     }
 
