@@ -21,12 +21,11 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.R;
-import org.hisp.dhis.client.sdk.ui.fragments.AbsSelectorFragment;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
 
-public class SelectorFragment extends AbsSelectorFragment implements ISelectorView,
+public class SelectorFragment extends Fragment implements ISelectorView,
         OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
