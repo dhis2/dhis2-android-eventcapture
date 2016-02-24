@@ -1,27 +1,30 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 
+import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 
+import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.DetailsActivity;
+import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.R;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
@@ -43,6 +46,7 @@ public class SelectorFragment extends Fragment implements ISelectorView,
     //to save the state of the action button.
 
     private OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment;
+    private ItemListFragment mItemListFragment;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,6 @@ public class SelectorFragment extends Fragment implements ISelectorView,
         }
         mSelectorPresenter = new SelectorPresenter(this);
         setHasOptionsMenu(true);
-
     }
 
     @Override
@@ -61,27 +64,40 @@ public class SelectorFragment extends Fragment implements ISelectorView,
         super.onActivityCreated(savedInstanceState);
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_selector, container, false);
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
+            //init orgPicker:
             OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment =
                     (OrganisationUnitProgramPickerFragment) createPickerFragment();
             attachFragment(R.id.pickerFragment, organisationUnitProgramPickerFragment,
                     OrganisationUnitProgramPickerFragment.TAG);
+            //init itemList:
+            if (getActivity().findViewById(R.id.item_fragment) != null) {
+                mItemListFragment = new ItemListFragment();
+                attachFragment(R.id.item_fragment, mItemListFragment,
+                        ItemListFragment.TAG);
+            }
             hiddenFloatingActionButton = true;
         } else {
             hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE,
                     hiddenFloatingActionButton);
         }
 
-        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingActionButton);
+        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floating_action_button);
         mFloatingActionButton.setOnClickListener(this);
 
         boolean onTablet = getResources().getBoolean(org.hisp.dhis.android.eventcapture.R.bool
                 .isTablet);
         if (!onTablet) {
             if (hiddenFloatingActionButton) {
-                //mFloatingActionButton.hide();
+                mFloatingActionButton.hide();
             } else {
                 mFloatingActionButton.show();
             }
@@ -91,6 +107,7 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
         progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
         //hideProgress();
+
 
         mSelectorPresenter.initializeSynchronization();
     }
@@ -148,11 +165,15 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
     private void hideProgress() {
 
-        //show the selector fragment.
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.show(mOrganisationUnitProgramPickerFragment);
-        ft.commit();
+        //A quick workaround for a null pointer exception that happens after screen rotation.
+        //TODO: Vlad : find the cause of getActivity() returning null. (RX call related.)
+        Activity a = getActivity();
+        if (a != null) {
+            FrameLayout progressFrame = (FrameLayout) a.findViewById(R.id.layer_progress_bar);
+            progressFrame.setVisibility(View.GONE);
+        }
 
+        //spinner:
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.out_down);
             progressBar.startAnimation(anim);
@@ -162,14 +183,10 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
     private void showProgress() {
 
-        //TODO: show the progress bar in the mtiddle of the fragment.
-        //hide the Floating action button:
-        mFloatingActionButton.hide();
-        //hide the pickers:
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.hide(mOrganisationUnitProgramPickerFragment);
-        ft.commit();
+        FrameLayout progressFrame = (FrameLayout) getActivity().findViewById(R.id.layer_progress_bar);
+        progressFrame.setVisibility(View.VISIBLE);
 
+        //spinner:
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.in_up);
             progressBar.startAnimation(anim);
@@ -182,18 +199,12 @@ public class SelectorFragment extends Fragment implements ISelectorView,
         // on phone(portrait): go to ItemListFragment
         Intent itemsList = new Intent(getActivity(), DetailsActivity.class); //switch to activity.
         startActivity(itemsList);
-
-        // on phone(landscape): hide FAbutton (if it doesn't look good, go to ItemListFragment)
-        // on tablet(portrait): go to ItemListFragment
-        // on tablet(landscape): hide FAbutton
-
-
     }
 
     @Override
     public void activate() {
-        // don't show unless in portrait.
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+        // only show on phones:
+        if (!getResources().getBoolean(R.bool.isTablet)) {
             mFloatingActionButton.show();
             hiddenFloatingActionButton = false;
         }
