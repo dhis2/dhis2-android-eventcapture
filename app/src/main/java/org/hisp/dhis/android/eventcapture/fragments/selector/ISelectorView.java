@@ -11,7 +11,7 @@ import rx.Observable;
 public interface ISelectorView {
     void onFinishLoading();
 
-    void onLoadingError();
+    void onLoadingError(Throwable throwable);
 
     void onStartLoading();
 

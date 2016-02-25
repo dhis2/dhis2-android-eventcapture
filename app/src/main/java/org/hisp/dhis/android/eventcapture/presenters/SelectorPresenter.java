@@ -71,7 +71,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            mSelectorView.onLoadingError();
+                            mSelectorView.onLoadingError(throwable);
                         }
                     });
         }

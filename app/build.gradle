@@ -93,6 +93,9 @@ dependencies {
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
+    //Smooth progress bar:
+    compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"
+
     // Square/Jake Wharton
     compile "com.jakewharton.timber:timber:${libs.timberVersion}"
 
