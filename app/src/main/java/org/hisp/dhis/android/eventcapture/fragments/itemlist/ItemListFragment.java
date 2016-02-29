@@ -3,14 +3,11 @@ package org.hisp.dhis.android.eventcapture.fragments.itemlist;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.fragments.dataentry.DataEntryActivity;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
-import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
-import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -24,8 +21,6 @@ import java.util.List;
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
-import rx.observables.ConnectableObservable;
-import rx.subscriptions.CompositeSubscription;
 
 public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment implements IItemListView {
     public static final String TAG = ItemListFragment.class.getSimpleName();

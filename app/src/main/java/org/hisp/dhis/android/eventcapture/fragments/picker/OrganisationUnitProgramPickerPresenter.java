@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.fragments.picker;
 
 import org.hisp.dhis.android.eventcapture.mapper.OrganisationUnitPickableMapper;
 import org.hisp.dhis.android.eventcapture.mapper.ProgramPickableMapper;

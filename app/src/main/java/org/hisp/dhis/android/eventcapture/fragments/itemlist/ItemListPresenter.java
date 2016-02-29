@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.fragments.itemlist;
 
 import android.support.annotation.NonNull;
 
