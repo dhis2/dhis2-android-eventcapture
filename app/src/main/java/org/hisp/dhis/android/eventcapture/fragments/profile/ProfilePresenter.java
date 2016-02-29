@@ -37,14 +37,18 @@ import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 import timber.log.Timber;
 
@@ -106,7 +110,8 @@ public class ProfilePresenter extends AbsPresenter
 
     private List<DataEntity> transformUserAccount(UserAccount account) {
         List<DataEntity> dataEntities = new ArrayList<>();
-        RxProfileValueChangedListener onProfileValueChangedListener = new RxProfileValueChangedListener(null);
+        RxProfileValueChangedListener onProfileValueChangedListener = new RxProfileValueChangedListener();
+        onProfileValueChangedListener.setUserAccount(account);
 
         dataEntities.add(DataEntity.create("First name", account.getFirstName(), Type.TEXT,
                 onProfileValueChangedListener));
@@ -122,9 +127,9 @@ public class ProfilePresenter extends AbsPresenter
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Interests", account.getIntroduction(), Type
+        dataEntities.add(DataEntity.create("Interests", account.getInterests(), Type
                 .COORDINATES,  onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Job title", account.getIntroduction(), Type.TEXT,
+        dataEntities.add(DataEntity.create("Job title", account.getJobTitle(), Type.TEXT,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT,
                 onProfileValueChangedListener));
@@ -136,54 +141,63 @@ public class ProfilePresenter extends AbsPresenter
         return dataEntities;
     }
 
-    static class RxProfileValueChangedListener extends Subject<CharSequence, Pair<CharSequence, CharSequence>> implements OnValueChangeListener<CharSequence> {
-
-        protected RxProfileValueChangedListener(OnSubscribe<Pair<CharSequence, CharSequence>> onSubscribe) {
-            super(onSubscribe);
-        }
-
-        @Override
-        public void onValueChanged(String key, CharSequence value) {
-            onNext(value);
-        }
-
-        @Override
-        public boolean hasObservers() {
-            return false;
-        }
-
-        @Override
-        public void onCompleted() {
-            Timber.d("onComplete");
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            Timber.d("onError");
-        }
-
-        @Override
-        public void onNext(CharSequence charSequence) {
-            Timber.d(charSequence.toString());
-        }
-    }
-    private class OnProfileValueChangedListener implements OnValueChangeListener<CharSequence> {
+    private class RxProfileValueChangedListener implements OnValueChangeListener<CharSequence, CharSequence> {
         private UserAccount userAccount;
 
         @Override
-        public void onValueChanged(String key, CharSequence value) {
-
-            saveProfileSubscription = D2.me().save(userAccount)
-                    .subscribeOn(AndroidSchedulers.mainThread())
-                    .observeOn(Schedulers.io())
-                    .subscribe(new Action1<Object>() {
+        public void onValueChanged(CharSequence key, CharSequence value) {
+            if("First name".equals(key)) {
+                userAccount.setFirstName(value.toString());
+            }
+            else if("Surname".equals(key)) {
+                userAccount.setSurname(value.toString());
+            }
+            else if("Gender".equals(key)) {
+                userAccount.setGender(value.toString());
+            }
+            else if("Birthday".equals(key)) {
+                userAccount.setBirthday(value.toString());
+            }
+            else if("Introduction".equals(key)) {
+                userAccount.setIntroduction(value.toString());
+            }
+            else if("Education".equals(key)) {
+                userAccount.setEducation(value.toString());
+            }
+            else if("Employer".equals(key)) {
+                userAccount.setEmployer(value.toString());
+            }
+            else if("Interests".equals(key)) {
+                userAccount.setInterests(value.toString());
+            }
+            else if("Job title".equals(key)) {
+                userAccount.setJobTitle(value.toString());
+            }
+            else if("Languages".equals(key)) {
+                userAccount.setLanguages(value.toString());
+            }
+            else if("Email".equals(key)) {
+                userAccount.setEmail(value.toString());
+            }
+            else if("Phone number".equals(key)) {
+                userAccount.setPhoneNumber(value.toString());
+            }
+            else {
+                throw new UnsupportedOperationException("Unsupported key");
+            }
+            saveProfileSubscription = D2.me().save(userAccount).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(
+                    new Action1<Void>() {
                         @Override
-                        public void call(Object o) {
-
-                            Timber.d("ProfilePresenter", "userAcc saved");
+                        public void call(Void aVoid) {
+                            Timber.d("userAccount successfully saved");
+                        }
+                    }
+                    , new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Timber.d("userAccount has failed saving");
                         }
                     });
-
         }
 
         public void setUserAccount(UserAccount userAccount) {
