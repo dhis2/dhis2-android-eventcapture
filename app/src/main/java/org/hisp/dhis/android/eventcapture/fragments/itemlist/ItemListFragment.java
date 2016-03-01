@@ -82,6 +82,8 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
                     mItemListPresenter.loadEventList
                             (organisationUnitObservable.toBlocking().first(),
                                     programObservable.toBlocking().first());
+                } else {
+                    deactivate();
                 }
             }
         });
