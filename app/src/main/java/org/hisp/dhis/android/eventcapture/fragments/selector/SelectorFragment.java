@@ -23,8 +23,6 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.DetailsActivity;
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
-import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -200,10 +198,11 @@ public class SelectorFragment extends Fragment implements ISelectorView,
     @Override
     public void activate() {
         // only show on phones:
+        /* deactivated FAB, as it is currently not necessary.
         if (!getResources().getBoolean(R.bool.isTablet)) {
             mFloatingActionButton.show();
             hiddenFloatingActionButton = false;
-        }
+        }*/
     }
 
     @Override

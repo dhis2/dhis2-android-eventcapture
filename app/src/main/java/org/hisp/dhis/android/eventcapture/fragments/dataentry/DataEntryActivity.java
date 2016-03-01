@@ -116,12 +116,12 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         }
     }
 
-    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements View.OnClickListener{
+    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements View.OnClickListener {
         private ImageView nextSectionButton, previousSectionButton;
         private TextSwitcher sectionLabelTextSwitcher;
         private int lastPosition;
         private int numberOfPages;
-        private Animation slideOut, slideIn;
+        private Animation slideOutRight, slideInRight, slideInLeft, slideOutLeft;
 
         public DataEntrySectionPageChangedListener(ImageView previousSectionButton,
                                                    ImageView nextSectionButton,
@@ -130,12 +130,21 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
             this.previousSectionButton = previousSectionButton;
             this.nextSectionButton = nextSectionButton;
             this.sectionLabelTextSwitcher = sectionLabelTextSwitcher;
-            this.slideOut = AnimationUtils.
+
+            this.slideOutRight = AnimationUtils.
                     loadAnimation(
                             sectionLabelTextSwitcher.getContext(), android.R.anim.slide_out_right);
-            this.slideIn = AnimationUtils
+            this.slideInLeft = AnimationUtils
                     .loadAnimation(
                             sectionLabelTextSwitcher.getContext(), android.R.anim.slide_in_left);
+
+            this.slideOutLeft = AnimationUtils
+                    .loadAnimation(
+                            sectionLabelTextSwitcher.getContext(), R.anim.slide_out_left);
+
+            this.slideInRight = AnimationUtils
+                    .loadAnimation(
+                            sectionLabelTextSwitcher.getContext(), R.anim.slide_in_right);
 
             this.sectionLabelTextSwitcher.setText(viewPager.getAdapter().getPageTitle(lastPosition));
             this.previousSectionButton.setVisibility(View.INVISIBLE);
@@ -145,7 +154,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
 
             this.numberOfPages = viewPager.getAdapter().getCount() - 1;
 
-            if(viewPager.getAdapter().getCount() > 0) {
+            if (viewPager.getAdapter().getCount() > 0) {
                 this.nextSectionButton.setVisibility(View.VISIBLE);
             }
 
@@ -161,26 +170,25 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         private void animateUiChanges(int position) {
             sectionLabelTextSwitcher.setText(viewPager.getAdapter().getPageTitle(position));
 
-            if(position == 0) {
+            if (position == 0) {
                 previousSectionButton.setVisibility(View.INVISIBLE);
                 nextSectionButton.setVisibility(View.VISIBLE);
-            }
-            else if(position == numberOfPages) {
+            } else if (position == numberOfPages) {
                 previousSectionButton.setVisibility(View.VISIBLE);
                 nextSectionButton.setVisibility(View.INVISIBLE);
-            }
-            else {
+            } else {
                 previousSectionButton.setVisibility(View.VISIBLE);
                 nextSectionButton.setVisibility(View.VISIBLE);
             }
 
-            if(position >= lastPosition) {
-                sectionLabelTextSwitcher.setInAnimation(slideOut);
-                sectionLabelTextSwitcher.setOutAnimation(slideIn);
-            }
-            else {
-                sectionLabelTextSwitcher.setInAnimation(slideIn);
-                sectionLabelTextSwitcher.setOutAnimation(slideOut);
+            System.out.println("Position=" + position + " LastPosition=" + lastPosition);
+            if (position > lastPosition) {
+                //change these:
+                sectionLabelTextSwitcher.setOutAnimation(slideOutLeft);
+                sectionLabelTextSwitcher.setInAnimation(slideInRight);
+            } else if(position < lastPosition){
+                sectionLabelTextSwitcher.setInAnimation(slideInLeft);
+                sectionLabelTextSwitcher.setOutAnimation(slideOutRight);
             }
 
             lastPosition = position;
@@ -190,15 +198,15 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.previous_section: {
-                    if(viewPager.getCurrentItem() > 0) {
+                    if (viewPager.getCurrentItem() > 0) {
                         viewPager.setCurrentItem((viewPager.getCurrentItem() - 1), true);
                         viewPager.getAdapter().notifyDataSetChanged();
                         break;
                     }
                 }
                 case R.id.next_section: {
-                    if(viewPager.getCurrentItem() < numberOfPages)
-                    viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+                    if (viewPager.getCurrentItem() < numberOfPages)
+                        viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
                     viewPager.getAdapter().notifyDataSetChanged();
                     break;
                 }
