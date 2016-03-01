@@ -3,9 +3,11 @@ package org.hisp.dhis.android.eventcapture.fragments.itemlist;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
+import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.dataentry.DataEntryActivity;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
@@ -18,14 +20,16 @@ import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRowAdapter;
 
 import java.util.List;
 
+import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 
-public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment implements IItemListView {
+public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.ItemListFragment implements IItemListView, View.OnClickListener {
     public static final String TAG = ItemListFragment.class.getSimpleName();
     public static final String ORG_UNIT_ID = "extra:orgUnitId";
     public static final String PROGRAM_ID = "extra:ProgramId";
+    public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
 
     private ItemListRowAdapter mItemListRowAdapter;
     private ItemListPresenter mItemListPresenter;
@@ -33,6 +37,10 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
     private RxBus rxBus;
     private Observable<OrganisationUnit> organisationUnitObservable;
     private Observable<Program> programObservable;
+
+    private CircularProgressBar mProgressBar;
+    private FloatingActionButton mNewItemButton;
+    private boolean hiddenNewItemButton;
 
     public ItemListFragment() {
         super();
@@ -70,7 +78,7 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
                     setProgramObservable(onProgramSelectedClick.getProgramObservable());
                 }
 
-                if(organisationUnitObservable != null && programObservable != null) {
+                if (organisationUnitObservable != null && programObservable != null) {
                     mItemListPresenter.loadEventList
                             (organisationUnitObservable.toBlocking().first(),
                                     programObservable.toBlocking().first());
@@ -84,7 +92,7 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
         super.onDestroy();
         if (busSubscription != null && !busSubscription.isUnsubscribed()) {
             busSubscription.unsubscribe();
-            busSubscription= null;
+            busSubscription = null;
         }
     }
 
@@ -95,11 +103,11 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
 
     @Override
     public void renderItemRowList(List<ItemListRow> itemListRowCollection) {
-        if(itemListRowCollection!= null) {
+        if (itemListRowCollection != null) {
             mItemListRowAdapter = new ItemListRowAdapter(itemListRowCollection);
             mRecyclerView.setAdapter(mItemListRowAdapter);
 
-            for(ItemListRow itemListRow : itemListRowCollection) {
+            for (ItemListRow itemListRow : itemListRowCollection) {
                 itemListRow.setOnRowClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -112,13 +120,14 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
                         getContext().startActivity(intent);
                     }
                 });
+                activate();
             }
         }
     }
 
     @Override
     public void viewEditEvent(Object object) {
-        if(object instanceof Event) {
+        if (object instanceof Event) {
             Event event = (Event) object;
             //show dataEntryFragment
         }
@@ -153,6 +162,21 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mItemListPresenter.onCreate();
+        if (savedInstanceState == null) {
+            hiddenNewItemButton = true;
+        } else {
+            hiddenNewItemButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hiddenNewItemButton);
+        }
+
+        mNewItemButton = (FloatingActionButton) view.findViewById(R.id.new_item_button);
+        mNewItemButton.setOnClickListener(this);
+
+        if (hiddenNewItemButton) {
+            mNewItemButton.hide();
+        } else {
+            mNewItemButton.show();
+        }
+        mProgressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
     }
 
     public void setOrganisationUnitObservable(Observable<OrganisationUnit> organisationUnitObservable) {
@@ -161,5 +185,26 @@ public class ItemListFragment extends org.hisp.dhis.client.sdk.ui.fragments.Item
 
     public void setProgramObservable(Observable<Program> programObservable) {
         this.programObservable = programObservable;
+    }
+
+    public void activate() {
+        mNewItemButton.show();
+        hiddenNewItemButton = false;
+    }
+
+    public void deactivate() {
+        mNewItemButton.hide();
+        hiddenNewItemButton = true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent(getContext(), DataEntryActivity.class);
+        intent.putExtra(PROGRAM_ID,
+                programObservable.toBlocking().first().getUId());
+        intent.putExtra(ORG_UNIT_ID,
+                organisationUnitObservable.toBlocking().first().getUId());
+
+        getContext().startActivity(intent);
     }
 }
