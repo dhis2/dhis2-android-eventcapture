@@ -198,10 +198,11 @@ public class SelectorFragment extends Fragment implements ISelectorView,
     @Override
     public void activate() {
         // only show on phones:
+        /* deactivated FAB, as it is currently not necessary.
         if (!getResources().getBoolean(R.bool.isTablet)) {
             mFloatingActionButton.show();
             hiddenFloatingActionButton = false;
-        }
+        }*/
     }
 
     @Override
