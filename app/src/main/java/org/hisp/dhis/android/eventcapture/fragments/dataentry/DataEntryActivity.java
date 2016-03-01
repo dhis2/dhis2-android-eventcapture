@@ -3,6 +3,7 @@ package org.hisp.dhis.android.eventcapture.fragments.dataentry;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -10,6 +11,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -20,14 +23,18 @@ import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
-import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
+import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
-public class DataEntryActivity extends FragmentActivity {
+import java.util.List;
+
+public class DataEntryActivity extends FragmentActivity implements IDataEntryView {
     private String organisationUnitUid;
     private String programUid;
 
+    private RowViewAdapter rowViewAdapter;
     private ViewPager viewPager;
-    private AppBarLayout appBarLayout;
     private TextSwitcher sectionLabelTextSwitcher;
     private ImageView previousSectionButton, nextSectionButton;
 
@@ -44,7 +51,6 @@ public class DataEntryActivity extends FragmentActivity {
         Log.d("PROGRAM DATAENTRY", programUid);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
-        appBarLayout = (AppBarLayout) findViewById(R.id.appBarLayout);
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
@@ -54,7 +60,23 @@ public class DataEntryActivity extends FragmentActivity {
                 previousSectionButton,
                 nextSectionButton,
                 sectionLabelTextSwitcher));
+
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        rowViewAdapter = new RowViewAdapter(getSupportFragmentManager());
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview_dataentry);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(rowViewAdapter);
+        recyclerView.addItemDecoration(new DividerDecoration(this));
+
+        IDataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
+        dataEntryPresenter.onCreate();
+        dataEntryPresenter.listDataEntryFields(programUid, 0);
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -64,6 +86,12 @@ public class DataEntryActivity extends FragmentActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    @Override
+    @UiThread
+    public void setDataEntryFields(List<DataEntity> dataEntities) {
+        rowViewAdapter.swap(dataEntities);
     }
 
     private class DataEntrySectionPageAdapter extends FragmentStatePagerAdapter {
@@ -79,7 +107,7 @@ public class DataEntryActivity extends FragmentActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return new ProfileFragment();
+            return new EventDataEntryFragment();
         }
 
         @Override

@@ -135,7 +135,7 @@ public class ProfilePresenter extends AbsPresenter
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Email", account.getEmail(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Phone number", account.getPhoneNumber(), Type.TEXT,
+        dataEntities.add(DataEntity.create("Phone number", account.getPhoneNumber(), Type.INTEGER,
                 onProfileValueChangedListener));
 
         return dataEntities;
