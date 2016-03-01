@@ -28,8 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.fragments.profile;
 
-import android.support.v4.util.Pair;
-
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
@@ -37,19 +35,14 @@ import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 import timber.log.Timber;
 
 public class ProfilePresenter extends AbsPresenter
@@ -94,7 +87,7 @@ public class ProfilePresenter extends AbsPresenter
         if (profileSubscription != null && !profileSubscription.isUnsubscribed()) {
             profileSubscription.isUnsubscribed();
         }
-        if(saveProfileSubscription != null && !saveProfileSubscription.isUnsubscribed()) {
+        if (saveProfileSubscription != null && !saveProfileSubscription.isUnsubscribed()) {
             saveProfileSubscription.unsubscribe();
         }
 
@@ -110,7 +103,8 @@ public class ProfilePresenter extends AbsPresenter
 
     private List<DataEntity> transformUserAccount(UserAccount account) {
         List<DataEntity> dataEntities = new ArrayList<>();
-        RxProfileValueChangedListener onProfileValueChangedListener = new RxProfileValueChangedListener();
+        RxProfileValueChangedListener onProfileValueChangedListener = new
+                RxProfileValueChangedListener();
         onProfileValueChangedListener.setUserAccount(account);
 
         dataEntities.add(DataEntity.create("First name", account.getFirstName(), Type.TEXT,
@@ -122,13 +116,13 @@ public class ProfilePresenter extends AbsPresenter
         dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.DATE,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(), Type
-                .TRUE_ONLY,  onProfileValueChangedListener));
+                .TRUE_ONLY, onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Education", account.getEducation(), Type.BOOLEAN,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Interests", account.getInterests(), Type
-                .COORDINATES,  onProfileValueChangedListener));
+                .COORDINATES, onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Job title", account.getJobTitle(), Type.TEXT,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT,
@@ -141,51 +135,41 @@ public class ProfilePresenter extends AbsPresenter
         return dataEntities;
     }
 
-    private class RxProfileValueChangedListener implements OnValueChangeListener<CharSequence, CharSequence> {
+    private class RxProfileValueChangedListener implements OnValueChangeListener<CharSequence,
+            CharSequence> {
         private UserAccount userAccount;
 
         @Override
         public void onValueChanged(CharSequence key, CharSequence value) {
-            if("First name".equals(key)) {
+            if ("First name".equals(key)) {
                 userAccount.setFirstName(value.toString());
-            }
-            else if("Surname".equals(key)) {
+            } else if ("Surname".equals(key)) {
                 userAccount.setSurname(value.toString());
-            }
-            else if("Gender".equals(key)) {
+            } else if ("Gender".equals(key)) {
                 userAccount.setGender(value.toString());
-            }
-            else if("Birthday".equals(key)) {
+            } else if ("Birthday".equals(key)) {
                 userAccount.setBirthday(value.toString());
-            }
-            else if("Introduction".equals(key)) {
+            } else if ("Introduction".equals(key)) {
                 userAccount.setIntroduction(value.toString());
-            }
-            else if("Education".equals(key)) {
+            } else if ("Education".equals(key)) {
                 userAccount.setEducation(value.toString());
-            }
-            else if("Employer".equals(key)) {
+            } else if ("Employer".equals(key)) {
                 userAccount.setEmployer(value.toString());
-            }
-            else if("Interests".equals(key)) {
+            } else if ("Interests".equals(key)) {
                 userAccount.setInterests(value.toString());
-            }
-            else if("Job title".equals(key)) {
+            } else if ("Job title".equals(key)) {
                 userAccount.setJobTitle(value.toString());
-            }
-            else if("Languages".equals(key)) {
+            } else if ("Languages".equals(key)) {
                 userAccount.setLanguages(value.toString());
-            }
-            else if("Email".equals(key)) {
+            } else if ("Email".equals(key)) {
                 userAccount.setEmail(value.toString());
-            }
-            else if("Phone number".equals(key)) {
+            } else if ("Phone number".equals(key)) {
                 userAccount.setPhoneNumber(value.toString());
-            }
-            else {
+            } else {
                 throw new UnsupportedOperationException("Unsupported key");
             }
-            saveProfileSubscription = D2.me().save(userAccount).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(
+            saveProfileSubscription = D2.me().save(userAccount).observeOn(AndroidSchedulers
+                    .mainThread()).subscribeOn(Schedulers.io()).subscribe(
                     new Action1<Void>() {
                         @Override
                         public void call(Void aVoid) {

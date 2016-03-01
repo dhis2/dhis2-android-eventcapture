@@ -10,13 +10,13 @@ import rx.schedulers.Schedulers;
 
 public class SelectorPresenter extends AbsPresenter implements ISelectorPresenter {
 
-    private ISelectorView mSelectorView;
+    private ISelectorView selectorView;
     private Subscription synchronizationSubscription;
     private Subscription pickedOrganisationUnitSubscription;
     private Subscription pickedProgramSubscription;
 
     public SelectorPresenter(ISelectorView selectorView) {
-        this.mSelectorView = selectorView;
+        this.selectorView = selectorView;
     }
 
     @Override
@@ -55,19 +55,19 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void initializeSynchronization() {
         if (synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
-            mSelectorView.onStartLoading();
-            synchronizationSubscription = D2.me().syncAssignedPrograms()
+            selectorView.onStartLoading();
+            synchronizationSubscription = D2.me().programs()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<Void>() {
                         @Override
                         public void call(Void aVoid) {
-                            mSelectorView.onFinishLoading();
+                            selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
-                            mSelectorView.onLoadingError(throwable);
+                            selectorView.onLoadingError(throwable);
                         }
                     });
         }
