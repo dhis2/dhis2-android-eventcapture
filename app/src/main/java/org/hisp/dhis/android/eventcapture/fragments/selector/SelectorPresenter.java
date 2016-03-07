@@ -2,6 +2,9 @@ package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.models.program.Program;
+
+import java.util.List;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -37,6 +40,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onDestroy() {
         super.onDestroy();
+
         if (synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
             synchronizationSubscription.unsubscribe();
             synchronizationSubscription = null;
@@ -56,13 +60,21 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     public void initializeSynchronization() {
         if (synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
             selectorView.onStartLoading();
-            synchronizationSubscription = D2.me().programs()
+
+            synchronizationSubscription = D2.me().programs().sync()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Void>() {
+                    .subscribe(new Action1<List<Program>>() {
+
                         @Override
-                        public void call(Void aVoid) {
+                        public void call(List<Program> assignedPrograms) {
                             selectorView.onFinishLoading();
+
+                            for (Program program : assignedPrograms) {
+                                System.out.println("Program list item: " +
+                                        program.getDisplayName() + " isAssigned: " +
+                                        program.isAssignedToUser());
+                            }
                         }
                     }, new Action1<Throwable>() {
                         @Override

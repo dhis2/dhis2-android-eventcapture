@@ -103,40 +103,42 @@ public class ProfilePresenter extends AbsPresenter
 
     private List<DataEntity> transformUserAccount(UserAccount account) {
         List<DataEntity> dataEntities = new ArrayList<>();
-        RxProfileValueChangedListener onProfileValueChangedListener = new
-                RxProfileValueChangedListener();
+
+        RxProfileValueChangedListener onProfileValueChangedListener =
+                new RxProfileValueChangedListener();
         onProfileValueChangedListener.setUserAccount(account);
 
-        dataEntities.add(DataEntity.create("First name", account.getFirstName(), Type.TEXT,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Surname", account.getSurname(), Type.TEXT,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Gender", account.getGender(), Type.AUTO_COMPLETE,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.DATE,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(), Type
-                .TRUE_ONLY, onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Education", account.getEducation(), Type.BOOLEAN,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Interests", account.getInterests(), Type
-                .COORDINATES, onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Job title", account.getJobTitle(), Type.TEXT,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Email", account.getEmail(), Type.TEXT,
-                onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Phone number", account.getPhoneNumber(), Type.TEXT,
-                onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("First name", account.getFirstName(),
+                Type.TEXT, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Surname", account.getSurname(),
+                Type.TEXT, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Gender", account.getGender(),
+                Type.AUTO_COMPLETE, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Birthday", account.getBirthday(),
+                Type.DATE, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(),
+                Type.TRUE_ONLY, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Education", account.getEducation(),
+                Type.BOOLEAN, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Employer", account.getEmployer(),
+                Type.TEXT, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Interests", account.getInterests(),
+                Type.COORDINATES, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Job title", account.getJobTitle(),
+                Type.TEXT, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Languages", account.getLanguages(),
+                Type.TEXT, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Email", account.getEmail(),
+                Type.TEXT, onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Phone number", account.getPhoneNumber(),
+                Type.TEXT, onProfileValueChangedListener));
 
         return dataEntities;
     }
 
-    private class RxProfileValueChangedListener implements OnValueChangeListener<CharSequence,
-            CharSequence> {
+    private class RxProfileValueChangedListener implements OnValueChangeListener<
+            CharSequence, CharSequence> {
+
         private UserAccount userAccount;
 
         @Override
@@ -168,20 +170,22 @@ public class ProfilePresenter extends AbsPresenter
             } else {
                 throw new UnsupportedOperationException("Unsupported key");
             }
-            saveProfileSubscription = D2.me().save(userAccount).observeOn(AndroidSchedulers
-                    .mainThread()).subscribeOn(Schedulers.io()).subscribe(
-                    new Action1<Void>() {
-                        @Override
-                        public void call(Void aVoid) {
-                            Timber.d("userAccount successfully saved");
-                        }
-                    }
-                    , new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            Timber.d("userAccount has failed saving");
-                        }
-                    });
+
+            saveProfileSubscription = D2.me().save(userAccount)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io()).subscribe(
+                            new Action1<Boolean>() {
+                                @Override
+                                public void call(Boolean isSaved) {
+                                    Timber.d("userAccount successfully saved");
+                                }
+                            }
+                            , new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    Timber.d("userAccount has failed saving");
+                                }
+                            });
         }
 
         public void setUserAccount(UserAccount userAccount) {
