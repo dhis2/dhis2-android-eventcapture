@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.profile.IProfilePresenter;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfilePresenter;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
@@ -20,10 +21,22 @@ import java.util.List;
 
 public class EventDataEntryFragment extends Fragment implements IEventDataEntryView {
     private RowViewAdapter rowViewAdapter;
+    private static String EXTRA_SECTION_UID = "extra:SectionUid";
+    private static String EXTRA_EVENT_UID = "extra:EventUid";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    public static EventDataEntryFragment newInstance(String eventUId, String sectionUid) {
+        EventDataEntryFragment eventDataEntryFragment = new EventDataEntryFragment();
+        Bundle args = new Bundle();
+        args.putString(EXTRA_EVENT_UID, eventUId);
+        args.putString(EXTRA_SECTION_UID, sectionUid);
+        eventDataEntryFragment.setArguments(args);
+
+        return eventDataEntryFragment;
     }
 
     @Nullable
@@ -46,9 +59,11 @@ public class EventDataEntryFragment extends Fragment implements IEventDataEntryV
         recyclerView.setAdapter(rowViewAdapter);
         recyclerView.addItemDecoration(new DividerDecoration(getContext()));
 
+        String eventUId = getArguments().getString(EXTRA_EVENT_UID);
+        String sectionUid = getArguments().getString(EXTRA_SECTION_UID);
+
         IEventDataEntryPresenter eventDataEntryPresenter = new EventDataEntryPresenter(this);
-        eventDataEntryPresenter.onCreate();
-        eventDataEntryPresenter.listDataEntryFields();
+        eventDataEntryPresenter.listDataEntryFieldsWithEventValues(eventUId, sectionUid);
     }
 
     @Override

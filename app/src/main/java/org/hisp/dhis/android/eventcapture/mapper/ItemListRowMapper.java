@@ -4,10 +4,12 @@ import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.View;
 
+import org.hisp.dhis.android.eventcapture.views.EventListRow;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.EItemListRowStatus;
-import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
+import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,43 +24,50 @@ public class ItemListRowMapper {
 
     }
 
-    public ItemListRow transform(Event event) {
+    public IItemListRow transform(Event event) {
         isNull(event, "Event object must not be null");
 
 
 
         List<TrackedEntityDataValue> trackedEntityDataValues = event.getTrackedEntityDataValues();
-        ItemListRow itemListRow = null;
+        EventListRow itemListRow = null;
 //        new ItemListRow(event, event.getTrackedEntityDataValues(), event.getStatus());
 
 
         return itemListRow;
     }
 
-    public List<ItemListRow> transform(List<Event> events) {
+    public List<IItemListRow> transform(List<Event> events) {
 
         return null;
     }
 
-    public List<ItemListRow> transform(Observable<List<Event>> events) {
+    public List<IItemListRow> transform(Observable<List<Event>> events) {
+        Event event1 = new Event();
+        event1.setUId("001");
         List<Pair<String,Integer>> itemListRow1Values = new ArrayList<>();
-        itemListRow1Values.add(new Pair<String, Integer>("Erling", 1));
-        itemListRow1Values.add(new Pair<String, Integer>("Fjelstad", 2));
-        itemListRow1Values.add(new Pair<String, Integer>("Mann", 3));
-        ItemListRow itemListRow1 = new ItemListRow(null, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
+        itemListRow1Values.add(new Pair<>("Erling", 1));
+        itemListRow1Values.add(new Pair<>("Fjelstad", 2));
+        itemListRow1Values.add(new Pair<>("Mann", 3));
+        IItemListRow itemListRow1 = new EventListRow(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
 
+        Event event2 = new Event();
+        event2.setUId("002");
         List<Pair<String,Integer>> itemListRow2Values = new ArrayList<>();
-        itemListRow2Values.add(new Pair<String, Integer>("Simen", 1));
-        itemListRow2Values.add(new Pair<String, Integer>("R", 1));
-        itemListRow2Values.add(new Pair<String, Integer>("Russnes", 2));
-        itemListRow2Values.add(new Pair<String, Integer>("Mann", 3));
-        ItemListRow itemListRow2 = new ItemListRow(null, itemListRow2Values, EItemListRowStatus.SENT.toString());
+        itemListRow2Values.add(new Pair<>("Simen", 1));
+        itemListRow2Values.add(new Pair<>("R", 1));
+        itemListRow2Values.add(new Pair<>("Russnes", 2));
+        itemListRow2Values.add(new Pair<>("Mann", 3));
+        IItemListRow itemListRow2 = new EventListRow(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
+
+        Event event3 = new Event();
+        event3.setUId("003");
         List<Pair<String,Integer>> itemListRow3Values = new ArrayList<>();
-        itemListRow3Values.add(new Pair<String, Integer>("Araz", 1));
-        itemListRow3Values.add(new Pair<String, Integer>("AB", 1));
-        itemListRow3Values.add(new Pair<String, Integer>("Abishov", 2));
-        itemListRow3Values.add(new Pair<String, Integer>("Man", 3));
-        ItemListRow itemListRow3 = new ItemListRow(null, itemListRow3Values, EItemListRowStatus.ERROR.toString());
+        itemListRow3Values.add(new Pair<>("Araz", 1));
+        itemListRow3Values.add(new Pair<>("AB", 1));
+        itemListRow3Values.add(new Pair<>("Abishov", 2));
+        itemListRow3Values.add(new Pair<>("Man", 3));
+        IItemListRow itemListRow3 = new EventListRow(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,7 +96,7 @@ public class ItemListRowMapper {
         itemListRow3.setOnRowClickListener(onClickListener);
         itemListRow3.setOnStatusClickListener(onStatusClickListener);
         itemListRow3.setOnLongClickListener(onLongClickListener);
-        List<ItemListRow> itemListRows = new ArrayList<>();
+        List<IItemListRow> itemListRows = new ArrayList<>();
         itemListRows.add(itemListRow1);
         itemListRows.add(itemListRow2);
         itemListRows.add(itemListRow3);

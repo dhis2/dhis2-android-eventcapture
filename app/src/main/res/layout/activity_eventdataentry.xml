@@ -101,15 +101,6 @@
       android:id="@+id/viewpager_eventdataentry_fragment"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-      <android.support.v7.widget.RecyclerView
-          android:id="@+id/recyclerview_dataentry"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
-          android:clipToPadding="false"/>
-
-  </android.support.v4.view.ViewPager>
-
+      app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 </android.support.design.widget.CoordinatorLayout>

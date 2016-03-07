@@ -9,7 +9,7 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
+import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
 
 import java.util.List;
 
@@ -55,12 +55,12 @@ public class ItemListPresenter extends AbsPresenter {
     }
 
     public void showItemListRows(List<Event> eventList) {
-        List<ItemListRow> itemListRows = itemListRowMapper.transform(eventList);
+        List<IItemListRow> itemListRows = itemListRowMapper.transform(eventList);
         mItemListView.renderItemRowList(itemListRows);
     }
 
     public void showItemListRows(Observable<List<Event>> eventList) {
-        List<ItemListRow> itemListRows = itemListRowMapper.transform(eventList);
+        List<IItemListRow> itemListRows = itemListRowMapper.transform(eventList);
         mItemListView.renderItemRowList(itemListRows);
     }
 

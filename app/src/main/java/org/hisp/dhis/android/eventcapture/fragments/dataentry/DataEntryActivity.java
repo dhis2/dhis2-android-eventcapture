@@ -4,15 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -23,17 +20,18 @@ import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
-import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
-import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
+import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.List;
 
 public class DataEntryActivity extends FragmentActivity implements IDataEntryView {
     private String organisationUnitUid;
     private String programUid;
+    private String eventUid;
+    private Event event;
+    private List<ProgramStageSection> programStageSections;
 
-    private RowViewAdapter rowViewAdapter;
     private ViewPager viewPager;
     private TextSwitcher sectionLabelTextSwitcher;
     private ImageView previousSectionButton, nextSectionButton;
@@ -44,39 +42,43 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         setContentView(R.layout.activity_eventdataentry);
 
         Intent intent = getIntent();
-        organisationUnitUid = intent.getStringExtra(ItemListFragment.ORG_UNIT_ID);
-        programUid = intent.getStringExtra(ItemListFragment.PROGRAM_ID);
+        organisationUnitUid = intent.getStringExtra(ItemListFragment.ORG_UNIT_UID);
+        programUid = intent.getStringExtra(ItemListFragment.PROGRAM_UID);
+        eventUid = intent.getStringExtra(ItemListFragment.EVENT_UID);
 
         Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
         Log.d("PROGRAM DATAENTRY", programUid);
+        Log.d("EVENT DATAENTRY", eventUid);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
+        IDataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
+        dataEntryPresenter.onCreate();
+        dataEntryPresenter.listProgramStageSections(programUid);
+
+        if(eventUid.equals("")) {
+            dataEntryPresenter.createNewEvent(organisationUnitUid, programUid);
+        }
+        else {
+            event = dataEntryPresenter.getEvent(eventUid);  //doesn't work when we have dummy data
+        }
+
+
+
+    }
+    @Override
+    @UiThread
+    public void initializeViewPager(List<ProgramStageSection> programStageSections) {
+        this.programStageSections = programStageSections;
         viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
         viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
                 previousSectionButton,
                 nextSectionButton,
                 sectionLabelTextSwitcher));
-
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        rowViewAdapter = new RowViewAdapter(getSupportFragmentManager());
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview_dataentry);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(rowViewAdapter);
-        recyclerView.addItemDecoration(new DividerDecoration(this));
-
-        IDataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
-        dataEntryPresenter.onCreate();
-        dataEntryPresenter.listDataEntryFields(programUid, 0);
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -89,9 +91,8 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     }
 
     @Override
-    @UiThread
-    public void setDataEntryFields(List<DataEntity> dataEntities) {
-        rowViewAdapter.swap(dataEntities);
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
     private class DataEntrySectionPageAdapter extends FragmentStatePagerAdapter {
@@ -102,17 +103,27 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return "Section " + position;
+            if(programStageSections != null) {
+                return programStageSections.get(position).getDisplayName();
+            }
+            else return "";
         }
 
         @Override
         public Fragment getItem(int position) {
-            return new EventDataEntryFragment();
+            if(event != null) {
+            return EventDataEntryFragment.newInstance(event.getUId(), programStageSections.get(position).getUId());
+        }
+        else return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
         }
 
         @Override
         public int getCount() {
-            return 7;
+            if(programStageSections == null)
+                return 0;
+            else {
+                return programStageSections.size();
+            }
         }
     }
 
@@ -152,7 +163,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
             this.previousSectionButton.setOnClickListener(this);
             this.nextSectionButton.setOnClickListener(this);
 
-            this.numberOfPages = viewPager.getAdapter().getCount() - 1;
+            this.numberOfPages = (viewPager.getAdapter().getCount() - 1);
 
             if (viewPager.getAdapter().getCount() > 0) {
                 this.nextSectionButton.setVisibility(View.VISIBLE);
@@ -181,7 +192,6 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
                 nextSectionButton.setVisibility(View.VISIBLE);
             }
 
-            System.out.println("Position=" + position + " LastPosition=" + lastPosition);
             if (position > lastPosition) {
                 //change these:
                 sectionLabelTextSwitcher.setOutAnimation(slideOutLeft);
