@@ -82,6 +82,16 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             selectorView.onLoadingError(throwable);
                         }
                     });
+
+            // TODO Do something with this
+//            Observable.zip(Arrays.asList(D2.me().programs().sync(),
+//                    D2.me().organisationUnits().sync()), new FuncN<List<OrganisationUnit>>() {
+//
+//                @Override
+//                public List<OrganisationUnit> call(Object... args) {
+//                    return null;
+//                }
+//            });
         }
     }
 }
