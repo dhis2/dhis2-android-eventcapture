@@ -115,7 +115,6 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
         mSelectorPresenter.initializeSynchronization();
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
