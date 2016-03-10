@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
+import org.hisp.dhis.android.eventcapture.datasync.SessionManager;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 
@@ -54,22 +55,27 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void initializeSynchronization() {
-        if (synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
-            mSelectorView.onStartLoading();
-            synchronizationSubscription = D2.me().syncAssignedPrograms()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Void>() {
-                        @Override
-                        public void call(Void aVoid) {
-                            mSelectorView.onFinishLoading();
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            mSelectorView.onLoadingError(throwable);
-                        }
-                    });
+        if (!SessionManager.getInstance().isSelectorSynced()) {
+            if (synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
+                mSelectorView.onStartLoading();
+                synchronizationSubscription = D2.me().syncAssignedPrograms()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<Void>() {
+                            @Override
+                            public void call(Void aVoid) {
+                                mSelectorView.onFinishLoading();
+                                SessionManager.getInstance().setSelectorSynced(true);
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                mSelectorView.onLoadingError(throwable);
+                            }
+                        });
+            }
+        } else {
+            mSelectorView.onFinishLoading();
         }
     }
 }
