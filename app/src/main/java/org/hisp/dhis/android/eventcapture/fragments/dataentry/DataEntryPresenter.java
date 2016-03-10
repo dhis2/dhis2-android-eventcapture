@@ -48,7 +48,6 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     public List<ProgramStageSection> call(List<ProgramStage> programStages) {
                         ProgramStage stage = programStages.get(0);
                         return D2.programStageSections().list(stage).toBlocking().first();
-//                        return D2.programStageSections().list(programStages.get(0)).toBlocking().first(); //only one stage in EventCapture
                     }
                 }).subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
@@ -95,16 +94,6 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                         Timber.d(throwable.toString());
                     }
                 });
-
-
-//                .subscribe(new Action1<List<ProgramStage>>() {
-//                    @Override
-//                    public void call(List<ProgramStage> programStages) {
-//                        ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture
-//                        Event event = Event.create(organisationUnitId, programId, currentProgramStage.getUId(), Event.STATUS_ACTIVE);
-//                        setEmptyTrackedEntityDataValues(event, currentProgramStage);
-//                    }
-//                });
     }
 
     private void setEmptyTrackedEntityDataValues(Event event, ProgramStage programStage, UserAccount userAccount) {

@@ -35,6 +35,7 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
+import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
 
 import java.io.IOException;
@@ -68,15 +69,15 @@ public class ProfilePresenter extends AbsPresenter
         profileSubscription = D2.me().account()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<UserAccount, List<DataEntity>>() {
+                .map(new Func1<UserAccount, List<IDataEntity>>() {
                     @Override
-                    public List<DataEntity> call(UserAccount userAccount) {
+                    public List<IDataEntity> call(UserAccount userAccount) {
                         return transformUserAccount(userAccount);
                     }
                 })
-                .subscribe(new Action1<List<DataEntity>>() {
+                .subscribe(new Action1<List<IDataEntity>>() {
                     @Override
-                    public void call(List<DataEntity> dataEntities) {
+                    public void call(List<IDataEntity> dataEntities) {
                         if (profileView != null) {
                             profileView.setProfileFields(dataEntities);
                         }
@@ -108,8 +109,8 @@ public class ProfilePresenter extends AbsPresenter
         return ProfilePresenter.class.getSimpleName();
     }
 
-    private List<DataEntity> transformUserAccount(UserAccount account) {
-        List<DataEntity> dataEntities = new ArrayList<>();
+    private List<IDataEntity> transformUserAccount(UserAccount account) {
+        List<IDataEntity> dataEntities = new ArrayList<>();
         RxProfileValueChangedListener onProfileValueChangedListener = new RxProfileValueChangedListener();
         onProfileValueChangedListener.setUserAccount(account);
 
@@ -127,8 +128,8 @@ public class ProfilePresenter extends AbsPresenter
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Interests", account.getInterests(), Type
-                .COORDINATES,  onProfileValueChangedListener));
+        dataEntities.add(DataEntity.create("Interests", account.getInterests(),
+                Type.TEXT,  onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Job title", account.getJobTitle(), Type.TEXT,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT,
@@ -141,46 +142,46 @@ public class ProfilePresenter extends AbsPresenter
         return dataEntities;
     }
 
-    private class RxProfileValueChangedListener implements OnValueChangeListener<CharSequence, CharSequence> {
+    private class RxProfileValueChangedListener implements OnValueChangeListener<Pair<CharSequence, CharSequence>> {
         private UserAccount userAccount;
 
         @Override
-        public void onValueChanged(CharSequence key, CharSequence value) {
-            if("First name".equals(key)) {
-                userAccount.setFirstName(value.toString());
+        public void onValueChanged(Pair<CharSequence, CharSequence> keyValue) {
+            if("First name".equals(keyValue.first)) {
+                userAccount.setFirstName(keyValue.second.toString());
             }
-            else if("Surname".equals(key)) {
-                userAccount.setSurname(value.toString());
+            else if("Surname".equals(keyValue.first)) {
+                userAccount.setSurname(keyValue.second.toString());
             }
-            else if("Gender".equals(key)) {
-                userAccount.setGender(value.toString());
+            else if("Gender".equals(keyValue.first)) {
+                userAccount.setGender(keyValue.second.toString());
             }
-            else if("Birthday".equals(key)) {
-                userAccount.setBirthday(value.toString());
+            else if("Birthday".equals(keyValue.first)) {
+                userAccount.setBirthday(keyValue.second.toString());
             }
-            else if("Introduction".equals(key)) {
-                userAccount.setIntroduction(value.toString());
+            else if("Introduction".equals(keyValue.first)) {
+                userAccount.setIntroduction(keyValue.second.toString());
             }
-            else if("Education".equals(key)) {
-                userAccount.setEducation(value.toString());
+            else if("Education".equals(keyValue.first)) {
+                userAccount.setEducation(keyValue.second.toString());
             }
-            else if("Employer".equals(key)) {
-                userAccount.setEmployer(value.toString());
+            else if("Employer".equals(keyValue.first)) {
+                userAccount.setEmployer(keyValue.second.toString());
             }
-            else if("Interests".equals(key)) {
-                userAccount.setInterests(value.toString());
+            else if("Interests".equals(keyValue.first)) {
+                userAccount.setInterests(keyValue.second.toString());
             }
-            else if("Job title".equals(key)) {
-                userAccount.setJobTitle(value.toString());
+            else if("Job title".equals(keyValue.first)) {
+                userAccount.setJobTitle(keyValue.second.toString());
             }
-            else if("Languages".equals(key)) {
-                userAccount.setLanguages(value.toString());
+            else if("Languages".equals(keyValue.first)) {
+                userAccount.setLanguages(keyValue.second.toString());
             }
-            else if("Email".equals(key)) {
-                userAccount.setEmail(value.toString());
+            else if("Email".equals(keyValue.first)) {
+                userAccount.setEmail(keyValue.second.toString());
             }
-            else if("Phone number".equals(key)) {
-                userAccount.setPhoneNumber(value.toString());
+            else if("Phone number".equals(keyValue.first)) {
+                userAccount.setPhoneNumber(keyValue.second.toString());
             }
             else {
                 throw new UnsupportedOperationException("Unsupported key");
