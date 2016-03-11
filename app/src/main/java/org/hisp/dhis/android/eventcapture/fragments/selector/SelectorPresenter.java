@@ -2,21 +2,22 @@ package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 
 import java.util.List;
 
-import rx.Subscription;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class SelectorPresenter extends AbsPresenter implements ISelectorPresenter {
 
     private ISelectorView selectorView;
-    private Subscription synchronizationSubscription;
-    private Subscription pickedOrganisationUnitSubscription;
-    private Subscription pickedProgramSubscription;
+    private CompositeSubscription subscriptions;
 
     public SelectorPresenter(ISelectorView selectorView) {
         this.selectorView = selectorView;
@@ -24,7 +25,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void onCreate() {
-
+        subscriptions = new CompositeSubscription();
     }
 
     @Override
@@ -34,64 +35,52 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void onResume() {
-
+        // stub implementation
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (synchronizationSubscription != null && !synchronizationSubscription.isUnsubscribed()) {
-            synchronizationSubscription.unsubscribe();
-            synchronizationSubscription = null;
-        }
-        if (pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription
-                .isUnsubscribed()) {
-            pickedOrganisationUnitSubscription.unsubscribe();
-            pickedOrganisationUnitSubscription = null;
-        }
-        if (pickedProgramSubscription != null && !pickedProgramSubscription.isUnsubscribed()) {
-            pickedProgramSubscription.unsubscribe();
-            pickedProgramSubscription = null;
-        }
+        subscriptions.unsubscribe();
     }
 
     @Override
     public void initializeSynchronization() {
-        if (synchronizationSubscription == null || synchronizationSubscription.isUnsubscribed()) {
-            selectorView.onStartLoading();
+        selectorView.onStartLoading();
 
-            synchronizationSubscription = D2.me().programs().sync()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<Program>>() {
+        subscriptions.add(Observable.zip(
+                D2.me().organisationUnits().sync(), D2.me().programs().sync(),
+                new Func2<List<OrganisationUnit>, List<Program>, List<OrganisationUnit>>() {
 
-                        @Override
-                        public void call(List<Program> assignedPrograms) {
-                            selectorView.onFinishLoading();
-
-                            for (Program program : assignedPrograms) {
-                                System.out.println("Program list item: " +
-                                        program.getDisplayName() + " isAssigned: " +
-                                        program.isAssignedToUser());
-                            }
+                    @Override
+                    public List<OrganisationUnit> call(List<OrganisationUnit> organisationUnits,
+                                                       List<Program> programs) {
+                        for (Program program : programs) {
+                            System.out.println("Program: " + program.getDisplayName());
                         }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            selectorView.onLoadingError(throwable);
-                        }
-                    });
 
-            // TODO Do something with this
-//            Observable.zip(Arrays.asList(D2.me().programs().sync(),
-//                    D2.me().organisationUnits().sync()), new FuncN<List<OrganisationUnit>>() {
-//
-//                @Override
-//                public List<OrganisationUnit> call(Object... args) {
-//                    return null;
-//                }
-//            });
-        }
+                        for (OrganisationUnit organisationUnit : organisationUnits) {
+                            System.out.println("OrganisationUnit: " +
+                                    organisationUnit.getDisplayName());
+                        }
+
+                        return organisationUnits;
+                    }
+                }
+        )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<OrganisationUnit>>() {
+                    @Override
+                    public void call(List<OrganisationUnit> organisationUnits) {
+                        selectorView.onFinishLoading();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                }));
     }
 }

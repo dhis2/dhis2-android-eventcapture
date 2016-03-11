@@ -10,6 +10,7 @@ import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -70,7 +71,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
         if (organisationUnitSubscription == null || organisationUnitSubscription.isUnsubscribed()) {
             mOrganisationUnitProgramPickerView.onStartLoading();
 
-            organisationUnitSubscription = D2.organisationUnits().list()
+            organisationUnitSubscription = D2.me().organisationUnits().list()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<List<OrganisationUnit>>() {
@@ -89,17 +90,28 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     }
 
     public void loadPrograms(OrganisationUnit organisationUnit) {
+
         if (programSubscription == null || programSubscription.isUnsubscribed()) {
             mOrganisationUnitProgramPickerView.onStartLoading();
+
             // TODO revise
-            programSubscription = D2.programs().list(organisationUnit, null)
+            programSubscription = D2.me().programs().list(organisationUnit)
                     // ProgramType.WITHOUT_REGISTRATION)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<List<Program>>() {
                         @Override
                         public void call(List<Program> programs) {
-                            setProgramPickables(programs);
+                            List<Program> filteredPrograms = new ArrayList<>();
+
+                            for (Program program : programs) {
+                                if (program.isAssignedToUser() && ProgramType.WITHOUT_REGISTRATION
+                                        .equals(program.getProgramType())) {
+                                    filteredPrograms.add(program);
+                                }
+                            }
+
+                            setProgramPickables(filteredPrograms);
                             mOrganisationUnitProgramPickerView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
