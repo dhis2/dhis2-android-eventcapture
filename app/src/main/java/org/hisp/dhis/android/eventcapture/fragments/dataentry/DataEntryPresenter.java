@@ -102,12 +102,11 @@ public class DataEntryPresenter implements IDataEntryPresenter {
         List<TrackedEntityDataValue> trackedEntityDataValues = new ArrayList<>();
 
         for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
-            TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
-            trackedEntityDataValue.setEvent(event);
-            trackedEntityDataValue.setValue(EMPTY_FIELD);
-            trackedEntityDataValue.setDataElement(programStageDataElement.getDataElement().getUId());
-            trackedEntityDataValue.setProvidedElsewhere(false);
-            trackedEntityDataValue.setStoredBy(userAccount.getDisplayName());
+
+            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
+                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
+                    userAccount.getDisplayName(), false);
+
             trackedEntityDataValues.add(trackedEntityDataValue);
         }
         event.setTrackedEntityDataValues(trackedEntityDataValues);
