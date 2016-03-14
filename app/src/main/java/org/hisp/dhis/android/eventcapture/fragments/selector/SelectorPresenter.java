@@ -67,8 +67,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
                         return organisationUnits;
                     }
-                }
-        )
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<OrganisationUnit>>() {
