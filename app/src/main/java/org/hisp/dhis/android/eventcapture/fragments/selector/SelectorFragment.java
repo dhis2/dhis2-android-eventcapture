@@ -53,7 +53,10 @@ public class SelectorFragment extends Fragment implements ISelectorView,
             hiddenFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE,
                     hiddenFloatingActionButton);
         }
+
         mSelectorPresenter = new SelectorPresenter(this);
+        mSelectorPresenter.onCreate();
+
         setHasOptionsMenu(true);
     }
 
@@ -70,13 +73,15 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_selector, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         if (savedInstanceState == null) {
+
             //init orgPicker:
             OrganisationUnitProgramPickerFragment organisationUnitProgramPickerFragment =
                     (OrganisationUnitProgramPickerFragment) createPickerFragment();
@@ -94,7 +99,8 @@ public class SelectorFragment extends Fragment implements ISelectorView,
                     hiddenFloatingActionButton);
         }
 
-        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id.floating_action_button);
+        mFloatingActionButton = (FloatingActionButton) view.findViewById(R.id
+                .floating_action_button);
         mFloatingActionButton.setOnClickListener(this);
 
         boolean onTablet = getResources().getBoolean(org.hisp.dhis.android.eventcapture.R.bool
@@ -175,7 +181,8 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
     private void showProgress() {
 
-        FrameLayout progressFrame = (FrameLayout) getActivity().findViewById(R.id.layer_progress_bar);
+        FrameLayout progressFrame = (FrameLayout) getActivity().findViewById(R.id
+                .layer_progress_bar);
         progressFrame.setVisibility(View.VISIBLE);
 
         //spinner:
@@ -226,7 +233,9 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
     public static class OnOrganisationUnitPickerValueUpdated {
         private final Observable<OrganisationUnit> organisationUnitObservable;
-        public OnOrganisationUnitPickerValueUpdated(Observable<OrganisationUnit> organisationUnitObservable) {
+
+        public OnOrganisationUnitPickerValueUpdated(Observable<OrganisationUnit>
+                                                            organisationUnitObservable) {
             this.organisationUnitObservable = organisationUnitObservable;
         }
 
@@ -237,6 +246,7 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
     public static class OnProgramPickerValueUpdated {
         private final Observable<Program> programObservable;
+
         public OnProgramPickerValueUpdated(Observable<Program> programObservable) {
             this.programObservable = programObservable;
         }
