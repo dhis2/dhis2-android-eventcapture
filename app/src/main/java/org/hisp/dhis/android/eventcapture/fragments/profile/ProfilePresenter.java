@@ -38,19 +38,14 @@ import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
 import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
-import rx.subjects.Subject;
 import timber.log.Timber;
 
 public class ProfilePresenter extends AbsPresenter
@@ -95,7 +90,7 @@ public class ProfilePresenter extends AbsPresenter
         if (profileSubscription != null && !profileSubscription.isUnsubscribed()) {
             profileSubscription.isUnsubscribed();
         }
-        if(saveProfileSubscription != null && !saveProfileSubscription.isUnsubscribed()) {
+        if (saveProfileSubscription != null && !saveProfileSubscription.isUnsubscribed()) {
             saveProfileSubscription.unsubscribe();
         }
 
@@ -108,6 +103,7 @@ public class ProfilePresenter extends AbsPresenter
     public String getKey() {
         return ProfilePresenter.class.getSimpleName();
     }
+
 
     private List<IDataEntity> transformUserAccount(UserAccount account) {
         List<IDataEntity> dataEntities = new ArrayList<>();
@@ -123,13 +119,13 @@ public class ProfilePresenter extends AbsPresenter
         dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.DATE,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(), Type
-                .TRUE_ONLY,  onProfileValueChangedListener));
+                .TRUE_ONLY, onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Education", account.getEducation(), Type.BOOLEAN,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Interests", account.getInterests(),
-                Type.TEXT,  onProfileValueChangedListener));
+                Type.TEXT, onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Job title", account.getJobTitle(), Type.TEXT,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT,
@@ -141,6 +137,7 @@ public class ProfilePresenter extends AbsPresenter
 
         return dataEntities;
     }
+
 
     private class RxProfileValueChangedListener implements OnValueChangeListener<Pair<CharSequence, CharSequence>> {
         private UserAccount userAccount;
@@ -184,21 +181,25 @@ public class ProfilePresenter extends AbsPresenter
                 userAccount.setPhoneNumber(keyValue.second.toString());
             }
             else {
+
                 throw new UnsupportedOperationException("Unsupported key");
             }
-            saveProfileSubscription = D2.me().save(userAccount).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(
-                    new Action1<Void>() {
-                        @Override
-                        public void call(Void aVoid) {
-                            Timber.d("userAccount successfully saved");
-                        }
-                    }
-                    , new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            Timber.d("userAccount has failed saving");
-                        }
-                    });
+
+            saveProfileSubscription = D2.me().save(userAccount)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io()).subscribe(
+                            new Action1<Boolean>() {
+                                @Override
+                                public void call(Boolean isSaved) {
+                                    Timber.d("userAccount successfully saved");
+                                }
+                            }
+                            , new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    Timber.d("userAccount has failed saving");
+                                }
+                            });
         }
 
         public void setUserAccount(UserAccount userAccount) {

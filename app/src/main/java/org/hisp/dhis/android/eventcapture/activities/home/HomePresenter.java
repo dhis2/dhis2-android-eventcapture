@@ -58,7 +58,8 @@ public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
                 .subscribe(this);
 
         //init the user account for synchronization:
-        AppAccountManager.getInstance().createAccount(homeView.getContext(), D2.configuration().getUsername());
+        AppAccountManager.getInstance().createAccount(homeView.getContext(), D2.configuration()
+                .getUsername());
     }
 
     @Override
@@ -75,7 +76,8 @@ public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
         if (!isEmpty(userAccount.getFirstName()) && !isEmpty(userAccount.getSurname())) {
             name = String.valueOf(userAccount.getFirstName().charAt(0)) +
                     String.valueOf(userAccount.getSurname().charAt(0));
-        } else if (userAccount.getDisplayName() != null && userAccount.getDisplayName().length() > 1) {
+        } else if (userAccount.getDisplayName() != null &&
+                userAccount.getDisplayName().length() > 1) {
             name = String.valueOf(userAccount.getDisplayName().charAt(0)) +
                     String.valueOf(userAccount.getDisplayName().charAt(1));
         }

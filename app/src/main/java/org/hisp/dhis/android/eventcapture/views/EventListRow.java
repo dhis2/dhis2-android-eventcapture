@@ -80,4 +80,8 @@ public class EventListRow implements IEventListRow {
     public void setEvent(Event event) {
         this.event = event;
     }
+
+    interface OnEventListRowClicked {
+        void onEventListRowClicked(EventListRow eventListRow);
+    }
 }

@@ -10,6 +10,7 @@ import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -43,17 +44,19 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(organisationUnitSubscription != null && !organisationUnitSubscription.isUnsubscribed()) {
+        if (organisationUnitSubscription != null && !organisationUnitSubscription.isUnsubscribed
+                ()) {
             organisationUnitSubscription.unsubscribe();
             organisationUnitSubscription = null;
         }
 
-        if(programSubscription != null && !programSubscription.isUnsubscribed()) {
+        if (programSubscription != null && !programSubscription.isUnsubscribed()) {
             programSubscription.unsubscribe();
             programSubscription = null;
         }
 
-        if(pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription.isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription != null && !pickedOrganisationUnitSubscription
+                .isUnsubscribed()) {
             pickedOrganisationUnitSubscription.unsubscribe();
             pickedOrganisationUnitSubscription = null;
         }
@@ -65,51 +68,66 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     }
 
     public void loadOrganisationUnits() {
-        if(organisationUnitSubscription == null || organisationUnitSubscription.isUnsubscribed()) {
+        if (organisationUnitSubscription == null || organisationUnitSubscription.isUnsubscribed()) {
             mOrganisationUnitProgramPickerView.onStartLoading();
 
-            organisationUnitSubscription = D2.organisationUnits().list()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Action1<List<OrganisationUnit>>() {
-                @Override
-                public void call(List<OrganisationUnit> organisationUnits) {
-                    setOrganisationUnitPickables(organisationUnits);
-                    mOrganisationUnitProgramPickerView.onFinishLoading();
-                }
-            }, new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    mOrganisationUnitProgramPickerView.onLoadingError(); // (throwable);
-                }
-            });
+            organisationUnitSubscription = D2.me().organisationUnits().list()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<List<OrganisationUnit>>() {
+                        @Override
+                        public void call(List<OrganisationUnit> organisationUnits) {
+                            setOrganisationUnitPickables(organisationUnits);
+                            mOrganisationUnitProgramPickerView.onFinishLoading();
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            mOrganisationUnitProgramPickerView.onLoadingError(); // (throwable);
+                        }
+                    });
         }
     }
 
     public void loadPrograms(OrganisationUnit organisationUnit) {
-        if(programSubscription == null || programSubscription.isUnsubscribed()) {
+
+        if (programSubscription == null || programSubscription.isUnsubscribed()) {
             mOrganisationUnitProgramPickerView.onStartLoading();
-            programSubscription = D2.programs().list(organisationUnit, ProgramType.WITHOUT_REGISTRATION)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(new Action1<List<Program>>() {
-                @Override
-                public void call(List<Program> programs) {
-                    setProgramPickables(programs);
-                    mOrganisationUnitProgramPickerView.onFinishLoading();
-                }
-            }, new Action1<Throwable>() {
-                @Override
-                public void call(Throwable throwable) {
-                    mOrganisationUnitProgramPickerView.onLoadingError(); //(throwable);
-                }
-            });
+
+            // TODO revise
+            programSubscription = D2.me().programs().list(organisationUnit)
+                    // ProgramType.WITHOUT_REGISTRATION)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<List<Program>>() {
+                        @Override
+                        public void call(List<Program> programs) {
+                            List<Program> filteredPrograms = new ArrayList<>();
+
+                            for (Program program : programs) {
+                                if (program.isAssignedToUser() && ProgramType.WITHOUT_REGISTRATION
+                                        .equals(program.getProgramType())) {
+                                    filteredPrograms.add(program);
+                                }
+                            }
+
+                            setProgramPickables(filteredPrograms);
+                            mOrganisationUnitProgramPickerView.onFinishLoading();
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            mOrganisationUnitProgramPickerView.onLoadingError(); //(throwable);
+                        }
+                    });
         }
     }
 
     public void setOrganisationUnitPickables(List<OrganisationUnit> organisationUnits) {
-        List<IPickable> organisationUnitPickables = mOrganisationUnitPickableMapper.transform(organisationUnits);
-        mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables(organisationUnitPickables);
+        List<IPickable> organisationUnitPickables = mOrganisationUnitPickableMapper.transform
+                (organisationUnits);
+        mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables
+                (organisationUnitPickables);
 
     }
 
@@ -119,21 +137,23 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
 
     }
 
-    public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView) {
+    public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView
+                                                             mOrganisationUnitProgramPickerView) {
         this.mOrganisationUnitProgramPickerView = mOrganisationUnitProgramPickerView;
     }
 
     public void setPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnit) {
-        if(pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription.isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription
+                .isUnsubscribed()) {
             pickedOrganisationUnitSubscription = organisationUnit.
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).
                     subscribe(new Action1<OrganisationUnit>() {
-                    @Override
-                    public void call(OrganisationUnit organisationUnit) {
-                        loadPrograms(organisationUnit);
-                    }
-                });
+                        @Override
+                        public void call(OrganisationUnit organisationUnit) {
+                            loadPrograms(organisationUnit);
+                        }
+                    });
 
         }
     }

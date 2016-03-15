@@ -18,20 +18,16 @@ import rx.Subscriber;
 
 public class ItemListPresenter extends AbsPresenter {
 
-    private IItemListView mItemListView;
+    private IItemListView itemListView;
     private final ItemListRowMapper itemListRowMapper;
 
-    public ItemListPresenter() {
+    public ItemListPresenter(@NonNull IItemListView itemListView) {
+        this.itemListView = itemListView;
         this.itemListRowMapper = new ItemListRowMapper();
-    }
-
-    public void setItemListView(@NonNull IItemListView mItemListView) {
-        this.mItemListView = mItemListView;
     }
 
     @Override
     public void onCreate() {
-//        this.loadEventList();
     }
 
     @Override
@@ -44,8 +40,13 @@ public class ItemListPresenter extends AbsPresenter {
         super.onDestroy();
     }
 
-    public void loadEventList(OrganisationUnit organisationUnit, Program program) {
-        this.getEventsList(organisationUnit, program);
+    public void loadEventList(Observable<OrganisationUnit> organisationUnitObservable, Observable<Program> programObservable) {
+        if(organisationUnitObservable == null || programObservable == null) {
+            return;
+        }
+        this.getEventsList(
+                organisationUnitObservable.toBlocking().first(),
+                programObservable.toBlocking().first());
     }
 
     public void getEventsList(OrganisationUnit organisationUnit, Program program) {
@@ -56,32 +57,32 @@ public class ItemListPresenter extends AbsPresenter {
 
     public void showItemListRows(List<Event> eventList) {
         List<IItemListRow> itemListRows = itemListRowMapper.transform(eventList);
-        mItemListView.renderItemRowList(itemListRows);
+        itemListView.renderItemRowList(itemListRows);
     }
 
     public void showItemListRows(Observable<List<Event>> eventList) {
         List<IItemListRow> itemListRows = itemListRowMapper.transform(eventList);
-        mItemListView.renderItemRowList(itemListRows);
+        itemListView.renderItemRowList(itemListRows);
     }
 
     private void showViewLoading() {
-        this.mItemListView.showViewLoading();
+        this.itemListView.showViewLoading();
     }
 
     private void hideViewLoading() {
-        this.mItemListView.hideViewLoading();
+        this.itemListView.hideViewLoading();
     }
 
     private void showViewRetry() {
-        this.mItemListView.showViewRetry();
+        this.itemListView.showViewRetry();
     }
 
     private void hideViewRetry() {
-        this.mItemListView.hideViewRetry();
+        this.itemListView.hideViewRetry();
     }
 
     private void showErrorMessage(String error) {
-        this.mItemListView.showErrorMessage(error);
+        this.itemListView.showErrorMessage(error);
     }
 
     private final class EventSubscriber extends Subscriber<List<Event>> {

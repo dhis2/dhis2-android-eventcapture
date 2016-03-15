@@ -1,10 +1,7 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
-import android.support.v4.app.Fragment;
-
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 
 import rx.Observable;
 
