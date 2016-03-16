@@ -39,8 +39,8 @@ ext {
     libraries = [
             // android libs
             supportVersion          : "23.1.1",
-            rxAndroidVersion        : "1.0.1",
-            dbFlowVersion           : "2.2.1",
+            rxAndroidVersion        : "1.1.0",
+            dbFlowVersion           : "3.0.0-beta5",
             progressBarVersion      : "1.2.0",
             smoothProgressBarVersion: "1.1.0",
             crashlyticsVersion      : "2.5.5",
@@ -48,10 +48,10 @@ ext {
 
             // java libs
             timberVersion           : "4.1.0",
-            okhttpVersion           : "2.7.0",
-            retrofitVersion         : "2.0.0-beta2",
-            jacksonVersion          : "2.6.4",
-            jodaTimeVersion         : "2.9.1",
+            okhttpVersion           : "3.2.0",
+            retrofitVersion         : "2.0.0",
+            jacksonVersion          : "2.7.3",
+            jodaTimeVersion         : "2.9.2",
             jexlVersion             : "2.1.1",
             commonsLang3Version     : "3.3.2",
             commonsMath3Version     : "3.6",
@@ -81,7 +81,16 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven { url 'https://maven.fabric.io/public' }
+
+        maven {
+            url 'https://maven.fabric.io/public'
+        }
+
+        // We need JitPack's repository in order
+        // to compile DbFlow (3)
+        maven {
+            url "https://jitpack.io"
+        }
     }
 }
 

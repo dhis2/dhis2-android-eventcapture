@@ -38,9 +38,11 @@ import org.hisp.dhis.client.sdk.models.user.UserAccount;
 
 import java.net.HttpURLConnection;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
@@ -61,9 +63,9 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     }
 
     @Override
-    public void validateCredentials(String serverUrl, String username, String password) {
+    public void validateCredentials(final String serverUrl, final String username,
+                                    final String password) {
         Configuration configuration = new Configuration(serverUrl);
-
         accountName = username;
 
         mLoginView.showProgress();
@@ -74,7 +76,13 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
             }
         }, 3000);
 
-        mLoginSubscription = D2.signIn(configuration, username, password)
+        mLoginSubscription = D2.configure(configuration)
+                .flatMap(new Func1<Void, Observable<UserAccount>>() {
+                    @Override
+                    public Observable<UserAccount> call(Void aVoid) {
+                        return D2.me().signIn(username, password);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<UserAccount>() {
@@ -85,6 +93,7 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        throwable.printStackTrace();
                         handleError(throwable);
                     }
                 });
@@ -104,17 +113,19 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
 
     @Override
     public void onResume() {
-        D2.isSignedIn()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Boolean>() {
-                    @Override
-                    public void call(Boolean isSignedIn) {
-                        if (isSignedIn != null && isSignedIn) {
-                            onSuccess();
+        if (D2.isConfigured()) {
+            D2.me().isSignedIn()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<Boolean>() {
+                        @Override
+                        public void call(Boolean isSignedIn) {
+                            if (isSignedIn != null && isSignedIn) {
+                                onSuccess();
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
 
     @Override
@@ -135,7 +146,6 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     @Override
     public void onSuccess() {
         mLoginView.hideProgress();
-
         mLoginView.navigateToHome();
     }
 

@@ -58,8 +58,8 @@ public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
                 .subscribe(this);
 
         //init the user account for synchronization:
-        AppAccountManager.getInstance().createAccount(homeView.getContext(), D2.configuration()
-                .getUsername());
+        AppAccountManager.getInstance().createAccount(homeView.getContext(),
+                D2.me().userCredentials().toBlocking().first().getUsername());
     }
 
     @Override
