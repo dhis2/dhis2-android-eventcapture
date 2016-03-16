@@ -26,6 +26,17 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onCreate() {
         subscriptions = new CompositeSubscription();
+
+        D2.me().programs().list()
+                .subscribe(new Action1<List<Program>>() {
+
+                    @Override
+                    public void call(List<Program> programs) {
+                        for (Program program : programs) {
+                            System.out.println("OrgUnits: " + program.getOrganisationUnits());
+                        }
+                    }
+                });
     }
 
     @Override

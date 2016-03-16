@@ -124,10 +124,10 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     }
 
     public void setOrganisationUnitPickables(List<OrganisationUnit> organisationUnits) {
-        List<IPickable> organisationUnitPickables = mOrganisationUnitPickableMapper.transform
-                (organisationUnits);
-        mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables
-                (organisationUnitPickables);
+        List<IPickable> organisationUnitPickables =
+                mOrganisationUnitPickableMapper.transform(organisationUnits);
+        mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables(
+                organisationUnitPickables);
 
     }
 
@@ -143,8 +143,8 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     }
 
     public void setPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnit) {
-        if (pickedOrganisationUnitSubscription == null || pickedOrganisationUnitSubscription
-                .isUnsubscribed()) {
+        if (pickedOrganisationUnitSubscription == null ||
+                pickedOrganisationUnitSubscription.isUnsubscribed()) {
             pickedOrganisationUnitSubscription = organisationUnit.
                     subscribeOn(Schedulers.io()).
                     observeOn(AndroidSchedulers.mainThread()).
