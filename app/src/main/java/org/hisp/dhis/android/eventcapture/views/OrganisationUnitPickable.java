@@ -30,7 +30,6 @@ package org.hisp.dhis.android.eventcapture.views;
 
 import android.os.Parcel;
 
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
@@ -81,6 +80,7 @@ public class OrganisationUnitPickable implements IPickable {
     };
 
     public Observable<OrganisationUnit> getOrganisationUnit() {
-        return D2.organisationUnits().get(mId);
+        // return D2.organisationUnits().get(mId);
+        return null;
     }
 }

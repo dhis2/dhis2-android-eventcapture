@@ -38,7 +38,8 @@ public class SettingsPresenter implements ISettingsPresenter {
 
     @Override
     public void logout(Context context) {
-        D2.signOut();
+        // D2.signOut();
+        D2.me().signOut();
         ActivityUtils.changeDefaultActivity(context, true);
         context.startActivity(new Intent(mSettingsFragment.getActivity(), LogInActivity.class));
 
