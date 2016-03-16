@@ -8,8 +8,11 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
@@ -31,6 +34,7 @@ import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
+import timber.log.Timber;
 
 public class ItemListFragment extends Fragment implements IItemListView, View.OnClickListener {
     public static final String TAG = ItemListFragment.class.getSimpleName();
@@ -39,27 +43,29 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
     public static final String EVENT_UID = "extra:EventUId";
     public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
 
-    private ItemListRowAdapter mItemListRowAdapter;
-    private ItemListPresenter mItemListPresenter;
+    private ItemListRowAdapter itemListRowAdapter;
+    private ItemListPresenter itemListPresenter;
     private Subscription busSubscription;
     private RxBus rxBus;
     private Observable<OrganisationUnit> organisationUnitObservable;
     private Observable<Program> programObservable;
 
-    private CircularProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
-    private TextView mEmptyItemsTextView;
+    private CircularProgressBar progressBar;
+    private RecyclerView recyclerView;
+    private TextView emptyItemsTextView;
+    private Button editColumnsButton;
     private FloatingActionButton floatingActionButton;
     private boolean hideFloatingActionButton;
 
     public ItemListFragment() {
-        super();
-    }
+        //empty constructor
+   }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mItemListPresenter = new ItemListPresenter(this);
+        itemListPresenter = new ItemListPresenter(this);
+        itemListPresenter.onCreate();
     }
 
     @Nullable
@@ -92,11 +98,9 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
                     setProgramObservable(onProgramSelectedClick.getProgramObservable());
                 }
 
-
-                mItemListPresenter.loadEventList
+                itemListPresenter.loadEventList
                         (organisationUnitObservable,
                                 programObservable);
-
             }
         });
     }
@@ -118,8 +122,8 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
     @Override
     public void renderItemRowList(List<IItemListRow> itemListRowCollection) {
         if (itemListRowCollection != null) {
-            mItemListRowAdapter = new ItemListRowAdapter(itemListRowCollection);
-            mRecyclerView.setAdapter(mItemListRowAdapter);
+            itemListRowAdapter = new ItemListRowAdapter(itemListRowCollection);
+            recyclerView.setAdapter(itemListRowAdapter);
 
             for (IItemListRow itemListRow : itemListRowCollection) {
                 if(itemListRow instanceof EventListRow) {
@@ -179,11 +183,11 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mRecyclerView = (RecyclerView) view.findViewById(org.hisp.dhis.client.sdk.ui.R.id.itemListCardViewRecyclerView);
-        mEmptyItemsTextView = (TextView) view.findViewById(org.hisp.dhis.client.sdk.ui.R.id.tvNoItems);
-
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
+        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_itemlistfragment);
+        emptyItemsTextView = (TextView) view.findViewById(R.id.no_items_textview_itemlistfragment);
+        editColumnsButton = (Button) view.findViewById(R.id.edit_columns_itemlistfragment);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
 
         if (savedInstanceState == null) {
             hideFloatingActionButton = true;
@@ -191,15 +195,18 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
             hideFloatingActionButton = savedInstanceState.getBoolean(FLOATING_BUTTON_STATE, hideFloatingActionButton);
         }
 
-        floatingActionButton = (FloatingActionButton) view.findViewById(R.id.new_item_button);
+        floatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingactionbutton_itemlistfragment);
         floatingActionButton.setOnClickListener(this);
+        editColumnsButton.setOnClickListener(this);
 
         if (hideFloatingActionButton) {
             floatingActionButton.hide();
+            editColumnsButton.setVisibility(View.INVISIBLE);
         } else {
             floatingActionButton.show();
+            editColumnsButton.setVisibility(View.VISIBLE);
         }
-        mProgressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
+        progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
     }
 
     public void setOrganisationUnitObservable(Observable<OrganisationUnit> organisationUnitObservable) {
@@ -212,6 +219,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
     public void activate() {
         floatingActionButton.show();
+        editColumnsButton.setVisibility(View.VISIBLE);
         hideFloatingActionButton = false;
     }
 
@@ -222,6 +230,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
     @Override
     public void onClick(View v) {
+        if(v.getId() == floatingActionButton.getId()) {
         Intent intent = new Intent(getContext(), DataEntryActivity.class);
         intent.putExtra(PROGRAM_UID,
                 programObservable.toBlocking().first().getUId());
@@ -230,5 +239,10 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
         intent.putExtra(EVENT_UID,"");
 
         getContext().startActivity(intent);
+        }
+        else if(v.getId() == editColumnsButton.getId()) {
+            Timber.d("Edit columns button");
+        }
+
     }
 }

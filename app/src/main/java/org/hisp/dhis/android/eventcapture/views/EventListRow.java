@@ -15,10 +15,17 @@ public class EventListRow implements IEventListRow {
     private View.OnClickListener onStatusClickListener;
     private View.OnLongClickListener onLongClickListener;
 
-    public EventListRow(Event event, List<Pair<String, Integer>> valuesPosition, String status) {
-        this.event = event;
-        this.valuesPosition = valuesPosition;
-        this.status = status;
+    public EventListRow() {
+
+    }
+
+    public static EventListRow create(Event event, List<Pair<String, Integer>> valuesPosition, String status) {
+        EventListRow eventListRow = new EventListRow();
+        eventListRow.setEvent(event);
+        eventListRow.setValuesPosition(valuesPosition);
+        eventListRow.setStatus(status);
+
+        return eventListRow;
     }
 
     @Override

@@ -6,13 +6,18 @@ import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.views.EventListRow;
 import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.EItemListRowStatus;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import rx.Observable;
 
@@ -42,14 +47,35 @@ public class ItemListRowMapper {
         return null;
     }
 
-    public List<IItemListRow> transform(Observable<List<Event>> events) {
+    public IItemListRow transform(Event event, Map<String,String> map) {
+        List<Pair<String, Integer>> valuePos = new ArrayList<>();
+        Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()) {
+            int i = valuePos.size();
+            if (valuePos.size() == 3) {
+                break;
+            }
+            Map.Entry<String, String> entry = iterator.next();
+            valuePos.add(new Pair<>(entry.getValue(), i));
+            iterator.remove();
+        }
+        return EventListRow.create(event, valuePos, event.getStatus());
+    }
+
+    public IItemListRow transformToEventListRow(Program program, Event event) {
+
+        EventListRow eventListRow = EventListRow.create(event, new ArrayList<Pair<String, Integer>>(), event.getStatus());
+        return eventListRow;
+    }
+
+    public List<IItemListRow> getDummyData() {
         Event event1 = new Event();
         event1.setUId("001");
         List<Pair<String,Integer>> itemListRow1Values = new ArrayList<>();
         itemListRow1Values.add(new Pair<>("Erling", 1));
         itemListRow1Values.add(new Pair<>("Fjelstad", 2));
         itemListRow1Values.add(new Pair<>("Mann", 3));
-        IItemListRow itemListRow1 = new EventListRow(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
+        IItemListRow itemListRow1 = EventListRow.create(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
 
         Event event2 = new Event();
         event2.setUId("002");
@@ -58,7 +84,7 @@ public class ItemListRowMapper {
         itemListRow2Values.add(new Pair<>("R", 1));
         itemListRow2Values.add(new Pair<>("Russnes", 2));
         itemListRow2Values.add(new Pair<>("Mann", 3));
-        IItemListRow itemListRow2 = new EventListRow(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
+        IItemListRow itemListRow2 = EventListRow.create(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
 
         Event event3 = new Event();
         event3.setUId("003");
@@ -67,7 +93,7 @@ public class ItemListRowMapper {
         itemListRow3Values.add(new Pair<>("AB", 1));
         itemListRow3Values.add(new Pair<>("Abishov", 2));
         itemListRow3Values.add(new Pair<>("Man", 3));
-        IItemListRow itemListRow3 = new EventListRow(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
+        IItemListRow itemListRow3 = EventListRow.create(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {

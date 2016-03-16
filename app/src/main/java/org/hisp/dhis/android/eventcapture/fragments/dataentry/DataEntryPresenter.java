@@ -38,7 +38,6 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<Program, List<ProgramStage>>() {
-
                     @Override
                     public List<ProgramStage> call(Program program) {
                         return D2.programStages().list(program).toBlocking().first();
