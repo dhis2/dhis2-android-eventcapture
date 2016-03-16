@@ -5,12 +5,12 @@ import android.support.annotation.NonNull;
 import org.hisp.dhis.android.eventcapture.mapper.ItemListRowMapper;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 
+import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
@@ -50,8 +50,8 @@ public class ItemListPresenter extends AbsPresenter {
 
     public void getEventsList(OrganisationUnit organisationUnit, Program program) {
         Subscriber<List<Event>> subscriber = new EventSubscriber();
-        // showItemListRows(D2.events().list(organisationUnit, program));
-
+        showItemListRows(Observable.just(Arrays.asList(new Event())));
+        // D2.events().list(organisationUnit, program)
     }
 
     public void showItemListRows(List<Event> eventList) {
