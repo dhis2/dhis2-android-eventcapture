@@ -85,6 +85,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                     .subscribe(new Action1<List<OrganisationUnit>>() {
                         @Override
                         public void call(List<OrganisationUnit> organisationUnits) {
+                            SessionManager.getInstance().setSelectorSynced(true);
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
