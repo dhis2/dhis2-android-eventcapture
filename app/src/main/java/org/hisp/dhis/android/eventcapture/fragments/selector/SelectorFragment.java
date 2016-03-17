@@ -26,11 +26,12 @@ import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgr
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment2;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
 
-public class SelectorFragment extends Fragment implements ISelectorView,
+public class SelectorFragment extends BaseFragment2 implements ISelectorView,
         OnAllPickersSelectedListener, View.OnClickListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
@@ -56,8 +57,9 @@ public class SelectorFragment extends Fragment implements ISelectorView,
 
         mSelectorPresenter = new SelectorPresenter(this);
         mSelectorPresenter.onCreate();
+        showRefreshButton();
+        setOnMenuItemClickListener(this);
 
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -75,6 +77,7 @@ public class SelectorFragment extends Fragment implements ISelectorView,
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         return inflater.inflate(R.layout.fragment_selector, container, false);
     }
 
@@ -119,8 +122,16 @@ public class SelectorFragment extends Fragment implements ISelectorView,
         //hideProgress();
 
 
-        mSelectorPresenter.initializeSynchronization();
+        mSelectorPresenter.initializeSynchronization(false);
+
     }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        mSelectorPresenter.initializeSynchronization(true);
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return super.onOptionsItemSelected(item);
@@ -180,6 +191,7 @@ public class SelectorFragment extends Fragment implements ISelectorView,
     }
 
     private void showProgress() {
+
 
         FrameLayout progressFrame = (FrameLayout) getActivity().findViewById(R.id
                 .layer_progress_bar);

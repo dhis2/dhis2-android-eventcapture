@@ -31,22 +31,24 @@ package org.hisp.dhis.android.eventcapture.fragments.profile;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment2;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
 
-public class ProfileFragment extends Fragment implements IProfileView {
+public class ProfileFragment extends BaseFragment2 implements IProfileView {
     private RowViewAdapter rowViewAdapter;
+    private IProfilePresenter mProfilePresenter;
 
     @Nullable
     @Override
@@ -67,14 +69,22 @@ public class ProfileFragment extends Fragment implements IProfileView {
         recyclerView.setAdapter(rowViewAdapter);
         recyclerView.addItemDecoration(new DividerDecoration(getContext()));
 
-        IProfilePresenter profilePresenter = new ProfilePresenter(this);
-        profilePresenter.onCreate();
-        profilePresenter.listUserAccountFields();
+        mProfilePresenter = new ProfilePresenter(this);
+        mProfilePresenter.onCreate();
+        mProfilePresenter.listUserAccountFields();
+        showRefreshButton();
+        setOnMenuItemClickListener(this);
     }
 
     @Override
     @UiThread
     public void setProfileFields(List<DataEntity> dataEntities) {
         rowViewAdapter.swap(dataEntities);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        mProfilePresenter.listUserAccountFields();
+        return true;
     }
 }

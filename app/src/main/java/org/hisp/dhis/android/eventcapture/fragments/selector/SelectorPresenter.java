@@ -58,8 +58,8 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     }
 
     @Override
-    public void initializeSynchronization() {
-        if (!SessionManager.getInstance().isSelectorSynced()) {
+    public void initializeSynchronization(Boolean force) {
+        if (force || !SessionManager.getInstance().isSelectorSynced()) {
             selectorView.onStartLoading();
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
