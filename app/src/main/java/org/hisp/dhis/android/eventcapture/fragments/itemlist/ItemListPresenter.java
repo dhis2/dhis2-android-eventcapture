@@ -1,11 +1,9 @@
 package org.hisp.dhis.android.eventcapture.fragments.itemlist;
 
 import android.support.annotation.NonNull;
-import android.support.v4.util.Pair;
 
 import org.hisp.dhis.android.eventcapture.mapper.ItemListRowMapper;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
-import org.hisp.dhis.android.eventcapture.views.EventListRow;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -18,10 +16,8 @@ import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -114,7 +110,7 @@ public class ItemListPresenter extends AbsPresenter {
                                     map.put(val.getDataElement(), val.getValue());
                                 }
                             }
-                            
+
                             eventRows.add(itemListRowMapper.transform(event, map));
                         }
 
