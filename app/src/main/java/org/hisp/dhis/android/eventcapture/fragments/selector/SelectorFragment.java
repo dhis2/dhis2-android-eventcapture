@@ -151,7 +151,7 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView,
     public void onFinishLoading() {
         hideProgress();
     }
-
+    
     @Override
     public void onLoadingError(Throwable throwable) {
         Snackbar.make(getView(), throwable.getMessage(), Snackbar.LENGTH_LONG);
