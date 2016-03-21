@@ -3,6 +3,7 @@ package org.hisp.dhis.android.eventcapture.fragments.selector;
 import org.hisp.dhis.android.eventcapture.datasync.SessionManager;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -19,6 +20,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+import timber.log.Timber;
 
 public class SelectorPresenter extends AbsPresenter implements ISelectorPresenter {
 
@@ -32,7 +34,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onCreate() {
         subscriptions = new CompositeSubscription();
-
         D2.me().programs().list()
                 .subscribe(new Action1<List<Program>>() {
 
@@ -85,6 +86,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 //                    });
 
             selectorView.onStartLoading();
+
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
@@ -124,8 +126,29 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             throwable.printStackTrace();
                         }
                     }));
+
         } else {
             selectorView.onFinishLoading();
         }
+    }
+
+    @Override
+    public void loadDataElements() {
+        subscriptions.add(D2.dataElements().sync()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Action1<List<DataElement>>() {
+            @Override
+            public void call(List<DataElement> dataElements) {
+                for (DataElement dataElement : dataElements) {
+                    System.out.println("Data Element: " + dataElement.getDisplayName());
+                }
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }));
     }
 }

@@ -139,8 +139,11 @@ public class SelectorFragment extends Fragment implements ISelectorView,
     @Override
     public void onFinishLoading() {
         hideProgress();
+        loadDataElements();
     }
-
+    public void loadDataElements() {
+        mSelectorPresenter.loadDataElements();
+    }
     @Override
     public void onLoadingError(Throwable throwable) {
         Snackbar.make(getView(), throwable.getMessage(), Snackbar.LENGTH_LONG);
