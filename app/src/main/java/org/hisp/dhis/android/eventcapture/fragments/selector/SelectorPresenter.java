@@ -5,12 +5,17 @@ import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -59,33 +64,39 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     @Override
     public void initializeSynchronization(Boolean force) {
-        if (force || !SessionManager.getInstance().isSelectorSynced()) {
+        if (!SessionManager.getInstance().isSelectorSynced()) {
             selectorView.onStartLoading();
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
-                    new Func2<List<OrganisationUnit>, List<Program>, List<OrganisationUnit>>() {
+                    new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
 
                         @Override
-                        public List<OrganisationUnit> call(List<OrganisationUnit> organisationUnits,
-                                                           List<Program> programs) {
+                        public List<Program> call(List<OrganisationUnit> organisationUnits,
+                                                  List<Program> programs) {
+                            return programs;
+                        }
+                    })
+                    .map(new Func1<List<Program>, List<ProgramStage>>() {
+                        @Override
+                        public List<ProgramStage> call(List<Program> programs) {
+                            Set<String> stageUids = new HashSet<>();
                             for (Program program : programs) {
-                                System.out.println("Program: " + program.getDisplayName());
+                                Set<String> programStageUids = ModelUtils.toUidSet(
+                                        program.getProgramStages());
+                                stageUids.addAll(programStageUids);
+
+                                System.out.println("ProgramName: " + program.getDisplayName()
+                                        + " stages: " + programStageUids);
                             }
 
-                            for (OrganisationUnit organisationUnit : organisationUnits) {
-                                System.out.println("OrganisationUnit: " +
-                                        organisationUnit.getDisplayName());
-                            }
-
-                            return organisationUnits;
+                            return null;
                         }
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<OrganisationUnit>>() {
+                    .subscribe(new Action1<List<ProgramStage>>() {
                         @Override
-                        public void call(List<OrganisationUnit> organisationUnits) {
-                            SessionManager.getInstance().setSelectorSynced(true);
+                        public void call(List<ProgramStage> programStages) {
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {

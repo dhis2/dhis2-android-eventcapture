@@ -83,58 +83,58 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
     @Override
     public void listDataEntryFieldsWithEventValues(final String eventUId, final String programStageSectionUId) {
 //        programDataEntryRowSubscription
-        Observable<List<ProgramStageDataElement>> programStageDataElements = D2.programStageSections().get(programStageSectionUId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<ProgramStageSection, List<ProgramStageDataElement>>() {
-                    @Override
-                    public List<ProgramStageDataElement> call(ProgramStageSection programStageSection) {
-                        return D2.programStageDataElements().list(programStageSection).toBlocking().first();
-                    }
-                });
-
-        Observable<HashMap<String, TrackedEntityDataValue>> programStageDataElementHash = programStageDataElements.zipWith(D2.events().get(eventUId),
-                new Func2<List<ProgramStageDataElement>, Event, HashMap<String, TrackedEntityDataValue>>() {
-                    @Override
-                    public HashMap<String, TrackedEntityDataValue> call(List<ProgramStageDataElement> programStageDataElements, Event event) {
-                        HashMap<String, TrackedEntityDataValue> map = new HashMap<>();
-                        List<TrackedEntityDataValue> trackedEntityDataValues = event.getTrackedEntityDataValues();
-                        for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
-                            map.put(programStageDataElement.getUId(), null);
-                        }
-                        for (TrackedEntityDataValue trackedEntityDataValue : trackedEntityDataValues) {
-                            if (map.containsKey(trackedEntityDataValue.getDataElement())) {
-                                map.put(trackedEntityDataValue.getDataElement(), trackedEntityDataValue);
-                            }
-                        }
-
-                        return map;
-                    }
-                });
-        Observable programStageSections = D2.programStageSections().get(programStageSectionUId);
-
-        Observable<List<IDataEntity>> dataEntryForm = Observable.combineLatest(programStageDataElementHash, programStageSections, new Func2<ProgramStageSection,
-                HashMap<String, TrackedEntityDataValue>, List<IDataEntity>>() {
-            @Override
-            public List<IDataEntity> call(ProgramStageSection section, HashMap<String, TrackedEntityDataValue> valueHashMap) {
-                return transformDataEntryFormWithValues(valueHashMap, section, D2.events().get(eventUId).toBlocking().first());
-            }
-        });
-
-
-        programDataEntryRowSubscription = dataEntryForm.subscribe(new Action1<List<IDataEntity>>() {
-            @Override
-            public void call(List<IDataEntity> dataEntities) {
-                if (eventDataEntryView != null) {
-                    eventDataEntryView.setDataEntryFields(dataEntities);
-                }
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Timber.d(throwable.toString());
-            }
-        });
+//        Observable<List<ProgramStageDataElement>> programStageDataElements = D2.programStageSections().get(programStageSectionUId)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .map(new Func1<ProgramStageSection, List<ProgramStageDataElement>>() {
+//                    @Override
+//                    public List<ProgramStageDataElement> call(ProgramStageSection programStageSection) {
+//                        return D2.programStageDataElements().list(programStageSection).toBlocking().first();
+//                    }
+//                });
+//
+//        Observable<HashMap<String, TrackedEntityDataValue>> programStageDataElementHash = programStageDataElements.zipWith(D2.events().get(eventUId),
+//                new Func2<List<ProgramStageDataElement>, Event, HashMap<String, TrackedEntityDataValue>>() {
+//                    @Override
+//                    public HashMap<String, TrackedEntityDataValue> call(List<ProgramStageDataElement> programStageDataElements, Event event) {
+//                        HashMap<String, TrackedEntityDataValue> map = new HashMap<>();
+//                        List<TrackedEntityDataValue> trackedEntityDataValues = event.getTrackedEntityDataValues();
+//                        for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
+//                            map.put(programStageDataElement.getUId(), null);
+//                        }
+//                        for (TrackedEntityDataValue trackedEntityDataValue : trackedEntityDataValues) {
+//                            if (map.containsKey(trackedEntityDataValue.getDataElement())) {
+//                                map.put(trackedEntityDataValue.getDataElement(), trackedEntityDataValue);
+//                            }
+//                        }
+//
+//                        return map;
+//                    }
+//                });
+//        Observable programStageSections = D2.programStageSections().get(programStageSectionUId);
+//
+//        Observable<List<IDataEntity>> dataEntryForm = Observable.combineLatest(programStageDataElementHash, programStageSections, new Func2<ProgramStageSection,
+//                HashMap<String, TrackedEntityDataValue>, List<IDataEntity>>() {
+//            @Override
+//            public List<IDataEntity> call(ProgramStageSection section, HashMap<String, TrackedEntityDataValue> valueHashMap) {
+//                return transformDataEntryFormWithValues(valueHashMap, section, D2.events().get(eventUId).toBlocking().first());
+//            }
+//        });
+//
+//
+//        programDataEntryRowSubscription = dataEntryForm.subscribe(new Action1<List<IDataEntity>>() {
+//            @Override
+//            public void call(List<IDataEntity> dataEntities) {
+//                if (eventDataEntryView != null) {
+//                    eventDataEntryView.setDataEntryFields(dataEntities);
+//                }
+//            }
+//        }, new Action1<Throwable>() {
+//            @Override
+//            public void call(Throwable throwable) {
+//                Timber.d(throwable.toString());
+//            }
+//        });
     }
 
     private List<IDataEntity> transformDataEntryFormWithValues(
@@ -263,38 +263,38 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
         @Override
         public void onValueChanged(Pair<CharSequence, CharSequence> keyValuePair) {
 
-            if(programStageDataElement.getProgramStage().getReportDateDescription().equals(keyValuePair.first)) {
-                // update report date in Event and save
-                event.setEventDate(new DateTime(keyValuePair.second.toString()));
-                saveValueObservable = D2.events().save(event);
-            }
-            else if("Capture Coordinates".equals(keyValuePair.first)) {
-                // update coordinates in Event and save
-                // needs special onvaluechangedlistener
-
-            }
-            else if(programStageDataElement.getDataElement().getDisplayName().equals(keyValuePair.first)) {
-                // save trackedEntityDataValue
-                trackedEntityDataValue.setValue(keyValuePair.second.toString());
-                saveValueObservable = D2.trackedEntityDataValues().save(trackedEntityDataValue);
-            }
-
-
-            saveDataEntityValues = D2.trackedEntityDataValues().save(trackedEntityDataValue)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .debounce(250, TimeUnit.MILLISECONDS)
-                    .map(new Func1<Boolean, List<ProgramRule>>() {
-                        @Override
-                        public List<ProgramRule> call(Boolean aBoolean) {
-                            return D2.programRules().list(programStageDataElement.getProgramStage()).toBlocking().first();
-                        }
-                    }).subscribe(new Action1<List<ProgramRule>>() {
-                        @Override
-                        public void call(List<ProgramRule> programRules) {
-
-                        }
-                    });
+//            if(programStageDataElement.getProgramStage().getReportDateDescription().equals(keyValuePair.first)) {
+//                // update report date in Event and save
+//                event.setEventDate(new DateTime(keyValuePair.second.toString()));
+//                saveValueObservable = D2.events().save(event);
+//            }
+//            else if("Capture Coordinates".equals(keyValuePair.first)) {
+//                // update coordinates in Event and save
+//                // needs special onvaluechangedlistener
+//
+//            }
+//            else if(programStageDataElement.getDataElement().getDisplayName().equals(keyValuePair.first)) {
+//                // save trackedEntityDataValue
+//                trackedEntityDataValue.setValue(keyValuePair.second.toString());
+//                saveValueObservable = D2.trackedEntityDataValues().save(trackedEntityDataValue);
+//            }
+//
+//
+//            saveDataEntityValues = D2.trackedEntityDataValues().save(trackedEntityDataValue)
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .debounce(250, TimeUnit.MILLISECONDS)
+//                    .map(new Func1<Boolean, List<ProgramRule>>() {
+//                        @Override
+//                        public List<ProgramRule> call(Boolean aBoolean) {
+//                            return D2.programRules().list(programStageDataElement.getProgramStage()).toBlocking().first();
+//                        }
+//                    }).subscribe(new Action1<List<ProgramRule>>() {
+//                        @Override
+//                        public void call(List<ProgramRule> programRules) {
+//
+//                        }
+//                    });
 
                 // trigger update of program rules
         }

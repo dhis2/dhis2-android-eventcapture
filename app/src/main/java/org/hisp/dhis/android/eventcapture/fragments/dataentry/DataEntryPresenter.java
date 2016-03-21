@@ -46,7 +46,8 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     @Override
                     public List<ProgramStageSection> call(List<ProgramStage> programStages) {
                         ProgramStage stage = programStages.get(0);
-                        return D2.programStageSections().list(stage).toBlocking().first();
+                        return null;
+//                        return D2.programStageSections().list(stage).toBlocking().first();
                     }
                 }).subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
