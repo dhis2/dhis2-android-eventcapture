@@ -132,24 +132,4 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             selectorView.onFinishLoading();
         }
     }
-
-    @Override
-    public void loadDataElements() {
-        subscriptions.add(D2.dataElements().sync()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<List<DataElement>>() {
-            @Override
-            public void call(List<DataElement> dataElements) {
-                for (DataElement dataElement : dataElements) {
-                    System.out.println("Data Element: " + dataElement.getDisplayName());
-                }
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        }));
-    }
 }
