@@ -6,6 +6,7 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
 
 import java.util.HashSet;
@@ -65,28 +66,10 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void initializeSynchronization() {
         if (!SessionManager.getInstance().isSelectorSynced()) {
-//
-//            D2.programStages().sync()
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(new Action1<List<ProgramStage>>() {
-//                        @Override
-//                        public void call(List<ProgramStage> programStages) {
-//                            for (ProgramStage programStage : programStages) {
-//                                System.out.println("ProgramStage: " +
-//                                        programStage.getDisplayName());
-//                            }
-//                        }
-//                    }, new Action1<Throwable>() {
-//                        @Override
-//                        public void call(Throwable throwable) {
-//                            throwable.printStackTrace();
-//                        }
-//                    });
-
             selectorView.onStartLoading();
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
+
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
 
                         @Override
@@ -96,6 +79,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                         }
                     })
                     .map(new Func1<List<Program>, List<ProgramStage>>() {
+
                         @Override
                         public List<ProgramStage> call(List<Program> programs) {
                             Set<String> stageUids = new HashSet<>();
@@ -103,19 +87,36 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                                 Set<String> programStageUids = ModelUtils.toUidSet(
                                         program.getProgramStages());
                                 stageUids.addAll(programStageUids);
-
-                                System.out.println("ProgramName: " + program.getDisplayName()
-                                        + " stages: " + programStageUids);
                             }
 
-                            return null;
+                            return D2.programStages().sync(stageUids.toArray(
+                                    new String[stageUids.size()])).toBlocking().first();
+                        }
+                    })
+                    .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
+
+                        @Override
+                        public List<ProgramStageSection> call(List<ProgramStage> programStages) {
+                            Set<String> sectionUids = new HashSet<>();
+                            for (ProgramStage programStage : programStages) {
+                                Set<String> stageSectionUids = ModelUtils.toUidSet(
+                                        programStage.getProgramStageSections());
+                                sectionUids.addAll(stageSectionUids);
+                            }
+                            System.out.println(sectionUids);
+                            return D2.programStageSections().sync(sectionUids.toArray(
+                                    new String[sectionUids.size()])).toBlocking().first();
                         }
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<ProgramStage>>() {
+                    .subscribe(new Action1<List<ProgramStageSection>>() {
                         @Override
-                        public void call(List<ProgramStage> programStages) {
+                        public void call(List<ProgramStageSection> programStageSections) {
+                            System.out.println(programStageSections);
+                            for (ProgramStageSection stageSection : programStageSections) {
+                                System.out.println("StageSection: " + stageSection.getDisplayName());
+                            }
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
