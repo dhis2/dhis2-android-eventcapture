@@ -13,51 +13,46 @@
         android:weightSum="1"
         >
 
-        <FrameLayout
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_selector"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             >
 
             <FrameLayout
-                android:id="@+id/pickerFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
+                android:layout_height="wrap_content">
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/floating_action_button"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="16dp"
-                android:clickable="true"
-                android:src="@drawable/ic_arrow_forward"
-                app:layout_anchor="@id/pickerFragment"
-                />
+                <FrameLayout
+                    android:id="@+id/pickerFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
 
-            <FrameLayout
-                android:id="@+id/layer_progress_bar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/white">
+                <FrameLayout
+                    android:id="@+id/layer_progress_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white">
 
-                <fr.castorflex.android.circularprogressbar.CircularProgressBar
-                    android:id="@+id/progress_bar_circular"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:indeterminate="true"/>
+                </FrameLayout>
             </FrameLayout>
-        </FrameLayout>
+        </android.support.v4.widget.SwipeRefreshLayout>
 
-        <FrameLayout
-            android:id="@+id/item_fragment"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh_item_fragment"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:layout_weight="0.5"
-            />
+            >
 
+            <FrameLayout
+                android:id="@+id/item_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                />
+        </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
 
     <!-- for some reason the app: attributes are not found... need to figure that out before using it.
@@ -77,4 +72,6 @@
         app:spb_speed="2.0"
         app:spb_stroke_separator_length="4dp"
         app:spb_stroke_width="4dp" /-->
+    <!--</FrameLayout>-->
+
 </FrameLayout>
