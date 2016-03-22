@@ -26,7 +26,8 @@ import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment2;
 import rx.Observable;
 import timber.log.Timber;
 
-public class SelectorFragment extends BaseFragment2 implements ISelectorView, SwipeRefreshLayout.OnRefreshListener {
+public class SelectorFragment extends BaseFragment2 implements ISelectorView, OnAllPickersSelectedListener,
+        SwipeRefreshLayout.OnRefreshListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
 
@@ -72,10 +73,9 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, Sw
                         ItemListFragment.TAG);
             }
         }
+        showRefreshButton();
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_selector);
         mSwipeRefreshLayout.setOnRefreshListener(this);
-
-        showRefreshButton();
         mSelectorPresenter.initializeSynchronization(false);
     }
 
@@ -112,7 +112,6 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, Sw
             }
         }
         mSwipeRefreshLayout.setRefreshing(false);
-
         //A quick workaround for a null pointer exception that happens after screen rotation.
         //TODO: Vlad : find the cause of getActivity() returning null. (RX call related.)
         Activity a = getActivity();
@@ -125,6 +124,10 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, Sw
     
     @Override
     public void onStartLoading() {
+        FrameLayout progressFrame = (FrameLayout) getActivity().findViewById(R.id
+                .layer_progress_bar);
+        progressFrame.setVisibility(View.VISIBLE);
+        View v = getView();
         if (mSwipeRefreshLayout == null && getView() != null) {
             mSwipeRefreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swipe_refresh_selector);
             if (mSwipeRefreshLayout == null) {
@@ -133,9 +136,6 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, Sw
             }
         }
         mSwipeRefreshLayout.setRefreshing(true);
-        FrameLayout progressFrame = (FrameLayout) getActivity().findViewById(R.id
-                .layer_progress_bar);
-        progressFrame.setVisibility(View.VISIBLE);
         //hide refresh button ?
     }
 
@@ -158,7 +158,18 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, Sw
     public Fragment createPickerFragment() {
         mOrganisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
         mOrganisationUnitProgramPickerFragment.setSelectorView(this);
+        mOrganisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
         return mOrganisationUnitProgramPickerFragment;
+    }
+
+    @Override
+    public void activate() {
+
+    }
+
+    @Override
+    public void deactivate() {
+
     }
 
     public static class OnOrganisationUnitPickerValueUpdated {
