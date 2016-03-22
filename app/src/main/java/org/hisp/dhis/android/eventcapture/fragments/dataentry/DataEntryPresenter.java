@@ -46,8 +46,7 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     @Override
                     public List<ProgramStageSection> call(List<ProgramStage> programStages) {
                         ProgramStage stage = programStages.get(0);
-                        return null;
-//                        return D2.programStageSections().list(stage).toBlocking().first();
+                        return D2.programStageSections().list(stage).toBlocking().first();
                     }
                 }).subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
@@ -77,7 +76,9 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     @Override
                     public Event call(List<ProgramStage> programStages, UserAccount userAccount) {
                         ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture
-                        Event event = Event.create(organisationUnitId, programId, currentProgramStage.getUId(), Event.STATUS_ACTIVE);
+                        Event event = D2.events().create(
+                                organisationUnitId, programId,
+                                currentProgramStage.getUId(), Event.STATUS_ACTIVE).toBlocking().first();
                         setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
                         return event;
                     }

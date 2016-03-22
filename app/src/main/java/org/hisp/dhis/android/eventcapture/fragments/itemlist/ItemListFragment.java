@@ -185,7 +185,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_itemlistfragment);
         emptyItemsTextView = (TextView) view.findViewById(R.id.no_items_textview_itemlistfragment);
-        editColumnsButton = (Button) view.findViewById(R.id.edit_columns_itemlistfragment);
+//        editColumnsButton = (Button) view.findViewById(R.id.edit_columns_itemlistfragment);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
 
@@ -197,14 +197,14 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
         floatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingactionbutton_itemlistfragment);
         floatingActionButton.setOnClickListener(this);
-        editColumnsButton.setOnClickListener(this);
+//        editColumnsButton.setOnClickListener(this);
 
         if (hideFloatingActionButton) {
             floatingActionButton.hide();
-            editColumnsButton.setVisibility(View.INVISIBLE);
+//            editColumnsButton.setVisibility(View.INVISIBLE);
         } else {
             floatingActionButton.show();
-            editColumnsButton.setVisibility(View.VISIBLE);
+//            editColumnsButton.setVisibility(View.VISIBLE);
         }
         progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
     }
@@ -219,7 +219,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
     public void activate() {
         floatingActionButton.show();
-        editColumnsButton.setVisibility(View.VISIBLE);
+//        editColumnsButton.setVisibility(View.VISIBLE);
         hideFloatingActionButton = false;
     }
 
@@ -240,9 +240,9 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
         getContext().startActivity(intent);
         }
-        else if(v.getId() == editColumnsButton.getId()) {
-            Timber.d("Edit columns button");
-        }
+//        else if(v.getId() == editColumnsButton.getId()) {
+//            Timber.d("Edit columns button");
+//        }
 
     }
 }

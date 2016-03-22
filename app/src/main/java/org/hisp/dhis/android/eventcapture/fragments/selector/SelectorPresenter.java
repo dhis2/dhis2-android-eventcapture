@@ -7,6 +7,7 @@ import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
 
@@ -110,14 +111,21 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                                     new String[sectionUids.size()])).toBlocking().first();
                         }
                     })
+                    .map(new Func1<List<ProgramStageSection>, List<ProgramStageDataElement>>() {
+                        @Override
+                        public List<ProgramStageDataElement> call(List<ProgramStageSection> programStageSections) {
+//                            return D2.programStageDataElements().sync().toBlocking().first();
+                            return null;
+                        }
+                    })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<ProgramStageSection>>() {
+                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
                         @Override
-                        public void call(List<ProgramStageSection> programStageSections) {
-                            System.out.println(programStageSections);
-                            for (ProgramStageSection stageSection : programStageSections) {
-                                System.out.println("StageSection: " + stageSection.getDisplayName());
+                        public void call(List<ProgramStageDataElement> ProgramStageDataElements) {
+                            System.out.println(ProgramStageDataElements);
+                            for (ProgramStageDataElement programStageDataElement : ProgramStageDataElements) {
+                                System.out.println("programStageDataElements: " + programStageDataElement.getDisplayName());
                             }
                             selectorView.onFinishLoading();
                         }
