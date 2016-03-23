@@ -119,6 +119,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             for (ProgramStageSection stageSection : programStageSections) {
                                 System.out.println("StageSection: " + stageSection.getDisplayName());
                             }
+                            SessionManager.getInstance().setSelectorSynced(true);
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
