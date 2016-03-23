@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.DetailsActivity;
+import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.android.eventcapture.fragments.itemlist.ItemListFragment;
 import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgramPickerFragment;
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
@@ -150,8 +151,9 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView,
     @Override
     public void onFinishLoading() {
         hideProgress();
+        SyncManager.getInstance().setLastSyncedNow();
     }
-    
+
     @Override
     public void onLoadingError(Throwable throwable) {
         Snackbar.make(getView(), throwable.getMessage(), Snackbar.LENGTH_LONG);

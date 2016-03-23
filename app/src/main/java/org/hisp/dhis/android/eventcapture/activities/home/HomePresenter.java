@@ -33,6 +33,9 @@ import android.os.Bundle;
 import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
+import org.joda.time.DateTime;
+
+import java.util.Calendar;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -86,4 +89,6 @@ public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
         homeView.setUserInfo(userAccount.getEmail());
         homeView.setUserLetter(name);
     }
+
+
 }

@@ -34,8 +34,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
@@ -63,6 +65,12 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
 
 //        onNavigationItemSelected(getNavigationView()
 //                .getMenu().findItem(R.id.drawer_selector));
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+        super.onDrawerOpened(drawerView);
+        setSynchronizedMessage(SyncManager.getInstance().getLastSyncedString());
     }
 
     @NonNull
