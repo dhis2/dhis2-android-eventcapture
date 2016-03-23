@@ -59,6 +59,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
+
                         @Override
                         public List<Program> call(List<OrganisationUnit> organisationUnits,
                                                   List<Program> programs) {
@@ -66,12 +67,14 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                         }
                     })
                     .map(new Func1<List<Program>, List<ProgramStage>>() {
+
                         @Override
                         public List<ProgramStage> call(List<Program> programs) {
                             return loadProgramStages(programs);
                         }
                     })
                     .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
+
                         @Override
                         public List<ProgramStageSection> call(List<ProgramStage> programStages) {
                             return loadProgramStageSections(programStages);
@@ -83,7 +86,10 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
                         @Override
                         public void call(List<ProgramStageSection> stageSections) {
-                            System.out.println(stageSections);
+                            for (ProgramStageSection stageSection : stageSections) {
+                                System.out.println(stageSection.getDisplayName());
+                            }
+
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
