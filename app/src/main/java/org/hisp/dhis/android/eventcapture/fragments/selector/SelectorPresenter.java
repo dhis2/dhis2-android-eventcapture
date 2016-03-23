@@ -56,6 +56,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     public void initializeSynchronization() {
         if (!SessionManager.getInstance().isSelectorSynced()) {
             selectorView.onStartLoading();
+
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
@@ -99,6 +100,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             throwable.printStackTrace();
                         }
                     }));
+
         } else {
             selectorView.onFinishLoading();
         }
