@@ -33,17 +33,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onCreate() {
         subscriptions = new CompositeSubscription();
-
-        D2.me().programs().list()
-                .subscribe(new Action1<List<Program>>() {
-
-                    @Override
-                    public void call(List<Program> programs) {
-                        for (Program program : programs) {
-                            System.out.println("OrgUnits: " + program.getOrganisationUnits());
-                        }
-                    }
-                });
     }
 
     @Override
@@ -69,9 +58,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             selectorView.onStartLoading();
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
-
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
-
                         @Override
                         public List<Program> call(List<OrganisationUnit> organisationUnits,
                                                   List<Program> programs) {
@@ -79,47 +66,28 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                         }
                     })
                     .map(new Func1<List<Program>, List<ProgramStage>>() {
-
                         @Override
                         public List<ProgramStage> call(List<Program> programs) {
-                            Set<String> stageUids = new HashSet<>();
-                            for (Program program : programs) {
-                                Set<String> programStageUids = ModelUtils.toUidSet(
-                                        program.getProgramStages());
-                                stageUids.addAll(programStageUids);
-                            }
-
-                            return D2.programStages().sync(stageUids.toArray(
-                                    new String[stageUids.size()])).toBlocking().first();
+                            return loadProgramStages(programs);
                         }
                     })
                     .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
-
                         @Override
                         public List<ProgramStageSection> call(List<ProgramStage> programStages) {
-                            Set<String> sectionUids = new HashSet<>();
-                            for (ProgramStage programStage : programStages) {
-                                Set<String> stageSectionUids = ModelUtils.toUidSet(
-                                        programStage.getProgramStageSections());
-                                sectionUids.addAll(stageSectionUids);
-                            }
-                            System.out.println(sectionUids);
-                            return D2.programStageSections().sync(sectionUids.toArray(
-                                    new String[sectionUids.size()])).toBlocking().first();
+                            return loadProgramStageSections(programStages);
                         }
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<List<ProgramStageSection>>() {
+
                         @Override
-                        public void call(List<ProgramStageSection> programStageSections) {
-                            System.out.println(programStageSections);
-                            for (ProgramStageSection stageSection : programStageSections) {
-                                System.out.println("StageSection: " + stageSection.getDisplayName());
-                            }
+                        public void call(List<ProgramStageSection> stageSections) {
+                            System.out.println(stageSections);
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
+
                         @Override
                         public void call(Throwable throwable) {
                             throwable.printStackTrace();
@@ -128,5 +96,29 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
         } else {
             selectorView.onFinishLoading();
         }
+    }
+
+    private static List<ProgramStage> loadProgramStages(List<Program> programs) {
+        Set<String> stageUids = new HashSet<>();
+        for (Program program : programs) {
+            Set<String> programStageUids = ModelUtils.toUidSet(
+                    program.getProgramStages());
+            stageUids.addAll(programStageUids);
+        }
+
+        return D2.programStages().sync(stageUids.toArray(
+                new String[stageUids.size()])).toBlocking().first();
+    }
+
+    private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
+        Set<String> sectionUids = new HashSet<>();
+        for (ProgramStage programStage : stages) {
+            Set<String> stageSectionUids = ModelUtils.toUidSet(
+                    programStage.getProgramStageSections());
+            sectionUids.addAll(stageSectionUids);
+        }
+
+        return D2.programStageSections().sync(sectionUids.toArray(
+                new String[sectionUids.size()])).toBlocking().first();
     }
 }
