@@ -60,22 +60,22 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
         programDataEntryRowSubscription = D2.programStageSections().get(programStageSectionUid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<ProgramStageSection, List<ProgramStageDataElement>>() {
+                .map(new Func1<ProgramStageSection, List<IDataEntity>>() {
                     @Override
-                    public List<ProgramStageDataElement> call(ProgramStageSection programStageSection) {
-                        return D2.programStageDataElements().list(programStageSection).toBlocking().first();
-                    }
-                }).map(new Func1<List<ProgramStageDataElement>, List<IDataEntity>>() {
-                    @Override
-                    public List<IDataEntity> call(List<ProgramStageDataElement> programStageDataElements) {
-                        return transformDataEntryForm(programStageDataElements);
+                    public List<IDataEntity> call(ProgramStageSection programStageSection) {
+                        return transformDataEntryForm(programStageSection.getProgramStageDataElements());
                     }
                 }).subscribe(new Action1<List<IDataEntity>>() {
                     @Override
                     public void call(List<IDataEntity> dataEntities) {
-                        if(eventDataEntryView != null) {
+                        if (eventDataEntryView != null) {
                             eventDataEntryView.setDataEntryFields(dataEntities);
                         }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
                     }
                 });
     }
@@ -126,7 +126,7 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
 //            @Override
 //            public void call(List<IDataEntity> dataEntities) {
 //                if (eventDataEntryView != null) {
-//                    eventDataEntryView.setDataEntryFields(dataEntities);
+//                    eventDataEntryView.setDataEntryFields(dataEntities);E
 //                }
 //            }
 //        }, new Action1<Throwable>() {

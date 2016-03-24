@@ -72,9 +72,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
-
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
-
                         @Override
                         public List<Program> call(List<OrganisationUnit> organisationUnits,
                                                   List<Program> programs) {
@@ -111,21 +109,18 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                                     new String[sectionUids.size()])).toBlocking().first();
                         }
                     })
-                    .map(new Func1<List<ProgramStageSection>, List<ProgramStageDataElement>>() {
-                        @Override
-                        public List<ProgramStageDataElement> call(List<ProgramStageSection> programStageSections) {
-//                            return D2.programStageDataElements().sync().toBlocking().first();
-                            return null;
-                        }
-                    })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                    .subscribe(new Action1<List<ProgramStageSection>>() {
                         @Override
-                        public void call(List<ProgramStageDataElement> ProgramStageDataElements) {
-                            System.out.println(ProgramStageDataElements);
-                            for (ProgramStageDataElement programStageDataElement : ProgramStageDataElements) {
-                                System.out.println("programStageDataElements: " + programStageDataElement.getDisplayName());
+                        public void call(List<ProgramStageSection> programStageSections) {
+                            System.out.println(programStageSections);
+                            for (ProgramStageSection programStageSection : programStageSections) {
+                                System.out.println("programStageSections: " + programStageSection.getDisplayName());
+                                for(ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
+                                    System.out.println("programStageDataElement: " + programStageDataElement.getUId());
+                                    System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
+                                }
                             }
                             selectorView.onFinishLoading();
                         }
