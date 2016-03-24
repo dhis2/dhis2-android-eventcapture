@@ -39,6 +39,7 @@ import timber.log.Timber;
 
 public final class EventCaptureApp extends Application {
     private RxBus rxBus = null;
+
     @Override
     public void onCreate() {
         super.onCreate();

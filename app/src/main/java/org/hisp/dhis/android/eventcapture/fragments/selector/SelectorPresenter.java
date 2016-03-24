@@ -3,7 +3,6 @@ package org.hisp.dhis.android.eventcapture.fragments.selector;
 import org.hisp.dhis.android.eventcapture.datasync.SessionManager;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -22,7 +21,6 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
-import timber.log.Timber;
 
 public class SelectorPresenter extends AbsPresenter implements ISelectorPresenter {
 
@@ -36,16 +34,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
     @Override
     public void onCreate() {
         subscriptions = new CompositeSubscription();
-        D2.me().programs().list()
-                .subscribe(new Action1<List<Program>>() {
-
-                    @Override
-                    public void call(List<Program> programs) {
-                        for (Program program : programs) {
-                            System.out.println("OrgUnits: " + program.getOrganisationUnits());
-                        }
-                    }
-                });
     }
 
     @Override
@@ -83,49 +71,38 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
                         @Override
                         public List<ProgramStage> call(List<Program> programs) {
-                            Set<String> stageUids = new HashSet<>();
-                            for (Program program : programs) {
-                                Set<String> programStageUids = ModelUtils.toUidSet(
-                                        program.getProgramStages());
-                                stageUids.addAll(programStageUids);
-                            }
-
-                            return D2.programStages().sync(stageUids.toArray(
-                                    new String[stageUids.size()])).toBlocking().first();
+                            return loadProgramStages(programs);
                         }
                     })
                     .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
 
                         @Override
                         public List<ProgramStageSection> call(List<ProgramStage> programStages) {
-                            Set<String> sectionUids = new HashSet<>();
-                            for (ProgramStage programStage : programStages) {
-                                Set<String> stageSectionUids = ModelUtils.toUidSet(
-                                        programStage.getProgramStageSections());
-                                sectionUids.addAll(stageSectionUids);
-                            }
-                            System.out.println(sectionUids);
-                            return D2.programStageSections().sync(sectionUids.toArray(
-                                    new String[sectionUids.size()])).toBlocking().first();
+                            return loadProgramStageSections(programStages);
                         }
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<List<ProgramStageSection>>() {
                         @Override
-                        public void call(List<ProgramStageSection> programStageSections) {
-                            System.out.println(programStageSections);
-                            for (ProgramStageSection programStageSection : programStageSections) {
-                                System.out.println("programStageSections: " + programStageSection.getDisplayName());
-                                for(ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
-                                    System.out.println("programStageDataElement: " + programStageDataElement.getUId());
-                                    System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
-                                }
+                        public void call(List<ProgramStageSection> stageSections) {
+                            for (ProgramStageSection stageSection : stageSections) {
+                                System.out.println(stageSection.getDisplayName());
                             }
-                            SessionManager.getInstance().setSelectorSynced(true);
+                                System.out.println(stageSections);
+                                for (ProgramStageSection programStageSection : stageSections) {
+                                    System.out.println("programStageSections: " + programStageSection.getDisplayName());
+                                    for(ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
+                                        System.out.println("programStageDataElement: " + programStageDataElement.getUId());
+                                        System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
+                                    }
+                                }
+                                SessionManager.getInstance().setSelectorSynced(true);
+
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
+
                         @Override
                         public void call(Throwable throwable) {
                             throwable.printStackTrace();
@@ -135,5 +112,29 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
         } else {
             selectorView.onFinishLoading();
         }
+    }
+
+    private static List<ProgramStage> loadProgramStages(List<Program> programs) {
+        Set<String> stageUids = new HashSet<>();
+        for (Program program : programs) {
+            Set<String> programStageUids = ModelUtils.toUidSet(
+                    program.getProgramStages());
+            stageUids.addAll(programStageUids);
+        }
+
+        return D2.programStages().sync(stageUids.toArray(
+                new String[stageUids.size()])).toBlocking().first();
+    }
+
+    private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
+        Set<String> sectionUids = new HashSet<>();
+        for (ProgramStage programStage : stages) {
+            Set<String> stageSectionUids = ModelUtils.toUidSet(
+                    programStage.getProgramStageSections());
+            sectionUids.addAll(stageSectionUids);
+        }
+
+        return D2.programStageSections().sync(sectionUids.toArray(
+                new String[sectionUids.size()])).toBlocking().first();
     }
 }
