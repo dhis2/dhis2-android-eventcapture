@@ -76,15 +76,11 @@ public class ItemListPresenter extends AbsPresenter {
                 }).map(new Func1<ProgramStage, List<ProgramStageDataElement>>() {
                     @Override
                     public List<ProgramStageDataElement> call(ProgramStage programStage) {
-
-                        List<ProgramStageDataElement> programStageDataElements =
-                                programStage.getProgramStageDataElements();
-                        List<ProgramStageDataElement> stageDataElementsIsDisplayInReport =
-                                new ArrayList<>();
-
-                        for (ProgramStageDataElement programStageDataElement :
-                                programStageDataElements) {
-                            if (programStageDataElement.isDisplayInReports()) {
+                        List<ProgramStageDataElement> programStageDataElements;
+                        List<ProgramStageDataElement> stageDataElementsIsDisplayInReport = new ArrayList<>();
+                        programStageDataElements = D2.programStageDataElements().list(programStage).toBlocking().first();
+                        for(ProgramStageDataElement programStageDataElement : programStageDataElements) {
+                            if(programStageDataElement.isDisplayInReports()) {
                                 stageDataElementsIsDisplayInReport.add(programStageDataElement);
                             }
                         }
@@ -120,6 +116,9 @@ public class ItemListPresenter extends AbsPresenter {
                     @Override
                     public void call(List<IItemListRow> eventListRows) {
                         if (itemListView != null) {
+                            if(eventListRows.size() == 0) {
+                                itemListView.renderItemRowList(itemListRowMapper.getDummyData());
+                            }
                             itemListView.renderItemRowList(eventListRows);
                         }
                     }

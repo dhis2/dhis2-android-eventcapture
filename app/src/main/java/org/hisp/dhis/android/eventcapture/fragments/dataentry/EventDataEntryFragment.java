@@ -64,7 +64,7 @@ public class EventDataEntryFragment extends Fragment implements IEventDataEntryV
         String sectionUid = getArguments().getString(EXTRA_SECTION_UID);
 
         IEventDataEntryPresenter eventDataEntryPresenter = new EventDataEntryPresenter(this);
-        eventDataEntryPresenter.listDataEntryFieldsWithEventValues(eventUId, sectionUid);
+        eventDataEntryPresenter.listDataEntryFields(sectionUid);
     }
 
     @Override

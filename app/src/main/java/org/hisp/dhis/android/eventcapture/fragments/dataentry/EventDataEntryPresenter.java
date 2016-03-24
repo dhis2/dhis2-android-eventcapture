@@ -55,34 +55,34 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
         eventDataEntryView = null;
     }
 
-//    @Override
-//    public void listDataEntryFields(String programStageSectionUid) {
-//        programDataEntryRowSubscription = D2.programStageSections().get(programStageSectionUid)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .map(new Func1<ProgramStageSection, List<ProgramStageDataElement>>() {
-//                    @Override
-//                    public List<ProgramStageDataElement> call(ProgramStageSection programStageSection) {
-//                        return D2.programStageDataElements().list(programStageSection).toBlocking().first();
-//                    }
-//                }).map(new Func1<List<ProgramStageDataElement>, List<DataEntity>>() {
-//                    @Override
-//                    public List<DataEntity> call(List<ProgramStageDataElement> programStageDataElements) {
-//                        return transformDataEntryForm(programStageDataElements);
-//                    }
-//                }).subscribe(new Action1<List<DataEntity>>() {
-//                    @Override
-//                    public void call(List<DataEntity> dataEntities) {
-//                        if(eventDataEntryView != null) {
-//                            eventDataEntryView.setDataEntryFields(dataEntities);
-//                        }
-//                    }
-//                });
-//    }
+    @Override
+    public void listDataEntryFields(String programStageSectionUid) {
+        programDataEntryRowSubscription = D2.programStageSections().get(programStageSectionUid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<ProgramStageSection, List<IDataEntity>>() {
+                    @Override
+                    public List<IDataEntity> call(ProgramStageSection programStageSection) {
+                        return transformDataEntryForm(programStageSection.getProgramStageDataElements());
+                    }
+                }).subscribe(new Action1<List<IDataEntity>>() {
+                    @Override
+                    public void call(List<IDataEntity> dataEntities) {
+                        if (eventDataEntryView != null) {
+                            eventDataEntryView.setDataEntryFields(dataEntities);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
+    }
 
     @Override
     public void listDataEntryFieldsWithEventValues(final String eventUId, final String programStageSectionUId) {
-//        programDataEntryRowSubscription
+
 //        Observable<List<ProgramStageDataElement>> programStageDataElements = D2.programStageSections().get(programStageSectionUId)
 //                .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
@@ -126,7 +126,7 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
 //            @Override
 //            public void call(List<IDataEntity> dataEntities) {
 //                if (eventDataEntryView != null) {
-//                    eventDataEntryView.setDataEntryFields(dataEntities);
+//                    eventDataEntryView.setDataEntryFields(dataEntities);E
 //                }
 //            }
 //        }, new Action1<Throwable>() {
@@ -135,6 +135,62 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
 //                Timber.d(throwable.toString());
 //            }
 //        });
+    }
+
+    private List<IDataEntity> transformDataEntryForm(List<ProgramStageDataElement> programStageDataElements) {
+        List<IDataEntity> dataEntities = new ArrayList<>();
+
+        RxDataEntityValueChangedListener dataEntityValueChangedListener = new RxDataEntityValueChangedListener();
+        for(ProgramStageDataElement programStageDataElement : programStageDataElements) {
+            dataEntityValueChangedListener.setProgramStageDataElement(programStageDataElement);
+//            TrackedEntityDataValue trackedEntityDataValue = valueHashMap.get(programStageDataElement.getUId());
+//            dataEntityValueChangedListener.setTrackedEntityDataValue(trackedEntityDataValue);
+
+            if(programStageDataElement.getDataElement().getValueType().isBoolean()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.BOOLEAN, dataEntityValueChangedListener));
+            }
+            else if(programStageDataElement.getDataElement().getValueType().isCoordinate()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.COORDINATES, dataEntityValueChangedListener));
+            }
+            else if(programStageDataElement.getDataElement().getValueType().isDate()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.DATE, dataEntityValueChangedListener));
+            }
+            else if(programStageDataElement.getDataElement().getValueType().isFile()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.FILE, dataEntityValueChangedListener));
+            }
+            else if(programStageDataElement.getDataElement().getValueType().isInteger()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.INTEGER, dataEntityValueChangedListener));
+            }
+            else if(programStageDataElement.getDataElement().getValueType().isNumeric()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.NUMBER, dataEntityValueChangedListener));
+            }
+            else if(programStageDataElement.getDataElement().getValueType().isText()) {
+                dataEntities.add(DataEntity.create(
+                        programStageDataElement.getDataElement().getDisplayName(),
+                        "",//trackedEntityDataValue.getValue(),
+                        DataEntity.Type.TEXT, dataEntityValueChangedListener));
+            }
+        }
+
+        return dataEntities;
     }
 
     private List<IDataEntity> transformDataEntryFormWithValues(
@@ -208,45 +264,6 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
 
         return dataEntities;
     }
-//    private List<DataEntity> transformDataEntryForm(List<ProgramStageDataElement> programStageDataElements) {
-//        List<DataEntity> dataEntities = new ArrayList<>();
-//        RxDataEntityValueChangedListener dataEntityValueChangedListener = new RxDataEntityValueChangedListener();
-//
-//        if(programStageDataElements.get(0).getProgramStage().getProgram().isDisplayIncidentDate()) {
-//
-//        }
-//        if(programStageDataElements.get(0).getProgramStage().isCaptureCoordinates()) {
-//            //coordinate row
-//        }
-//
-//        for(ProgramStageDataElement programStageDataElement : programStageDataElements) {
-//            dataEntityValueChangedListener.setProgramStageDataElement(programStageDataElement);
-//
-//            if(programStageDataElement.getDataElement().getValueType().isBoolean()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.BOOLEAN, dataEntityValueChangedListener));
-//            }
-//            else if(programStageDataElement.getDataElement().getValueType().isCoordinate()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.COORDINATES, dataEntityValueChangedListener));
-//            }
-//            else if(programStageDataElement.getDataElement().getValueType().isDate()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.DATE, dataEntityValueChangedListener));
-//            }
-//            else if(programStageDataElement.getDataElement().getValueType().isFile()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.FILE, dataEntityValueChangedListener));
-//            }
-//            else if(programStageDataElement.getDataElement().getValueType().isInteger()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.INTEGER, dataEntityValueChangedListener));
-//            }
-//            else if(programStageDataElement.getDataElement().getValueType().isNumeric()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.NUMBER, dataEntityValueChangedListener));
-//            }
-//            else if(programStageDataElement.getDataElement().getValueType().isText()) {
-//                dataEntities.add(DataEntity.create(programStageDataElement.getDataElement().getDisplayName(), "", DataEntity.Type.TEXT, dataEntityValueChangedListener));
-//            }
-//        }
-//
-//        return dataEntities;
-//    }
 
     @Override
     public String getKey() {

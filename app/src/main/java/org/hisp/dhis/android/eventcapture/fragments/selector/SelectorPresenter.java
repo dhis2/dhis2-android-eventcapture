@@ -7,6 +7,7 @@ import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
 
@@ -71,9 +72,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
-
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
-
                         @Override
                         public List<Program> call(List<OrganisationUnit> organisationUnits,
                                                   List<Program> programs) {
@@ -116,8 +115,12 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                         @Override
                         public void call(List<ProgramStageSection> programStageSections) {
                             System.out.println(programStageSections);
-                            for (ProgramStageSection stageSection : programStageSections) {
-                                System.out.println("StageSection: " + stageSection.getDisplayName());
+                            for (ProgramStageSection programStageSection : programStageSections) {
+                                System.out.println("programStageSections: " + programStageSection.getDisplayName());
+                                for(ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
+                                    System.out.println("programStageDataElement: " + programStageDataElement.getUId());
+                                    System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
+                                }
                             }
                             SessionManager.getInstance().setSelectorSynced(true);
                             selectorView.onFinishLoading();
