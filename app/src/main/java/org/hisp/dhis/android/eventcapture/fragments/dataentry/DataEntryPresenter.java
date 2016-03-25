@@ -99,7 +99,8 @@ public class DataEntryPresenter implements IDataEntryPresenter {
 
     private void setEmptyTrackedEntityDataValues(Event event, ProgramStage programStage, UserAccount userAccount) {
         String EMPTY_FIELD = "";
-        List<ProgramStageDataElement> programStageDataElements = programStage.getProgramStageDataElements();
+        List<ProgramStageDataElement> programStageDataElements =
+                D2.programStageDataElements().list(programStage).toBlocking().first();
         List<TrackedEntityDataValue> trackedEntityDataValues = new ArrayList<>();
 
         for (ProgramStageDataElement programStageDataElement : programStageDataElements) {

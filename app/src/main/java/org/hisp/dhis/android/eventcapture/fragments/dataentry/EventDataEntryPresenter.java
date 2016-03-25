@@ -60,12 +60,19 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
         programDataEntryRowSubscription = D2.programStageSections().get(programStageSectionUid)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<ProgramStageSection, List<IDataEntity>>() {
+                .map(new Func1<ProgramStageSection, List<ProgramStageDataElement>>() {
                     @Override
-                    public List<IDataEntity> call(ProgramStageSection programStageSection) {
-                        return transformDataEntryForm(programStageSection.getProgramStageDataElements());
+                    public List<ProgramStageDataElement> call(ProgramStageSection programStageSection) {
+                        return D2.programStageDataElements().list(programStageSection).toBlocking().first();
                     }
-                }).subscribe(new Action1<List<IDataEntity>>() {
+                })
+                .map(new Func1<List<ProgramStageDataElement>, List<IDataEntity>>() {
+                    @Override
+                    public List<IDataEntity> call(List<ProgramStageDataElement> programStageDataElements) {
+                        return transformDataEntryForm(programStageDataElements);
+                    }
+                })
+                .subscribe(new Action1<List<IDataEntity>>() {
                     @Override
                     public void call(List<IDataEntity> dataEntities) {
                         if (eventDataEntryView != null) {
@@ -126,7 +133,7 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
 //            @Override
 //            public void call(List<IDataEntity> dataEntities) {
 //                if (eventDataEntryView != null) {
-//                    eventDataEntryView.setDataEntryFields(dataEntities);E
+//                    eventDataEntryView.setDataEntryFields(dataEntities);
 //                }
 //            }
 //        }, new Action1<Throwable>() {
@@ -146,6 +153,9 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
 //            TrackedEntityDataValue trackedEntityDataValue = valueHashMap.get(programStageDataElement.getUId());
 //            dataEntityValueChangedListener.setTrackedEntityDataValue(trackedEntityDataValue);
 
+            if(programStageDataElement.getDataElement().getOptionSet() != null) {
+                dataEntities.add(null);
+            }
             if(programStageDataElement.getDataElement().getValueType().isBoolean()) {
                 dataEntities.add(DataEntity.create(
                         programStageDataElement.getDataElement().getDisplayName(),
