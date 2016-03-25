@@ -10,6 +10,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,44 +62,38 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().sync(), D2.me().programs().sync(),
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
+
                         @Override
                         public List<Program> call(List<OrganisationUnit> organisationUnits,
                                                   List<Program> programs) {
                             return programs;
                         }
                     })
-                    .map(new Func1<List<Program>, List<ProgramStage>>() {
+                    .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
 
                         @Override
-                        public List<ProgramStage> call(List<Program> programs) {
-                            return loadProgramStages(programs);
-                        }
-                    })
-                    .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
+                        public List<ProgramStageDataElement> call(List<Program> programs) {
+                            List<ProgramStage> programStages =
+                                    loadProgramStages(programs);
+                            List<ProgramStageSection> stageSections =
+                                    loadProgramStageSections(programStages);
 
-                        @Override
-                        public List<ProgramStageSection> call(List<ProgramStage> programStages) {
-                            return loadProgramStageSections(programStages);
+                            return loadProgramStageDataElements(programStages, stageSections);
                         }
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<ProgramStageSection>>() {
-                        @Override
-                        public void call(List<ProgramStageSection> stageSections) {
-                            for (ProgramStageSection stageSection : stageSections) {
-                                System.out.println(stageSection.getDisplayName());
-                            }
-                                System.out.println(stageSections);
-                                for (ProgramStageSection programStageSection : stageSections) {
-                                    System.out.println("programStageSections: " + programStageSection.getDisplayName());
-                                    for(ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
-                                        System.out.println("programStageDataElement: " + programStageDataElement.getUId());
-                                        System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
-                                    }
-                                }
-                                SessionManager.getInstance().setSelectorSynced(true);
+                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
 
+                        @Override
+                        public void call(List<ProgramStageDataElement> stageDataElements) {
+
+                            for (ProgramStageDataElement stageDataElement : stageDataElements) {
+                                System.out.println("ProgramStageDataElement: " +
+                                        stageDataElement.getDataElement().getUId());
+                            }
+
+                            SessionManager.getInstance().setSelectorSynced(true);
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
@@ -108,7 +103,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             throwable.printStackTrace();
                         }
                     }));
-
         } else {
             selectorView.onFinishLoading();
         }
@@ -136,5 +130,27 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
         return D2.programStageSections().sync(sectionUids.toArray(
                 new String[sectionUids.size()])).toBlocking().first();
+    }
+
+    private static List<ProgramStageDataElement> loadProgramStageDataElements(
+            List<ProgramStage> programStages, List<ProgramStageSection> stageSections) {
+
+        if (programStages == null || programStages.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Set<String> stageDataElementUids = new HashSet<>();
+        for (ProgramStage stage : programStages) {
+            stageDataElementUids.addAll(ModelUtils.toUidSet(
+                    stage.getProgramStageDataElements()));
+        }
+
+        for (ProgramStageSection programStageSection : stageSections) {
+            stageDataElementUids.addAll(ModelUtils.toUidSet(
+                    programStageSection.getProgramStageDataElements()));
+        }
+
+        return D2.programStageDataElements().sync(stageDataElementUids
+                .toArray(new String[stageDataElementUids.size()])).toBlocking().first();
     }
 }
