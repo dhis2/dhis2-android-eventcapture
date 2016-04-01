@@ -34,7 +34,7 @@ public class ItemListRowMapper {
 
 
 
-        List<TrackedEntityDataValue> trackedEntityDataValues = event.getTrackedEntityDataValues();
+        List<TrackedEntityDataValue> trackedEntityDataValues = event.getDataValues();
         EventListRow itemListRow = null;
 //        new ItemListRow(event, event.getTrackedEntityDataValues(), event.getStatus());
 
@@ -59,12 +59,12 @@ public class ItemListRowMapper {
             valuePos.add(new Pair<>(entry.getValue(), i));
             iterator.remove();
         }
-        return EventListRow.create(event, valuePos, event.getStatus());
+        return EventListRow.create(event, valuePos, event.getStatus().toString());
     }
 
     public IItemListRow transformToEventListRow(Program program, Event event) {
 
-        EventListRow eventListRow = EventListRow.create(event, new ArrayList<Pair<String, Integer>>(), event.getStatus());
+        EventListRow eventListRow = EventListRow.create(event, new ArrayList<Pair<String, Integer>>(), event.getStatus().toString());
         return eventListRow;
     }
 

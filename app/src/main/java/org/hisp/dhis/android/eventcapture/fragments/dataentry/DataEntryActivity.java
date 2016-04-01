@@ -84,7 +84,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
             getSupportFragmentManager().beginTransaction()
                     .add(EventDataEntryFragment.newInstance(
                             event.getUId(),
-                            event.getProgramStageId()),
+                            event.getProgramStage()),
                             "EventDataEntryFragment").commit();
         }
     }

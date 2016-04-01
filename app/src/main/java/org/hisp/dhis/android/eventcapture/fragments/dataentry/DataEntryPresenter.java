@@ -76,11 +76,13 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     @Override
                     public Event call(List<ProgramStage> programStages, UserAccount userAccount) {
                         ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture
-                        Event event = D2.events().create(
-                                organisationUnitId, programId,
-                                currentProgramStage.getUId(), Event.STATUS_ACTIVE).toBlocking().first();
-                        setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
-                        return event;
+//                        Event event = D2.events().create(
+//                                organisationUnitId, programId,
+//                                currentProgramStage.getUId(), Event.EventStatus.ACTIVE).toBlocking().first();
+//                        setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
+//                        return event;
+                        //TODO fix this stuff
+                        return null;
                     }
                 }).subscribe(new Action1<Event>() {
                     @Override
@@ -105,13 +107,13 @@ public class DataEntryPresenter implements IDataEntryPresenter {
 
         for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 
-            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
-                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
-                    userAccount.getDisplayName(), false);
+//            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
+//                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
+//                    userAccount.getDisplayName(), false);
 
-            trackedEntityDataValues.add(trackedEntityDataValue);
+//            trackedEntityDataValues.add(trackedEntityDataValue);
         }
-        event.setTrackedEntityDataValues(trackedEntityDataValues);
+        event.setDataValues(trackedEntityDataValues);
     }
 
     @Override
