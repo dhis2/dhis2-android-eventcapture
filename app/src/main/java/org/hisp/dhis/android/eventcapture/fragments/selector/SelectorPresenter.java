@@ -1,12 +1,12 @@
 package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 import org.hisp.dhis.android.eventcapture.datasync.SessionManager;
+import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
 
@@ -99,7 +99,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                                 }
                             }*/
                             SessionManager.getInstance().setSelectorSynced(true);
-
+                            SyncManager.getInstance().setLastSyncedNow();
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
