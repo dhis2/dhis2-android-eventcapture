@@ -6,15 +6,12 @@ import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
-import org.hisp.dhis.client.sdk.models.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -76,9 +73,10 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     @Override
                     public Event call(List<ProgramStage> programStages, UserAccount userAccount) {
                         ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture
-                        Event event = D2.events().create(
-                                organisationUnitId, programId,
-                                currentProgramStage.getUId(), Event.STATUS_ACTIVE).toBlocking().first();
+//                        Event event = D2.events().create(
+//                                organisationUnitId, programId,
+//                                currentProgramStage.getUId(), Event.STATUS_ACTIVE).toBlocking().first();
+                        Event event = new Event();
                         setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
                         return event;
                     }
@@ -105,13 +103,14 @@ public class DataEntryPresenter implements IDataEntryPresenter {
 
         for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 
-            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
-                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
-                    userAccount.getDisplayName(), false);
-
+//            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
+//                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
+//                    userAccount.getDisplayName(), false);
+            TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
             trackedEntityDataValues.add(trackedEntityDataValue);
         }
-        event.setTrackedEntityDataValues(trackedEntityDataValues);
+
+        // event.setTrackedEntityDataValues(trackedEntityDataValues);
     }
 
     @Override
@@ -130,7 +129,7 @@ public class DataEntryPresenter implements IDataEntryPresenter {
             listProgramStageDataElements.unsubscribe();
         }
 
-        if(programStageSubscription != null && !programStageSubscription.isUnsubscribed()) {
+        if (programStageSubscription != null && !programStageSubscription.isUnsubscribed()) {
             programStageSubscription.unsubscribe();
         }
 

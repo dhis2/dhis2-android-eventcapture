@@ -99,7 +99,7 @@ public class ItemListPresenter extends AbsPresenter {
                         List<IItemListRow> eventRows = new ArrayList<>();
 
                         for (Event event : events) {
-                            List<TrackedEntityDataValue> dataValues = event.getTrackedEntityDataValues();
+                            List<TrackedEntityDataValue> dataValues = event.getDataValues();
 
                             for (TrackedEntityDataValue val : dataValues) {
                                 if (map.containsKey(val.getDataElement())) {
