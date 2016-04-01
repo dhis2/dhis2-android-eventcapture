@@ -220,7 +220,9 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
             //coordinate row
             // TODO create onvaluechangedlistener with getting coordinates
 
-//            dataEntities.add(DataEntityCoordinate.create("Capture Coordinates", event.getCoordinate(), DataEntity.Type.COORDINATES));
+
+
+            // dataEntities.add(DataEntityCoordinate.create("Capture Coordinates", event.getCoordinate(), DataEntity.Type.COORDINATES));
         }
 
         for(ProgramStageDataElement programStageDataElement : programStageDataElements) {

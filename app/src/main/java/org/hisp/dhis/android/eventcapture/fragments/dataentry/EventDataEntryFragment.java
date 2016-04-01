@@ -10,10 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.fragments.profile.IProfilePresenter;
-import org.hisp.dhis.android.eventcapture.fragments.profile.ProfilePresenter;
-import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
