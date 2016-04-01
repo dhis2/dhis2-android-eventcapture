@@ -44,6 +44,13 @@ android {
         versionName cfg.versionName
 
         multiDexEnabled true
+        //for gradle plugin 1.5: Vector Drawables
+        generatedDensities = []
+    }
+
+    //for gradle plugin 1.5: Vector Drawables
+    aaptOptions {
+        additionalParameters "--no-version-vectors"
     }
 
     compileOptions {
