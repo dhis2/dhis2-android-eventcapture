@@ -78,6 +78,9 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, On
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_selector);
         mSwipeRefreshLayout.setOnRefreshListener(this);
+        //set the circular progress bar color:
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.color_primary_default);
+
         mSelectorPresenter.initializeSynchronization(false);
     }
 
