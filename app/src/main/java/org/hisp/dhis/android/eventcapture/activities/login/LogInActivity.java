@@ -115,8 +115,6 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
         startActivity(new Intent(this, HomeActivity.class));
     }
 
-
-
     private void showError(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
         AlertDialog alertDialog = builder
