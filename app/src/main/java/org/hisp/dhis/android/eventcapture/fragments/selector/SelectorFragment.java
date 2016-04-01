@@ -37,6 +37,7 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, On
 
     private OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment;
     private ItemListFragment mItemListFragment;
+    boolean ranOnStartLoading =  false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -119,7 +120,6 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, On
             FrameLayout progressFrame = (FrameLayout) a.findViewById(R.id.layer_progress_bar);
             progressFrame.setVisibility(View.GONE);
         }
-        //show refresh button ?
     }
     
     @Override
@@ -130,18 +130,26 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, On
         View v = getView();
         if (mSwipeRefreshLayout == null && getView() != null) {
             mSwipeRefreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swipe_refresh_selector);
+            Timber.d("mSwipeRefreshLayout is not null");
             if (mSwipeRefreshLayout == null) {
                 Timber.e("mSwipeRefreshLayout is NULL");
                 return;
             }
         }
-        mSwipeRefreshLayout.setRefreshing(true);
-        //hide refresh button ?
+        //mSwipeRefreshLayout.setRefreshing(true);
+        //A workaround, to the above. It seems to work when started on a new thread.
+        //
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
     }
 
      @Override
     public void onLoadingError(Throwable throwable) {
-        Snackbar.make(getView(), throwable.getMessage(), Snackbar.LENGTH_LONG);
+         Snackbar.make(getView(), throwable.getMessage(), Snackbar.LENGTH_LONG);
     }
 
 

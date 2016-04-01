@@ -20,18 +20,23 @@
             >
 
             <FrameLayout
-                android:id="@+id/pickerFragment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
-
-            <FrameLayout
-                android:id="@+id/layer_progress_bar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/white">
+                >
+
+                <FrameLayout
+                    android:id="@+id/pickerFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <FrameLayout
+                    android:id="@+id/layer_progress_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/white"/>
 
             </FrameLayout>
+
         </android.support.v4.widget.SwipeRefreshLayout>
 
         <android.support.v4.widget.SwipeRefreshLayout
@@ -44,9 +49,10 @@
             <FrameLayout
                 android:id="@+id/item_fragment"
                 android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                />
+                android:layout_height="fill_parent"/>
+
         </android.support.v4.widget.SwipeRefreshLayout>
+
     </LinearLayout>
 
     <!-- for some reason the app: attributes are not found... need to figure that out before using it.
