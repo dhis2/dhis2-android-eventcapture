@@ -101,6 +101,9 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
                 itemListPresenter.loadEventList
                         (organisationUnitObservable,
                                 programObservable);
+
+                //TODO: remove this when the Rx ItemListPresenter NullPointer exception is resolved.
+                activate();
             }
         });
     }

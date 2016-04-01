@@ -59,9 +59,9 @@ public class ItemListPresenter extends AbsPresenter {
         if(organisationUnitObservable == null || programObservable == null) {
             return;
         }
-        this.getEventsList(
+        /*this.getEventsList(
                 organisationUnitObservable.toBlocking().first(),
-                programObservable.toBlocking().first());
+                programObservable.toBlocking().first());*/
     }
 
     public void getEventsList(final OrganisationUnit organisationUnit, final Program program) {
