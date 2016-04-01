@@ -72,7 +72,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
         mOrganisationUnitPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
             @Override
             public void clearedCallback() {
-                onPickerClickedListener.deactivate();
                 selectorView.onPickedOrganisationUnit(null);
             }
         });
@@ -100,7 +99,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
         mProgramPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
             @Override
             public void clearedCallback() {
-                onPickerClickedListener.deactivate();
                 selectorView.onPickedProgram(null);
 
             }

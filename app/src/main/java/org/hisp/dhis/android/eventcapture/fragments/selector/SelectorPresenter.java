@@ -89,15 +89,16 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                             for (ProgramStageSection stageSection : stageSections) {
                                 System.out.println(stageSection.getDisplayName());
                             }
-                                System.out.println(stageSections);
-                                for (ProgramStageSection programStageSection : stageSections) {
-                                    System.out.println("programStageSections: " + programStageSection.getDisplayName());
-                                    for(ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
-                                        System.out.println("programStageDataElement: " + programStageDataElement.getUId());
-                                        System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
-                                    }
+
+                            System.out.println(stageSections);
+                            for (ProgramStageSection programStageSection : stageSections) {
+                                System.out.println("programStageSections: " + programStageSection.getDisplayName());
+                                for (ProgramStageDataElement programStageDataElement : programStageSection.getProgramStageDataElements()) {
+                                    System.out.println("programStageDataElement: " + programStageDataElement.getUId());
+                                    System.out.println("programStageDataElement.getDataElement: " + programStageDataElement.getDataElement().getDisplayName());
                                 }
-                                SessionManager.getInstance().setSelectorSynced(true);
+                            }
+                            SessionManager.getInstance().setSelectorSynced(true);
 
                             selectorView.onFinishLoading();
                         }
