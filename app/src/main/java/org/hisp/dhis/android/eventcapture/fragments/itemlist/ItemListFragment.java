@@ -197,15 +197,15 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
         floatingActionButton = (FloatingActionButton) view.findViewById(R.id.floatingactionbutton_itemlistfragment);
         floatingActionButton.setOnClickListener(this);
-        /*editColumnsButton.setOnClickListener(this);
+        //editColumnsButton.setOnClickListener(this);
 
         if (hideFloatingActionButton) {
             floatingActionButton.hide();
-            editColumnsButton.setVisibility(View.INVISIBLE);
+            //editColumnsButton.setVisibility(View.INVISIBLE);
         } else {
             floatingActionButton.show();
-            editColumnsButton.setVisibility(View.VISIBLE);
-        }*/
+            //editColumnsButton.setVisibility(View.VISIBLE);
+        }
         progressBar = (CircularProgressBar) view.findViewById(R.id.progress_bar_circular);
     }
 
