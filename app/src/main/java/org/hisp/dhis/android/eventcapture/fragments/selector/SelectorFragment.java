@@ -73,8 +73,9 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, On
                 attachFragment(R.id.item_fragment, mItemListFragment,
                         ItemListFragment.TAG);
             }
+            showRefreshButton();
         }
-        showRefreshButton();
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_selector);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSelectorPresenter.initializeSynchronization(false);
@@ -130,7 +131,6 @@ public class SelectorFragment extends BaseFragment2 implements ISelectorView, On
         View v = getView();
         if (mSwipeRefreshLayout == null && getView() != null) {
             mSwipeRefreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swipe_refresh_selector);
-            Timber.d("mSwipeRefreshLayout is not null");
             if (mSwipeRefreshLayout == null) {
                 Timber.e("mSwipeRefreshLayout is NULL");
                 return;
