@@ -4,8 +4,11 @@ import org.hisp.dhis.android.eventcapture.datasync.SessionManager;
 import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.core.common.controllers.SyncStrategy;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramRule;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
@@ -78,6 +81,12 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                                     loadProgramStages(programs);
                             List<ProgramStageSection> stageSections =
                                     loadProgramStageSections(programStages);
+                            List<ProgramRule> programRules = loadProgramRules(programs);
+                            List<ProgramRuleAction> programRuleActions = loadProgramRuleActions(programRules);
+                            for(ProgramRuleAction programRuleAction : programRuleActions) {
+                                System.out.println("ProgramRuleAction: " +
+                                programRuleAction.getUId());
+                            }
 
                             return loadProgramStageDataElements(programStages, stageSections);
                         }
@@ -151,5 +160,20 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
         }
 
         return D2.programStageDataElements().pull(stageDataElementUids).toBlocking().first();
+    }
+
+    private static List<ProgramRule> loadProgramRules(List<Program> programs) {
+
+        return D2.programRules().sync(SyncStrategy.DEFAULT, programs).toBlocking().first();
+    }
+    private static List<ProgramRuleAction> loadProgramRuleActions(List<ProgramRule> programRules) {
+        Set<String> programRuleActionUids = new HashSet<>();
+
+        for(ProgramRule programRule : programRules) {
+            programRuleActionUids.addAll(ModelUtils.toUidSet(
+                    programRule.getProgramRuleActions()));
+        }
+        return D2.programRuleActions().sync(SyncStrategy.DEFAULT, programRuleActionUids)
+                .toBlocking().first();
     }
 }

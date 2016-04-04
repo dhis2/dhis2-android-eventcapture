@@ -75,10 +75,17 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                         ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture
 //                        Event event = D2.events().create(
 //                                organisationUnitId, programId,
+
+//                                currentProgramStage.getUId(), Event.EventStatus.ACTIVE).toBlocking().first();
+//                        setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
+//                        return event;
+                        //TODO fix this stuff
+
 //                                currentProgramStage.getUId(), Event.STATUS_ACTIVE).toBlocking().first();
                         Event event = new Event();
                         setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
                         return event;
+
                     }
                 }).subscribe(new Action1<Event>() {
                     @Override
@@ -106,12 +113,22 @@ public class DataEntryPresenter implements IDataEntryPresenter {
 //            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
 //                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
 //                    userAccount.getDisplayName(), false);
+
+
+//            trackedEntityDataValues.add(trackedEntityDataValue);
+        }
+        event.setDataValues(trackedEntityDataValues);
+        //TODO fix this stuff
             TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
             trackedEntityDataValues.add(trackedEntityDataValue);
-        }
 
         // event.setTrackedEntityDataValues(trackedEntityDataValues);
+
     }
+
+
+
+
 
     @Override
     public Event getEvent(String eventUId) {

@@ -73,11 +73,20 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     @UiThread
     public void initializeViewPager(List<ProgramStageSection> programStageSections) {
         this.programStageSections = programStageSections;
-        viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
-        viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
-                previousSectionButton,
-                nextSectionButton,
-                sectionLabelTextSwitcher));
+        if(!programStageSections.isEmpty()) {
+            viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
+            viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
+                    previousSectionButton,
+                    nextSectionButton,
+                    sectionLabelTextSwitcher));
+        }
+        else {
+            getSupportFragmentManager().beginTransaction()
+                    .add(EventDataEntryFragment.newInstance(
+                            event.getUId(),
+                            event.getProgramStage()),
+                            "EventDataEntryFragment").commit();
+        }
     }
 
     @Override
@@ -103,23 +112,23 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
 
         @Override
         public CharSequence getPageTitle(int position) {
-            if(programStageSections != null) {
+            if(!programStageSections.isEmpty()) {
                 return programStageSections.get(position).getDisplayName();
             }
-            else return "";
+            else return "Program name";
         }
 
         @Override
         public Fragment getItem(int position) {
             if(event != null) {
-            return EventDataEntryFragment.newInstance(event.getUId(), programStageSections.get(position).getUId());
-        }
-        else return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
+                return EventDataEntryFragment.newInstance(event.getUId(), programStageSections.get(position).getUId());
+            }
+            else return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
         }
 
         @Override
         public int getCount() {
-            if(programStageSections == null)
+            if(programStageSections == null || programStageSections.isEmpty())
                 return 0;
             else {
                 return programStageSections.size();

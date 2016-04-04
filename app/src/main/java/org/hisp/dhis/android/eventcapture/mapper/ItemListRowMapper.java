@@ -59,10 +59,14 @@ public class ItemListRowMapper {
             valuePos.add(new Pair<>(entry.getValue(), i));
             iterator.remove();
         }
+
+
         return EventListRow.create(event, valuePos, event.getStatus().name());
+
     }
 
     public IItemListRow transformToEventListRow(Program program, Event event) {
+
 
         EventListRow eventListRow = EventListRow.create(event,
                 new ArrayList<Pair<String, Integer>>(), event.getStatus().name());
