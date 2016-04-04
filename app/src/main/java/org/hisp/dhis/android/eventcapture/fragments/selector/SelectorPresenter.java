@@ -164,7 +164,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
     private static List<ProgramRule> loadProgramRules(List<Program> programs) {
 
-        return D2.programRules().sync(SyncStrategy.DEFAULT, programs).toBlocking().first();
+        return D2.programRules().pull(SyncStrategy.DEFAULT, programs).toBlocking().first();
     }
     private static List<ProgramRuleAction> loadProgramRuleActions(List<ProgramRule> programRules) {
         Set<String> programRuleActionUids = new HashSet<>();
@@ -173,7 +173,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             programRuleActionUids.addAll(ModelUtils.toUidSet(
                     programRule.getProgramRuleActions()));
         }
-        return D2.programRuleActions().sync(SyncStrategy.DEFAULT, programRuleActionUids)
+        return D2.programRuleActions().pull(SyncStrategy.DEFAULT, programRuleActionUids)
                 .toBlocking().first();
     }
 }
