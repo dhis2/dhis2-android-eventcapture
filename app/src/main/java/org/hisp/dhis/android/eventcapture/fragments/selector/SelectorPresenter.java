@@ -61,7 +61,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             selectorView.onStartLoading();
 
             subscriptions.add(Observable.zip(
-                    D2.me().organisationUnits().sync(), D2.me().programs().sync(),
+                    D2.me().organisationUnits().pull(), D2.me().programs().pull(),
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
 
                         @Override
@@ -118,8 +118,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             stageUids.addAll(programStageUids);
         }
 
-        return D2.programStages().sync(stageUids.toArray(
-                new String[stageUids.size()])).toBlocking().first();
+        return D2.programStages().pull(stageUids).toBlocking().first();
     }
 
     private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
@@ -130,8 +129,7 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
             sectionUids.addAll(stageSectionUids);
         }
 
-        return D2.programStageSections().sync(sectionUids.toArray(
-                new String[sectionUids.size()])).toBlocking().first();
+        return D2.programStageSections().pull(sectionUids).toBlocking().first();
     }
 
     private static List<ProgramStageDataElement> loadProgramStageDataElements(
@@ -152,7 +150,6 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
                     programStageSection.getProgramStageDataElements()));
         }
 
-        return D2.programStageDataElements().sync(stageDataElementUids
-                .toArray(new String[stageDataElementUids.size()])).toBlocking().first();
+        return D2.programStageDataElements().pull(stageDataElementUids).toBlocking().first();
     }
 }
