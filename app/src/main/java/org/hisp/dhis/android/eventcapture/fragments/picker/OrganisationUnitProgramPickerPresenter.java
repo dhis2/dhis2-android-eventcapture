@@ -11,6 +11,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import rx.Observable;
@@ -95,7 +96,7 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
             mOrganisationUnitProgramPickerView.onStartLoading();
 
             // TODO revise
-            programSubscription = D2.me().programs().list(organisationUnit)
+            programSubscription = D2.me().programs().list(Arrays.asList(organisationUnit))
                     // ProgramType.WITHOUT_REGISTRATION)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
