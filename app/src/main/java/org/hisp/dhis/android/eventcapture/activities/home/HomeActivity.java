@@ -37,10 +37,12 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
@@ -100,6 +102,12 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
             case DRAWER_ITEM_EVENTS_ID: {
                 attachFragmentDelayed(WrapperFragment.newInstance(SelectorFragment.class,
                         getString(R.string.drawer_item_events)));
+                break;
+            }
+            case R.id.drawer_item_settings: {
+                LogInActivity.navigateTo(this, LogInActivity.class,
+                        D2.configuration().toBlocking().first().getServerUrl(),
+                        D2.me().userCredentials().toBlocking().first().getUsername());
                 break;
             }
         }

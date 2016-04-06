@@ -29,18 +29,15 @@
 package org.hisp.dhis.android.eventcapture.activities.login;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
-import org.hisp.dhis.android.eventcapture.utils.ActivityUtils;
 import org.hisp.dhis.android.eventcapture.utils.PresenterManager;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
+
 
 public class LogInActivity extends AbsLoginActivity implements ILogInView {
     private ILogInPresenter loginPresenter;
@@ -79,9 +76,9 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
     }
 
     @Override
-    protected void onLogInButtonClicked(Editable server, Editable username, Editable password) {
-        loginPresenter.validateCredentials(server.toString(), username.toString(),
-                password.toString());
+    protected void onLoginButtonClicked(Editable server, Editable username, Editable password) {
+        loginPresenter.validateCredentials(
+                server.toString(), username.toString(), password.toString());
     }
 
     @Override
@@ -90,8 +87,15 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
     }
 
     @Override
-    public void hideProgress() {
-        onFinishLoading();
+    public void hideProgress(final OnProgressFinishedListener listener) {
+        onFinishLoading(new OnAnimationFinishListener() {
+            @Override
+            public void onFinish() {
+                if (listener != null) {
+                    listener.onProgressFinished();
+                }
+            }
+        });
     }
 
     @Override
@@ -111,15 +115,15 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
 
     @Override
     public void navigateToHome() {
-        ActivityUtils.changeDefaultActivity(getBaseContext(), false);
-        startActivity(new Intent(this, HomeActivity.class));
+        navigateTo(HomeActivity.class);
     }
 
     private void showError(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
         AlertDialog alertDialog = builder
                 .setTitle(getString(R.string.error))
-                .setMessage(message).show();
+                .setMessage(message)
+                .show();
         alertDialog.show();
     }
 }

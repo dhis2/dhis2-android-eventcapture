@@ -26,37 +26,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.utils;
+package org.hisp.dhis.android.eventcapture.activities;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
+import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
 import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
+import org.hisp.dhis.client.sdk.android.api.D2;
 
-import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
+public class LauncherActivity extends AppCompatActivity {
 
-public final class ActivityUtils {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_launcher);
 
-    private ActivityUtils() {
-        // private constructor
-    }
+        Intent intent;
+        if (D2.isConfigured() &&
+                D2.me().isSignedIn().toBlocking().first()) {
+            intent = new Intent(this, HomeActivity.class);
+        } else {
+            intent = new Intent(this, LogInActivity.class);
+        }
 
-    public static void changeDefaultActivity(Context context, boolean isLogIn) {
-        isNull(context, "Context must not be null");
-
-        final ComponentName logInActivity = new ComponentName(context, LogInActivity.class);
-        final ComponentName homeActivity = new ComponentName(context, HomeActivity.class);
-
-        final int logInActivityState = isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-        final int mainActivityState = !isLogIn ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED :
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
-
-        context.getPackageManager().setComponentEnabledSetting(logInActivity, logInActivityState,
-                PackageManager.DONT_KILL_APP);
-        context.getPackageManager().setComponentEnabledSetting(homeActivity, mainActivityState,
-                PackageManager.DONT_KILL_APP);
+        startActivity(intent);
+        finish();
     }
 }

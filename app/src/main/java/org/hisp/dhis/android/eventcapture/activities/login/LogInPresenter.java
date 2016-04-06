@@ -28,8 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-import android.os.Handler;
-
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
@@ -48,8 +46,6 @@ import rx.schedulers.Schedulers;
 public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
     public static final String TAG = LogInPresenter.class.getSimpleName();
 
-    public static String accountName;
-
     private final ILogInView mLoginView;
     private Subscription mLoginSubscription;
 
@@ -63,20 +59,12 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
     }
 
     @Override
-    public void validateCredentials(final String serverUrl, final String username,
-                                    final String password) {
-        Configuration configuration = new Configuration(serverUrl);
-        accountName = username;
+    public void validateCredentials(
+            final String serverUrl, final String username, final String password) {
+        // Configuration configuration = new Configuration(serverUrl);
 
         mLoginView.showProgress();
-        (new Handler()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mLoginView.hideProgress();
-            }
-        }, 3000);
-
-        mLoginSubscription = D2.configure(configuration)
+        mLoginSubscription = D2.configure(new Configuration(serverUrl))
                 .flatMap(new Func1<Void, Observable<UserAccount>>() {
                     @Override
                     public Observable<UserAccount> call(Void aVoid) {
@@ -113,29 +101,41 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
 
     @Override
     public void onResume() {
-        if (D2.isConfigured()) {
-            D2.me().isSignedIn()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Boolean>() {
-                        @Override
-                        public void call(Boolean isSignedIn) {
-                            if (isSignedIn != null && isSignedIn) {
-                                onSuccess();
-                            }
-                        }
-                    });
-        }
+//        if (D2.isConfigured()) {
+//            D2.me().isSignedIn()
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(new Action1<Boolean>() {
+//                        @Override
+//                        public void call(Boolean isSignedIn) {
+//                            if (isSignedIn != null && isSignedIn) {
+//                                onSuccess();
+//                            }
+//                        }
+//                    });
+//        }
     }
 
     @Override
-    public void onServerError(String message) {
-        mLoginView.showServerError(message);
+    public void onServerError(final String message) {
+        mLoginView.hideProgress(new ILogInView.OnProgressFinishedListener() {
+
+            @Override
+            public void onProgressFinished() {
+                mLoginView.showServerError(message);
+            }
+        });
     }
 
     @Override
-    public void onUnexpectedError(String message) {
-        mLoginView.showUnexpectedError(message);
+    public void onUnexpectedError(final String message) {
+        mLoginView.hideProgress(new ILogInView.OnProgressFinishedListener() {
+
+            @Override
+            public void onProgressFinished() {
+                mLoginView.showUnexpectedError(message);
+            }
+        });
     }
 
     @Override
@@ -145,7 +145,6 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
 
     @Override
     public void onSuccess() {
-        mLoginView.hideProgress();
         mLoginView.navigateToHome();
     }
 

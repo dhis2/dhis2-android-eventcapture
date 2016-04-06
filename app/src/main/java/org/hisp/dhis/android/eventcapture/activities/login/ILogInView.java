@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture.activities.login;
 public interface ILogInView {
     void showProgress();
 
-    void hideProgress();
+    void hideProgress(OnProgressFinishedListener listener);
 
     void showServerError(String message);
 
@@ -41,4 +41,7 @@ public interface ILogInView {
 
     void navigateToHome();
 
+    interface OnProgressFinishedListener {
+        void onProgressFinished();
+    }
 }
