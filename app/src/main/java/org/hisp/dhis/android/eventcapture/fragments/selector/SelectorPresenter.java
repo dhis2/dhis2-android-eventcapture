@@ -77,12 +77,14 @@ public class SelectorPresenter extends AbsPresenter implements ISelectorPresente
 
                         @Override
                         public List<ProgramStageDataElement> call(List<Program> programs) {
-                            List<ProgramStage> programStages =
-                                    loadProgramStages(programs);
-                            List<ProgramStageSection> stageSections =
-                                    loadProgramStageSections(programStages);
-                            List<ProgramRule> programRules = loadProgramRules(programs);
-                            List<ProgramRuleAction> programRuleActions = loadProgramRuleActions(programRules);
+                            List<ProgramStage> programStages
+                                    = loadProgramStages(programs);
+                            List<ProgramStageSection> stageSections
+                                    = loadProgramStageSections(programStages);
+                            List<ProgramRule> programRules
+                                    = loadProgramRules(programs);
+                            List<ProgramRuleAction> programRuleActions
+                                    = loadProgramRuleActions(programRules);
                             for(ProgramRuleAction programRuleAction : programRuleActions) {
                                 System.out.println("ProgramRuleAction: " +
                                 programRuleAction.getUId());

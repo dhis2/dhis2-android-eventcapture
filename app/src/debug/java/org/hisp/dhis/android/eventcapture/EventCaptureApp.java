@@ -67,7 +67,6 @@ public final class EventCaptureApp extends Application {
         //init rxBus
         rxBus = new RxBus();
 
-        // TODO Add stetho initialization code here
         // TODO Add LeakCanary support
         // TODO Start writing unit tests for application
         // TODO implement debug navigation drawer

@@ -77,7 +77,6 @@ android {
         }
     }
 
-    // TODO Remove this packaging HACK
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE'
