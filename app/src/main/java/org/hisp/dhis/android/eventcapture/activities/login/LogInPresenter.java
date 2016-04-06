@@ -43,13 +43,16 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOnLogInFinishedListener {
-    public static final String TAG = LogInPresenter.class.getSimpleName();
+// TODO Logger injection (ability to pass-in custom OkHttp, Retrofit, Jackson, Logger instances)
+// TODO create new module for utilities (commons)
+// TODO revise MVP/PassiveView/SupervisorController patterns
+public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOnLoginFinishedListener {
+    public static final String TAG = LoginPresenter.class.getSimpleName();
 
-    private final ILogInView mLoginView;
+    private final ILoginView mLoginView;
     private Subscription mLoginSubscription;
 
-    public LogInPresenter(ILogInView loginView) {
+    public LoginPresenter(ILoginView loginView) {
         this.mLoginView = loginView;
     }
 
@@ -101,24 +104,14 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
 
     @Override
     public void onResume() {
-//        if (D2.isConfigured()) {
-//            D2.me().isSignedIn()
-//                    .subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(new Action1<Boolean>() {
-//                        @Override
-//                        public void call(Boolean isSignedIn) {
-//                            if (isSignedIn != null && isSignedIn) {
-//                                onSuccess();
-//                            }
-//                        }
-//                    });
-//        }
+        if (D2.isConfigured() && D2.me().isSignedIn().toBlocking().first()) {
+            onSuccess();
+        }
     }
 
     @Override
     public void onServerError(final String message) {
-        mLoginView.hideProgress(new ILogInView.OnProgressFinishedListener() {
+        mLoginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
 
             @Override
             public void onProgressFinished() {
@@ -129,7 +122,7 @@ public class LogInPresenter extends AbsPresenter implements ILogInPresenter, IOn
 
     @Override
     public void onUnexpectedError(final String message) {
-        mLoginView.hideProgress(new ILogInView.OnProgressFinishedListener() {
+        mLoginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
 
             @Override
             public void onProgressFinished() {

@@ -29,7 +29,7 @@
 package org.hisp.dhis.android.eventcapture.activities.login;
 
 
-public interface IOnLogInFinishedListener {
+public interface IOnLoginFinishedListener {
     void onServerError(String message);
 
     void onUnexpectedError(String message);

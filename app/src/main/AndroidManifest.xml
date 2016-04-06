@@ -48,7 +48,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.login.LogInActivity" />
+        <activity android:name=".activities.login.LoginActivity" />
         <activity android:name=".activities.home.HomeActivity" />
         <activity android:name=".activities.home.DetailsActivity" />
         <activity android:name=".fragments.dataentry.DataEntryActivity" />
