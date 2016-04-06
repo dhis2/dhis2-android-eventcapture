@@ -44,7 +44,7 @@ ext {
             progressBarVersion      : "1.2.0",
             smoothProgressBarVersion: "1.1.0",
             crashlyticsVersion      : "2.5.5",
-            stethoVersion           : "1.2.0",
+            stethoVersion           : "1.3.1",
 
             // java libs
             timberVersion           : "4.1.0",
@@ -72,8 +72,6 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
         classpath 'io.fabric.tools:gradle:1.21.2'
-
-        // ToDo temp
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
 }

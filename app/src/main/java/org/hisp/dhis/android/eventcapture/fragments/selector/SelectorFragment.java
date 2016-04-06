@@ -21,12 +21,12 @@ import org.hisp.dhis.android.eventcapture.fragments.picker.OrganisationUnitProgr
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment2;
+import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 
 import rx.Observable;
 import timber.log.Timber;
 
-public class SelectorFragment extends BaseFragment2 implements ISelectorView, OnAllPickersSelectedListener,
+public class SelectorFragment extends BaseFragment implements ISelectorView, OnAllPickersSelectedListener,
         SwipeRefreshLayout.OnRefreshListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();

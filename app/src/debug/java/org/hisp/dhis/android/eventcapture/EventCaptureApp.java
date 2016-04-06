@@ -32,9 +32,14 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import org.hisp.dhis.android.eventcapture.utils.RxBus;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.api.utils.Logger;
 
+import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 public final class EventCaptureApp extends Application {
@@ -46,8 +51,18 @@ public final class EventCaptureApp extends Application {
 
         Timber.plant(new Timber.DebugTree());
 
-        // Feed context to D2
-        D2.init(this);
+        Stetho.initializeWithDefaults(this);
+
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(new StethoInterceptor())
+                .build();
+
+        D2.Flavor flavor = new D2.Builder()
+                .okHttp(okHttpClient)
+                .logger(new Logger())
+                .build();
+
+        D2.init(this, flavor);
 
         //init rxBus
         rxBus = new RxBus();

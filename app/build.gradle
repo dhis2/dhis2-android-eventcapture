@@ -116,7 +116,7 @@ dependencies {
 
     // Stetho
     debugCompile "com.facebook.stetho:stetho:${libs.stethoVeirsion}"
-    debugCompile "com.facebook.stetho:stetho-okhttp:${libs.stethoVersion}"
+    debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stethoVersion}"
 
     // Test
     testCompile "junit:junit:${libs.jUnitVersion}"

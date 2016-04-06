@@ -39,14 +39,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment2;
+import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
 
-public class ProfileFragment extends BaseFragment2 implements IProfileView {
+public class ProfileFragment extends BaseFragment implements IProfileView {
     private RowViewAdapter rowViewAdapter;
     private IProfilePresenter mProfilePresenter;
 
