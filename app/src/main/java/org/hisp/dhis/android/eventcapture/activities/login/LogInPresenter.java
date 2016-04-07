@@ -30,6 +30,7 @@ package org.hisp.dhis.android.eventcapture.activities.login;
 
 import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.core.common.ILogger;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
@@ -37,23 +38,25 @@ import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import java.net.HttpURLConnection;
 
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
-// TODO Logger injection (ability to pass-in custom OkHttp, Retrofit, Jackson, Logger instances)
 // TODO create new module for utilities (commons)
 // TODO revise MVP/PassiveView/SupervisorController patterns
 public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOnLoginFinishedListener {
     public static final String TAG = LoginPresenter.class.getSimpleName();
 
-    private final ILoginView mLoginView;
-    private Subscription mLoginSubscription;
+    private final ILoginView loginView;
+    private final ILogger logger;
+    private final CompositeSubscription subscription;
 
-    public LoginPresenter(ILoginView loginView) {
-        this.mLoginView = loginView;
+    public LoginPresenter(ILoginView loginView, ILogger logger) {
+        this.loginView = loginView;
+        this.logger = logger;
+        this.subscription = new CompositeSubscription();
     }
 
     @Override
@@ -64,36 +67,36 @@ public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOn
     @Override
     public void validateCredentials(
             final String serverUrl, final String username, final String password) {
-        // Configuration configuration = new Configuration(serverUrl);
 
-        mLoginView.showProgress();
-        mLoginSubscription = D2.configure(new Configuration(serverUrl))
-                .flatMap(new Func1<Void, Observable<UserAccount>>() {
-                    @Override
-                    public Observable<UserAccount> call(Void aVoid) {
-                        return D2.me().signIn(username, password);
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<UserAccount>() {
-                    @Override
-                    public void call(UserAccount userAccount) {
-                        onSuccess();
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        throwable.printStackTrace();
-                        handleError(throwable);
-                    }
-                });
+        loginView.showProgress();
+        subscription.add(
+                D2.configure(new Configuration(serverUrl))
+                        .flatMap(new Func1<Void, Observable<UserAccount>>() {
+                            @Override
+                            public Observable<UserAccount> call(Void aVoid) {
+                                return D2.me().signIn(username, password);
+                            }
+                        })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<UserAccount>() {
+                            @Override
+                            public void call(UserAccount userAccount) {
+                                onSuccess();
+                            }
+                        }, new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                throwable.printStackTrace();
+                                handleError(throwable);
+                            }
+                        }));
     }
 
     @Override
     public void onDestroy() {
-        if (mLoginSubscription != null) {
-            mLoginSubscription.unsubscribe();
+        if (!subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
         }
     }
 
@@ -111,34 +114,34 @@ public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOn
 
     @Override
     public void onServerError(final String message) {
-        mLoginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
+        loginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
 
             @Override
             public void onProgressFinished() {
-                mLoginView.showServerError(message);
+                loginView.showServerError(message);
             }
         });
     }
 
     @Override
     public void onUnexpectedError(final String message) {
-        mLoginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
+        loginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
 
             @Override
             public void onProgressFinished() {
-                mLoginView.showUnexpectedError(message);
+                loginView.showUnexpectedError(message);
             }
         });
     }
 
     @Override
     public void onInvalidCredentialsError() {
-        mLoginView.showInvalidCredentialsError();
+        loginView.showInvalidCredentialsError();
     }
 
     @Override
     public void onSuccess() {
-        mLoginView.navigateToHome();
+        loginView.navigateToHome();
     }
 
     private void handleError(final Throwable throwable) {

@@ -36,6 +36,7 @@ import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
 import org.hisp.dhis.android.eventcapture.utils.PresenterManager;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
@@ -46,12 +47,10 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // TODO make a SessionManager
-
         if (PresenterManager.get(LoginPresenter.TAG) != null) {
             loginPresenter = (LoginPresenter) PresenterManager.remove(LoginPresenter.TAG);
         } else {
-            loginPresenter = new LoginPresenter(this);
+            loginPresenter = new LoginPresenter(this, D2.logger());
         }
 
         loginPresenter.onCreate();
