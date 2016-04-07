@@ -48,6 +48,7 @@ android {
         generatedDensities = []
     }
 
+    // TODO since now we are using gralde plugin 2.0, we don't need additional params
     //for gradle plugin 1.5: Vector Drawables
     aaptOptions {
         additionalParameters "--no-version-vectors"
@@ -93,13 +94,18 @@ android {
 dependencies {
 
     // Local
-    compile project(":core-android")
-    compile project(":ui")
+    compile project(':core-android')
+    compile project(':ui')
+
+    // Dependencies for testing
+    testCompile "junit:junit:${libs.jUnitVersion}"
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
+    compile "com.google.dagger:dagger:${libs.dagger}"
+    compile "com.google.dagger:dagger-compiler:${libs.dagger}"
 
-    //Smooth progress bar:
+    // Smooth progress bar:
     compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"
 
     // Square/Jake Wharton
@@ -111,12 +117,9 @@ dependencies {
     }
 
     //Multidex:
-    compile 'com.android.support:multidex:1.0.1'
+    compile "com.android.support:multidex:${libs.multidex}"
 
     // Stetho
     debugCompile "com.facebook.stetho:stetho:${libs.stethoVeirsion}"
     debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stethoVersion}"
-
-    // Test
-    testCompile "junit:junit:${libs.jUnitVersion}"
 }

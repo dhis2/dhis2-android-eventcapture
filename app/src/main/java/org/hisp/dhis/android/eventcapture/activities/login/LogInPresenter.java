@@ -44,6 +44,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 // TODO create new module for utilities (commons)
+// TODO dagger integration
 // TODO revise MVP/PassiveView/SupervisorController patterns
 public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
     public static final String TAG = LoginPresenter.class.getSimpleName();

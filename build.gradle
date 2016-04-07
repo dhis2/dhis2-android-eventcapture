@@ -45,6 +45,7 @@ ext {
             smoothProgressBarVersion: "1.1.0",
             crashlyticsVersion      : "2.5.5",
             stethoVersion           : "1.3.1",
+            multidex                : "1.0.1",
 
             // java libs
             timberVersion           : "4.1.0",
@@ -55,6 +56,7 @@ ext {
             jexlVersion             : "2.1.1",
             commonsLang3Version     : "3.3.2",
             commonsMath3Version     : "3.6",
+            dagger                  : "2.2",
 
             // testing libs
             jUnitVersion            : "4.12",

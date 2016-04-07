@@ -35,6 +35,7 @@ import android.text.Editable;
 import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
@@ -45,9 +46,12 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // gradle magic for debug builds
         getServerUrl().setText(BuildConfig.SERVER_URL);
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
+
+        loginPresenter = new LoginPresenter(this, D2.logger());
     }
 
 //    @Override
@@ -101,11 +105,9 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
     }
 
     private void showError(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-        AlertDialog alertDialog = builder
+        new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.error))
                 .setMessage(message)
                 .show();
-        alertDialog.show();
     }
 }
