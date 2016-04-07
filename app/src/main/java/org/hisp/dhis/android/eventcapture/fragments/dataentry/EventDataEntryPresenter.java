@@ -3,34 +3,27 @@ package org.hisp.dhis.android.eventcapture.fragments.dataentry;
 
 import android.support.v4.util.Pair;
 
-import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.models.program.ProgramRule;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
-import org.hisp.dhis.client.sdk.ui.models.DataEntityCoordinate;
 import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
 
-public class EventDataEntryPresenter extends AbsPresenter implements IEventDataEntryPresenter {
+public class EventDataEntryPresenter implements IEventDataEntryPresenter {
     private IEventDataEntryView eventDataEntryView;
     private Subscription programDataEntryRowSubscription;
     private Subscription saveDataEntityValues;
@@ -39,21 +32,19 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
         this.eventDataEntryView = eventDataEntryView;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (programDataEntryRowSubscription != null && !programDataEntryRowSubscription.isUnsubscribed()) {
-            programDataEntryRowSubscription.unsubscribe();
-        }
-
-        if(saveDataEntityValues != null && !saveDataEntityValues.isUnsubscribed()) {
-            saveDataEntityValues.unsubscribe();
-        }
-
-        programDataEntryRowSubscription = null;
-        saveDataEntityValues = null;
-        eventDataEntryView = null;
-    }
+//    public void onDestroy() {
+//        if (programDataEntryRowSubscription != null && !programDataEntryRowSubscription.isUnsubscribed()) {
+//            programDataEntryRowSubscription.unsubscribe();
+//        }
+//
+//        if(saveDataEntityValues != null && !saveDataEntityValues.isUnsubscribed()) {
+//            saveDataEntityValues.unsubscribe();
+//        }
+//
+//        programDataEntryRowSubscription = null;
+//        saveDataEntityValues = null;
+//        eventDataEntryView = null;
+//    }
 
     @Override
     public void listDataEntryFields(String programStageSectionUid) {
@@ -275,11 +266,6 @@ public class EventDataEntryPresenter extends AbsPresenter implements IEventDataE
         }
 
         return dataEntities;
-    }
-
-    @Override
-    public String getKey() {
-        return this.getClass().getSimpleName();
     }
 
     private class RxDataEntityValueChangedListener implements OnValueChangeListener<Pair<CharSequence, CharSequence>> {

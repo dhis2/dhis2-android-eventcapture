@@ -2,7 +2,6 @@ package org.hisp.dhis.android.eventcapture.fragments.picker;
 
 import org.hisp.dhis.android.eventcapture.mapper.OrganisationUnitPickableMapper;
 import org.hisp.dhis.android.eventcapture.mapper.ProgramPickableMapper;
-import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
@@ -20,8 +19,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
-
+public class OrganisationUnitProgramPickerPresenter {
     private IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
     private OrganisationUnitPickableMapper mOrganisationUnitPickableMapper;
     private ProgramPickableMapper mProgramPickableMapper;
@@ -33,18 +31,11 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
     public OrganisationUnitProgramPickerPresenter() {
         mOrganisationUnitPickableMapper = new OrganisationUnitPickableMapper();
         mProgramPickableMapper = new ProgramPickableMapper();
+
+        loadOrganisationUnits();
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        this.loadOrganisationUnits();
-    }
-
-    @Override
     public void onDestroy() {
-        super.onDestroy();
         if (organisationUnitSubscription != null && !organisationUnitSubscription.isUnsubscribed
                 ()) {
             organisationUnitSubscription.unsubscribe();
@@ -61,11 +52,6 @@ public class OrganisationUnitProgramPickerPresenter extends AbsPresenter {
             pickedOrganisationUnitSubscription.unsubscribe();
             pickedOrganisationUnitSubscription = null;
         }
-    }
-
-    @Override
-    public String getKey() {
-        return getClass().getSimpleName();
     }
 
     public void loadOrganisationUnits() {

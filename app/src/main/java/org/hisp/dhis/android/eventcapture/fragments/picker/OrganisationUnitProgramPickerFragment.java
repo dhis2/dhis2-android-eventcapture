@@ -38,7 +38,6 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
 
         mOrganisationUnitProgramPickerPresenter = new OrganisationUnitProgramPickerPresenter();
         mOrganisationUnitProgramPickerPresenter.setOrganisationUnitProgramPickerView(this);
-        mOrganisationUnitProgramPickerPresenter.onCreate();
 
         this.createPickers();
     }

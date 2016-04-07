@@ -56,7 +56,8 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
         IDataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
-        dataEntryPresenter.onCreate();
+
+        // dataEntryPresenter.onCreate();
         dataEntryPresenter.listProgramStageSections(programUid);
 
         if(eventUid.equals("")) {

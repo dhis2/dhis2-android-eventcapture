@@ -30,7 +30,6 @@ package org.hisp.dhis.android.eventcapture.fragments.profile;
 
 import android.support.v4.util.Pair;
 
-import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
@@ -48,9 +47,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class ProfilePresenter extends AbsPresenter
-        implements IProfilePresenter {
-
+public class ProfilePresenter implements IProfilePresenter {
     private IProfileView profileView;
     private Subscription profileSubscription;
     private Subscription saveProfileSubscription;
@@ -84,25 +81,19 @@ public class ProfilePresenter extends AbsPresenter
                     }
                 });
     }
-
-    @Override
-    public void onDestroy() {
-        if (profileSubscription != null && !profileSubscription.isUnsubscribed()) {
-            profileSubscription.isUnsubscribed();
-        }
-        if (saveProfileSubscription != null && !saveProfileSubscription.isUnsubscribed()) {
-            saveProfileSubscription.unsubscribe();
-        }
-
-        profileView = null;
-        profileSubscription = null;
-        saveProfileSubscription = null;
-    }
-
-    @Override
-    public String getKey() {
-        return ProfilePresenter.class.getSimpleName();
-    }
+//
+//    public void onDestroy() {
+//        if (profileSubscription != null && !profileSubscription.isUnsubscribed()) {
+//            profileSubscription.isUnsubscribed();
+//        }
+//        if (saveProfileSubscription != null && !saveProfileSubscription.isUnsubscribed()) {
+//            saveProfileSubscription.unsubscribe();
+//        }
+//
+//        profileView = null;
+//        profileSubscription = null;
+//        saveProfileSubscription = null;
+//    }
 
 
     private List<IDataEntity> transformUserAccount(UserAccount account) {
@@ -144,43 +135,31 @@ public class ProfilePresenter extends AbsPresenter
 
         @Override
         public void onValueChanged(Pair<CharSequence, CharSequence> keyValue) {
-            if("First name".equals(keyValue.first)) {
+            if ("First name".equals(keyValue.first)) {
                 userAccount.setFirstName(keyValue.second.toString());
-            }
-            else if("Surname".equals(keyValue.first)) {
+            } else if ("Surname".equals(keyValue.first)) {
                 userAccount.setSurname(keyValue.second.toString());
-            }
-            else if("Gender".equals(keyValue.first)) {
+            } else if ("Gender".equals(keyValue.first)) {
                 userAccount.setGender(keyValue.second.toString());
-            }
-            else if("Birthday".equals(keyValue.first)) {
+            } else if ("Birthday".equals(keyValue.first)) {
                 userAccount.setBirthday(keyValue.second.toString());
-            }
-            else if("Introduction".equals(keyValue.first)) {
+            } else if ("Introduction".equals(keyValue.first)) {
                 userAccount.setIntroduction(keyValue.second.toString());
-            }
-            else if("Education".equals(keyValue.first)) {
+            } else if ("Education".equals(keyValue.first)) {
                 userAccount.setEducation(keyValue.second.toString());
-            }
-            else if("Employer".equals(keyValue.first)) {
+            } else if ("Employer".equals(keyValue.first)) {
                 userAccount.setEmployer(keyValue.second.toString());
-            }
-            else if("Interests".equals(keyValue.first)) {
+            } else if ("Interests".equals(keyValue.first)) {
                 userAccount.setInterests(keyValue.second.toString());
-            }
-            else if("Job title".equals(keyValue.first)) {
+            } else if ("Job title".equals(keyValue.first)) {
                 userAccount.setJobTitle(keyValue.second.toString());
-            }
-            else if("Languages".equals(keyValue.first)) {
+            } else if ("Languages".equals(keyValue.first)) {
                 userAccount.setLanguages(keyValue.second.toString());
-            }
-            else if("Email".equals(keyValue.first)) {
+            } else if ("Email".equals(keyValue.first)) {
                 userAccount.setEmail(keyValue.second.toString());
-            }
-            else if("Phone number".equals(keyValue.first)) {
+            } else if ("Phone number".equals(keyValue.first)) {
                 userAccount.setPhoneNumber(keyValue.second.toString());
-            }
-            else {
+            } else {
 
                 throw new UnsupportedOperationException("Unsupported key");
             }

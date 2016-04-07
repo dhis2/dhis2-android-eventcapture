@@ -136,29 +136,23 @@ public class DataEntryPresenter implements IDataEntryPresenter {
         return event;
     }
 
-    @Override
-    public void onCreate() {
-    }
-
-    @Override
-    public void onDestroy() {
-        if (listProgramStageDataElements != null && !listProgramStageDataElements.isUnsubscribed()) {
-            listProgramStageDataElements.unsubscribe();
-        }
-
-        if (programStageSubscription != null && !programStageSubscription.isUnsubscribed()) {
-            programStageSubscription.unsubscribe();
-        }
-
-        listProgramStageDataElements = null;
-        programStageSubscription = null;
-        dataEntryView = null;
-    }
-
-    @Override
-    public String getKey() {
-        return this.getClass().getSimpleName();
-    }
-
-
+//    @Override
+//    public void onDestroy() {
+//        if (listProgramStageDataElements != null && !listProgramStageDataElements.isUnsubscribed()) {
+//            listProgramStageDataElements.unsubscribe();
+//        }
+//
+//        if (programStageSubscription != null && !programStageSubscription.isUnsubscribed()) {
+//            programStageSubscription.unsubscribe();
+//        }
+//
+//        listProgramStageDataElements = null;
+//        programStageSubscription = null;
+//        dataEntryView = null;
+//    }
+//
+//    @Override
+//    public String getKey() {
+//        return this.getClass().getSimpleName();
+//    }
 }

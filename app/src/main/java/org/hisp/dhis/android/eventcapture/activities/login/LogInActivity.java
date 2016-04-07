@@ -35,8 +35,6 @@ import android.text.Editable;
 import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
-import org.hisp.dhis.android.eventcapture.utils.PresenterManager;
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
@@ -47,32 +45,17 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (PresenterManager.get(LoginPresenter.TAG) != null) {
-            loginPresenter = (LoginPresenter) PresenterManager.remove(LoginPresenter.TAG);
-        } else {
-            loginPresenter = new LoginPresenter(this, D2.logger());
-        }
-
-        loginPresenter.onCreate();
-
         getServerUrl().setText(BuildConfig.SERVER_URL);
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
     }
 
-    @Override
-    public void onDestroy() {
-        loginPresenter.onDestroy();
-
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        loginPresenter.onResume();
-
-        super.onResume();
-    }
+//    @Override
+//    protected void onResume() {
+//        loginPresenter.onResume();
+//
+//        super.onResume();
+//    }
 
     @Override
     protected void onLoginButtonClicked(Editable server, Editable username, Editable password) {

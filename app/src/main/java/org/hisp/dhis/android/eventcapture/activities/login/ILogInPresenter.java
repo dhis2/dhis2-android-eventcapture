@@ -28,10 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-import org.hisp.dhis.android.eventcapture.utils.IPresenter;
-
-public interface ILoginPresenter extends IPresenter {
+public interface ILoginPresenter {
     void validateCredentials(String serverUrl, String username, String password);
-
-    void onResume();
 }

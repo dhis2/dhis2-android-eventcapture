@@ -43,7 +43,6 @@ public class SelectorFragment extends BaseFragment implements ISelectorView, OnA
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSelectorPresenter = new SelectorPresenter(this);
-        mSelectorPresenter.onCreate();
         setOnMenuItemClickListener(this);
     }
 

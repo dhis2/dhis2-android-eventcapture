@@ -28,7 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.core.common.ILogger;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
@@ -46,7 +45,7 @@ import rx.subscriptions.CompositeSubscription;
 
 // TODO create new module for utilities (commons)
 // TODO revise MVP/PassiveView/SupervisorController patterns
-public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOnLoginFinishedListener {
+public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
     public static final String TAG = LoginPresenter.class.getSimpleName();
 
     private final ILoginView loginView;
@@ -57,11 +56,6 @@ public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOn
         this.loginView = loginView;
         this.logger = logger;
         this.subscription = new CompositeSubscription();
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
     }
 
     @Override
@@ -92,25 +86,13 @@ public class LoginPresenter extends AbsPresenter implements ILoginPresenter, IOn
                             }
                         }));
     }
-
-    @Override
-    public void onDestroy() {
-        if (!subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-        }
-    }
-
-    @Override
-    public String getKey() {
-        return TAG;
-    }
-
-    @Override
-    public void onResume() {
-        if (D2.isConfigured() && D2.me().isSignedIn().toBlocking().first()) {
-            onSuccess();
-        }
-    }
+//
+//    @Override
+//    public void onResume() {
+//        if (D2.isConfigured() && D2.me().isSignedIn().toBlocking().first()) {
+//            onSuccess();
+//        }
+//    }
 
     @Override
     public void onServerError(final String message) {

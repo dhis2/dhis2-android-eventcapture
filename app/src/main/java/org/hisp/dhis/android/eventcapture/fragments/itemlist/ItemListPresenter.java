@@ -3,7 +3,6 @@ package org.hisp.dhis.android.eventcapture.fragments.itemlist;
 import android.support.annotation.NonNull;
 
 import org.hisp.dhis.android.eventcapture.mapper.ItemListRowMapper;
-import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -28,8 +27,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-public class ItemListPresenter extends AbsPresenter {
-
+public class ItemListPresenter {
     private IItemListView itemListView;
     private final ItemListRowMapper itemListRowMapper;
     private CompositeSubscription subscriptions;
@@ -37,23 +35,12 @@ public class ItemListPresenter extends AbsPresenter {
     public ItemListPresenter(@NonNull IItemListView itemListView) {
         this.itemListView = itemListView;
         this.itemListRowMapper = new ItemListRowMapper();
+        this.subscriptions = new CompositeSubscription();
     }
-
-    @Override
-    public void onCreate() {
-        subscriptions = new CompositeSubscription();
-    }
-
-    @Override
-    public String getKey() {
-        return getClass().getSimpleName();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        subscriptions.unsubscribe();
-    }
+//
+//    public void onDestroy() {
+//        subscriptions.unsubscribe();
+//    }
 
     public void loadEventList(Observable<OrganisationUnit> organisationUnitObservable, Observable<Program> programObservable) {
         if(organisationUnitObservable == null || programObservable == null) {

@@ -2,9 +2,7 @@ package org.hisp.dhis.android.eventcapture.fragments.selector;
 
 import org.hisp.dhis.android.eventcapture.datasync.SessionManager;
 import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
-import org.hisp.dhis.android.eventcapture.utils.AbsPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.core.common.controllers.SyncStrategy;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramRule;
@@ -27,36 +25,18 @@ import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-public class SelectorPresenter extends AbsPresenter implements ISelectorPresenter {
-
+public class SelectorPresenter implements ISelectorPresenter {
     private ISelectorView selectorView;
     private CompositeSubscription subscriptions;
 
     public SelectorPresenter(ISelectorView selectorView) {
         this.selectorView = selectorView;
+        this.subscriptions = new CompositeSubscription();
     }
-
-    @Override
-    public void onCreate() {
-        subscriptions = new CompositeSubscription();
-    }
-
-    @Override
-    public String getKey() {
-        return this.getClass().getSimpleName();
-    }
-
-    @Override
-    public void onResume() {
-        // stub implementation
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        subscriptions.unsubscribe();
-    }
+//
+//    public void onDestroy() {
+//        subscriptions.unsubscribe();
+//    }
 
     @Override
     public void initializeSynchronization(Boolean force) {

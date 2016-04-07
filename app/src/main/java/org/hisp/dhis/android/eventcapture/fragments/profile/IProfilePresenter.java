@@ -28,8 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.fragments.profile;
 
-import org.hisp.dhis.android.eventcapture.utils.IPresenter;
 
-public interface IProfilePresenter extends IPresenter {
+public interface IProfilePresenter {
     void listUserAccountFields();
 }

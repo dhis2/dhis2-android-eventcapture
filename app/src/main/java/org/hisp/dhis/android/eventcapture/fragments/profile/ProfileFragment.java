@@ -70,7 +70,6 @@ public class ProfileFragment extends BaseFragment implements IProfileView {
         recyclerView.addItemDecoration(new DividerDecoration(getContext()));
 
         mProfilePresenter = new ProfilePresenter(this);
-        mProfilePresenter.onCreate();
         mProfilePresenter.listUserAccountFields();
         showRefreshButton();
         setOnMenuItemClickListener(this);

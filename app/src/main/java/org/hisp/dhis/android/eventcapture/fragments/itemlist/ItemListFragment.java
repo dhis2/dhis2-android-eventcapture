@@ -65,7 +65,6 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         itemListPresenter = new ItemListPresenter(this);
-        itemListPresenter.onCreate();
     }
 
     @Nullable
