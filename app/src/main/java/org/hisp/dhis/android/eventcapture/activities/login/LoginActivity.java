@@ -39,8 +39,8 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
-public class LogInActivity extends AbsLoginActivity implements ILogInView {
-    private ILogInPresenter loginPresenter;
+public class LoginActivity extends AbsLoginActivity implements ILoginView {
+    private ILoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class LogInActivity extends AbsLoginActivity implements ILogInView {
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
 
-        loginPresenter = new LogInPresenter(this, D2.logger());
+        loginPresenter = new LoginPresenter(this, D2.logger());
     }
 
 //    @Override

@@ -46,14 +46,14 @@ import rx.subscriptions.CompositeSubscription;
 // TODO create new module for utilities (commons)
 // TODO dagger integration
 // TODO revise MVP/PassiveView/SupervisorController patterns
-public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener {
-    public static final String TAG = LogInPresenter.class.getSimpleName();
+public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
+    public static final String TAG = LoginPresenter.class.getSimpleName();
 
-    private final ILogInView loginView;
+    private final ILoginView loginView;
     private final ILogger logger;
     private final CompositeSubscription subscription;
 
-    public LogInPresenter(ILogInView loginView, ILogger logger) {
+    public LoginPresenter(ILoginView loginView, ILogger logger) {
         this.loginView = loginView;
         this.logger = logger;
         this.subscription = new CompositeSubscription();
@@ -97,7 +97,7 @@ public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener
 
     @Override
     public void onServerError(final String message) {
-        loginView.hideProgress(new ILogInView.OnProgressFinishedListener() {
+        loginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
 
             @Override
             public void onProgressFinished() {
@@ -108,7 +108,7 @@ public class LogInPresenter implements ILogInPresenter, IOnLogInFinishedListener
 
     @Override
     public void onUnexpectedError(final String message) {
-        loginView.hideProgress(new ILogInView.OnProgressFinishedListener() {
+        loginView.hideProgress(new ILoginView.OnProgressFinishedListener() {
 
             @Override
             public void onProgressFinished() {

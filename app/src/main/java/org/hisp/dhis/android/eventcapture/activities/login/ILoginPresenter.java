@@ -28,20 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.activities.login;
 
-public interface ILogInView {
-    void showProgress();
 
-    void hideProgress(OnProgressFinishedListener listener);
-
-    void showServerError(String message);
-
-    void showInvalidCredentialsError();
-
-    void showUnexpectedError(String message);
-
-    void navigateToHome();
-
-    interface OnProgressFinishedListener {
-        void onProgressFinished();
-    }
+public interface ILoginPresenter {
+    void validateCredentials(String serverUrl, String username, String password);
 }

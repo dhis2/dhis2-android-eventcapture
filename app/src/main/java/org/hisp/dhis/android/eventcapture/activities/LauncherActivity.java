@@ -35,7 +35,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.activities.home.HomeActivity;
-import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
+import org.hisp.dhis.android.eventcapture.activities.login.LoginActivity;
 import org.hisp.dhis.client.sdk.android.api.D2;
 
 public class LauncherActivity extends AppCompatActivity {
@@ -50,7 +50,7 @@ public class LauncherActivity extends AppCompatActivity {
                 D2.me().isSignedIn().toBlocking().first()) {
             intent = new Intent(this, HomeActivity.class);
         } else {
-            intent = new Intent(this, LogInActivity.class);
+            intent = new Intent(this, LoginActivity.class);
         }
 
         ActivityCompat.startActivity(this, intent, null);
