@@ -48,7 +48,6 @@ import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.IDataEntryPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.EventDataEntryFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.IDataEntryView;
 import org.hisp.dhis.android.eventcapture.views.fragments.ItemListFragment;
@@ -83,37 +82,49 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         Log.d("EVENT DATAENTRY", eventUid);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
+
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
+
+
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
-        IDataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
+        final DataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
 
         // dataEntryPresenter.onCreate();
         dataEntryPresenter.listProgramStageSections(programUid);
 
-        if(eventUid.equals("")) {
+        sectionLabelTextSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //This works, but clicking on the arrow doesn't trigger this for some reason, (when styled as Spinner).
+
+                //make new intent to switch to SectionFilterActivity
+                Intent intent = new Intent(getApplicationContext(), SectionFilterActivity.class);
+                intent.putExtra(ItemListFragment.PROGRAM_STAGE_UID, dataEntryPresenter.getProgramStageUid());
+
+                startActivity(intent);
+            }
+        });
+
+        if (eventUid.equals("")) {
             dataEntryPresenter.createNewEvent(organisationUnitUid, programUid);
-        }
-        else {
+        } else {
             event = dataEntryPresenter.getEvent(eventUid);  //doesn't work when we have dummy data
         }
-
-
-
     }
+
     @Override
     @UiThread
     public void initializeViewPager(List<ProgramStageSection> programStageSections) {
         this.programStageSections = programStageSections;
-        if(!programStageSections.isEmpty()) {
+        if (!programStageSections.isEmpty()) {
             viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
             viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
                     previousSectionButton,
                     nextSectionButton,
                     sectionLabelTextSwitcher));
-        }
-        else {
+        } else {
             getSupportFragmentManager().beginTransaction()
                     .add(EventDataEntryFragment.newInstance(
                             event.getUId(),
@@ -145,23 +156,22 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
 
         @Override
         public CharSequence getPageTitle(int position) {
-            if(!programStageSections.isEmpty()) {
+            if (!programStageSections.isEmpty()) {
                 return programStageSections.get(position).getDisplayName();
-            }
-            else return "Program name";
+            } else return "Program name";
         }
 
         @Override
         public Fragment getItem(int position) {
-            if(event != null) {
+            if (event != null) {
                 return EventDataEntryFragment.newInstance(event.getUId(), programStageSections.get(position).getUId());
-            }
-            else return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
+            } else
+                return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
         }
 
         @Override
         public int getCount() {
-            if(programStageSections == null || programStageSections.isEmpty())
+            if (programStageSections == null || programStageSections.isEmpty())
                 return 0;
             else {
                 return programStageSections.size();
@@ -238,7 +248,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
                 //change these:
                 sectionLabelTextSwitcher.setOutAnimation(slideOutLeft);
                 sectionLabelTextSwitcher.setInAnimation(slideInRight);
-            } else if(position < lastPosition){
+            } else if (position < lastPosition) {
                 sectionLabelTextSwitcher.setInAnimation(slideInLeft);
                 sectionLabelTextSwitcher.setOutAnimation(slideOutRight);
             }

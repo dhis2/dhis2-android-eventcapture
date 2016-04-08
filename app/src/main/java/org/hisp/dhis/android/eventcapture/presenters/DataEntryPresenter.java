@@ -53,9 +53,14 @@ public class DataEntryPresenter implements IDataEntryPresenter {
     private IDataEntryView dataEntryView;
     private Subscription listProgramStageDataElements;
     private Subscription programStageSubscription;
+    private String programStageUid;
 
     public DataEntryPresenter(IDataEntryView dataEntryView) {
         this.dataEntryView = dataEntryView;
+    }
+
+    public String getProgramStageUid() {
+        return programStageUid;
     }
 
     @Override
@@ -72,6 +77,8 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                     @Override
                     public List<ProgramStageSection> call(List<ProgramStage> programStages) {
                         ProgramStage stage = programStages.get(0);
+                        // save the program stage uid here:
+                        programStageUid = stage.getUId();
                         return D2.programStageSections().list(stage).toBlocking().first();
                     }
                 }).subscribe(new Action1<List<ProgramStageSection>>() {
@@ -148,23 +155,17 @@ public class DataEntryPresenter implements IDataEntryPresenter {
         }
         event.setDataValues(trackedEntityDataValues);
         //TODO fix this stuff
-            TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
-            trackedEntityDataValues.add(trackedEntityDataValue);
+        TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
+        trackedEntityDataValues.add(trackedEntityDataValue);
 
         // event.setTrackedEntityDataValues(trackedEntityDataValues);
-
     }
-
-
-
-
 
     @Override
     public Event getEvent(String eventUId) {
         Event event = D2.events().get(eventUId).toBlocking().first();
         return event;
     }
-
 //    @Override
 //    public void onDestroy() {
 //        if (listProgramStageDataElements != null && !listProgramStageDataElements.isUnsubscribed()) {

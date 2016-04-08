@@ -43,11 +43,11 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
-import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
 import org.hisp.dhis.android.eventcapture.RxBus;
+import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
 import org.hisp.dhis.android.eventcapture.views.EventListRow;
 import org.hisp.dhis.android.eventcapture.views.IItemListView;
+import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -66,6 +66,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
     public static final String ORG_UNIT_UID = "extra:orgUnitUId";
     public static final String PROGRAM_UID = "extra:ProgramUId";
     public static final String EVENT_UID = "extra:EventUId";
+    public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUId";
     public static final String FLOATING_BUTTON_STATE = "state:FloatingButtonState";
 
     private ItemListRowAdapter itemListRowAdapter;
@@ -84,7 +85,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
     public ItemListFragment() {
         //empty constructor
-   }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -153,7 +154,7 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
             recyclerView.setAdapter(itemListRowAdapter);
 
             for (IItemListRow itemListRow : itemListRowCollection) {
-                if(itemListRow instanceof EventListRow) {
+                if (itemListRow instanceof EventListRow) {
                     final EventListRow eventListRow = (EventListRow) itemListRow;
 
                     eventListRow.setOnRowClickListener(new View.OnClickListener() {
@@ -260,15 +261,15 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == floatingActionButton.getId()) {
-        Intent intent = new Intent(getContext(), DataEntryActivity.class);
-        intent.putExtra(PROGRAM_UID,
-                programObservable.toBlocking().first().getUId());
-        intent.putExtra(ORG_UNIT_UID,
-                organisationUnitObservable.toBlocking().first().getUId());
-        intent.putExtra(EVENT_UID,"");
+        if (v.getId() == floatingActionButton.getId()) {
+            Intent intent = new Intent(getContext(), DataEntryActivity.class);
+            intent.putExtra(PROGRAM_UID,
+                    programObservable.toBlocking().first().getUId());
+            intent.putExtra(ORG_UNIT_UID,
+                    organisationUnitObservable.toBlocking().first().getUId());
+            intent.putExtra(EVENT_UID, "");
 
-        getContext().startActivity(intent);
+            getContext().startActivity(intent);
         }
 //        else if(v.getId() == editColumnsButton.getId()) {
 //            Timber.d("Edit columns button");
