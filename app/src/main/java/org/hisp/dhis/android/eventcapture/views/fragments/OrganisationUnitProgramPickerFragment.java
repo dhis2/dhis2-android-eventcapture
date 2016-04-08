@@ -39,8 +39,8 @@ import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.dialogs.AutoCompleteDialogFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickableItemClearListener;
+import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
+import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.PickableItemClearListener;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Picker;
 
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     }
 
     public void createPickers() {
-        mOrganisationUnitPicker = new Picker(new ArrayList<IPickable>(), OrganisationUnit.class.getSimpleName(), OrganisationUnit.class.getName());
+        mOrganisationUnitPicker = new Picker(new ArrayList<Pickable>(), OrganisationUnit.class.getSimpleName(), OrganisationUnit.class.getName());
         mOrganisationUnitPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,14 +95,14 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             }
         });
 
-        mOrganisationUnitPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
+        mOrganisationUnitPicker.registerPickedItemClearListener(new PickableItemClearListener() {
             @Override
             public void clearedCallback() {
                 selectorView.onPickedOrganisationUnit(null);
             }
         });
 
-        mProgramPicker = new Picker(new ArrayList<IPickable>(), Program.class.getSimpleName(), Program.class.getName());
+        mProgramPicker = new Picker(new ArrayList<Pickable>(), Program.class.getSimpleName(), Program.class.getName());
         mProgramPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +122,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
             }
         });
 
-        mProgramPicker.registerPickedItemClearListener(new IPickableItemClearListener() {
+        mProgramPicker.registerPickedItemClearListener(new PickableItemClearListener() {
             @Override
             public void clearedCallback() {
                 selectorView.onPickedProgram(null);
@@ -135,12 +135,12 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     }
 
     @Override
-    public void renderOrganisationUnitPickables(List<IPickable> organisationUnitPickables) {
+    public void renderOrganisationUnitPickables(List<Pickable> organisationUnitPickables) {
         mOrganisationUnitPicker.setPickableItems(organisationUnitPickables);
     }
 
     @Override
-    public void renderProgramPickables(List<IPickable> programPickables) {
+    public void renderProgramPickables(List<Pickable> programPickables) {
         mProgramPicker.setPickableItems(programPickables);
     }
 
@@ -172,7 +172,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     }
 
     @Override
-    public void onOptionSelected(IPickable pickable) {
+    public void onOptionSelected(Pickable pickable) {
         if(pickable instanceof OrganisationUnitPickable) {
             OrganisationUnitPickable organisationUnitPickable = (OrganisationUnitPickable) pickable;
 
@@ -190,7 +190,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
         }
     }
 
-    public void showDialog(String title, List<IPickable> pickables,
+    public void showDialog(String title, List<Pickable> pickables,
                            AutoCompleteDialogFragment.OnOptionSelectedListener
                                    onOptionSelectedListener) {
         AutoCompleteDialogFragment.newInstance(title, pickables, onOptionSelectedListener)

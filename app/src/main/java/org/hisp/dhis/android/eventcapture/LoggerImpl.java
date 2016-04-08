@@ -26,61 +26,65 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views;
+package org.hisp.dhis.android.eventcapture;
 
-import android.os.Parcel;
+import org.hisp.dhis.client.sdk.core.common.Logger;
 
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
+import timber.log.Timber;
 
-import rx.Observable;
+public class LoggerImpl implements Logger {
 
-public class OrganisationUnitPickable implements Pickable {
-
-    String mId;
-    String mLabel;
-
-    public OrganisationUnitPickable(String label, String id) {
-        this.mLabel = label;
-        this.mId = id;
+    public LoggerImpl(Timber.Tree tree) {
+        Timber.plant(tree);
     }
 
     @Override
-    public String toString() {
-        return mLabel;
+    public void v(String tag, String message) {
+        Timber.v(message);
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public void v(String tag, String message, Throwable throwable) {
+        Timber.v(throwable, message);
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeStringArray(new String[]{mLabel, mId});
+    public void d(String tag, String message) {
+        Timber.d(message);
     }
 
-    public OrganisationUnitPickable(Parcel in) {
-        String[] data = new String[2];
-        in.readStringArray(data);
-        this.mLabel = data[0];
-        this.mId = data[1];
+    @Override
+    public void d(String tag, String message, Throwable throwable) {
+        Timber.d(throwable, message);
     }
 
-    public static final Creator<OrganisationUnitPickable> CREATOR = new Creator<OrganisationUnitPickable>() {
-        @Override
-        public OrganisationUnitPickable createFromParcel(Parcel in) {
-            return new OrganisationUnitPickable(in);
-        }
+    @Override
+    public void i(String tag, String message) {
+        Timber.i(message);
+    }
 
-        @Override
-        public OrganisationUnitPickable[] newArray(int size) {
-            return new OrganisationUnitPickable[size];
-        }
-    };
+    @Override
+    public void i(String tag, String message, Throwable throwable) {
+        Timber.i(throwable, message);
+    }
 
-    public Observable<OrganisationUnit> getOrganisationUnit() {
-        return D2.organisationUnits().get(mId);
+    @Override
+    public void w(String tag, String message) {
+        Timber.w(message);
+    }
+
+    @Override
+    public void w(String tag, String message, Throwable throwable) {
+        Timber.w(throwable, message);
+    }
+
+    @Override
+    public void e(String tag, String message) {
+        Timber.e(message);
+    }
+
+    @Override
+    public void e(String tag, String message, Throwable throwable) {
+        Timber.e(throwable, message);
     }
 }

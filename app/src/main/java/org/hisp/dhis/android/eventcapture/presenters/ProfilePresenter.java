@@ -33,9 +33,9 @@ import android.support.v4.util.Pair;
 import org.hisp.dhis.android.eventcapture.views.fragments.IProfileView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntityText;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity.Type;
-import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
 
 import java.util.ArrayList;
@@ -62,15 +62,15 @@ public class ProfilePresenter implements IProfilePresenter {
         profileSubscription = D2.me().account()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<UserAccount, List<IDataEntity>>() {
+                .map(new Func1<UserAccount, List<DataEntity>>() {
                     @Override
-                    public List<IDataEntity> call(UserAccount userAccount) {
+                    public List<DataEntity> call(UserAccount userAccount) {
                         return transformUserAccount(userAccount);
                     }
                 })
-                .subscribe(new Action1<List<IDataEntity>>() {
+                .subscribe(new Action1<List<DataEntity>>() {
                     @Override
-                    public void call(List<IDataEntity> dataEntities) {
+                    public void call(List<DataEntity> dataEntities) {
                         if (profileView != null) {
                             profileView.setProfileFields(dataEntities);
                         }
@@ -97,34 +97,34 @@ public class ProfilePresenter implements IProfilePresenter {
 //    }
 
 
-    private List<IDataEntity> transformUserAccount(UserAccount account) {
-        List<IDataEntity> dataEntities = new ArrayList<>();
+    private List<DataEntity> transformUserAccount(UserAccount account) {
+        List<DataEntity> dataEntities = new ArrayList<>();
         RxProfileValueChangedListener onProfileValueChangedListener = new RxProfileValueChangedListener();
         onProfileValueChangedListener.setUserAccount(account);
 
-        dataEntities.add(DataEntity.create("First name", account.getFirstName(), Type.TEXT,
+        dataEntities.add(DataEntityText.create("First name", account.getFirstName(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Surname", account.getSurname(), Type.TEXT,
+        dataEntities.add(DataEntityText.create("Surname", account.getSurname(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Gender", account.getGender(), Type.AUTO_COMPLETE,
+        dataEntities.add(DataEntityText.create("Gender", account.getGender(), Type.AUTO_COMPLETE,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Birthday", account.getBirthday(), Type.DATE,
+        dataEntities.add(DataEntityText.create("Birthday", account.getBirthday(), Type.DATE,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Introduction", account.getIntroduction(), Type
+        dataEntities.add(DataEntityText.create("Introduction", account.getIntroduction(), Type
                 .TRUE_ONLY, onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Education", account.getEducation(), Type.BOOLEAN,
+        dataEntities.add(DataEntityText.create("Education", account.getEducation(), Type.BOOLEAN,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Employer", account.getEmployer(), Type.TEXT,
+        dataEntities.add(DataEntityText.create("Employer", account.getEmployer(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Interests", account.getInterests(),
+        dataEntities.add(DataEntityText.create("Interests", account.getInterests(),
                 Type.TEXT, onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Job title", account.getJobTitle(), Type.TEXT,
+        dataEntities.add(DataEntityText.create("Job title", account.getJobTitle(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Languages", account.getLanguages(), Type.TEXT,
+        dataEntities.add(DataEntityText.create("Languages", account.getLanguages(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Email", account.getEmail(), Type.TEXT,
+        dataEntities.add(DataEntityText.create("Email", account.getEmail(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntity.create("Phone number", account.getPhoneNumber(), Type.INTEGER,
+        dataEntities.add(DataEntityText.create("Phone number", account.getPhoneNumber(), Type.INTEGER,
                 onProfileValueChangedListener));
 
         return dataEntities;

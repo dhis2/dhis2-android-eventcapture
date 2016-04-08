@@ -51,7 +51,7 @@ import org.hisp.dhis.android.eventcapture.views.IItemListView;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
+import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRowAdapter;
 
 import java.util.List;
@@ -147,12 +147,12 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
     }
 
     @Override
-    public void renderItemRowList(List<IItemListRow> itemListRowCollection) {
+    public void renderItemRowList(List<ItemListRow> itemListRowCollection) {
         if (itemListRowCollection != null) {
             itemListRowAdapter = new ItemListRowAdapter(itemListRowCollection);
             recyclerView.setAdapter(itemListRowAdapter);
 
-            for (IItemListRow itemListRow : itemListRowCollection) {
+            for (ItemListRow itemListRow : itemListRowCollection) {
                 if(itemListRow instanceof EventListRow) {
                     final EventListRow eventListRow = (EventListRow) itemListRow;
 

@@ -32,7 +32,7 @@ import org.hisp.dhis.android.eventcapture.views.IView;
 import org.hisp.dhis.android.eventcapture.views.activities.ILoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.IOnLoginFinishedListener;
 import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.core.common.ILogger;
+import org.hisp.dhis.client.sdk.core.common.Logger;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
@@ -52,9 +52,9 @@ import rx.subscriptions.CompositeSubscription;
 public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
     CompositeSubscription subscription;
     ILoginView loginView;
-    ILogger logger;
+    Logger logger;
 
-    public LoginPresenter(ILogger logger) {
+    public LoginPresenter(Logger logger) {
         this.logger = logger;
         this.subscription = new CompositeSubscription();
     }

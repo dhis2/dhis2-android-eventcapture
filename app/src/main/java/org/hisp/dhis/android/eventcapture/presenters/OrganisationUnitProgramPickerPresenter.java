@@ -36,7 +36,7 @@ import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.utils.Preconditions;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
+import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,7 +143,7 @@ public class OrganisationUnitProgramPickerPresenter {
     }
 
     public void setOrganisationUnitPickables(List<OrganisationUnit> organisationUnits) {
-        List<IPickable> organisationUnitPickables =
+        List<Pickable> organisationUnitPickables =
                 mOrganisationUnitPickableMapper.transform(organisationUnits);
         mOrganisationUnitProgramPickerView.renderOrganisationUnitPickables(
                 organisationUnitPickables);
@@ -151,7 +151,7 @@ public class OrganisationUnitProgramPickerPresenter {
     }
 
     public void setProgramPickables(List<Program> programs) {
-        List<IPickable> programPickables = mProgramPickableMapper.transform(programs);
+        List<Pickable> programPickables = mProgramPickableMapper.transform(programs);
         mOrganisationUnitProgramPickerView.renderProgramPickables(programPickables);
 
     }
@@ -179,18 +179,18 @@ public class OrganisationUnitProgramPickerPresenter {
 
     private static class OrganisationUnitPickableMapper {
 
-        public IPickable transform(OrganisationUnit organisationUnit) {
+        public Pickable transform(OrganisationUnit organisationUnit) {
             isNull(organisationUnit, "Org unit must not be null");
 
-            IPickable organisationUnitPickable = new OrganisationUnitPickable(organisationUnit.getName(), organisationUnit.getUId());
+            Pickable organisationUnitPickable = new OrganisationUnitPickable(organisationUnit.getName(), organisationUnit.getUId());
             return organisationUnitPickable;
         }
 
-        public List<IPickable> transform(List<OrganisationUnit> organisationUnits) {
-            List<IPickable> organisationUnitPickables = new ArrayList<>();
+        public List<Pickable> transform(List<OrganisationUnit> organisationUnits) {
+            List<Pickable> organisationUnitPickables = new ArrayList<>();
 
             for (OrganisationUnit organisationUnit : organisationUnits) {
-                IPickable organisationUnitPickable = transform(organisationUnit);
+                Pickable organisationUnitPickable = transform(organisationUnit);
                 organisationUnitPickables.add(organisationUnitPickable);
             }
 
@@ -199,18 +199,18 @@ public class OrganisationUnitProgramPickerPresenter {
     }
 
     private static class ProgramPickableMapper {
-        public IPickable transform(Program program) {
+        public Pickable transform(Program program) {
             Preconditions.isNull(program, "Program must not be null");
 
-            IPickable programPickable = new ProgramPickable(program.getName(), program.getUId());
+            Pickable programPickable = new ProgramPickable(program.getName(), program.getUId());
             return programPickable;
         }
 
-        public List<IPickable> transform(List<Program> programs) {
-            List<IPickable> programPickables = new ArrayList<>();
+        public List<Pickable> transform(List<Program> programs) {
+            List<Pickable> programPickables = new ArrayList<>();
 
             for (Program program : programs) {
-                IPickable programPickable = transform(program);
+                Pickable programPickable = transform(program);
                 programPickables.add(programPickable);
             }
 

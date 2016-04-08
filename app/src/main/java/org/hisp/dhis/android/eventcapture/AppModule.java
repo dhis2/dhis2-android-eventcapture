@@ -31,10 +31,16 @@ package org.hisp.dhis.android.eventcapture;
 import android.app.Application;
 import android.content.Context;
 
+import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
+import org.hisp.dhis.client.sdk.core.common.Logger;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.OkHttpClient;
+import timber.log.Timber;
 
 @Module
 public class AppModule {
@@ -48,5 +54,30 @@ public class AppModule {
     @Singleton
     public Context provideContext() {
         return application;
+    }
+
+    @Provides
+    @Singleton
+    public Logger provideLogger(Timber.Tree tree) {
+        return new LoggerImpl(tree);
+    }
+
+    @Provides
+    @Singleton
+    public D2.Flavor provideD2Flavor(OkHttpClient okHttpClient, Logger logger) {
+        // TODO replace OkHttpClient with OkClient (interface)
+        return new D2.Builder()
+                .okHttp(okHttpClient)
+                .logger(logger)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    public UserAccountScope provideUserAccountScope() {
+        // TODO find a way to distribute D2 scope interfaces
+        // TODO bad naming in D2 (Scopes, Services, Stores)?
+        // TODO Consider replacing D2 singleton instance into something else?
+        return D2.me();
     }
 }

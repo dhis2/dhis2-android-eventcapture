@@ -42,7 +42,7 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.IProfilePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
-import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
@@ -79,7 +79,7 @@ public class ProfileFragment extends BaseFragment implements IProfileView {
 
     @Override
     @UiThread
-    public void setProfileFields(List<IDataEntity> dataEntities) {
+    public void setProfileFields(List<DataEntity> dataEntities) {
         rowViewAdapter.swap(dataEntities);
     }
 

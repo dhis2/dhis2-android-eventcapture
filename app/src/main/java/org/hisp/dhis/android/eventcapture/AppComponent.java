@@ -28,63 +28,18 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.client.sdk.core.common.ILogger;
+import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 
-import timber.log.Timber;
+import javax.inject.Singleton;
 
-public class Logger implements ILogger {
+import dagger.Component;
 
-    public Logger(Timber.Tree tree) {
-        Timber.plant(tree);
-    }
+@Singleton
+@Component(modules = {
+        AppModule.class
+})
+public interface AppComponent {
+    void inject(EventCaptureApp target);
 
-    @Override
-    public void v(String tag, String message) {
-        Timber.v(message);
-    }
-
-    @Override
-    public void v(String tag, String message, Throwable throwable) {
-        Timber.v(throwable, message);
-    }
-
-    @Override
-    public void d(String tag, String message) {
-        Timber.d(message);
-    }
-
-    @Override
-    public void d(String tag, String message, Throwable throwable) {
-        Timber.d(throwable, message);
-    }
-
-    @Override
-    public void i(String tag, String message) {
-        Timber.i(message);
-    }
-
-    @Override
-    public void i(String tag, String message, Throwable throwable) {
-        Timber.i(throwable, message);
-    }
-
-    @Override
-    public void w(String tag, String message) {
-        Timber.w(message);
-    }
-
-    @Override
-    public void w(String tag, String message, Throwable throwable) {
-        Timber.w(throwable, message);
-    }
-
-    @Override
-    public void e(String tag, String message) {
-        Timber.e(message);
-    }
-
-    @Override
-    public void e(String tag, String message, Throwable throwable) {
-        Timber.e(throwable, message);
-    }
+    void inject(LoginActivity loginActivity);
 }

@@ -28,10 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 
 import java.util.List;
 
 public interface IProfileView {
-    void setProfileFields(List<IDataEntity> dataEntities);
+    void setProfileFields(List<DataEntity> dataEntities);
 }

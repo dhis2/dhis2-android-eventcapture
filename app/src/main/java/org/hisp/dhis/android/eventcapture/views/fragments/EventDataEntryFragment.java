@@ -40,7 +40,7 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.EventDataEntryPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.IEventDataEntryPresenter;
-import org.hisp.dhis.client.sdk.ui.models.IDataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
@@ -94,7 +94,7 @@ public class EventDataEntryFragment extends Fragment implements IEventDataEntryV
     }
 
     @Override
-    public void setDataEntryFields(List<IDataEntity> dataEntities) {
+    public void setDataEntryFields(List<DataEntity> dataEntities) {
         rowViewAdapter.swap(dataEntities);
     }
 }

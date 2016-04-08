@@ -5,11 +5,11 @@ import android.os.Parcelable;
 
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.IPickable;
+import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
 
 import rx.Observable;
 
-public class ProgramPickable implements IPickable {
+public class ProgramPickable implements Pickable {
     String mId;
     String mLabel;
 

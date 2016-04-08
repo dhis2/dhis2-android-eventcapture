@@ -43,7 +43,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.EItemListRowStatus;
-import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
+import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -109,16 +109,16 @@ public class ItemListPresenter {
                         return stageDataElementsIsDisplayInReport;
                     }
                 })
-                .zipWith(D2.events().list(organisationUnit, program), new Func2<List<ProgramStageDataElement>, List<Event>, List<IItemListRow>>() {
+                .zipWith(D2.events().list(organisationUnit, program), new Func2<List<ProgramStageDataElement>, List<Event>, List<ItemListRow>>() {
                     @Override
-                    public List<IItemListRow> call(List<ProgramStageDataElement> programStageDataElements, List<Event> events) {
+                    public List<ItemListRow> call(List<ProgramStageDataElement> programStageDataElements, List<Event> events) {
                         Map<String, String> map = new HashMap<>();
 
                         for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
                             map.put(programStageDataElement.getUId(), "");
                         }
 
-                        List<IItemListRow> eventRows = new ArrayList<>();
+                        List<ItemListRow> eventRows = new ArrayList<>();
 
                         for (Event event : events) {
                             List<TrackedEntityDataValue> dataValues = event.getDataValues();
@@ -134,9 +134,9 @@ public class ItemListPresenter {
 
                         return eventRows;
                     }
-                }).subscribe(new Action1<List<IItemListRow>>() {
+                }).subscribe(new Action1<List<ItemListRow>>() {
                     @Override
-                    public void call(List<IItemListRow> eventListRows) {
+                    public void call(List<ItemListRow> eventListRows) {
                         if (itemListView != null) {
                             if (eventListRows.size() == 0) {
                                 itemListView.renderItemRowList(itemListRowMapper.getDummyData());
@@ -154,7 +154,7 @@ public class ItemListPresenter {
     }
 
     public void showItemListRows(List<Event> eventList) {
-        List<IItemListRow> itemListRows = itemListRowMapper.transform(eventList);
+        List<ItemListRow> itemListRows = itemListRowMapper.transform(eventList);
         itemListView.renderItemRowList(itemListRows);
     }
 
@@ -185,7 +185,7 @@ public class ItemListPresenter {
 
         }
 
-        public IItemListRow transform(Event event) {
+        public ItemListRow transform(Event event) {
             isNull(event, "Event object must not be null");
 
 
@@ -197,12 +197,12 @@ public class ItemListPresenter {
             return itemListRow;
         }
 
-        public List<IItemListRow> transform(List<Event> events) {
+        public List<ItemListRow> transform(List<Event> events) {
 
             return null;
         }
 
-        public IItemListRow transform(Event event, Map<String, String> map) {
+        public ItemListRow transform(Event event, Map<String, String> map) {
             List<Pair<String, Integer>> valuePos = new ArrayList<>();
             Iterator<Map.Entry<String, String>> iterator = map.entrySet().iterator();
             while (iterator.hasNext()) {
@@ -220,7 +220,7 @@ public class ItemListPresenter {
 
         }
 
-        public IItemListRow transformToEventListRow(Program program, Event event) {
+        public ItemListRow transformToEventListRow(Program program, Event event) {
 
 
             EventListRow eventListRow = EventListRow.create(event,
@@ -228,14 +228,14 @@ public class ItemListPresenter {
             return eventListRow;
         }
 
-        public List<IItemListRow> getDummyData() {
+        public List<ItemListRow> getDummyData() {
             Event event1 = new Event();
             event1.setUId("001");
             List<Pair<String, Integer>> itemListRow1Values = new ArrayList<>();
             itemListRow1Values.add(new Pair<>("Erling", 1));
             itemListRow1Values.add(new Pair<>("Fjelstad", 2));
             itemListRow1Values.add(new Pair<>("Mann", 3));
-            IItemListRow itemListRow1 = EventListRow.create(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
+            ItemListRow itemListRow1 = EventListRow.create(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
 
             Event event2 = new Event();
             event2.setUId("002");
@@ -244,7 +244,7 @@ public class ItemListPresenter {
             itemListRow2Values.add(new Pair<>("R", 1));
             itemListRow2Values.add(new Pair<>("Russnes", 2));
             itemListRow2Values.add(new Pair<>("Mann", 3));
-            IItemListRow itemListRow2 = EventListRow.create(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
+            ItemListRow itemListRow2 = EventListRow.create(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
 
             Event event3 = new Event();
             event3.setUId("003");
@@ -253,7 +253,7 @@ public class ItemListPresenter {
             itemListRow3Values.add(new Pair<>("AB", 1));
             itemListRow3Values.add(new Pair<>("Abishov", 2));
             itemListRow3Values.add(new Pair<>("Man", 3));
-            IItemListRow itemListRow3 = EventListRow.create(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
+            ItemListRow itemListRow3 = EventListRow.create(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
             View.OnClickListener onClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -282,7 +282,7 @@ public class ItemListPresenter {
             itemListRow3.setOnRowClickListener(onClickListener);
             itemListRow3.setOnStatusClickListener(onStatusClickListener);
             itemListRow3.setOnLongClickListener(onLongClickListener);
-            List<IItemListRow> itemListRows = new ArrayList<>();
+            List<ItemListRow> itemListRows = new ArrayList<>();
             itemListRows.add(itemListRow1);
             itemListRows.add(itemListRow2);
             itemListRows.add(itemListRow3);

@@ -29,23 +29,32 @@
 package org.hisp.dhis.android.eventcapture.views.activities;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 
 import org.hisp.dhis.android.eventcapture.BuildConfig;
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ILoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
+import javax.inject.Inject;
+
 
 public class LoginActivity extends AbsLoginActivity implements ILoginView {
+
+    @Inject
+    Context applicationContext;
+
     ILoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ((EventCaptureApp) getApplication()).getComponent().inject(this);
 
         getServerUrl().setText(BuildConfig.SERVER_URL);
         getUsername().setText(BuildConfig.USERNAME);

@@ -36,20 +36,24 @@ import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.android.api.utils.Logger;
 
 import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
 public final class EventCaptureApp extends Application {
+    private AppComponent appComponent;
+
     private RxBus rxBus = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Timber.plant(new Timber.DebugTree());
+        appComponent = DaggerAppComponent.builder()
+                .appModule(new AppModule(this))
+                .build();
 
+        Timber.plant(new Timber.DebugTree());
 
         Stetho.initializeWithDefaults(this);
 
@@ -59,7 +63,7 @@ public final class EventCaptureApp extends Application {
 
         D2.Flavor flavor = new D2.Builder()
                 .okHttp(okHttpClient)
-                .logger(new Logger())
+                .logger(new LoggerImpl(new Timber.DebugTree()))
                 .build();
 
         D2.init(this, flavor);
@@ -73,16 +77,20 @@ public final class EventCaptureApp extends Application {
         // TODO integrate DI library.
     }
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
+    public AppComponent getComponent() {
+        return appComponent;
+    }
+
     public RxBus getRxBusSingleton() {
         if (rxBus == null) {
             rxBus = new RxBus();
         }
         return rxBus;
-    }
-
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
     }
 }

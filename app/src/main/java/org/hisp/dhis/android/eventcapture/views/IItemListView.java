@@ -1,7 +1,7 @@
 package org.hisp.dhis.android.eventcapture.views;
 
 import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.IItemListRow;
+import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ public interface IItemListView {
     /**
      * Render itemrowlist in the UI.
      *
-     * @param itemListRowCollection The collection of {@link IItemListRow} that will be shown.
+     * @param itemListRowCollection The collection of {@link ItemListRow} that will be shown.
      */
-    void renderItemRowList(List<IItemListRow> itemListRowCollection);
+    void renderItemRowList(List<ItemListRow> itemListRowCollection);
 
     /**
      * View and edit an {@link Event} data entry model.

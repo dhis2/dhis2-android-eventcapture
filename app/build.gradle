@@ -106,7 +106,7 @@ dependencies {
 
     // Dagger dependencies
     compile "com.google.dagger:dagger:${libs.dagger}"
-    compile "com.google.dagger:dagger-compiler:${libs.dagger}"
+    provided "com.google.dagger:dagger-compiler:${libs.dagger}"
     apt "com.google.dagger:dagger-compiler:${libs.dagger}"
 
     // Smooth progress bar:
