@@ -5,15 +5,12 @@ import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.models.program.ProgramRule;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
-import org.hisp.dhis.client.sdk.models.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.models.utils.ModelUtils.ModelAction;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +22,8 @@ import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
+import static org.hisp.dhis.client.sdk.models.utils.ModelUtils.toUidSet;
+
 public class SelectorPresenter implements ISelectorPresenter {
     private ISelectorView selectorView;
     private CompositeSubscription subscriptions;
@@ -33,10 +32,6 @@ public class SelectorPresenter implements ISelectorPresenter {
         this.selectorView = selectorView;
         this.subscriptions = new CompositeSubscription();
     }
-//
-//    public void onDestroy() {
-//        subscriptions.unsubscribe();
-//    }
 
     @Override
     public void initializeSynchronization(Boolean force) {
@@ -46,7 +41,6 @@ public class SelectorPresenter implements ISelectorPresenter {
             subscriptions.add(Observable.zip(
                     D2.me().organisationUnits().pull(), D2.me().programs().pull(),
                     new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
-
                         @Override
                         public List<Program> call(List<OrganisationUnit> organisationUnits,
                                                   List<Program> programs) {
@@ -54,43 +48,26 @@ public class SelectorPresenter implements ISelectorPresenter {
                         }
                     })
                     .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
-
                         @Override
                         public List<ProgramStageDataElement> call(List<Program> programs) {
                             List<ProgramStage> programStages
                                     = loadProgramStages(programs);
                             List<ProgramStageSection> stageSections
                                     = loadProgramStageSections(programStages);
-                            List<ProgramRule> programRules
-                                    = loadProgramRules(programs);
-                            List<ProgramRuleAction> programRuleActions
-                                    = loadProgramRuleActions(programRules);
-                            for(ProgramRuleAction programRuleAction : programRuleActions) {
-                                System.out.println("ProgramRuleAction: " +
-                                programRuleAction.getUId());
-                            }
-
                             return loadProgramStageDataElements(programStages, stageSections);
                         }
                     })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<List<ProgramStageDataElement>>() {
-
                         @Override
                         public void call(List<ProgramStageDataElement> stageDataElements) {
-
-                            for (ProgramStageDataElement stageDataElement : stageDataElements) {
-                                System.out.println("ProgramStageDataElement: " +
-                                        stageDataElement.getDataElement().getUId());
-                            }
-
                             SessionManager.getInstance().setSelectorSynced(true);
                             SyncManager.getInstance().setLastSyncedNow();
+
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {
-
                         @Override
                         public void call(Throwable throwable) {
                             throwable.printStackTrace();
@@ -102,58 +79,45 @@ public class SelectorPresenter implements ISelectorPresenter {
     }
 
     private static List<ProgramStage> loadProgramStages(List<Program> programs) {
-        Set<String> stageUids = new HashSet<>();
-        for (Program program : programs) {
-            Set<String> programStageUids = ModelUtils.toUidSet(
-                    program.getProgramStages());
-            stageUids.addAll(programStageUids);
-        }
+        Set<String> stageUids = toUidSet(programs, new ModelAction<Program>() {
+            @Override
+            public Collection<String> getUids(Program program) {
+                return toUidSet(program.getProgramStages());
+            }
+        });
 
         return D2.programStages().pull(stageUids).toBlocking().first();
     }
 
     private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
-        Set<String> sectionUids = new HashSet<>();
-        for (ProgramStage programStage : stages) {
-            Set<String> stageSectionUids = ModelUtils.toUidSet(
-                    programStage.getProgramStageSections());
-            sectionUids.addAll(stageSectionUids);
-        }
+        Set<String> sectionUids = toUidSet(stages, new ModelAction<ProgramStage>() {
+            @Override
+            public Collection<String> getUids(ProgramStage programStage) {
+                return toUidSet(programStage.getProgramStageSections());
+            }
+        });
 
         return D2.programStageSections().pull(sectionUids).toBlocking().first();
     }
 
     private static List<ProgramStageDataElement> loadProgramStageDataElements(
-            List<ProgramStage> programStages, List<ProgramStageSection> stageSections) {
+            List<ProgramStage> stages, List<ProgramStageSection> sections) {
 
-        if (programStages == null || programStages.isEmpty()) {
-            return new ArrayList<>();
-        }
+        Set<String> stageElementUids = toUidSet(stages, new ModelAction<ProgramStage>() {
+            @Override
+            public Collection<String> getUids(ProgramStage model) {
+                return toUidSet(model.getProgramStageDataElements());
+            }
+        });
 
-        Set<String> stageDataElementUids = new HashSet<>();
-        for (ProgramStage stage : programStages) {
-            stageDataElementUids.addAll(ModelUtils.toUidSet(
-                    stage.getProgramStageDataElements()));
-        }
+        Set<String> sectionElementUids = toUidSet(sections, new ModelAction<ProgramStageSection>() {
+            @Override
+            public Collection<String> getUids(ProgramStageSection model) {
+                return toUidSet(model.getProgramStageDataElements());
+            }
+        });
 
-        for (ProgramStageSection programStageSection : stageSections) {
-            stageDataElementUids.addAll(ModelUtils.toUidSet(
-                    programStageSection.getProgramStageDataElements()));
-        }
-
-        return D2.programStageDataElements().pull(stageDataElementUids).toBlocking().first();
-    }
-
-    private static List<ProgramRule> loadProgramRules(List<Program> programs) {
-        return D2.programRules().pull(programs).toBlocking().first();
-    }
-    private static List<ProgramRuleAction> loadProgramRuleActions(List<ProgramRule> programRules) {
-        Set<String> programRuleActionUids = new HashSet<>();
-
-        for(ProgramRule programRule : programRules) {
-            programRuleActionUids.addAll(ModelUtils.toUidSet(
-                    programRule.getProgramRuleActions()));
-        }
-        return D2.programRuleActions().pull(programRuleActionUids).toBlocking().first();
+        stageElementUids.addAll(sectionElementUids);
+        return D2.programStageDataElements().pull(sectionElementUids).toBlocking().first();
     }
 }

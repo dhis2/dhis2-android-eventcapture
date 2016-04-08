@@ -28,9 +28,10 @@ public class OrganisationUnitProgramPickerPresenter {
     private Subscription pickedOrganisationUnitSubscription;
 
 
-    public OrganisationUnitProgramPickerPresenter() {
+    public OrganisationUnitProgramPickerPresenter(IOrganisationUnitProgramPickerView pickerView) {
         mOrganisationUnitPickableMapper = new OrganisationUnitPickableMapper();
         mProgramPickableMapper = new ProgramPickableMapper();
+        mOrganisationUnitProgramPickerView = pickerView;
 
         loadOrganisationUnits();
     }

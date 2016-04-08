@@ -103,7 +103,7 @@ dependencies {
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
     compile "com.google.dagger:dagger:${libs.dagger}"
-    compile "com.google.dagger:dagger-compiler:${libs.dagger}"
+    provided "com.google.dagger:dagger-compiler:${libs.dagger}"
 
     // Smooth progress bar:
     compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"

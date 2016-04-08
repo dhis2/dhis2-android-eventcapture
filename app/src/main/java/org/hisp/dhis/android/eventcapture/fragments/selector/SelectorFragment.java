@@ -54,7 +54,8 @@ public class SelectorFragment extends BaseFragment implements ISelectorView, OnA
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_selector, container, false);
     }
 
@@ -110,7 +111,8 @@ public class SelectorFragment extends BaseFragment implements ISelectorView, OnA
     public void onFinishLoading() {
 
         if (mSwipeRefreshLayout == null && getView() != null) {
-            mSwipeRefreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swipe_refresh_selector);
+            mSwipeRefreshLayout = (SwipeRefreshLayout) getView()
+                    .findViewById(R.id.swipe_refresh_selector);
             if (mSwipeRefreshLayout == null) {
                 Timber.e("mSwipeRefreshLayout is NULL");
                 return;
@@ -133,7 +135,8 @@ public class SelectorFragment extends BaseFragment implements ISelectorView, OnA
         progressFrame.setVisibility(View.VISIBLE);
         View v = getView();
         if (mSwipeRefreshLayout == null && getView() != null) {
-            mSwipeRefreshLayout = (SwipeRefreshLayout) getView().findViewById(R.id.swipe_refresh_selector);
+            mSwipeRefreshLayout = (SwipeRefreshLayout) getView()
+                    .findViewById(R.id.swipe_refresh_selector);
             if (mSwipeRefreshLayout == null) {
                 Timber.e("mSwipeRefreshLayout is NULL");
                 return;
@@ -186,7 +189,8 @@ public class SelectorFragment extends BaseFragment implements ISelectorView, OnA
     public static class OnOrganisationUnitPickerValueUpdated {
         private final Observable<OrganisationUnit> organisationUnitObservable;
 
-        public OnOrganisationUnitPickerValueUpdated(Observable<OrganisationUnit> organisationUnitObservable) {
+        public OnOrganisationUnitPickerValueUpdated(
+                Observable<OrganisationUnit> organisationUnitObservable) {
             this.organisationUnitObservable = organisationUnitObservable;
         }
 

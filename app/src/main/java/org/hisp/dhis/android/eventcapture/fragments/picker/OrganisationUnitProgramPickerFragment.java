@@ -36,7 +36,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mOrganisationUnitProgramPickerPresenter = new OrganisationUnitProgramPickerPresenter();
+        mOrganisationUnitProgramPickerPresenter = new OrganisationUnitProgramPickerPresenter(this);
         mOrganisationUnitProgramPickerPresenter.setOrganisationUnitProgramPickerView(this);
 
         this.createPickers();
