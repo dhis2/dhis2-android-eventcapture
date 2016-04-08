@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.views.IView;
 import org.hisp.dhis.android.eventcapture.views.activities.ILoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.IOnLoginFinishedListener;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -49,16 +50,31 @@ import rx.subscriptions.CompositeSubscription;
 // TODO dagger integration
 // TODO revise MVP/PassiveView/SupervisorController patterns
 public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener {
-    public static final String TAG = LoginPresenter.class.getSimpleName();
+    CompositeSubscription subscription;
+    ILoginView loginView;
+    ILogger logger;
 
-    private final ILoginView loginView;
-    private final ILogger logger;
-    private final CompositeSubscription subscription;
-
-    public LoginPresenter(ILoginView loginView, ILogger logger) {
-        this.loginView = loginView;
+    public LoginPresenter(ILogger logger) {
         this.logger = logger;
         this.subscription = new CompositeSubscription();
+    }
+
+    @Override
+    public void attachView(IView view) {
+        loginView = (ILoginView) view;
+
+        if (D2.isConfigured() && D2.me().isSignedIn().toBlocking().first()) {
+            onSuccess();
+        }
+    }
+
+    @Override
+    public void detachView() {
+        loginView = null;
+
+        if (subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+        }
     }
 
     @Override
@@ -89,13 +105,6 @@ public class LoginPresenter implements ILoginPresenter, IOnLoginFinishedListener
                             }
                         }));
     }
-//
-//    @Override
-//    public void onResume() {
-//        if (D2.isConfigured() && D2.me().isSignedIn().toBlocking().first()) {
-//            onSuccess();
-//        }
-//    }
 
     @Override
     public void onServerError(final String message) {

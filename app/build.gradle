@@ -27,6 +27,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'io.fabric'
 
 def cfg = rootProject.ext.configuration
@@ -102,8 +103,11 @@ dependencies {
 
     // Google
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
+
+    // Dagger dependencies
     compile "com.google.dagger:dagger:${libs.dagger}"
-    provided "com.google.dagger:dagger-compiler:${libs.dagger}"
+    compile "com.google.dagger:dagger-compiler:${libs.dagger}"
+    apt "com.google.dagger:dagger-compiler:${libs.dagger}"
 
     // Smooth progress bar:
     compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"

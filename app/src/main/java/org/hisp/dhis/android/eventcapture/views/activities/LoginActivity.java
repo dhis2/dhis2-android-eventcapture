@@ -41,7 +41,7 @@ import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
 public class LoginActivity extends AbsLoginActivity implements ILoginView {
-    private ILoginPresenter loginPresenter;
+    ILoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -51,15 +51,16 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
 
-        loginPresenter = new LoginPresenter(this, D2.logger());
+        loginPresenter = new LoginPresenter(D2.logger());
     }
 
-//    @Override
-//    protected void onResume() {
-//        loginPresenter.onResume();
-//
-//        super.onResume();
-//    }
+    @Override
+    protected void onResume() {
+        loginPresenter.attachView(this);
+
+        super.onResume();
+    }
+
 
     @Override
     protected void onLoginButtonClicked(Editable server, Editable username, Editable password) {

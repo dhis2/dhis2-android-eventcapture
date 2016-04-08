@@ -28,61 +28,63 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.app.Application;
-import android.content.Context;
-import android.support.multidex.MultiDex;
+import org.hisp.dhis.client.sdk.core.common.ILogger;
 
-import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
-
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.android.api.utils.Logger;
-
-import okhttp3.OkHttpClient;
 import timber.log.Timber;
 
-public final class EventCaptureApp extends Application {
-    private RxBus rxBus = null;
+public class Logger implements ILogger {
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        Timber.plant(new Timber.DebugTree());
-
-
-        Stetho.initializeWithDefaults(this);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addNetworkInterceptor(new StethoInterceptor())
-                .build();
-
-        D2.Flavor flavor = new D2.Builder()
-                .okHttp(okHttpClient)
-                .logger(new Logger())
-                .build();
-
-        D2.init(this, flavor);
-
-        //init rxBus
-        rxBus = new RxBus();
-
-        // TODO Add LeakCanary support
-        // TODO Start writing unit tests for application
-        // TODO implement debug navigation drawer
-        // TODO integrate DI library.
-    }
-
-    public RxBus getRxBusSingleton() {
-        if (rxBus == null) {
-            rxBus = new RxBus();
-        }
-        return rxBus;
+    public Logger(Timber.Tree tree) {
+        Timber.plant(tree);
     }
 
     @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
+    public void v(String tag, String message) {
+        Timber.v(message);
+    }
+
+    @Override
+    public void v(String tag, String message, Throwable throwable) {
+        Timber.v(throwable, message);
+    }
+
+    @Override
+    public void d(String tag, String message) {
+        Timber.d(message);
+    }
+
+    @Override
+    public void d(String tag, String message, Throwable throwable) {
+        Timber.d(throwable, message);
+    }
+
+    @Override
+    public void i(String tag, String message) {
+        Timber.i(message);
+    }
+
+    @Override
+    public void i(String tag, String message, Throwable throwable) {
+        Timber.i(throwable, message);
+    }
+
+    @Override
+    public void w(String tag, String message) {
+        Timber.w(message);
+    }
+
+    @Override
+    public void w(String tag, String message, Throwable throwable) {
+        Timber.w(throwable, message);
+    }
+
+    @Override
+    public void e(String tag, String message) {
+        Timber.e(message);
+    }
+
+    @Override
+    public void e(String tag, String message, Throwable throwable) {
+        Timber.e(throwable, message);
     }
 }
