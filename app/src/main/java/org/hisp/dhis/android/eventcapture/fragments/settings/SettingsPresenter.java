@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.activities.login.LoginActivity;
+import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 import org.hisp.dhis.android.eventcapture.datasync.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
 
@@ -41,7 +41,7 @@ public class SettingsPresenter implements ISettingsPresenter {
         D2.me().signOut();
 
         // ActivityUtils.changeDefaultActivity(context, true);
-        context.startActivity(new Intent(mSettingsFragment.getActivity(), LoginActivity.class));
+        context.startActivity(new Intent(mSettingsFragment.getActivity(), LogInActivity.class));
 
         //TODO: When loging out functionality works test the following:
         //log in with 1 user, log out and log in with another.

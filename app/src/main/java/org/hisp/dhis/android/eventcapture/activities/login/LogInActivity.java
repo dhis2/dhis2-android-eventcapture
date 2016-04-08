@@ -40,17 +40,17 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
-public class LoginActivity extends AbsLoginActivity implements ILoginView {
-    private ILoginPresenter loginPresenter;
+public class LogInActivity extends AbsLoginActivity implements ILogInView {
+    private ILogInPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (PresenterManager.get(LoginPresenter.TAG) != null) {
-            loginPresenter = (LoginPresenter) PresenterManager.remove(LoginPresenter.TAG);
+        if (PresenterManager.get(LogInPresenter.TAG) != null) {
+            loginPresenter = (LogInPresenter) PresenterManager.remove(LogInPresenter.TAG);
         } else {
-            loginPresenter = new LoginPresenter(this, D2.logger());
+            loginPresenter = new LogInPresenter(this, D2.logger());
         }
 
         loginPresenter.onCreate();
@@ -118,7 +118,7 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
     }
 
     private void showError(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(LogInActivity.this);
         AlertDialog alertDialog = builder
                 .setTitle(getString(R.string.error))
                 .setMessage(message)
