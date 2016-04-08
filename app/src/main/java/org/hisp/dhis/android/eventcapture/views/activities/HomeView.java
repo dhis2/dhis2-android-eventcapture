@@ -26,12 +26,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views.activities;
 
-import org.hisp.dhis.android.eventcapture.views.IView;
+import android.content.Context;
 
-public interface IPresenter {
-    void attachView(IView view);
+public interface HomeView {
+    void setUsername(CharSequence username);
 
-    void detachView();
+    void setUserInfo(CharSequence userInfo);
+
+    void setUserLetter(CharSequence userLetter);
+
+    Context getContext(); //TODO: remove when moving to using Dagger
 }

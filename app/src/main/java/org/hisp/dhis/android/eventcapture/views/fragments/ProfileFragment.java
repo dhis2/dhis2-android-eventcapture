@@ -39,8 +39,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.IProfilePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
+import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenterImpl;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
@@ -48,9 +48,9 @@ import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
 
-public class ProfileFragment extends BaseFragment implements IProfileView {
+public class ProfileFragment extends BaseFragment implements ProfileView {
     private RowViewAdapter rowViewAdapter;
-    private IProfilePresenter mProfilePresenter;
+    private ProfilePresenter mProfilePresenter;
 
     @Nullable
     @Override
@@ -71,7 +71,7 @@ public class ProfileFragment extends BaseFragment implements IProfileView {
         recyclerView.setAdapter(rowViewAdapter);
         recyclerView.addItemDecoration(new DividerDecoration(getContext()));
 
-        mProfilePresenter = new ProfilePresenter(this);
+        mProfilePresenter = new ProfilePresenterImpl(this);
         mProfilePresenter.listUserAccountFields();
         showRefreshButton();
         setOnMenuItemClickListener(this);

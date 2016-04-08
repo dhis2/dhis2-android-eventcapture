@@ -44,8 +44,8 @@ import android.widget.FrameLayout;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.ISelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.android.eventcapture.RxBus;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -54,14 +54,14 @@ import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import rx.Observable;
 import timber.log.Timber;
 
-public class SelectorFragment extends BaseFragment implements ISelectorView, OnAllPickersSelectedListener,
+public class SelectorFragment extends BaseFragment implements SelectorView, OnAllPickersSelectedListener,
         SwipeRefreshLayout.OnRefreshListener {
 
     public static final String TAG = SelectorFragment.class.getSimpleName();
 
     private RxBus rxBus;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ISelectorPresenter mSelectorPresenter;
+    private SelectorPresenter mSelectorPresenter;
 
     private OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment;
     private ItemListFragment mItemListFragment;
@@ -70,7 +70,7 @@ public class SelectorFragment extends BaseFragment implements ISelectorView, OnA
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSelectorPresenter = new SelectorPresenter(this);
+        mSelectorPresenter = new SelectorPresenterImpl(this);
         setOnMenuItemClickListener(this);
     }
 

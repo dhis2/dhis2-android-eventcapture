@@ -32,7 +32,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.presenters.OrganisationUnitProgramPickerPresenter;
-import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
+import org.hisp.dhis.android.eventcapture.views.OrganisationUnitProgramPickerView;
 import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
 import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
@@ -47,13 +47,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class OrganisationUnitProgramPickerFragment extends PickerFragment implements IOrganisationUnitProgramPickerView, AutoCompleteDialogFragment.OnOptionSelectedListener {
+public class OrganisationUnitProgramPickerFragment extends PickerFragment implements OrganisationUnitProgramPickerView, AutoCompleteDialogFragment.OnOptionSelectedListener {
     public static final String TAG = OrganisationUnitProgramPickerFragment.class.getSimpleName();
     private OrganisationUnitProgramPickerPresenter mOrganisationUnitProgramPickerPresenter;
     private Picker mProgramPicker;
     private Picker mOrganisationUnitPicker;
     private OnAllPickersSelectedListener onPickerClickedListener;
-    private ISelectorView selectorView;
+    private SelectorView selectorView;
 
     public OrganisationUnitProgramPickerFragment() {
         super();
@@ -167,7 +167,7 @@ public class OrganisationUnitProgramPickerFragment extends PickerFragment implem
         this.onPickerClickedListener = onPickerClickedListener;
     }
 
-    public void setSelectorView(ISelectorView selectorView) {
+    public void setSelectorView(SelectorView selectorView) {
         this.selectorView = selectorView;
     }
 

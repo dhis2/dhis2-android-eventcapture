@@ -26,7 +26,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views;
+package org.hisp.dhis.android.eventcapture.views.activities;
 
-public interface IView {
+import org.hisp.dhis.android.eventcapture.views.View;
+
+public interface LoginView extends View {
+    void showProgress();
+
+    void hideProgress(OnProgressFinishedListener listener);
+
+    void showServerError(String message);
+
+    void showInvalidCredentialsError();
+
+    void showUnexpectedError(String message);
+
+    void navigateToHome();
+
+    interface OnProgressFinishedListener {
+        void onProgressFinished();
+    }
 }

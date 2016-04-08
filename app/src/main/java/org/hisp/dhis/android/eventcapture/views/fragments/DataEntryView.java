@@ -26,11 +26,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
-public interface IEventDataEntryPresenter {
-    void listDataEntryFields(String programStageSectionUid);
+import java.util.List;
 
-    void listDataEntryFieldsWithEventValues(String eventUId, String programStageSectionUid);
+public interface DataEntryView {
+    void initializeViewPager(List<ProgramStageSection> programStageSections);
+
+    void setEvent(Event event);
 }

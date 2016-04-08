@@ -28,10 +28,19 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
+import org.hisp.dhis.client.sdk.models.program.Program;
 
-import java.util.List;
+import rx.Observable;
 
-public interface IProfileView {
-    void setProfileFields(List<DataEntity> dataEntities);
+public interface SelectorView {
+    void onFinishLoading();
+
+    void onLoadingError(Throwable throwable);
+
+    void onStartLoading();
+
+    void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable);
+
+    void onPickedProgram(Observable<Program> programObservable);
 }

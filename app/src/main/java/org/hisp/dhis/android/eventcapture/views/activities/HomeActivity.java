@@ -37,8 +37,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
-import org.hisp.dhis.android.eventcapture.presenters.IHomePresenter;
 import org.hisp.dhis.android.eventcapture.model.SyncManager;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
@@ -48,17 +48,17 @@ import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
-public class HomeActivity extends AbsHomeActivity implements IHomeView {
+public class HomeActivity extends AbsHomeActivity implements HomeView {
     private static final int DRAWER_ITEM_EVENTS_ID = 34675426;
 
     // Instance fields
-    private IHomePresenter homePresenter;
+    private HomePresenter homePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        homePresenter = new HomePresenter(this);
+        homePresenter = new HomePresenterImpl(this);
         homePresenter.onCreate(savedInstanceState);
 
         addMenuItem(DRAWER_ITEM_EVENTS_ID, R.drawable.ic_add,

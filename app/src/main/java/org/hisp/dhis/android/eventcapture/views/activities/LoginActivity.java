@@ -36,20 +36,20 @@ import android.text.Editable;
 import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.ILoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 import javax.inject.Inject;
 
 
-public class LoginActivity extends AbsLoginActivity implements ILoginView {
+public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Inject
     Context applicationContext;
 
-    ILoginPresenter loginPresenter;
+    LoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,7 +60,7 @@ public class LoginActivity extends AbsLoginActivity implements ILoginView {
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
 
-        loginPresenter = new LoginPresenter(D2.logger());
+        loginPresenter = new LoginPresenterImpl(D2.logger());
     }
 
     @Override

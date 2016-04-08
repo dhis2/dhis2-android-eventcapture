@@ -26,9 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views;
 
-
-public interface ISelectorPresenter {
-    void initializeSynchronization(Boolean force);
+public interface View {
 }

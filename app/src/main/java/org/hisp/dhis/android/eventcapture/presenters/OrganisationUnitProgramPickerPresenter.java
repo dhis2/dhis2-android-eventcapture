@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.views.IOrganisationUnitProgramPickerView;
+import org.hisp.dhis.android.eventcapture.views.OrganisationUnitProgramPickerView;
 import org.hisp.dhis.android.eventcapture.views.OrganisationUnitPickable;
 import org.hisp.dhis.android.eventcapture.views.ProgramPickable;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -51,7 +51,7 @@ import rx.schedulers.Schedulers;
 import static org.hisp.dhis.client.sdk.ui.utils.Preconditions.isNull;
 
 public class OrganisationUnitProgramPickerPresenter {
-    private IOrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
+    private OrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
     private OrganisationUnitPickableMapper mOrganisationUnitPickableMapper;
     private ProgramPickableMapper mProgramPickableMapper;
     private Subscription programSubscription;
@@ -59,7 +59,7 @@ public class OrganisationUnitProgramPickerPresenter {
     private Subscription pickedOrganisationUnitSubscription;
 
 
-    public OrganisationUnitProgramPickerPresenter(IOrganisationUnitProgramPickerView pickerView) {
+    public OrganisationUnitProgramPickerPresenter(OrganisationUnitProgramPickerView pickerView) {
         mOrganisationUnitPickableMapper = new OrganisationUnitPickableMapper();
         mProgramPickableMapper = new ProgramPickableMapper();
         mOrganisationUnitProgramPickerView = pickerView;
@@ -156,7 +156,7 @@ public class OrganisationUnitProgramPickerPresenter {
 
     }
 
-    public void setOrganisationUnitProgramPickerView(IOrganisationUnitProgramPickerView
+    public void setOrganisationUnitProgramPickerView(OrganisationUnitProgramPickerView
                                                              mOrganisationUnitProgramPickerView) {
         this.mOrganisationUnitProgramPickerView = mOrganisationUnitProgramPickerView;
     }

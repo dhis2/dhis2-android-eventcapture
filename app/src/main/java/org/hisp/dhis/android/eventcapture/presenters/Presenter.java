@@ -28,10 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import android.os.Bundle;
+import org.hisp.dhis.android.eventcapture.views.View;
 
-public interface IHomePresenter {
-    void onCreate(Bundle savedInstanceState);
+public interface Presenter {
+    void attachView(View view);
 
-    void onDestroy();
+    void detachView();
 }

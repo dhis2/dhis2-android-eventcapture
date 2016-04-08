@@ -38,15 +38,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.presenters.EventDataEntryPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.EventDataEntryPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.IEventDataEntryPresenter;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
 
-public class EventDataEntryFragment extends Fragment implements IEventDataEntryView {
+public class EventDataEntryFragment extends Fragment implements EventDataEntryView {
     private RowViewAdapter rowViewAdapter;
     private static String EXTRA_SECTION_UID = "extra:SectionUid";
     private static String EXTRA_EVENT_UID = "extra:EventUid";
@@ -89,7 +89,7 @@ public class EventDataEntryFragment extends Fragment implements IEventDataEntryV
         String eventUId = getArguments().getString(EXTRA_EVENT_UID);
         String sectionUid = getArguments().getString(EXTRA_SECTION_UID);
 
-        IEventDataEntryPresenter eventDataEntryPresenter = new EventDataEntryPresenter(this);
+        EventDataEntryPresenter eventDataEntryPresenter = new EventDataEntryPresenterImpl(this);
         eventDataEntryPresenter.listDataEntryFields(sectionUid);
     }
 

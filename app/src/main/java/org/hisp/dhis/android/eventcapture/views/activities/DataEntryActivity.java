@@ -47,17 +47,17 @@ import android.widget.ImageView;
 import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.IDataEntryPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.EventDataEntryFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.IDataEntryView;
+import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
 import org.hisp.dhis.android.eventcapture.views.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.List;
 
-public class DataEntryActivity extends FragmentActivity implements IDataEntryView {
+public class DataEntryActivity extends FragmentActivity implements DataEntryView {
     private String organisationUnitUid;
     private String programUid;
     private String eventUid;
@@ -87,7 +87,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
-        IDataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
+        DataEntryPresenter dataEntryPresenter = new DataEntryPresenterImpl(this);
 
         // dataEntryPresenter.onCreate();
         dataEntryPresenter.listProgramStageSections(programUid);

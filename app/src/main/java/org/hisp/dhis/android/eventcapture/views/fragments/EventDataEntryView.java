@@ -26,9 +26,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 
-public interface IProfilePresenter {
-    void listUserAccountFields();
+import java.util.List;
+
+public interface EventDataEntryView {
+    void setDataEntryFields(List<DataEntity> dataEntities);
 }

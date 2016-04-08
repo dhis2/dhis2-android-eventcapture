@@ -26,27 +26,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import android.content.Context;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 
-/**
- * Created by Vladislav Georgiev Alfredov on 1/18/16.
- */
-public interface ISettingsPresenter {
-    void logout(Context context);
+import java.util.List;
 
-    void synchronize(Context context);
-
-    void setUpdateFrequency(Context context, int frequency);
-
-    int getUpdateFrequency(Context context);
-
-    void setBackgroundSynchronisation(Context context, Boolean enabled);
-
-    Boolean getBackgroundSynchronisation(Context context);
-
-    Boolean getCrashReports(Context context);
-
-    void setCrashReports(Context context, Boolean enabled);
+public interface ProfileView {
+    void setProfileFields(List<DataEntity> dataEntities);
 }

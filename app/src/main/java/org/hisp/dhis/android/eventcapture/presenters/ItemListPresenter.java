@@ -33,8 +33,8 @@ import android.support.v4.util.Pair;
 import android.util.Log;
 import android.view.View;
 
-import org.hisp.dhis.android.eventcapture.views.EventListRow;
-import org.hisp.dhis.android.eventcapture.views.IItemListView;
+import org.hisp.dhis.android.eventcapture.views.EventListRowImpl;
+import org.hisp.dhis.android.eventcapture.views.ItemListView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
@@ -63,11 +63,11 @@ import timber.log.Timber;
 import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
 
 public class ItemListPresenter {
-    private IItemListView itemListView;
+    private ItemListView itemListView;
     private final ItemListRowMapper itemListRowMapper;
     private CompositeSubscription subscriptions;
 
-    public ItemListPresenter(@NonNull IItemListView itemListView) {
+    public ItemListPresenter(@NonNull ItemListView itemListView) {
         this.itemListView = itemListView;
         this.itemListRowMapper = new ItemListRowMapper();
         this.subscriptions = new CompositeSubscription();
@@ -190,7 +190,7 @@ public class ItemListPresenter {
 
 
             List<TrackedEntityDataValue> trackedEntityDataValues = event.getDataValues();
-            EventListRow itemListRow = null;
+            EventListRowImpl itemListRow = null;
 //        new ItemListRow(event, event.getTrackedEntityDataValues(), event.getStatus());
 
 
@@ -216,14 +216,14 @@ public class ItemListPresenter {
             }
 
 
-            return EventListRow.create(event, valuePos, event.getStatus().name());
+            return EventListRowImpl.create(event, valuePos, event.getStatus().name());
 
         }
 
         public ItemListRow transformToEventListRow(Program program, Event event) {
 
 
-            EventListRow eventListRow = EventListRow.create(event,
+            EventListRowImpl eventListRow = EventListRowImpl.create(event,
                     new ArrayList<Pair<String, Integer>>(), event.getStatus().name());
             return eventListRow;
         }
@@ -235,7 +235,7 @@ public class ItemListPresenter {
             itemListRow1Values.add(new Pair<>("Erling", 1));
             itemListRow1Values.add(new Pair<>("Fjelstad", 2));
             itemListRow1Values.add(new Pair<>("Mann", 3));
-            ItemListRow itemListRow1 = EventListRow.create(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
+            ItemListRow itemListRow1 = EventListRowImpl.create(event1, itemListRow1Values, EItemListRowStatus.OFFLINE.toString());
 
             Event event2 = new Event();
             event2.setUId("002");
@@ -244,7 +244,7 @@ public class ItemListPresenter {
             itemListRow2Values.add(new Pair<>("R", 1));
             itemListRow2Values.add(new Pair<>("Russnes", 2));
             itemListRow2Values.add(new Pair<>("Mann", 3));
-            ItemListRow itemListRow2 = EventListRow.create(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
+            ItemListRow itemListRow2 = EventListRowImpl.create(event2, itemListRow2Values, EItemListRowStatus.SENT.toString());
 
             Event event3 = new Event();
             event3.setUId("003");
@@ -253,7 +253,7 @@ public class ItemListPresenter {
             itemListRow3Values.add(new Pair<>("AB", 1));
             itemListRow3Values.add(new Pair<>("Abishov", 2));
             itemListRow3Values.add(new Pair<>("Man", 3));
-            ItemListRow itemListRow3 = EventListRow.create(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
+            ItemListRow itemListRow3 = EventListRowImpl.create(event3, itemListRow3Values, EItemListRowStatus.ERROR.toString());
             View.OnClickListener onClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

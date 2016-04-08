@@ -30,63 +30,8 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import android.os.Bundle;
 
-import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
-import org.hisp.dhis.android.eventcapture.views.activities.IHomeView;
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.models.user.UserAccount;
+public interface HomePresenter {
+    void onCreate(Bundle savedInstanceState);
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
-
-import static android.text.TextUtils.isEmpty;
-import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
-
-public class HomePresenter implements IHomePresenter, Action1<UserAccount> {
-    private final IHomeView homeView;
-    private Subscription subscription;
-
-    public HomePresenter(IHomeView homeView) {
-        this.homeView = isNull(homeView, "IHomeView must not be null");
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        subscription = D2.me().account()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this);
-
-        //init the user account for synchronization:
-        AppAccountManager.getInstance().createAccount(homeView.getContext(),
-                D2.me().userCredentials().toBlocking().first().getUsername());
-    }
-
-    @Override
-    public void onDestroy() {
-        if (subscription != null && !subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-        }
-        subscription = null;
-    }
-
-    @Override
-    public void call(UserAccount userAccount) {
-        String name = "";
-        if (!isEmpty(userAccount.getFirstName()) && !isEmpty(userAccount.getSurname())) {
-            name = String.valueOf(userAccount.getFirstName().charAt(0)) +
-                    String.valueOf(userAccount.getSurname().charAt(0));
-        } else if (userAccount.getDisplayName() != null &&
-                userAccount.getDisplayName().length() > 1) {
-            name = String.valueOf(userAccount.getDisplayName().charAt(0)) +
-                    String.valueOf(userAccount.getDisplayName().charAt(1));
-        }
-
-        homeView.setUsername(userAccount.getDisplayName());
-        homeView.setUserInfo(userAccount.getEmail());
-        homeView.setUserLetter(name);
-    }
-
-
+    void onDestroy();
 }

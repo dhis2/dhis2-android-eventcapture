@@ -26,12 +26,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views.activities;
 
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
 
-import java.util.List;
+public interface OnLoginFinishedListener {
+    void onServerError(String message);
 
-public interface IEventDataEntryView {
-    void setDataEntryFields(List<DataEntity> dataEntities);
+    void onUnexpectedError(String message);
+
+    void onInvalidCredentialsError();
+
+    void onSuccess();
 }

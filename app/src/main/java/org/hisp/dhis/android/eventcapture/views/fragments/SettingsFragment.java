@@ -33,16 +33,16 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
-import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 
 public class SettingsFragment extends AbsSettingsFragment {
-    SettingsPresenter mSettingsPresenter;
+    SettingsPresenterImpl mSettingsPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSettingsPresenter = new SettingsPresenter(this);
+        mSettingsPresenter = new SettingsPresenterImpl(this);
         mSettingsPresenter.setSettingsFragment(this);
     }
 

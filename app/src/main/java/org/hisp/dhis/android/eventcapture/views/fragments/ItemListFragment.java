@@ -46,8 +46,8 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
 import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
 import org.hisp.dhis.android.eventcapture.RxBus;
-import org.hisp.dhis.android.eventcapture.views.EventListRow;
-import org.hisp.dhis.android.eventcapture.views.IItemListView;
+import org.hisp.dhis.android.eventcapture.views.EventListRowImpl;
+import org.hisp.dhis.android.eventcapture.views.ItemListView;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -61,7 +61,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 
-public class ItemListFragment extends Fragment implements IItemListView, View.OnClickListener {
+public class ItemListFragment extends Fragment implements ItemListView, View.OnClickListener {
     public static final String TAG = ItemListFragment.class.getSimpleName();
     public static final String ORG_UNIT_UID = "extra:orgUnitUId";
     public static final String PROGRAM_UID = "extra:ProgramUId";
@@ -153,8 +153,8 @@ public class ItemListFragment extends Fragment implements IItemListView, View.On
             recyclerView.setAdapter(itemListRowAdapter);
 
             for (ItemListRow itemListRow : itemListRowCollection) {
-                if(itemListRow instanceof EventListRow) {
-                    final EventListRow eventListRow = (EventListRow) itemListRow;
+                if(itemListRow instanceof EventListRowImpl) {
+                    final EventListRowImpl eventListRow = (EventListRowImpl) itemListRow;
 
                     eventListRow.setOnRowClickListener(new View.OnClickListener() {
                         @Override

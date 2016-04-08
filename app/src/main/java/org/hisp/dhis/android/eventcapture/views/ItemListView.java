@@ -5,7 +5,7 @@ import org.hisp.dhis.client.sdk.ui.views.itemlistrowview.ItemListRow;
 
 import java.util.List;
 
-public interface IItemListView {
+public interface ItemListView {
 
     /**
      * Render itemrowlist in the UI.

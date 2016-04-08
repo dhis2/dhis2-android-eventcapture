@@ -4,7 +4,7 @@ import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
 
 import java.util.List;
 
-public interface IOrganisationUnitProgramPickerView {
+public interface OrganisationUnitProgramPickerView {
 
     void renderOrganisationUnitPickables(List<Pickable> organisationUnitPickables);
 
