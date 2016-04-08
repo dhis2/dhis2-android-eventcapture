@@ -28,60 +28,24 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.app.Application;
-import android.content.Context;
-import android.support.multidex.MultiDex;
+import rx.Observable;
+import rx.subjects.PublishSubject;
+import rx.subjects.SerializedSubject;
+import rx.subjects.Subject;
 
-import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
+public class RxBus {
 
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.android.api.utils.Logger;
+    private final Subject<Object, Object> bus = new SerializedSubject<>(PublishSubject.create());
 
-import okhttp3.OkHttpClient;
-import timber.log.Timber;
-
-public final class EventCaptureApp extends Application {
-    private RxBus rxBus = null;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        Timber.plant(new Timber.DebugTree());
-
-        Stetho.initializeWithDefaults(this);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addNetworkInterceptor(new StethoInterceptor())
-                .build();
-
-        D2.Flavor flavor = new D2.Builder()
-                .okHttp(okHttpClient)
-                .logger(new Logger())
-                .build();
-
-        D2.init(this, flavor);
-
-        //init rxBus
-        rxBus = new RxBus();
-
-        // TODO Add LeakCanary support
-        // TODO Start writing unit tests for application
-        // TODO implement debug navigation drawer
-        // TODO integrate DI library.
+    public void send(Object o) {
+        bus.onNext(o);
     }
 
-    public RxBus getRxBusSingleton() {
-        if (rxBus == null) {
-            rxBus = new RxBus();
-        }
-        return rxBus;
+    public Observable<Object> toObserverable() {
+        return bus;
     }
 
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MultiDex.install(this);
+    public boolean hasObservers() {
+        return bus.hasObservers();
     }
 }

@@ -41,20 +41,20 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme.Base">
 
-        <activity android:name=".activities.LauncherActivity">
+        <activity android:name=".views.activities.LauncherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".activities.login.LoginActivity" />
-        <activity android:name=".activities.home.HomeActivity" />
-        <activity android:name=".activities.home.DetailsActivity" />
-        <activity android:name=".fragments.dataentry.DataEntryActivity" />
+        <activity android:name=".views.activities.LoginActivity" />
+        <activity android:name=".views.activities.HomeActivity" />
+        <activity android:name=".views.activities.DetailsActivity" />
+        <activity android:name=".views.activities.DataEntryActivity" />
 
         <!-- stub Authenticator service -->
-        <service android:name=".datasync.AuthenticatorService">
+        <service android:name=".model.AuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -66,15 +66,15 @@
 
         <!-- stub provider: -->
         <provider
-            android:name=".datasync.StubProvider"
-            android:authorities="org.hisp.dhis.android.eventcapture.datasync.provider"
+            android:name=".model.StubProvider"
+            android:authorities="org.hisp.dhis.android.eventcapture.model.provider"
             android:exported="false"
             android:label="provider"
             android:syncable="true" />
 
         <!-- Sync service : -->
         <service
-            android:name=".datasync.SyncService"
+            android:name=".model.SyncService"
             android:exported="true">
 
             <intent-filter>
