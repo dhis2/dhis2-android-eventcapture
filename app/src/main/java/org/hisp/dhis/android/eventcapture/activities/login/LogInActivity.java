@@ -39,19 +39,18 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 
-public class LoginActivity extends AbsLoginActivity implements ILoginView {
-    private ILoginPresenter loginPresenter;
+public class LogInActivity extends AbsLoginActivity implements ILogInView {
+    private ILogInPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // gradle magic for debug builds
         getServerUrl().setText(BuildConfig.SERVER_URL);
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
 
-        loginPresenter = new LoginPresenter(this, D2.logger());
+        loginPresenter = new LogInPresenter(this, D2.logger());
     }
 
 //    @Override

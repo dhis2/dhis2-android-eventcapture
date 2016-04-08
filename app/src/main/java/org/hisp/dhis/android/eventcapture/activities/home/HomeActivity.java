@@ -37,7 +37,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.activities.login.LoginActivity;
+import org.hisp.dhis.android.eventcapture.activities.login.LogInActivity;
 import org.hisp.dhis.android.eventcapture.datasync.SyncManager;
 import org.hisp.dhis.android.eventcapture.fragments.profile.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.fragments.selector.SelectorFragment;
@@ -104,7 +104,7 @@ public class HomeActivity extends AbsHomeActivity implements IHomeView {
                 break;
             }
             case R.id.drawer_item_settings: {
-                LoginActivity.navigateTo(this, LoginActivity.class,
+                LogInActivity.navigateTo(this, LogInActivity.class,
                         D2.configuration().toBlocking().first().getServerUrl(),
                         D2.me().userCredentials().toBlocking().first().getUsername());
                 break;
