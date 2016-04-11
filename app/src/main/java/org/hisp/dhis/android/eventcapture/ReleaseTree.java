@@ -28,70 +28,44 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.core.common.Logger;
+import com.crashlytics.android.Crashlytics;
 
-import javax.inject.Singleton;
-
-import dagger.Module;
-import dagger.Provides;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
+import io.fabric.sdk.android.Fabric;
 import timber.log.Timber;
 
-@Module
-public class AppModule {
-    private final Application application;
+public class ReleaseTree extends Timber.Tree {
 
-    public AppModule(Application application) {
-        this.application = application;
+    public ReleaseTree(Context context) {
+        Fabric.with(context, new Crashlytics());
     }
 
-    @Provides
-    @Singleton
-    public Context provideContext() {
-        return application;
-    }
-
-    @Provides
-    @Singleton
-    public Timber.Tree provideTimberTree(Context context) {
-        if (BuildConfig.DEBUG) {
-            return new Timber.DebugTree();
+    @Override
+    protected boolean isLoggable(int priority) {
+        if (priority == Log.VERBOSE || priority == Log.DEBUG || priority == Log.INFO) {
+            return false;
         }
 
-        return new ReleaseTree(context);
+        return true;
     }
 
-    @Provides
-    @Singleton
-    public Logger provideLogger(Timber.Tree tree) {
-        return new LoggerImpl(tree);
-    }
+    @Override
+    protected void log(int priority, String tag, String message, Throwable throwable) {
+        if (isLoggable(priority)) {
+            if (throwable == null) {
+                return;
+            }
 
-    @Provides
-    @Singleton
-    public OkHttpClient providesOkHttpClient() {
-        if (BuildConfig.DEBUG) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            if (priority == Log.ERROR) {
+                Fabric.getLogger().e(tag, message, throwable);
+                return;
+            }
 
-            return new OkHttpClient.Builder()
-                    .addInterceptor(loggingInterceptor)
-                    .build();
+            if (priority == Log.WARN) {
+                Fabric.getLogger().w(tag, message, throwable);
+            }
         }
-
-        return new OkHttpClient();
-    }
-
-    @Provides
-    public D2.Flavor provideD2Flavor(OkHttpClient okHttpClient, Logger logger) {
-        return new D2.Builder()
-                .okHttp(okHttpClient)
-                .logger(logger)
-                .build();
     }
 }

@@ -114,6 +114,7 @@ dependencies {
 
     // Square/Jake Wharton
     compile "com.jakewharton.timber:timber:${libs.timberVersion}"
+    compile "com.squareup.okhttp3:logging-interceptor:${libs.okhttpVersion}"
 
     // Fabric
     compile("com.crashlytics.sdk.android:crashlytics:${libs.crashlyticsVersion}@aar") {

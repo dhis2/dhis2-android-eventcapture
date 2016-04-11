@@ -42,7 +42,6 @@ import timber.log.Timber;
 
 public final class EventCaptureApp extends Application {
     private AppComponent appComponent;
-
     private RxBus rxBus = null;
 
     @Override
@@ -52,6 +51,7 @@ public final class EventCaptureApp extends Application {
         appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
+        appComponent.inject(this);
 
         Timber.plant(new Timber.DebugTree());
 
@@ -74,7 +74,6 @@ public final class EventCaptureApp extends Application {
         // TODO Add LeakCanary support
         // TODO Start writing unit tests for application
         // TODO implement debug navigation drawer
-        // TODO integrate DI library.
     }
 
     @Override
@@ -91,6 +90,7 @@ public final class EventCaptureApp extends Application {
         if (rxBus == null) {
             rxBus = new RxBus();
         }
+
         return rxBus;
     }
 }
