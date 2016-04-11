@@ -33,7 +33,7 @@ import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
+import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 import org.hisp.dhis.client.sdk.core.common.Logger;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 
@@ -57,7 +57,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    public UserAccountScope providesUserAccountScope() {
+    public UserAccountInteractor providesUserAccountInteractor() {
         if (D2.isConfigured()) {
             return D2.me();
         }
@@ -66,13 +66,14 @@ public class UserModule {
     }
 
     @Provides
-    public LauncherPresenter providesLauncherPresenter(@Nullable UserAccountScope accountScope) {
-        return new LauncherPresenterImpl(accountScope);
+    public LauncherPresenter providesLauncherPresenter(
+            @Nullable UserAccountInteractor accountInteractor) {
+        return new LauncherPresenterImpl(accountInteractor);
     }
 
     @Provides
     public LoginPresenter providesLoginPresenter(
-            @Nullable UserAccountScope accountScope, Logger logger) {
-        return new LoginPresenterImpl(accountScope, logger);
+            @Nullable UserAccountInteractor accountInteractor, Logger logger) {
+        return new LoginPresenterImpl(accountInteractor, logger);
     }
 }

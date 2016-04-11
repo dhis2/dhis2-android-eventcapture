@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.OnLoginFinishedListener;
-import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
+import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 import org.hisp.dhis.client.sdk.core.common.Logger;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
@@ -48,12 +48,12 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     CompositeSubscription subscription;
     LoginView loginView;
 
-    UserAccountScope userAccountScope;
+    UserAccountInteractor userAccountInteractor;
     Logger logger;
 
-    public LoginPresenterImpl(UserAccountScope userAccountScope, Logger logger) {
+    public LoginPresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
         this.subscription = new CompositeSubscription();
-        this.userAccountScope = userAccountScope;
+        this.userAccountInteractor = userAccountInteractor;
         this.logger = logger;
     }
 
@@ -61,7 +61,8 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     public void attachView(View view) {
         loginView = (LoginView) view;
 
-        if (userAccountScope != null && userAccountScope.isSignedIn().toBlocking().first()) {
+        if (userAccountInteractor != null &&
+                userAccountInteractor.isSignedIn().toBlocking().first()) {
             onSuccess();
         }
     }
@@ -80,7 +81,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
             final String serverUrl, final String username, final String password) {
 
         loginView.showProgress();
-        subscription.add(userAccountScope.signIn(username, password)
+        subscription.add(userAccountInteractor.signIn(username, password)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<UserAccount>() {

@@ -29,22 +29,22 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
+import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 
 public class LauncherPresenterImpl implements LauncherPresenter {
 
-    UserAccountScope userAccountScope;
+    UserAccountInteractor userAccountInteractor;
 
     LauncherView launcherView;
 
-    public LauncherPresenterImpl(UserAccountScope userAccountScope) {
-        this.userAccountScope = userAccountScope;
+    public LauncherPresenterImpl(UserAccountInteractor userAccountInteractor) {
+        this.userAccountInteractor = userAccountInteractor;
     }
 
     @Override
     public void checkIfUserIsLoggedIn() {
-        if (userAccountScope != null &&
-                userAccountScope.isSignedIn().toBlocking().first()) {
+        if (userAccountInteractor != null &&
+                userAccountInteractor.isSignedIn().toBlocking().first()) {
             launcherView.navigateToHome();
         } else {
             launcherView.navigateToLogin();
