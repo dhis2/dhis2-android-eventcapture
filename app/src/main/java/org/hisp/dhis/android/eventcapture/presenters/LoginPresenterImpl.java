@@ -43,17 +43,16 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-// TODO create new module for utilities (commons)
+
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
+    UserAccountInteractor userAccountInteractor;
     CompositeSubscription subscription;
     LoginView loginView;
-
-    UserAccountInteractor userAccountInteractor;
     Logger logger;
 
     public LoginPresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
-        this.subscription = new CompositeSubscription();
         this.userAccountInteractor = userAccountInteractor;
+        this.subscription = new CompositeSubscription();
         this.logger = logger;
     }
 
@@ -71,9 +70,9 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     public void detachView() {
         loginView = null;
 
-        if (subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-        }
+//        if (!subscription.isUnsubscribed()) {
+//            subscription.unsubscribe();
+//        }
     }
 
     @Override

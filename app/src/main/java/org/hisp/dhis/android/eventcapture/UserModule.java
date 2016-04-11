@@ -57,6 +57,7 @@ public class UserModule {
 
     @Provides
     @Nullable
+    @UserScope
     public UserAccountInteractor providesUserAccountInteractor() {
         if (D2.isConfigured()) {
             return D2.me();
@@ -66,12 +67,14 @@ public class UserModule {
     }
 
     @Provides
+    @UserScope
     public LauncherPresenter providesLauncherPresenter(
             @Nullable UserAccountInteractor accountInteractor) {
         return new LauncherPresenterImpl(accountInteractor);
     }
 
     @Provides
+    @UserScope
     public LoginPresenter providesLoginPresenter(
             @Nullable UserAccountInteractor accountInteractor, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, logger);
