@@ -28,18 +28,28 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-
 import javax.inject.Singleton;
 
 import dagger.Component;
 
 @Singleton
-@Component(modules = {
-        AppModule.class
-})
+@Component(
+        modules = {
+                AppModule.class
+        }
+)
 public interface AppComponent {
-    void inject(EventCaptureApp target);
 
-    void inject(LoginActivity loginActivity);
+    //------------------------------------------------------------------------
+    // Sub-modules
+    //------------------------------------------------------------------------
+
+    UserComponent plus(UserModule userModule);
+
+
+    //------------------------------------------------------------------------
+    // Injection targets
+    //------------------------------------------------------------------------
+
+    void inject(EventCaptureApp app);
 }

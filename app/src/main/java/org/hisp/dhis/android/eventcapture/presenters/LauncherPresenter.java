@@ -26,49 +26,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views.activities;
+package org.hisp.dhis.android.eventcapture.presenters;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
-
-import org.hisp.dhis.android.eventcapture.EventCaptureApp;
-import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.LauncherView;
-
-import javax.inject.Inject;
-
-public class LauncherActivity extends AppCompatActivity implements LauncherView {
-
-    @Inject
-    LauncherPresenter launcherPresenter;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_launcher);
-
-        // injecting dependencies
-        ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
-
-        launcherPresenter.attachView(this);
-        launcherPresenter.checkIfUserIsLoggedIn();
-    }
-
-    @Override
-    public void navigateToLogin() {
-        navigateTo(new Intent(this, LoginActivity.class));
-    }
-
-    @Override
-    public void navigateToHome() {
-        navigateTo(new Intent(this, HomeActivity.class));
-    }
-
-    private void navigateTo(Intent intent) {
-        ActivityCompat.startActivity(this, intent, null);
-        finish();
-    }
+public interface LauncherPresenter extends Presenter {
+    void checkIfUserIsLoggedIn();
 }

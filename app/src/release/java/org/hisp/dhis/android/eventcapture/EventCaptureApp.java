@@ -4,7 +4,6 @@ import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
 
-import org.hisp.dhis.android.eventcapture.utils.ReleaseTree;
 import org.hisp.dhis.client.sdk.android.common.D2;
 
 import io.fabric.sdk.android.Fabric;

@@ -29,7 +29,6 @@
 package org.hisp.dhis.android.eventcapture.views.activities;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 
@@ -37,8 +36,6 @@ import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 import javax.inject.Inject;
@@ -47,32 +44,37 @@ import javax.inject.Inject;
 public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Inject
-    Context applicationContext;
-
     LoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ((EventCaptureApp) getApplication()).getComponent().inject(this);
+
+        ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
 
         getServerUrl().setText(BuildConfig.SERVER_URL);
         getUsername().setText(BuildConfig.USERNAME);
         getPassword().setText(BuildConfig.PASSWORD);
-
-        loginPresenter = new LoginPresenterImpl(D2.logger());
     }
 
     @Override
     protected void onResume() {
-        loginPresenter.attachView(this);
-
         super.onResume();
-    }
 
+        loginPresenter.attachView(this);
+    }
 
     @Override
     protected void onLoginButtonClicked(Editable server, Editable username, Editable password) {
+        String serverUrl = server.toString();
+
+        ((EventCaptureApp) getApplication()).createUserComponent(serverUrl);
+        ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
+
+        // since we have re-instantiated LoginPresenter, we
+        // also have to re-attach view to it
+        loginPresenter.attachView(this);
+
         loginPresenter.validateCredentials(
                 server.toString(), username.toString(), password.toString());
     }

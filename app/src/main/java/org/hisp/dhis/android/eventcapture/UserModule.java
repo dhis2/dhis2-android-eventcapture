@@ -28,79 +28,51 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.app.Application;
-import android.content.Context;
-import android.util.Log;
-
+import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
+import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
 import org.hisp.dhis.client.sdk.core.common.Logger;
+import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.annotation.Nullable;
 
 import dagger.Module;
 import dagger.Provides;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import timber.log.Timber;
 
 @Module
-public class AppModule {
-    private final Application application;
+public class UserModule {
 
-    public AppModule(Application application) {
-        this.application = application;
+    public UserModule() {
+        // in cases when we already configured D2
+    }
+
+    public UserModule(String serverUrl) {
+        // it can throw exception in case if configuration has failed
+        Configuration configuration = new Configuration(serverUrl);
+        D2.configure(configuration).toBlocking().first();
     }
 
     @Provides
-    @Singleton
-    public Context provideContext() {
-        return application;
-    }
-
-    @Provides
-    @Singleton
-    public Timber.Tree provideTimberTree() {
-        if (BuildConfig.DEBUG) {
-            return new Timber.DebugTree();
+    @Nullable
+    public UserAccountScope providesUserAccountScope() {
+        if (D2.isConfigured()) {
+            return D2.me();
         }
 
-        return new ReleaseTree();
+        return null;
     }
 
     @Provides
-    @Singleton
-    public Logger provideLogger(Timber.Tree tree) {
-        return new LoggerImpl(tree);
+    public LauncherPresenter providesLauncherPresenter(@Nullable UserAccountScope accountScope) {
+        return new LauncherPresenterImpl(accountScope);
     }
 
     @Provides
-    @Singleton
-    public OkHttpClient providesOkHttpClient() {
-        if (BuildConfig.DEBUG) {
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-
-            return new OkHttpClient.Builder()
-                    .addInterceptor(loggingInterceptor)
-                    .build();
-        }
-
-        return new OkHttpClient();
-    }
-
-    @Provides
-    @Singleton
-    public D2.Flavor providesFlavor(OkHttpClient okHttpClient, Logger logger) {
-        return new D2.Builder()
-                .okHttp(okHttpClient)
-                .logger(logger)
-                .build();
-    }
-
-    @Inject
-    public void initD2(Context context, D2.Flavor flavor) {
-        Log.e("MODULE", "INSTANTIATING D2");
-        D2.init(context, flavor);
+    public LoginPresenter providesLoginPresenter(
+            @Nullable UserAccountScope accountScope, Logger logger) {
+        return new LoginPresenterImpl(accountScope, logger);
     }
 }

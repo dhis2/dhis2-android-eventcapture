@@ -31,39 +31,37 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.OnLoginFinishedListener;
-import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
 import org.hisp.dhis.client.sdk.core.common.Logger;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
-import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 
 import java.net.HttpURLConnection;
 
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 // TODO create new module for utilities (commons)
-// TODO dagger integration
-// TODO revise MVP/PassiveView/SupervisorController patterns
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
     CompositeSubscription subscription;
     LoginView loginView;
+
+    UserAccountScope userAccountScope;
     Logger logger;
 
-    public LoginPresenterImpl(Logger logger) {
-        this.logger = logger;
+    public LoginPresenterImpl(UserAccountScope userAccountScope, Logger logger) {
         this.subscription = new CompositeSubscription();
+        this.userAccountScope = userAccountScope;
+        this.logger = logger;
     }
 
     @Override
     public void attachView(View view) {
         loginView = (LoginView) view;
 
-        if (D2.isConfigured() && D2.me().isSignedIn().toBlocking().first()) {
+        if (userAccountScope != null && userAccountScope.isSignedIn().toBlocking().first()) {
             onSuccess();
         }
     }
@@ -82,28 +80,21 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
             final String serverUrl, final String username, final String password) {
 
         loginView.showProgress();
-        subscription.add(
-                D2.configure(new Configuration(serverUrl))
-                        .flatMap(new Func1<Void, Observable<UserAccount>>() {
-                            @Override
-                            public Observable<UserAccount> call(Void aVoid) {
-                                return D2.me().signIn(username, password);
-                            }
-                        })
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<UserAccount>() {
-                            @Override
-                            public void call(UserAccount userAccount) {
-                                onSuccess();
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {
-                                throwable.printStackTrace();
-                                handleError(throwable);
-                            }
-                        }));
+        subscription.add(userAccountScope.signIn(username, password)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<UserAccount>() {
+                    @Override
+                    public void call(UserAccount userAccount) {
+                        onSuccess();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                        handleError(throwable);
+                    }
+                }));
     }
 
     @Override
@@ -147,6 +138,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
                     break;
                 case HTTP: {
                     if (apiException.getResponse() != null) {
+                        System.out.println("STATUS: " + apiException.getResponse().getStatus());
                         switch (apiException.getResponse().getStatus()) {
                             case HttpURLConnection.HTTP_UNAUTHORIZED: {
                                 onInvalidCredentialsError();

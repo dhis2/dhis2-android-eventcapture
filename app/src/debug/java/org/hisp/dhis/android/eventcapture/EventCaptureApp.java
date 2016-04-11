@@ -33,57 +33,67 @@ import android.content.Context;
 import android.support.multidex.MultiDex;
 
 import com.facebook.stetho.Stetho;
-import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import org.hisp.dhis.client.sdk.android.api.D2;
 
-import okhttp3.OkHttpClient;
-import timber.log.Timber;
+import javax.inject.Inject;
 
 public final class EventCaptureApp extends Application {
-    private AppComponent appComponent;
-    private RxBus rxBus = null;
+
+    @Inject
+    D2.Flavor flavor;
+
+    AppComponent appComponent;
+
+    UserComponent userComponent;
+
+    RxBus rxBus;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
+        // Global dependency graph
         appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
+
+        // injecting dependencies
         appComponent.inject(this);
 
-        Timber.plant(new Timber.DebugTree());
-
+        // initializing stetho
         Stetho.initializeWithDefaults(this);
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addNetworkInterceptor(new StethoInterceptor())
-                .build();
-
-        D2.Flavor flavor = new D2.Builder()
-                .okHttp(okHttpClient)
-                .logger(new LoggerImpl(new Timber.DebugTree()))
-                .build();
-
         D2.init(this, flavor);
+
+        // adding UserComponent to global dependency graph
+        userComponent = appComponent.plus(new UserModule());
 
         //init rxBus
         rxBus = new RxBus();
 
         // TODO Add LeakCanary support
-        // TODO Start writing unit tests for application
         // TODO implement debug navigation drawer
     }
 
     @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
+    protected void attachBaseContext(Context baseContext) {
+        super.attachBaseContext(baseContext);
+
+        // TODO we should reduce amount of methods
         MultiDex.install(this);
     }
 
-    public AppComponent getComponent() {
+    public UserComponent createUserComponent(String serverUrl) {
+        userComponent = appComponent.plus(new UserModule(serverUrl));
+        return userComponent;
+    }
+
+    public AppComponent getAppComponent() {
         return appComponent;
+    }
+
+    public UserComponent getUserComponent() {
+        return userComponent;
     }
 
     public RxBus getRxBusSingleton() {

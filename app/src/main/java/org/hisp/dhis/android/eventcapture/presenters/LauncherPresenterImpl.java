@@ -26,55 +26,38 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture;
+package org.hisp.dhis.android.eventcapture.presenters;
 
-import android.util.Log;
+import org.hisp.dhis.android.eventcapture.views.View;
+import org.hisp.dhis.client.sdk.android.user.UserAccountScope;
 
-import timber.log.Timber;
+public class LauncherPresenterImpl implements LauncherPresenter {
 
-public class ReleaseTree extends Timber.Tree {
-    private static final int MAX_LOG_LENGTH = 4000;
+    UserAccountScope userAccountScope;
 
-    public ReleaseTree() {
-        // explicit empty constructor
+    LauncherView launcherView;
+
+    public LauncherPresenterImpl(UserAccountScope userAccountScope) {
+        this.userAccountScope = userAccountScope;
     }
 
     @Override
-    protected boolean isLoggable(int priority) {
-        if (priority == Log.VERBOSE || priority == Log.DEBUG || priority == Log.INFO) {
-            return false;
+    public void checkIfUserIsLoggedIn() {
+        if (userAccountScope != null &&
+                userAccountScope.isSignedIn().toBlocking().first()) {
+            launcherView.navigateToHome();
+        } else {
+            launcherView.navigateToLogin();
         }
-
-        return true;
     }
 
     @Override
-    protected void log(int priority, String tag, String message, Throwable t) {
-        if (isLoggable(priority)) {
-            if (message.length() < MAX_LOG_LENGTH) {
-                if (priority == Log.ASSERT) {
-                    Log.wtf(tag, message);
-                } else {
-                    Log.println(priority, tag, message);
-                }
-                return;
-            }
+    public void attachView(View view) {
+        launcherView = (LauncherView) view;
+    }
 
-            // Split by line, then ensure each line can fit into Log's maximum length.
-            for (int i = 0, length = message.length(); i < length; i++) {
-                int newline = message.indexOf('\n', i);
-                newline = newline != -1 ? newline : length;
-                do {
-                    int end = Math.min(newline, i + MAX_LOG_LENGTH);
-                    String part = message.substring(i, end);
-                    if (priority == Log.ASSERT) {
-                        Log.wtf(tag, part);
-                    } else {
-                        Log.println(priority, tag, part);
-                    }
-                    i = end;
-                } while (i < newline);
-            }
-        }
+    @Override
+    public void detachView() {
+        launcherView = null;
     }
 }

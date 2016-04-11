@@ -28,53 +28,24 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.util.Log;
+import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
+import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 
-import timber.log.Timber;
+import dagger.Subcomponent;
 
-public class ReleaseTree extends Timber.Tree {
-    private static final int MAX_LOG_LENGTH = 4000;
-
-    public ReleaseTree() {
-        // explicit empty constructor
-    }
-
-    @Override
-    protected boolean isLoggable(int priority) {
-        if (priority == Log.VERBOSE || priority == Log.DEBUG || priority == Log.INFO) {
-            return false;
+@UserScope
+@Subcomponent(
+        modules = {
+                UserModule.class
         }
+)
+public interface UserComponent {
 
-        return true;
-    }
+    //------------------------------------------------------------------------
+    // Injection targets
+    //------------------------------------------------------------------------
 
-    @Override
-    protected void log(int priority, String tag, String message, Throwable t) {
-        if (isLoggable(priority)) {
-            if (message.length() < MAX_LOG_LENGTH) {
-                if (priority == Log.ASSERT) {
-                    Log.wtf(tag, message);
-                } else {
-                    Log.println(priority, tag, message);
-                }
-                return;
-            }
+    void inject(LauncherActivity launcherActivity);
 
-            // Split by line, then ensure each line can fit into Log's maximum length.
-            for (int i = 0, length = message.length(); i < length; i++) {
-                int newline = message.indexOf('\n', i);
-                newline = newline != -1 ? newline : length;
-                do {
-                    int end = Math.min(newline, i + MAX_LOG_LENGTH);
-                    String part = message.substring(i, end);
-                    if (priority == Log.ASSERT) {
-                        Log.wtf(tag, part);
-                    } else {
-                        Log.println(priority, tag, part);
-                    }
-                    i = end;
-                } while (i < newline);
-            }
-        }
-    }
+    void inject(LoginActivity loginActivity);
 }
