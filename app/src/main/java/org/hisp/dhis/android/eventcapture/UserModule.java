@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
+import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
@@ -78,5 +80,12 @@ public class UserModule {
     public LoginPresenter providesLoginPresenter(
             @Nullable UserAccountInteractor accountInteractor, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, logger);
+    }
+
+    @Provides
+    @UserScope
+    public HomePresenter providesHomerPresenter(
+            @Nullable UserAccountInteractor accountInteractor, Logger logger) {
+        return new HomePresenterImpl(accountInteractor, logger);
     }
 }

@@ -28,51 +28,65 @@
 
 package org.hisp.dhis.android.eventcapture.views.activities;
 
-import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
-import org.hisp.dhis.android.eventcapture.model.SyncManager;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
+import javax.inject.Inject;
+
 public class HomeActivity extends AbsHomeActivity implements HomeView {
+
+    @IdRes
     private static final int DRAWER_ITEM_EVENTS_ID = 34675426;
 
-    // Instance fields
-    private HomePresenter homePresenter;
+    @Inject
+    HomePresenter homePresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        homePresenter = new HomePresenterImpl(this);
-        homePresenter.onCreate(savedInstanceState);
+        // injecting dependencies
+        ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
 
-        addMenuItem(DRAWER_ITEM_EVENTS_ID, R.drawable.ic_add,
-                R.string.drawer_item_events);
-        setSynchronizedMessage("Never");
+        // setSynchronizedMessage("Never");
 
-//        onNavigationItemSelected(getNavigationView()
-//                .getMenu().findItem(R.id.drawer_selector));
+        addMenuItem(DRAWER_ITEM_EVENTS_ID, R.drawable.ic_add, R.string.drawer_item_events);
+        // getNavigationView().setCheckedItem(DRAWER_ITEM_EVENTS_ID);
+        onNavigationItemSelected(getNavigationView().getMenu().findItem(DRAWER_ITEM_EVENTS_ID));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        homePresenter.attachView(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        homePresenter.detachView();
     }
 
     @Override
     public void onDrawerOpened(View drawerView) {
         super.onDrawerOpened(drawerView);
-        setSynchronizedMessage(SyncManager.getInstance().getLastSyncedString());
+
+        // setSynchronizedMessage(SyncManager.getInstance().getLastSyncedString());
     }
 
     @NonNull
@@ -90,24 +104,11 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        homePresenter.onDestroy();
-    }
-
-    @Override
     protected boolean onItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case DRAWER_ITEM_EVENTS_ID: {
-                attachFragmentDelayed(WrapperFragment.newInstance(SelectorFragment.class,
+                attachFragment(WrapperFragment.newInstance(SelectorFragment.class,
                         getString(R.string.drawer_item_events)));
-                break;
-            }
-            case R.id.drawer_item_settings: {
-                LoginActivity.navigateTo(this, LoginActivity.class,
-                        D2.configuration().toBlocking().first().getServerUrl(),
-                        D2.me().userCredentials().toBlocking().first().getUsername());
                 break;
             }
         }
@@ -140,10 +141,5 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
             }
         }
         return super.dispatchTouchEvent(event);
-    }
-
-    @Override
-    public Context getContext() {
-        return getApplicationContext();
     }
 }

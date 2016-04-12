@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 
@@ -48,4 +49,6 @@ public interface UserComponent {
     void inject(LauncherActivity launcherActivity);
 
     void inject(LoginActivity loginActivity);
+
+    void inject(HomeActivity homeActivity);
 }

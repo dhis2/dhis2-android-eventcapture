@@ -28,65 +28,79 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import android.os.Bundle;
-
-import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
+import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeView;
-import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
-import static android.text.TextUtils.isEmpty;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
-public class HomePresenterImpl implements HomePresenter, Action1<UserAccount> {
-    private final HomeView homeView;
-    private Subscription subscription;
+public class HomePresenterImpl implements HomePresenter {
+    private final CompositeSubscription subscription;
+    private final UserAccountInteractor userAccountInteractor;
+    private final Logger logger;
+    private HomeView homeView;
 
-    public HomePresenterImpl(HomeView homeView) {
-        this.homeView = isNull(homeView, "HomeView must not be null");
+    public HomePresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
+        this.userAccountInteractor = isNull(userAccountInteractor,
+                "UserAccountInteractor must not be null");
+        this.logger = isNull(logger, "Logger must not be null");
+        this.subscription = new CompositeSubscription();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        subscription = D2.me().account()
+    public void attachView(View view) {
+        isNull(view, "HomeView must not be null");
+        homeView = (HomeView) view;
+
+        subscription.add(userAccountInteractor.account()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this);
+                .subscribe(new Action1<UserAccount>() {
+                    @Override
+                    public void call(UserAccount userAccount) {
+                        String name = "";
+                        if (!isEmpty(userAccount.getFirstName()) &&
+                                !isEmpty(userAccount.getSurname())) {
+                            name = String.valueOf(userAccount.getFirstName().charAt(0)) +
+                                    String.valueOf(userAccount.getSurname().charAt(0));
+                        } else if (userAccount.getDisplayName() != null &&
+                                userAccount.getDisplayName().length() > 1) {
+                            name = String.valueOf(userAccount.getDisplayName().charAt(0)) +
+                                    String.valueOf(userAccount.getDisplayName().charAt(1));
+                        }
 
-        //init the user account for synchronization:
-        AppAccountManager.getInstance().createAccount(homeView.getContext(),
-                D2.me().userCredentials().toBlocking().first().getUsername());
+                        homeView.setUsername(userAccount.getDisplayName());
+                        homeView.setUserInfo(userAccount.getEmail());
+                        homeView.setUserLetter(name);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(HomePresenterImpl.class.getSimpleName(),
+                                "Something went wrong", throwable);
+                    }
+                }));
+
+//        TODO mpve this part out of presenter
+//        init the user account for synchronization:
+//        AppAccountManager.getInstance().createAccount(homeView.getContext(),
+//                D2.me().userCredentials().toBlocking().first().getUsername());
     }
 
     @Override
-    public void onDestroy() {
-        if (subscription != null && !subscription.isUnsubscribed()) {
+    public void detachView() {
+        homeView = null;
+
+        if (!subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
-        subscription = null;
     }
-
-    @Override
-    public void call(UserAccount userAccount) {
-        String name = "";
-        if (!isEmpty(userAccount.getFirstName()) && !isEmpty(userAccount.getSurname())) {
-            name = String.valueOf(userAccount.getFirstName().charAt(0)) +
-                    String.valueOf(userAccount.getSurname().charAt(0));
-        } else if (userAccount.getDisplayName() != null &&
-                userAccount.getDisplayName().length() > 1) {
-            name = String.valueOf(userAccount.getDisplayName().charAt(0)) +
-                    String.valueOf(userAccount.getDisplayName().charAt(1));
-        }
-
-        homeView.setUsername(userAccount.getDisplayName());
-        homeView.setUserInfo(userAccount.getEmail());
-        homeView.setUserLetter(name);
-    }
-
-
 }

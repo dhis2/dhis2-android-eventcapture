@@ -28,10 +28,5 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import android.os.Bundle;
-
-public interface HomePresenter {
-    void onCreate(Bundle savedInstanceState);
-
-    void onDestroy();
+public interface HomePresenter extends Presenter {
 }

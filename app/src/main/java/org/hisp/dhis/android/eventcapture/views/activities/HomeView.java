@@ -28,14 +28,12 @@
 
 package org.hisp.dhis.android.eventcapture.views.activities;
 
-import android.content.Context;
+import org.hisp.dhis.android.eventcapture.views.View;
 
-public interface HomeView {
+public interface HomeView extends View {
     void setUsername(CharSequence username);
 
     void setUserInfo(CharSequence userInfo);
 
     void setUserLetter(CharSequence userLetter);
-
-    Context getContext(); //TODO: remove when moving to using Dagger
 }
