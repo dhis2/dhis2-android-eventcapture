@@ -43,6 +43,8 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
     private final UserAccountInteractor userAccountInteractor;
@@ -59,6 +61,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
 
     @Override
     public void attachView(View view) {
+        isNull(view, "LoginView must not be null");
         loginView = (LoginView) view;
 
         if (userAccountInteractor != null &&
