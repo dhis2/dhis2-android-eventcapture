@@ -61,27 +61,18 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
     protected void onResume() {
         super.onResume();
         loginPresenter.attachView(this);
-
-        System.out.println("LoginPresenter (onResume()): " + loginPresenter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         loginPresenter.detachView();
-
-        System.out.println("LoginPresenter (onPaused())");
     }
 
     @Override
     protected void onLoginButtonClicked(Editable server, Editable username, Editable password) {
-        String serverUrl = server.toString();
-
         ((EventCaptureApp) getApplication())
-                .createUserComponent(serverUrl).inject(this);
-        // ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
-
-        System.out.println("LoginPresenter (onLoginButtonClicked()): " + loginPresenter);
+                .createUserComponent(server.toString()).inject(this);
 
         // since we have re-instantiated LoginPresenter, we
         // also have to re-attach view to it

@@ -32,9 +32,9 @@ import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.OnLoginFinishedListener;
 import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
-import org.hisp.dhis.client.sdk.core.common.Logger;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.net.HttpURLConnection;
 
@@ -45,10 +45,11 @@ import rx.subscriptions.CompositeSubscription;
 
 
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
-    UserAccountInteractor userAccountInteractor;
-    CompositeSubscription subscription;
-    LoginView loginView;
-    Logger logger;
+    private final UserAccountInteractor userAccountInteractor;
+    private final CompositeSubscription subscription;
+    private final Logger logger;
+
+    private LoginView loginView;
 
     public LoginPresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
         this.userAccountInteractor = userAccountInteractor;
@@ -69,16 +70,11 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     @Override
     public void detachView() {
         loginView = null;
-
-//        if (!subscription.isUnsubscribed()) {
-//            subscription.unsubscribe();
-//        }
     }
 
     @Override
-    public void validateCredentials(
-            final String serverUrl, final String username, final String password) {
-
+    public void validateCredentials(final String serverUrl, final String username,
+                                    final String password) {
         loginView.showProgress();
         subscription.add(userAccountInteractor.signIn(username, password)
                 .subscribeOn(Schedulers.io())
@@ -100,7 +96,6 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     @Override
     public void onServerError(final String message) {
         loginView.hideProgress(new LoginView.OnProgressFinishedListener() {
-
             @Override
             public void onProgressFinished() {
                 loginView.showServerError(message);
@@ -111,7 +106,6 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     @Override
     public void onUnexpectedError(final String message) {
         loginView.hideProgress(new LoginView.OnProgressFinishedListener() {
-
             @Override
             public void onProgressFinished() {
                 loginView.showUnexpectedError(message);

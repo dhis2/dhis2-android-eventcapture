@@ -35,7 +35,6 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
-import org.hisp.dhis.client.sdk.models.utils.Preconditions;
 import org.hisp.dhis.client.sdk.ui.views.chainablepickerview.Pickable;
 
 import java.util.ArrayList;
@@ -48,7 +47,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-import static org.hisp.dhis.client.sdk.ui.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 
 public class OrganisationUnitProgramPickerPresenter {
     private OrganisationUnitProgramPickerView mOrganisationUnitProgramPickerView;
@@ -200,7 +200,7 @@ public class OrganisationUnitProgramPickerPresenter {
 
     private static class ProgramPickableMapper {
         public Pickable transform(Program program) {
-            Preconditions.isNull(program, "Program must not be null");
+            isNull(program, "Program must not be null");
 
             Pickable programPickable = new ProgramPickable(program.getName(), program.getUId());
             return programPickable;

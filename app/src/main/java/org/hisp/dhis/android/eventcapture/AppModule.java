@@ -33,7 +33,7 @@ import android.content.Context;
 import android.util.Log;
 
 import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.core.common.Logger;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

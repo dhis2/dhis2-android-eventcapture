@@ -50,7 +50,7 @@ android {
     }
 
     // TODO since now we are using gralde plugin 2.0, we don't need additional params
-    //for gradle plugin 1.5: Vector Drawables
+    // TODO for gradle plugin 1.5: Vector Drawables
     aaptOptions {
         additionalParameters "--no-version-vectors"
     }
@@ -105,9 +105,9 @@ dependencies {
     compile "com.android.support:appcompat-v7:${libs.supportVersion}"
 
     // Dagger dependencies
-    compile "com.google.dagger:dagger:${libs.dagger}"
     provided "com.google.dagger:dagger-compiler:${libs.dagger}"
     apt "com.google.dagger:dagger-compiler:${libs.dagger}"
+    compile "com.google.dagger:dagger:${libs.dagger}"
 
     // Smooth progress bar:
     compile "com.github.castorflex.smoothprogressbar:library:${libs.smoothProgressBarVersion}"
@@ -121,7 +121,7 @@ dependencies {
         transitive = true;
     }
 
-    //Multidex:
+    // Multidex:
     compile "com.android.support:multidex:${libs.multidex}"
 
     // Stetho

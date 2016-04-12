@@ -41,7 +41,7 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 import static android.text.TextUtils.isEmpty;
-import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class HomePresenterImpl implements HomePresenter, Action1<UserAccount> {
     private final HomeView homeView;

@@ -37,7 +37,6 @@ import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
-import org.hisp.dhis.client.sdk.models.utils.ModelUtils.ModelAction;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,7 +50,9 @@ import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
-import static org.hisp.dhis.client.sdk.models.utils.ModelUtils.toUidSet;
+import static org.hisp.dhis.client.sdk.core.common.utils.ModelUtils.ModelAction;
+import static org.hisp.dhis.client.sdk.core.common.utils.ModelUtils.toUidSet;
+
 
 public class SelectorPresenterImpl implements SelectorPresenter {
     private SelectorView selectorView;

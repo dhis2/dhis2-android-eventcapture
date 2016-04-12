@@ -60,7 +60,8 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
-import static org.hisp.dhis.client.sdk.models.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 
 public class ItemListPresenter {
     private ItemListView itemListView;

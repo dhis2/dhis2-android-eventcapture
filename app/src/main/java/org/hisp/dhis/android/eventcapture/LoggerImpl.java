@@ -28,9 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.client.sdk.core.common.Logger;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import timber.log.Timber;
+
 
 public class LoggerImpl implements Logger {
 

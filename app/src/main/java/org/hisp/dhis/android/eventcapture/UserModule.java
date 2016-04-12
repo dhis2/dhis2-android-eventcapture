@@ -34,8 +34,8 @@ import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
-import org.hisp.dhis.client.sdk.core.common.Logger;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.annotation.Nullable;
 
