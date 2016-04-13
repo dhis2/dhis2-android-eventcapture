@@ -34,25 +34,24 @@ import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class HomePresenterImpl implements HomePresenter {
-    private final CompositeSubscription subscription;
     private final UserAccountInteractor userAccountInteractor;
     private final Logger logger;
+    private Subscription subscription;
     private HomeView homeView;
 
     public HomePresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
         this.userAccountInteractor = isNull(userAccountInteractor,
                 "UserAccountInteractor must not be null");
         this.logger = isNull(logger, "Logger must not be null");
-        this.subscription = new CompositeSubscription();
     }
 
     @Override
@@ -60,7 +59,7 @@ public class HomePresenterImpl implements HomePresenter {
         isNull(view, "HomeView must not be null");
         homeView = (HomeView) view;
 
-        subscription.add(userAccountInteractor.account()
+        subscription = userAccountInteractor.account()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<UserAccount>() {
@@ -87,9 +86,9 @@ public class HomePresenterImpl implements HomePresenter {
                         logger.e(HomePresenterImpl.class.getSimpleName(),
                                 "Something went wrong", throwable);
                     }
-                }));
+                });
 
-//        TODO mpve this part out of presenter
+//        TODO move this part out of presenter
 //        init the user account for synchronization:
 //        AppAccountManager.getInstance().createAccount(homeView.getContext(),
 //                D2.me().userCredentials().toBlocking().first().getUsername());
@@ -99,7 +98,7 @@ public class HomePresenterImpl implements HomePresenter {
     public void detachView() {
         homeView = null;
 
-        if (!subscription.isUnsubscribed()) {
+        if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
     }

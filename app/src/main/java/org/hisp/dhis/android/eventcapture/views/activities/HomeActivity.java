@@ -63,11 +63,11 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
         // injecting dependencies
         ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
 
-        // setSynchronizedMessage("Never");
-
         addMenuItem(DRAWER_ITEM_EVENTS_ID, R.drawable.ic_add, R.string.drawer_item_events);
-        // getNavigationView().setCheckedItem(DRAWER_ITEM_EVENTS_ID);
-        onNavigationItemSelected(getNavigationView().getMenu().findItem(DRAWER_ITEM_EVENTS_ID));
+        if (savedInstanceState == null) {
+            onNavigationItemSelected(getNavigationView().getMenu()
+                    .findItem(DRAWER_ITEM_EVENTS_ID));
+        }
     }
 
     @Override
@@ -85,7 +85,6 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     @Override
     public void onDrawerOpened(View drawerView) {
         super.onDrawerOpened(drawerView);
-
         // setSynchronizedMessage(SyncManager.getInstance().getLastSyncedString());
     }
 
@@ -117,6 +116,7 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
 
     @Override
     public void setUsername(CharSequence username) {
+        System.out.println("##### USERNAME #####: " + username);
         getUsernameTextView().setText(username);
     }
 
