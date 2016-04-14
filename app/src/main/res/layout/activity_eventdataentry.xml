@@ -72,6 +72,8 @@
                     android:layout_gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:drawableRight="@drawable/ic_arrow_drop_down"
                     />
 
                 <TextView
@@ -80,9 +82,11 @@
                     android:layout_gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="20sp"
+                    android:drawableEnd="@drawable/ic_arrow_drop_down"
+                    android:drawableRight="@drawable/ic_arrow_drop_down"
                     />
             </TextSwitcher>
-            <!--   style="@style/Widget.AppCompat.Spinner.DropDown.ActionBar"-->
+
             <ImageView
                 android:id="@+id/next_section"
                 android:layout_width="wrap_content"

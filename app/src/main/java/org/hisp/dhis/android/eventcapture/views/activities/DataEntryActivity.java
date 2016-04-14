@@ -39,7 +39,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -66,6 +65,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     private ViewPager viewPager;
     private TextSwitcher sectionLabelTextSwitcher;
     private ImageView previousSectionButton, nextSectionButton;
+    private int programStageIx = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,15 +77,30 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         programUid = intent.getStringExtra(ItemListFragment.PROGRAM_UID);
         eventUid = intent.getStringExtra(ItemListFragment.EVENT_UID);
 
-        Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
-        Log.d("PROGRAM DATAENTRY", programUid);
-        Log.d("EVENT DATAENTRY", eventUid);
+        if (savedInstanceState == null) {
+            Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
+            Log.d("PROGRAM DATAENTRY", programUid);
+            Log.d("EVENT DATAENTRY", eventUid);
+        } else {
+            if (organisationUnitUid != null &&
+                    programUid != null &&
+                    eventUid != null) {
+                Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
+                Log.d("PROGRAM DATAENTRY", programUid);
+                Log.d("EVENT DATAENTRY", eventUid);
+            } else {
+                //coming from SectionFilterActivity with refinements .
+                //...
+                //organisationUnitUid = savedInstanceState.getString();
+                //programUid = savedInstanceState.getString();
+                //eventUid = savedInstanceState.get();
+                //String selectedSectionUid = intent.getStringExtra();
+                //
+            }
+        }
 
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
-
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
-
-
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
@@ -97,12 +112,10 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         sectionLabelTextSwitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //This works, but clicking on the arrow doesn't trigger this for some reason, (when styled as Spinner).
-
                 //make new intent to switch to SectionFilterActivity
                 Intent intent = new Intent(getApplicationContext(), SectionFilterActivity.class);
-                intent.putExtra(ItemListFragment.PROGRAM_STAGE_UID, dataEntryPresenter.getProgramStageUid());
-
+                intent.putExtra(ItemListFragment.PROGRAM_STAGE_UID,
+                        dataEntryPresenter.getProgramStageUid());
                 startActivity(intent);
             }
         });
@@ -112,6 +125,18 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         } else {
             event = dataEntryPresenter.getEvent(eventUid);  //doesn't work when we have dummy data
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // save selected ix, orgUnitUid, progUid, eventUid
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // restore selected ix, orgUnitUid, progUid, eventUid
     }
 
     @Override
@@ -134,19 +159,12 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
     public void setEvent(Event event) {
         this.event = event;
     }
+
+
+
 
     private class DataEntrySectionPageAdapter extends FragmentStatePagerAdapter {
 
@@ -164,9 +182,11 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         @Override
         public Fragment getItem(int position) {
             if (event != null) {
-                return EventDataEntryFragment.newInstance(event.getUId(), programStageSections.get(position).getUId());
+                return EventDataEntryFragment.newInstance(
+                        event.getUId(), programStageSections.get(position).getUId());
             } else
-                return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
+                return EventDataEntryFragment.newInstance(
+                        eventUid, programStageSections.get(position).getUId());
         }
 
         @Override
@@ -179,7 +199,8 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         }
     }
 
-    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements View.OnClickListener {
+    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements
+            View.OnClickListener {
         private ImageView nextSectionButton, previousSectionButton;
         private TextSwitcher sectionLabelTextSwitcher;
         private int lastPosition;
@@ -220,14 +241,12 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
             if (viewPager.getAdapter().getCount() > 0) {
                 this.nextSectionButton.setVisibility(View.VISIBLE);
             }
-
         }
 
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
             animateUiChanges(position);
-
         }
 
         private void animateUiChanges(int position) {
@@ -252,7 +271,6 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
                 sectionLabelTextSwitcher.setInAnimation(slideInLeft);
                 sectionLabelTextSwitcher.setOutAnimation(slideOutRight);
             }
-
             lastPosition = position;
         }
 
