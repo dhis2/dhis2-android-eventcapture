@@ -26,9 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
-
-import org.hisp.dhis.android.eventcapture.views.View;
+package org.hisp.dhis.android.eventcapture.views;
 
 public interface LauncherView extends View {
     void navigateToLogin();

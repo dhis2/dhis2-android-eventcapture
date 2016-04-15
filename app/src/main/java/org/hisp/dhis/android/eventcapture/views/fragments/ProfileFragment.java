@@ -28,9 +28,11 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -61,6 +63,9 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Drawable colorDrawable = ContextCompat.getDrawable(
+                getActivity(), R.color.color_divider);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
@@ -69,12 +74,13 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_profile);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(rowViewAdapter);
-        recyclerView.addItemDecoration(new DividerDecoration(getContext()));
+        recyclerView.addItemDecoration(new DividerDecoration(colorDrawable));
 
         mProfilePresenter = new ProfilePresenterImpl(this);
         mProfilePresenter.listUserAccountFields();
-        showRefreshButton();
-        setOnMenuItemClickListener(this);
+
+        // showRefreshButton();
+        // setOnMenuItemClickListener(this);
     }
 
     @Override
@@ -82,10 +88,10 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
     public void setProfileFields(List<DataEntity> dataEntities) {
         rowViewAdapter.swap(dataEntities);
     }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        mProfilePresenter.listUserAccountFields();
-        return true;
-    }
+//
+//    @Override
+//    public boolean onMenuItemClick(MenuItem item) {
+//        mProfilePresenter.listUserAccountFields();
+//        return true;
+//    }
 }

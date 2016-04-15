@@ -26,32 +26,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture;
+package org.hisp.dhis.android.eventcapture.views;
 
-import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment2;
+import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
 
-import dagger.Subcomponent;
+public interface SelectorView2 extends View {
+    void showProgressBar();
 
-@UserScope
-@Subcomponent(
-        modules = {
-                UserModule.class
-        }
-)
-public interface UserComponent {
+    void hideProgressBar();
 
-    //------------------------------------------------------------------------
-    // Injection targets
-    //------------------------------------------------------------------------
+    void showPickers(Picker picker);
 
-    void inject(LauncherActivity launcherActivity);
-
-    void inject(LoginActivity loginActivity);
-
-    void inject(HomeActivity homeActivity);
-
-    void inject(SelectorFragment2 selectorFragment);
+    void showNoOrganisationUnitsError();
 }

@@ -40,7 +40,7 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment2;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
@@ -106,8 +106,8 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     protected boolean onItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case DRAWER_ITEM_EVENTS_ID: {
-                attachFragment(WrapperFragment.newInstance(SelectorFragment.class,
-                        getString(R.string.drawer_item_events)));
+                attachFragment(WrapperFragment.newInstance(
+                        SelectorFragment2.class, getString(R.string.drawer_item_events)));
                 break;
             }
         }
@@ -116,7 +116,6 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
 
     @Override
     public void setUsername(CharSequence username) {
-        System.out.println("##### USERNAME #####: " + username);
         getUsernameTextView().setText(username);
     }
 

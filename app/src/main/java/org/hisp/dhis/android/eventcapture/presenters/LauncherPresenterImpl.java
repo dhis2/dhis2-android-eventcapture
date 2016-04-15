@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.views.LauncherView;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 

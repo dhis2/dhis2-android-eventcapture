@@ -44,9 +44,9 @@ import android.widget.FrameLayout;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.RxBus;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
-import org.hisp.dhis.android.eventcapture.RxBus;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
@@ -54,10 +54,8 @@ import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import rx.Observable;
 import timber.log.Timber;
 
-public class SelectorFragment extends BaseFragment implements SelectorView, OnAllPickersSelectedListener,
+public class SelectorFragment extends BaseFragment implements SelectorView,
         SwipeRefreshLayout.OnRefreshListener {
-
-    public static final String TAG = SelectorFragment.class.getSimpleName();
 
     private RxBus rxBus;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -65,13 +63,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView, OnAl
 
     private OrganisationUnitProgramPickerFragment mOrganisationUnitProgramPickerFragment;
     private ItemListFragment mItemListFragment;
-    boolean ranOnStartLoading = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mSelectorPresenter = new SelectorPresenterImpl(this);
-        setOnMenuItemClickListener(this);
+        // setOnMenuItemClickListener(this);
     }
 
     @Override
@@ -101,14 +98,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView, OnAl
                 attachFragment(R.id.item_fragment, mItemListFragment,
                         ItemListFragment.TAG);
             }
-            showRefreshButton();
+            // showRefreshButton();
         }
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_selector);
         mSwipeRefreshLayout.setOnRefreshListener(this);
+
         //set the circular progress bar color:
         mSwipeRefreshLayout.setColorSchemeResources(R.color.color_primary_default);
-
         mSelectorPresenter.initializeSynchronization(false);
     }
 
@@ -117,13 +114,13 @@ public class SelectorFragment extends BaseFragment implements SelectorView, OnAl
         System.out.println("On refresh selector fragment.");
         mSelectorPresenter.initializeSynchronization(true);
     }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
-        System.out.println("On refresh selector fragment.");
-        mSelectorPresenter.initializeSynchronization(true);
-        return true;
-    }
+//
+//    @Override
+//    public boolean onMenuItemClick(MenuItem item) {
+//        System.out.println("On refresh selector fragment.");
+//        mSelectorPresenter.initializeSynchronization(true);
+//        return true;
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -200,18 +197,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView, OnAl
     public Fragment createPickerFragment() {
         mOrganisationUnitProgramPickerFragment = new OrganisationUnitProgramPickerFragment();
         mOrganisationUnitProgramPickerFragment.setSelectorView(this);
-        mOrganisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
+        // mOrganisationUnitProgramPickerFragment.setOnPickerClickedListener(this);
         return mOrganisationUnitProgramPickerFragment;
-    }
-
-    @Override
-    public void activate() {
-
-    }
-
-    @Override
-    public void deactivate() {
-
     }
 
     public static class OnOrganisationUnitPickerValueUpdated {

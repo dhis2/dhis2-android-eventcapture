@@ -26,32 +26,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture;
+package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment2;
+public interface SelectorPresenter2 extends Presenter {
+    void sync();
 
-import dagger.Subcomponent;
-
-@UserScope
-@Subcomponent(
-        modules = {
-                UserModule.class
-        }
-)
-public interface UserComponent {
-
-    //------------------------------------------------------------------------
-    // Injection targets
-    //------------------------------------------------------------------------
-
-    void inject(LauncherActivity launcherActivity);
-
-    void inject(LoginActivity loginActivity);
-
-    void inject(HomeActivity homeActivity);
-
-    void inject(SelectorFragment2 selectorFragment);
+    void listPickers();
 }
