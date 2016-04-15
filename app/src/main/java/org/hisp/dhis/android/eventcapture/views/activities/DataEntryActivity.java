@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.views.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -56,16 +57,18 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import java.util.List;
 
 public class DataEntryActivity extends FragmentActivity implements IDataEntryView {
+    public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
     private String organisationUnitUid;
     private String programUid;
     private String eventUid;
     private Event event;
     private List<ProgramStageSection> programStageSections;
+    private int programStageIx = -1;
 
     private ViewPager viewPager;
     private TextSwitcher sectionLabelTextSwitcher;
     private ImageView previousSectionButton, nextSectionButton;
-    private int programStageIx = 0;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -77,27 +80,9 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         programUid = intent.getStringExtra(ItemListFragment.PROGRAM_UID);
         eventUid = intent.getStringExtra(ItemListFragment.EVENT_UID);
 
-        if (savedInstanceState == null) {
-            Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
-            Log.d("PROGRAM DATAENTRY", programUid);
-            Log.d("EVENT DATAENTRY", eventUid);
-        } else {
-            if (organisationUnitUid != null &&
-                    programUid != null &&
-                    eventUid != null) {
-                Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
-                Log.d("PROGRAM DATAENTRY", programUid);
-                Log.d("EVENT DATAENTRY", eventUid);
-            } else {
-                //coming from SectionFilterActivity with refinements .
-                //...
-                //organisationUnitUid = savedInstanceState.getString();
-                //programUid = savedInstanceState.getString();
-                //eventUid = savedInstanceState.get();
-                //String selectedSectionUid = intent.getStringExtra();
-                //
-            }
-        }
+        Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
+        Log.d("PROGRAM DATAENTRY", programUid);
+        Log.d("EVENT DATAENTRY", eventUid);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager_eventdataentry_fragment);
         sectionLabelTextSwitcher = (TextSwitcher) findViewById(R.id.textswitcher_eventdataentry);
@@ -105,18 +90,15 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
         final DataEntryPresenter dataEntryPresenter = new DataEntryPresenter(this);
-
-        // dataEntryPresenter.onCreate();
         dataEntryPresenter.listProgramStageSections(programUid);
 
         sectionLabelTextSwitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //make new intent to switch to SectionFilterActivity
                 Intent intent = new Intent(getApplicationContext(), SectionFilterActivity.class);
                 intent.putExtra(ItemListFragment.PROGRAM_STAGE_UID,
                         dataEntryPresenter.getProgramStageUid());
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
         });
 
@@ -125,18 +107,42 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         } else {
             event = dataEntryPresenter.getEvent(eventUid);  //doesn't work when we have dummy data
         }
+
+        if (savedInstanceState != null) {
+            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+            viewPager.setCurrentItem(programStageIx);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        int oldIx = programStageIx;
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                programStageIx = data.getIntExtra(DataEntryActivity.PROGRAM_STAGE_IX, -1);
+                if(programStageIx == -1) { //revert changes if not available.
+                    programStageIx = oldIx;
+                } else { //only setCurrent if a valid index.
+                    viewPager.setCurrentItem(programStageIx);
+                }
+            }
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // save selected ix, orgUnitUid, progUid, eventUid
+        // save selected ix, orgUnitUid, progUid, eventUid ??
+        outState.putInt(DataEntryActivity.PROGRAM_STAGE_IX, programStageIx);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        // restore selected ix, orgUnitUid, progUid, eventUid
+        // restore selected ix, orgUnitUid, progUid, eventUid ??
+        if(savedInstanceState != null) {
+            savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+        }
     }
 
     @Override
@@ -163,8 +169,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         this.event = event;
     }
 
-
-
+    //**********************************************************************************************
 
     private class DataEntrySectionPageAdapter extends FragmentStatePagerAdapter {
 
@@ -176,7 +181,9 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         public CharSequence getPageTitle(int position) {
             if (!programStageSections.isEmpty()) {
                 return programStageSections.get(position).getDisplayName();
-            } else return "Program name";
+            } else {
+                return "Program name";
+            }
         }
 
         @Override
@@ -184,16 +191,17 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
             if (event != null) {
                 return EventDataEntryFragment.newInstance(
                         event.getUId(), programStageSections.get(position).getUId());
-            } else
+            } else {
                 return EventDataEntryFragment.newInstance(
                         eventUid, programStageSections.get(position).getUId());
+            }
         }
 
         @Override
         public int getCount() {
-            if (programStageSections == null || programStageSections.isEmpty())
+            if (programStageSections == null || programStageSections.isEmpty()) {
                 return 0;
-            else {
+            } else {
                 return programStageSections.size();
             }
         }
@@ -264,7 +272,6 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
             }
 
             if (position > lastPosition) {
-                //change these:
                 sectionLabelTextSwitcher.setOutAnimation(slideOutLeft);
                 sectionLabelTextSwitcher.setInAnimation(slideInRight);
             } else if (position < lastPosition) {

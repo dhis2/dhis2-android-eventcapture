@@ -94,7 +94,6 @@ public class DataEntryPresenter implements IDataEntryPresenter {
                         Timber.d(throwable.toString());
                     }
                 });
-
     }
 
     @Override

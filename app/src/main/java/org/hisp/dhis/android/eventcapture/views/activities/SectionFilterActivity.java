@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.eventcapture.views.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -28,7 +29,7 @@ import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class SectionFilterActivity extends FragmentActivity {
-    public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
+
     private String programStageUid;
     private List<ProgramStageSection> sectionsList;
 
@@ -56,7 +57,6 @@ public class SectionFilterActivity extends FragmentActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
         mRecyclerView.setHasFixedSize(true);
 
-        // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -77,13 +77,7 @@ public class SectionFilterActivity extends FragmentActivity {
                 .subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
                     public void call(List<ProgramStageSection> programStageSections) {
-                        //update the program stage section list here :
                         sectionsList = programStageSections;
-                        sectionsList.add(2, sectionsList.get(0));
-                        sectionsList.add(3, sectionsList.get(0));
-                        sectionsList.add(4, sectionsList.get(1));
-                        sectionsList.add(5, sectionsList.get(1));
-                        // specify an adapter (see also next example)
                         mAdapter = new SectionFilterAdapter(sectionsList);
                         mRecyclerView.setAdapter(mAdapter);
                     }
@@ -95,7 +89,7 @@ public class SectionFilterActivity extends FragmentActivity {
                 });
     }
 
-
+    //**********************************************************************************************
 
     public class SectionFilterAdapter extends RecyclerView.Adapter<SectionFilterAdapter.ViewHolder> {
         private List<ProgramStageSection> mSectionList;
@@ -115,18 +109,15 @@ public class SectionFilterActivity extends FragmentActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            //System.out.println("Showing SectionList ix: " + position);
             holder.mTextView.setText(mSectionList.get(position).getName());
         }
 
         @Override
         public int getItemCount() {
-            //System.out.println("SectionList size:" + mSectionList.size());
             return mSectionList.size();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            // each data item is just a string in this case
             public TextView mTextView;
 
             public ViewHolder(View v) {
@@ -135,13 +126,13 @@ public class SectionFilterActivity extends FragmentActivity {
                 mTextView.findViewById(R.id.sectionlist_text).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        System.out.println("Clicked!!");
-                        Intent intent = new Intent(getApplicationContext(), DataEntryActivity.class);
-                        intent.putExtra(SectionFilterActivity.PROGRAM_STAGE_IX, getAdapterPosition());
-                        //startActivity(intent);
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra(DataEntryActivity.PROGRAM_STAGE_IX, getAdapterPosition());
+                        setResult(Activity.RESULT_OK, returnIntent);
+                        finish();
                     }
                 });
             }
         }
-    }y 
+    }
 }
