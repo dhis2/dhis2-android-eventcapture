@@ -52,7 +52,10 @@
         <activity android:name=".views.activities.HomeActivity" />
         <activity android:name=".views.activities.DetailsActivity" />
         <activity android:name=".views.activities.DataEntryActivity" />
-        <activity android:name=".views.activities.SectionFilterActivity" />
+        <activity android:name=".views.activities.SectionFilterActivity" >
+            <meta-data android:name="android.app.searchable"
+                       android:resource="@xml/searchable"/>
+        </activity>
 
         <!-- stub Authenticator service -->
         <service android:name=".model.AuthenticatorService">

@@ -52,31 +52,11 @@
                 android:orientation="horizontal"
                 android:weightSum="1">
 
-                <!-- switch for filter: -->
-                <TextSwitcher
-                    android:id="@+id/textswitcher_eventdataentry"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_weight="0.8"
-                    >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:textColor="@android:color/white"
-                        android:textSize="20sp"
-                        />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:textColor="@android:color/white"
-                        android:textSize="20sp"
-                        />
-                </TextSwitcher>
+                <android.support.v7.widget.SearchView
+                    android:id="@+id/section_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                </android.support.v7.widget.SearchView>
 
             </LinearLayout>
         </android.support.design.widget.AppBarLayout>
