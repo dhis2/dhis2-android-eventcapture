@@ -57,7 +57,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import java.util.List;
 
 public class DataEntryActivity extends FragmentActivity implements IDataEntryView {
-    public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
+    public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUid";
     private String organisationUnitUid;
     private String programUid;
     private String eventUid;
@@ -68,7 +68,6 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     private ViewPager viewPager;
     private TextSwitcher sectionLabelTextSwitcher;
     private ImageView previousSectionButton, nextSectionButton;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,21 +108,22 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         }
 
         if (savedInstanceState != null) {
-            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_UID);
             viewPager.setCurrentItem(programStageIx);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        int oldIx = programStageIx;
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                programStageIx = data.getIntExtra(DataEntryActivity.PROGRAM_STAGE_IX, -1);
-                if(programStageIx == -1) { //revert changes if not available.
-                    programStageIx = oldIx;
-                } else { //only setCurrent if a valid index.
-                    viewPager.setCurrentItem(programStageIx);
+                String sectionUid = data.getStringExtra(DataEntryActivity.PROGRAM_STAGE_UID);
+                for(int i = 0; i < programStageSections.size(); i++) {
+                    if(programStageSections.get(i).getUId().equals(sectionUid)) {
+                        programStageIx =  i;
+                        viewPager.setCurrentItem(programStageIx);
+                        break;
+                    }
                 }
             }
         }
@@ -133,7 +133,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // save selected ix, orgUnitUid, progUid, eventUid ??
-        outState.putInt(DataEntryActivity.PROGRAM_STAGE_IX, programStageIx);
+        outState.putInt(DataEntryActivity.PROGRAM_STAGE_UID, programStageIx);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         super.onRestoreInstanceState(savedInstanceState);
         // restore selected ix, orgUnitUid, progUid, eventUid ??
         if(savedInstanceState != null) {
-            savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+            savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_UID);
         }
     }
 

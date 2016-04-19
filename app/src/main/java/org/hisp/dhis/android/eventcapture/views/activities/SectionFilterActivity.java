@@ -5,14 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -23,8 +20,8 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import rx.Subscription;
@@ -70,26 +67,10 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
 
         SearchView searchView = (SearchView) findViewById(R.id.section_search);
         searchView.setOnQueryTextListener(this);
-        //searchView.setOnQueryTextFocusChangeListener(this);
 
         //initializes the data and adapter.
         initSectionList();
     }
-
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        ////:
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        MenuItem item = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) findViewById(R.id.section_search);
-        //SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-
-
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnQueryTextFocusChangeListener(this);
-        return super.onCreateOptionsMenu(menu);
-    }*/
 
     public void initSectionList() {
         listProgramStageDataElements = D2.programStages().get(programStageUid)
@@ -104,7 +85,8 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
                 .subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
                     public void call(List<ProgramStageSection> programStageSections) {
-                        sectionsList = programStageSections;
+                        sectionsList = new ArrayList<>();
+                        sectionsList.addAll(programStageSections);
                         mAdapter = new SectionFilterAdapter(sectionsList);
                         mRecyclerView.setAdapter(mAdapter);
                     }
@@ -118,26 +100,38 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        System.out.println("onQueryTextSubmit");
-
-        //filter the recycler view list ?
-        //mAdapter.
         return false;
     }
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        //System.out.println("onQueryTextChange");
-        return false;
+        System.out.println("onQueryTextChange query: " + newText);
+        List<ProgramStageSection> filteredSections = filter(sectionsList, newText);
+        ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
+        mRecyclerView.scrollToPosition(0);
+        return true;
+    }
+
+    private List<ProgramStageSection> filter(List<ProgramStageSection> models, String query) {
+        query = query.toLowerCase();
+
+        final List<ProgramStageSection> filteredModelList = new ArrayList<>();
+        for (ProgramStageSection model : models) {
+            final String text = model.getName().toLowerCase();
+            if (text.contains(query)) {
+                filteredModelList.add(model);
+            }
+        }
+        return filteredModelList;
     }
 
     //**********************************************************************************************
 
     public class SectionFilterAdapter extends RecyclerView.Adapter<SectionFilterAdapter.ViewHolder> {
-        private List<ProgramStageSection> mSectionList;
+        private List<ProgramStageSection> mSectionList = new ArrayList<>();
 
         public SectionFilterAdapter(List<ProgramStageSection> myDataset) {
-            mSectionList = myDataset;
+            mSectionList.addAll(myDataset);
         }
 
         @Override
@@ -159,6 +153,11 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
             return mSectionList.size();
         }
 
+        public void setItems(List<ProgramStageSection> models) {
+            mSectionList = models;
+            notifyDataSetChanged();
+        }
+
         //******************************************************************************************
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -167,15 +166,17 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
             public ViewHolder(View v) {
                 super(v);
                 mTextView = (TextView) v.findViewById(R.id.sectionlist_text);
-                mTextView.findViewById(R.id.sectionlist_text).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent returnIntent = new Intent();
-                        returnIntent.putExtra(DataEntryActivity.PROGRAM_STAGE_IX, getAdapterPosition());
-                        setResult(Activity.RESULT_OK, returnIntent);
-                        finish();
-                    }
-                });
+                mTextView.findViewById(R.id.sectionlist_text).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(DataEntryActivity.PROGRAM_STAGE_UID,
+                                        mSectionList.get(getAdapterPosition()).getUId());
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
+                            }
+                        });
             }
         }
     }
