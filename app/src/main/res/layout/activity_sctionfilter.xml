@@ -50,13 +50,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:orientation="horizontal"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:weightSum="1">
 
-                <android.support.v7.widget.SearchView
+                <android.support.v7.widget.AppCompatEditText
                     android:id="@+id/section_search"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                </android.support.v7.widget.SearchView>
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_search"
+                    android:drawableStart="@drawable/ic_search"
+                    android:hint="@string/find_section"
+                    style="@style/CustomEditText"
+                    />
+
+                <ImageButton
+                    android:id="@+id/button_search_clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:background="@drawable/ic_cancel"
+                    />
 
             </LinearLayout>
         </android.support.design.widget.AppBarLayout>

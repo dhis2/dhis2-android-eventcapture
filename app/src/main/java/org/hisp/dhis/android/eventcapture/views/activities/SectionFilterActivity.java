@@ -8,10 +8,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.R;
@@ -31,7 +35,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class SectionFilterActivity extends FragmentActivity implements SearchView.OnQueryTextListener {
+public class SectionFilterActivity extends FragmentActivity implements SearchView.OnQueryTextListener, TextWatcher, View.OnClickListener {
 
     private String programStageUid;
     private List<ProgramStageSection> sectionsList;
@@ -42,7 +46,8 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private SearchView searchView;
+    private EditText mSearchTextField;
+    private ImageButton mClearButton;
 
     public List<ProgramStageSection> getSectionList() {
         return sectionsList;
@@ -65,8 +70,11 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        SearchView searchView = (SearchView) findViewById(R.id.section_search);
-        searchView.setOnQueryTextListener(this);
+        mClearButton = (ImageButton) findViewById(R.id.button_search_clear);
+        mClearButton.setOnClickListener(this);
+
+        mSearchTextField = (EditText) findViewById(R.id.section_search);
+        mSearchTextField.addTextChangedListener(this);
 
         //initializes the data and adapter.
         initSectionList();
@@ -105,7 +113,6 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        System.out.println("onQueryTextChange query: " + newText);
         List<ProgramStageSection> filteredSections = filter(sectionsList, newText);
         ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
         mRecyclerView.scrollToPosition(0);
@@ -123,6 +130,30 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
             }
         }
         return filteredModelList;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        //System.out.println("Text changed: " + s);
+        List<ProgramStageSection> filteredSections = filter(sectionsList, s.toString());
+        ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
+        mRecyclerView.scrollToPosition(0);
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        //clear button clicked.
+        mSearchTextField.setText("");
     }
 
     //**********************************************************************************************

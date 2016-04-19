@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="CustomEditText" parent="@style/Base.V7.Widget.AppCompat.EditText">
+        <item name="android:textColorHint">@android:color/white</item>
+
+        <item name="android:textColor">@android:color/white</item>
+
+        <item name="colorAccent">@android:color/white</item>
+        <item name="colorControlActivated">@android:color/white</item>
+        <item name="colorControlHighlight">@android:color/white</item>
+        <item name="android:colorActivatedHighlight">@android:color/white</item>
+
+        <item name="android:colorFocusedHighlight">@android:color/white</item>
+        <item name="android:colorPressedHighlight">@android:color/white</item>
+
+        <item name="android:colorMultiSelectHighlight">@android:color/white</item>
+        <item name="android:textColorHighlightInverse">@android:color/white</item>
+        <item name="android:textColorHighlight">@android:color/white</item>
+
+    </style>
+</resources>
