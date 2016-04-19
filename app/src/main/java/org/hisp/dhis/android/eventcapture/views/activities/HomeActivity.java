@@ -38,6 +38,7 @@ import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.model.SyncManager;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
@@ -85,7 +86,7 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     @Override
     public void onDrawerOpened(View drawerView) {
         super.onDrawerOpened(drawerView);
-        // setSynchronizedMessage(SyncManager.getInstance().getLastSyncedString());
+        setSynchronizedMessage(SyncManager.getInstance().getLastSyncedString());
     }
 
     @NonNull

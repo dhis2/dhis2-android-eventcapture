@@ -93,8 +93,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         @Override
                         public void call(List<ProgramStageDataElement> stageDataElements) {
                             SessionManager.getInstance().setSelectorSynced(true);
-                            // SyncManager.getInstance().setLastSyncedNow();
-
+                            SyncManager.getInstance().setLastSyncedNow();
                             selectorView.onFinishLoading();
                         }
                     }, new Action1<Throwable>() {

@@ -27,7 +27,6 @@ public class SyncManager {
 
     public void sync() {
         //...metadata sync code calls go here...
-
         //and on success :
         setLastSyncedNow();
     }
@@ -63,13 +62,14 @@ public class SyncManager {
             return "Never";
         } else {
             Long diff = Calendar.getInstance().getTime().getTime() - lastSynced;
+
             if (diff >= DAY_IN_MILLISECONDS) {
                 Date d = getLastSyncedDate();
                 SimpleDateFormat dt = new SimpleDateFormat("dd/mm/yy hh:mm");
                 return dt.format(d);
             } else {
                 Long hours = TimeUnit.MILLISECONDS.toHours(diff);
-                Long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
+                Long minutes = TimeUnit.MILLISECONDS.toMinutes(diff - hours*3600000);
 
                 String result = "";
                 if (hours > 0) {
