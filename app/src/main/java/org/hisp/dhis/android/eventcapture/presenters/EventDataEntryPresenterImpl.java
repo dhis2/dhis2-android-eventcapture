@@ -37,8 +37,8 @@ import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
-import org.hisp.dhis.client.sdk.ui.models.DataEntityText;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntityText;
 import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
 
 import java.util.ArrayList;
@@ -168,55 +168,52 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
         List<DataEntity> dataEntities = new ArrayList<>();
 
         RxDataEntityValueChangedListener dataEntityValueChangedListener = new RxDataEntityValueChangedListener();
-        for(ProgramStageDataElement programStageDataElement : programStageDataElements) {
+        for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
             dataEntityValueChangedListener.setProgramStageDataElement(programStageDataElement);
 //            TrackedEntityDataValue trackedEntityDataValue = valueHashMap.get(programStageDataElement.getUId());
 //            dataEntityValueChangedListener.setTrackedEntityDataValue(trackedEntityDataValue);
 
-            if(programStageDataElement.getDataElement().getOptionSet() != null) {
-                dataEntities.add(null);
-            }
-            if(programStageDataElement.getDataElement().getValueType().isBoolean()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.BOOLEAN, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isCoordinate()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.COORDINATES, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isDate()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.DATE, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isFile()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.FILE, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isInteger()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.INTEGER, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isNumeric()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.NUMBER, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isText()) {
-                dataEntities.add(DataEntityText.create(
-                        programStageDataElement.getDataElement().getDisplayName(),
-                        "",//trackedEntityDataValue.getValue(),
-                        DataEntityText.Type.TEXT, dataEntityValueChangedListener));
+            if (programStageDataElement != null && programStageDataElement.getDataElement() != null) {
+
+                if (programStageDataElement.getDataElement().getOptionSet() != null) {
+                    dataEntities.add(null);
+                }
+                if (programStageDataElement.getDataElement().getValueType().isBoolean()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.BOOLEAN, dataEntityValueChangedListener));
+                } else if (programStageDataElement.getDataElement().getValueType().isCoordinate()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.COORDINATES, dataEntityValueChangedListener));
+                } else if (programStageDataElement.getDataElement().getValueType().isDate()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.DATE, dataEntityValueChangedListener));
+                } else if (programStageDataElement.getDataElement().getValueType().isFile()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.FILE, dataEntityValueChangedListener));
+                } else if (programStageDataElement.getDataElement().getValueType().isInteger()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.INTEGER, dataEntityValueChangedListener));
+                } else if (programStageDataElement.getDataElement().getValueType().isNumeric()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.NUMBER, dataEntityValueChangedListener));
+                } else if (programStageDataElement.getDataElement().getValueType().isText()) {
+                    dataEntities.add(DataEntityText.create(
+                            programStageDataElement.getDataElement().getDisplayName(),
+                            "",//trackedEntityDataValue.getValue(),
+                            DataEntityText.Type.TEXT, dataEntityValueChangedListener));
+                }
             }
         }
 
@@ -231,62 +228,55 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
         RxDataEntityValueChangedListener dataEntityValueChangedListener = new RxDataEntityValueChangedListener();
         dataEntityValueChangedListener.setEvent(event);
 
-        if(section.getProgramStage().getReportDateDescription() != null) {
+        if (section.getProgramStage().getReportDateDescription() != null) {
             dataEntities.add(DataEntityText.create(
                     section.getProgramStage().getReportDateDescription(),
                     event.getEventDate().toString(), DataEntityText.Type.DATE, dataEntityValueChangedListener));
         }
-        if(section.getProgramStage().isCaptureCoordinates()) {
+        if (section.getProgramStage().isCaptureCoordinates()) {
             //coordinate row
             // TODO create onvaluechangedlistener with getting coordinates
-
 
 
             // dataEntities.add(DataEntityCoordinate.create("Capture Coordinates", event.getCoordinate(), DataEntityText.Type.COORDINATES));
         }
 
-        for(ProgramStageDataElement programStageDataElement : programStageDataElements) {
+        for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
             dataEntityValueChangedListener.setProgramStageDataElement(programStageDataElement);
             TrackedEntityDataValue trackedEntityDataValue = valueHashMap.get(programStageDataElement.getUId());
             dataEntityValueChangedListener.setTrackedEntityDataValue(trackedEntityDataValue);
 
-            if(programStageDataElement.getDataElement().getValueType().isBoolean()) {
+            if (programStageDataElement.getDataElement().getValueType().isBoolean()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
                         DataEntityText.Type.BOOLEAN, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isCoordinate()) {
+            } else if (programStageDataElement.getDataElement().getValueType().isCoordinate()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
                         DataEntityText.Type.COORDINATES, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isDate()) {
+            } else if (programStageDataElement.getDataElement().getValueType().isDate()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
                         DataEntityText.Type.DATE, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isFile()) {
+            } else if (programStageDataElement.getDataElement().getValueType().isFile()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
                         DataEntityText.Type.FILE, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isInteger()) {
+            } else if (programStageDataElement.getDataElement().getValueType().isInteger()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
                         DataEntityText.Type.INTEGER, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isNumeric()) {
+            } else if (programStageDataElement.getDataElement().getValueType().isNumeric()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
                         DataEntityText.Type.NUMBER, dataEntityValueChangedListener));
-            }
-            else if(programStageDataElement.getDataElement().getValueType().isText()) {
+            } else if (programStageDataElement.getDataElement().getValueType().isText()) {
                 dataEntities.add(DataEntityText.create(
                         programStageDataElement.getDataElement().getDisplayName(),
                         trackedEntityDataValue.getValue(),
@@ -340,7 +330,7 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
 //                        }
 //                    });
 
-                // trigger update of program rules
+            // trigger update of program rules
         }
 
         public void setProgramStageDataElement(ProgramStageDataElement programStageDataElement) {
