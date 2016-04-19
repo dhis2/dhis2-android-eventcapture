@@ -2,14 +2,15 @@ package org.hisp.dhis.android.eventcapture.views.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +71,10 @@ public class SectionFilterActivity extends FragmentActivity implements TextWatch
         mSearchTextField = (EditText) findViewById(R.id.section_search);
         mSearchTextField.addTextChangedListener(this);
 
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setTitleTextColor(Color.WHITE);
+        mToolbar.setTitle("Sections");
+        
         //initializes the data and adapter.
         initSectionList();
     }
