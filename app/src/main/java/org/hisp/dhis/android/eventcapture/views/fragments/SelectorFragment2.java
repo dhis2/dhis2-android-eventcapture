@@ -28,8 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
@@ -92,9 +94,9 @@ public class SelectorFragment2 extends BaseFragment
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        pickerAdapter = new PickerAdapter();
+        pickerAdapter = new PickerAdapter(getFragmentManager(), getActivity());
 
-        pickerRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view_pickers);
+        pickerRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_pickers);
         pickerRecyclerView.setLayoutManager(layoutManager);
         pickerRecyclerView.setAdapter(pickerAdapter);
 
@@ -124,13 +126,8 @@ public class SelectorFragment2 extends BaseFragment
     }
 
     @Override
-    public void showPickers(Picker picker) {
-        pickerAdapter.swapData(picker);
-
-        System.out.println("### LABEL ###: " + picker.getLabel());
-        for (Picker pickerItem : picker.getItems()) {
-            System.out.println("### ITEM ###: " + pickerItem.getDescendant());
-        }
+    public void showPickers(Picker pickerTree) {
+        pickerAdapter.swapData(pickerTree);
     }
 
     @Override
@@ -152,25 +149,26 @@ public class SelectorFragment2 extends BaseFragment
         return false;
     }
 
-    private class PickerAdapter extends RecyclerView.Adapter {
+    private static class PickerAdapter extends RecyclerView.Adapter {
+        private final FragmentManager fragmentManager;
         private final LayoutInflater layoutInflater;
         private final List<Picker> pickers;
 
-        public PickerAdapter() {
-            layoutInflater = LayoutInflater.from(getActivity());
-            pickers = new ArrayList<>();
+        public PickerAdapter(FragmentManager fragmentManager, Context context) {
+            this.fragmentManager = fragmentManager;
+            this.layoutInflater = LayoutInflater.from(context);
+            this.pickers = new ArrayList<>();
         }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new PickerViewHolder(
-                    layoutInflater.inflate(R.layout.recyclerview_picker, parent, false));
+            return new PickerViewHolder(layoutInflater.inflate(
+                    R.layout.recyclerview_picker, parent, false));
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            PickerViewHolder pickerViewHolder = (PickerViewHolder) holder;
-            pickerViewHolder.pickerLabel.setText(pickers.get(position).getLabel());
+            ((PickerViewHolder) holder).update(pickers.get(position));
         }
 
         @Override
@@ -178,43 +176,102 @@ public class SelectorFragment2 extends BaseFragment
             return pickers.size();
         }
 
-        public void swapData(Picker picker) {
+        public void swapData(Picker pickerTree) {
             pickers.clear();
-            System.out.println("Picker: " + picker);
 
-            // flattening the picker tree
-            if (picker != null) {
-                Picker node = picker;
-
+            if (pickerTree != null) {
+                // flattening the picker tree into list
+                Picker node = getRootNode(pickerTree);
                 do {
-                    pickers.add(node);
-                } while ((node = node.getDescendant()) != null);
+                    // we don't want to add leaf nodes to list
+                    if (!node.getItems().isEmpty()) {
+                        pickers.add(node);
+                    }
+                } while ((node = node.getSelectedItem()) != null);
             }
 
             notifyDataSetChanged();
         }
 
+        private Picker getRootNode(Picker picker) {
+            Picker node = picker;
+
+            // walk up the tree
+            while (node.getParent() != null) {
+                node = node.getParent();
+            }
+
+            return node;
+        }
+
+        private class OnItemClickedListener implements
+                FilterableDialogFragment.OnPickerItemClickListener {
+
+            @Override
+            public void onPickerItemClickListener(Picker selectedPicker) {
+                // we need to clear previous selection
+                if (selectedPicker.getSelectedItem() != null) {
+                    selectedPicker.setSelectedChild(null);
+                }
+
+                if (selectedPicker.getParent() != null) {
+                    selectedPicker.getParent().setSelectedChild(selectedPicker);
+                }
+
+                // re-render the tree
+                swapData(selectedPicker);
+            }
+        }
+
         private class PickerViewHolder extends RecyclerView.ViewHolder {
-            final TextView pickerLabel;
-            final ImageView cancel;
-            final View.OnClickListener onClickListener;
+            private final TextView pickerLabel;
+            private final ImageView cancel;
 
             public PickerViewHolder(View itemView) {
                 super(itemView);
 
-                onClickListener = new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        // stub implementation
-                    }
-                };
-
                 pickerLabel = (TextView) itemView.findViewById(R.id.textview_picker);
                 cancel = (ImageView) itemView.findViewById(R.id.imageview_cancel);
+            }
 
-                pickerLabel.setOnClickListener(onClickListener);
-                cancel.setOnClickListener(onClickListener);
+            public void update(Picker picker) {
+                if (picker.getSelectedItem() != null) {
+                    pickerLabel.setText(picker.getSelectedItem().getName());
+                } else {
+                    pickerLabel.setText(picker.getHint());
+                }
+
+                OnClickListener listener = new OnClickListener(picker);
+                pickerLabel.setOnClickListener(listener);
+                cancel.setOnClickListener(listener);
+            }
+        }
+
+        private class OnClickListener implements View.OnClickListener {
+            private final Picker picker;
+
+            private OnClickListener(Picker picker) {
+                this.picker = picker;
+            }
+
+            @Override
+            public void onClick(View view) {
+                switch (view.getId()) {
+                    case R.id.textview_picker: {
+                        FilterableDialogFragment.OnPickerItemClickListener listener =
+                                new OnItemClickedListener();
+                        FilterableDialogFragment dialogFragment =
+                                FilterableDialogFragment.newInstance(picker);
+                        dialogFragment.setOnPickerItemClickListener(listener);
+                        dialogFragment.show(fragmentManager, "filterableDialogFragment");
+                        break;
+                    }
+                    case R.id.imageview_cancel: {
+                        picker.setSelectedChild(null);
+                        swapData(picker);
+                        break;
+                    }
+                }
             }
         }
     }

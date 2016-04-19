@@ -38,7 +38,6 @@ import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -119,38 +118,34 @@ public class SelectorPresenter2Impl implements SelectorPresenter2 {
                     @Override
                     public Picker call(List<OrganisationUnit> units, List<Program> programs) {
                         Map<String, OrganisationUnit> organisationUnitMap = ModelUtils.toMap(units);
-                        Map<String, Program> programMap = ModelUtils.toMap(programs);
+                        Map<String, Program> assignedProgramsMap = ModelUtils.toMap(programs);
 
-                        System.out.println(organisationUnitMap);
-                        System.out.println(programMap);
-                        List<Picker> organisationUnitPickerItems = new ArrayList<>();
+                        Picker rootPicker = Picker.create("Choose organisation unit");
                         for (String unitKey : organisationUnitMap.keySet()) {
-                            OrganisationUnit orgUnit = organisationUnitMap.get(unitKey);
+                            // Creating organisation unit picker items
+                            OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
+                            Picker organisationUnitPicker = Picker.create(
+                                    organisationUnit.getUId(),
+                                    organisationUnit.getDisplayName(),
+                                    "Choose program",
+                                    rootPicker);
 
-                            List<Picker> programPickers = new ArrayList<>();
-                            for (Program shortProgram : orgUnit.getPrograms()) {
-                                Program program = programMap.get(shortProgram.getUId());
+                            for (Program program : organisationUnit.getPrograms()) {
+                                Program assignedProgram = assignedProgramsMap.get(program.getUId());
 
-                                if (program != null) {
-                                    System.out.println(shortProgram.getUId());
-                                    System.out.println(program);
-                                    programPickers.add(new Picker(program.getUId(),
-                                            program.getDisplayName()));
+                                if (assignedProgram != null) {
+                                    Picker programPicker = Picker.create(
+                                            assignedProgram.getUId(),
+                                            assignedProgram.getDisplayName(),
+                                            organisationUnitPicker);
+                                    organisationUnitPicker.addItem(programPicker);
                                 }
                             }
 
-                            Picker orgUnitPicker = new Picker(orgUnit.getUId(),
-                                    orgUnit.getDisplayName(), "Choose program", programPickers);
-                            organisationUnitPickerItems.add(orgUnitPicker);
+                            rootPicker.addItem(organisationUnitPicker);
                         }
 
-                        Picker picker = new Picker("Choose organisation unit",
-                                organisationUnitPickerItems);
-
-                        // TODO for testing only
-                        picker.setDescendant(picker.getItems().get(0));
-
-                        return picker;
+                        return rootPicker;
                     }
                 })
                 .subscribeOn(Schedulers.io())

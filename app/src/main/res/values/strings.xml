@@ -30,7 +30,6 @@
     <string name="app_name">DHIS2 Event Capture</string>
 
     <!-- Navigation drawer strings -->
-
     <string name="drawer_item_events">Events</string>
 
     <string name="error">Error</string>
