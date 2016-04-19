@@ -49,8 +49,10 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter2;
 import org.hisp.dhis.android.eventcapture.views.SelectorView2;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
-import org.hisp.dhis.client.sdk.ui.models.picker.PickerChain;
 import org.hisp.dhis.client.sdk.utils.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -150,12 +152,12 @@ public class SelectorFragment2 extends BaseFragment
     private static class PickerAdapter extends RecyclerView.Adapter {
         private final FragmentManager fragmentManager;
         private final LayoutInflater layoutInflater;
-        private final PickerChain pickerChain;
+        private final List<Picker> pickers;
 
         public PickerAdapter(FragmentManager fragmentManager, Context context) {
             this.fragmentManager = fragmentManager;
             this.layoutInflater = LayoutInflater.from(context);
-            this.pickerChain = new PickerChain();
+            this.pickers = new ArrayList<>();
         }
 
         @Override
@@ -166,22 +168,40 @@ public class SelectorFragment2 extends BaseFragment
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            ((PickerViewHolder) holder).update(
-                    pickerChain.get(position), pickerChain.get(position + 1));
+            ((PickerViewHolder) holder).update(pickers.get(position));
         }
 
         @Override
         public int getItemCount() {
-            int count = pickerChain.size();
-            System.out.println("Count: " + count);
-            return count;
+            return pickers.size();
         }
 
-        public void swapData(Picker picker) {
-            pickerChain.clear();
-            pickerChain.put(picker);
+        public void swapData(Picker pickerTree) {
+            pickers.clear();
+
+            if (pickerTree != null) {
+                // flattening the picker tree into list
+                Picker node = getRootNode(pickerTree);
+                do {
+                    // we don't want to add leaf nodes to list
+                    if (!node.getItems().isEmpty()) {
+                        pickers.add(node);
+                    }
+                } while ((node = node.getSelectedItem()) != null);
+            }
 
             notifyDataSetChanged();
+        }
+
+        private Picker getRootNode(Picker picker) {
+            Picker node = picker;
+
+            // walk up the tree
+            while (node.getParent() != null) {
+                node = node.getParent();
+            }
+
+            return node;
         }
 
         private class OnItemClickedListener implements
@@ -189,8 +209,17 @@ public class SelectorFragment2 extends BaseFragment
 
             @Override
             public void onPickerItemClickListener(Picker selectedPicker) {
-                pickerChain.put(selectedPicker);
-                notifyDataSetChanged();
+                // we need to clear previous selection
+                if (selectedPicker.getSelectedItem() != null) {
+                    selectedPicker.setSelectedChild(null);
+                }
+
+                if (selectedPicker.getParent() != null) {
+                    selectedPicker.getParent().setSelectedChild(selectedPicker);
+                }
+
+                // re-render the tree
+                swapData(selectedPicker);
             }
         }
 
@@ -205,14 +234,14 @@ public class SelectorFragment2 extends BaseFragment
                 cancel = (ImageView) itemView.findViewById(R.id.imageview_cancel);
             }
 
-            public void update(Picker currentPicker, Picker nextPicker) {
-                if (nextPicker != null) {
-                    pickerLabel.setText(nextPicker.getName());
+            public void update(Picker picker) {
+                if (picker.getSelectedItem() != null) {
+                    pickerLabel.setText(picker.getSelectedItem().getName());
                 } else {
-                    pickerLabel.setText(currentPicker.getHint());
+                    pickerLabel.setText(picker.getHint());
                 }
 
-                OnClickListener listener = new OnClickListener(currentPicker);
+                OnClickListener listener = new OnClickListener(picker);
                 pickerLabel.setOnClickListener(listener);
                 cancel.setOnClickListener(listener);
             }
@@ -238,8 +267,8 @@ public class SelectorFragment2 extends BaseFragment
                         break;
                     }
                     case R.id.imageview_cancel: {
-                        pickerChain.remove(picker);
-                        notifyDataSetChanged();
+                        picker.setSelectedChild(null);
+                        swapData(picker);
                         break;
                     }
                 }
