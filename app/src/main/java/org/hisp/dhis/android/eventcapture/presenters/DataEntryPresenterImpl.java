@@ -53,9 +53,14 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     private DataEntryView dataEntryView;
     private Subscription listProgramStageDataElements;
     private Subscription programStageSubscription;
+    private String programStageUid;
 
     public DataEntryPresenterImpl(DataEntryView dataEntryView) {
         this.dataEntryView = dataEntryView;
+    }
+
+    public String getProgramStageUid() {
+        return programStageUid;
     }
 
     @Override
@@ -72,6 +77,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     @Override
                     public List<ProgramStageSection> call(List<ProgramStage> programStages) {
                         ProgramStage stage = programStages.get(0);
+                        programStageUid = stage.getUId();
                         return D2.programStageSections().list(stage).toBlocking().first();
                     }
                 }).subscribe(new Action1<List<ProgramStageSection>>() {
@@ -154,10 +160,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         // event.setTrackedEntityDataValues(trackedEntityDataValues);
 
     }
-
-
-
-
 
     @Override
     public Event getEvent(String eventUId) {

@@ -52,6 +52,7 @@
         <activity android:name=".views.activities.HomeActivity" />
         <activity android:name=".views.activities.DetailsActivity" />
         <activity android:name=".views.activities.DataEntryActivity" />
+        <activity android:name=".views.activities.SectionFilterActivity" />
 
         <!-- stub Authenticator service -->
         <service android:name=".model.AuthenticatorService">

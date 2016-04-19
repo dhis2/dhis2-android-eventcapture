@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.views.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -39,7 +40,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -58,11 +58,15 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import java.util.List;
 
 public class DataEntryActivity extends FragmentActivity implements DataEntryView {
+    public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUid";
+    public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
+
     private String organisationUnitUid;
     private String programUid;
     private String eventUid;
     private Event event;
     private List<ProgramStageSection> programStageSections;
+    private int programStageIx;
 
     private ViewPager viewPager;
     private TextSwitcher sectionLabelTextSwitcher;
@@ -87,33 +91,79 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
         previousSectionButton = (ImageView) findViewById(R.id.previous_section);
         nextSectionButton = (ImageView) findViewById(R.id.next_section);
 
-        DataEntryPresenter dataEntryPresenter = new DataEntryPresenterImpl(this);
+        final DataEntryPresenterImpl dataEntryPresenter = new DataEntryPresenterImpl(this);
 
         // dataEntryPresenter.onCreate();
+
         dataEntryPresenter.listProgramStageSections(programUid);
 
-        if(eventUid.equals("")) {
+        sectionLabelTextSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SectionFilterActivity.class);
+                intent.putExtra(ItemListFragment.PROGRAM_STAGE_UID,
+                        dataEntryPresenter.getProgramStageUid());
+                startActivityForResult(intent, 1);
+            }
+        });
+
+        if (eventUid.equals("")) {
             dataEntryPresenter.createNewEvent(organisationUnitUid, programUid);
-        }
-        else {
+        } else {
             event = dataEntryPresenter.getEvent(eventUid);  //doesn't work when we have dummy data
         }
 
-
-
+        if (savedInstanceState != null) {
+            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_UID);
+            viewPager.setCurrentItem(programStageIx);
+        }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                String sectionUid = data.getStringExtra(DataEntryActivity.PROGRAM_STAGE_UID);
+                System.out.println("sectionUid: " + sectionUid);
+                for (int i = 0; i < programStageSections.size(); i++) {
+                    if (programStageSections.get(i).getUId().equals(sectionUid)) {
+                        programStageIx = i;
+                        viewPager.setCurrentItem(programStageIx);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // save selected ix, orgUnitUid, progUid, eventUid ??
+        outState.putInt(DataEntryActivity.PROGRAM_STAGE_IX, programStageIx);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // restore selected ix, orgUnitUid, progUid, eventUid ??
+        if (savedInstanceState != null) {
+            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+            viewPager.setCurrentItem(programStageIx);
+        }
+    }
+
     @Override
     @UiThread
     public void initializeViewPager(List<ProgramStageSection> programStageSections) {
         this.programStageSections = programStageSections;
-        if(!programStageSections.isEmpty()) {
+        if (!programStageSections.isEmpty()) {
             viewPager.setAdapter(new DataEntrySectionPageAdapter(getSupportFragmentManager()));
             viewPager.addOnPageChangeListener(new DataEntrySectionPageChangedListener(
                     previousSectionButton,
                     nextSectionButton,
                     sectionLabelTextSwitcher));
-        }
-        else {
+        } else {
             getSupportFragmentManager().beginTransaction()
                     .add(EventDataEntryFragment.newInstance(
                             event.getUId(),
@@ -123,19 +173,11 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-    }
-
-    @Override
     public void setEvent(Event event) {
         this.event = event;
     }
+
+    //**********************************************************************************************
 
     private class DataEntrySectionPageAdapter extends FragmentStatePagerAdapter {
 
@@ -145,31 +187,36 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
 
         @Override
         public CharSequence getPageTitle(int position) {
-            if(!programStageSections.isEmpty()) {
+            if (!programStageSections.isEmpty()) {
                 return programStageSections.get(position).getDisplayName();
+            } else {
+                return "Program name";
             }
-            else return "Program name";
         }
 
         @Override
         public Fragment getItem(int position) {
-            if(event != null) {
-                return EventDataEntryFragment.newInstance(event.getUId(), programStageSections.get(position).getUId());
+            if (event != null) {
+                return EventDataEntryFragment.newInstance(
+                        event.getUId(), programStageSections.get(position).getUId());
+            } else {
+                return EventDataEntryFragment.newInstance(
+                        eventUid, programStageSections.get(position).getUId());
             }
-            else return EventDataEntryFragment.newInstance(eventUid, programStageSections.get(position).getUId());
         }
 
         @Override
         public int getCount() {
-            if(programStageSections == null || programStageSections.isEmpty())
+            if (programStageSections == null || programStageSections.isEmpty()) {
                 return 0;
-            else {
+            } else {
                 return programStageSections.size();
             }
         }
     }
 
-    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements View.OnClickListener {
+    private class DataEntrySectionPageChangedListener extends SimpleOnPageChangeListener implements
+            View.OnClickListener {
         private ImageView nextSectionButton, previousSectionButton;
         private TextSwitcher sectionLabelTextSwitcher;
         private int lastPosition;
@@ -210,14 +257,12 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
             if (viewPager.getAdapter().getCount() > 0) {
                 this.nextSectionButton.setVisibility(View.VISIBLE);
             }
-
         }
 
         @Override
         public void onPageSelected(int position) {
             super.onPageSelected(position);
             animateUiChanges(position);
-
         }
 
         private void animateUiChanges(int position) {
@@ -235,14 +280,12 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
             }
 
             if (position > lastPosition) {
-                //change these:
                 sectionLabelTextSwitcher.setOutAnimation(slideOutLeft);
                 sectionLabelTextSwitcher.setInAnimation(slideInRight);
-            } else if(position < lastPosition){
+            } else if (position < lastPosition) {
                 sectionLabelTextSwitcher.setInAnimation(slideInLeft);
                 sectionLabelTextSwitcher.setOutAnimation(slideOutRight);
             }
-
             lastPosition = position;
         }
 
