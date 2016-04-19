@@ -32,6 +32,7 @@
     <!-- Navigation drawer strings -->
 
     <string name="drawer_item_events">Events</string>
+    <string name="find_section">"Search for sections"</string>
 
     <string name="error">Error</string>
     <string name="invalid_credentials_error">Unable to log in due to invalid credentials.</string>
