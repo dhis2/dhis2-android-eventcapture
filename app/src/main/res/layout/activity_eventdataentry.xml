@@ -49,14 +49,14 @@
 
             <ImageView
                 android:id="@+id/previous_section"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_weight="0.1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/transparent_selector"
                 android:clickable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_arrow_back"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_chevron_left"
                 android:visibility="gone"/>
 
             <TextSwitcher
@@ -89,14 +89,14 @@
 
             <ImageView
                 android:id="@+id/next_section"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_weight="0.1"
                 android:adjustViewBounds="true"
                 android:background="@drawable/transparent_selector"
                 android:clickable="true"
-                android:padding="4dp"
-                android:src="@drawable/ic_arrow_forward"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_chevron_right"
                 android:visibility="gone"/>
 
         </LinearLayout>
