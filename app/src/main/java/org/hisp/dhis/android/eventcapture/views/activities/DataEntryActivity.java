@@ -58,12 +58,13 @@ import java.util.List;
 
 public class DataEntryActivity extends FragmentActivity implements IDataEntryView {
     public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUid";
+    public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
     private String organisationUnitUid;
     private String programUid;
     private String eventUid;
     private Event event;
     private List<ProgramStageSection> programStageSections;
-    private int programStageIx = -1;
+    private int programStageIx;
 
     private ViewPager viewPager;
     private TextSwitcher sectionLabelTextSwitcher;
@@ -118,9 +119,10 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
                 String sectionUid = data.getStringExtra(DataEntryActivity.PROGRAM_STAGE_UID);
-                for(int i = 0; i < programStageSections.size(); i++) {
-                    if(programStageSections.get(i).getUId().equals(sectionUid)) {
-                        programStageIx =  i;
+                System.out.println("sectionUid: " + sectionUid);
+                for (int i = 0; i < programStageSections.size(); i++) {
+                    if (programStageSections.get(i).getUId().equals(sectionUid)) {
+                        programStageIx = i;
                         viewPager.setCurrentItem(programStageIx);
                         break;
                     }
@@ -133,15 +135,16 @@ public class DataEntryActivity extends FragmentActivity implements IDataEntryVie
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // save selected ix, orgUnitUid, progUid, eventUid ??
-        outState.putInt(DataEntryActivity.PROGRAM_STAGE_UID, programStageIx);
+        outState.putInt(DataEntryActivity.PROGRAM_STAGE_IX, programStageIx);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         // restore selected ix, orgUnitUid, progUid, eventUid ??
-        if(savedInstanceState != null) {
-            savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_UID);
+        if (savedInstanceState != null) {
+            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+            viewPager.setCurrentItem(programStageIx);
         }
     }
 

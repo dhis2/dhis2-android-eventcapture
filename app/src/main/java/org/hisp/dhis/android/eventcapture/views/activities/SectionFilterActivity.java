@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -25,7 +24,6 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import rx.Subscription;
@@ -35,11 +33,10 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class SectionFilterActivity extends FragmentActivity implements SearchView.OnQueryTextListener, TextWatcher, View.OnClickListener {
+public class SectionFilterActivity extends FragmentActivity implements TextWatcher, View.OnClickListener {
 
     private String programStageUid;
     private List<ProgramStageSection> sectionsList;
-    private HashMap<String, ProgramStageSection> sectoinMap;
 
     private Subscription listProgramStageDataElements;
 
@@ -59,9 +56,6 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
 
         Intent intent = getIntent();
         programStageUid = intent.getStringExtra(ItemListFragment.PROGRAM_STAGE_UID);
-
-        Log.d("SectionFilterActivity", "started");
-        Log.d("SectionFilterActivity", "PROGRAM_STAGE_UID: " + programStageUid);
 
         setContentView(R.layout.activity_sctionfilter);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
@@ -106,22 +100,8 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
                 });
     }
 
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        List<ProgramStageSection> filteredSections = filter(sectionsList, newText);
-        ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
-        mRecyclerView.scrollToPosition(0);
-        return true;
-    }
-
     private List<ProgramStageSection> filter(List<ProgramStageSection> models, String query) {
         query = query.toLowerCase();
-
         final List<ProgramStageSection> filteredModelList = new ArrayList<>();
         for (ProgramStageSection model : models) {
             final String text = model.getName().toLowerCase();
@@ -139,7 +119,6 @@ public class SectionFilterActivity extends FragmentActivity implements SearchVie
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        //System.out.println("Text changed: " + s);
         List<ProgramStageSection> filteredSections = filter(sectionsList, s.toString());
         ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
         mRecyclerView.scrollToPosition(0);
