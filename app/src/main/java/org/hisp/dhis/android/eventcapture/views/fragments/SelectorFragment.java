@@ -32,6 +32,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
@@ -59,14 +60,16 @@ import javax.inject.Inject;
 public class SelectorFragment extends BaseFragment
         implements SelectorView2, OnMenuItemClickListener {
 
+    private static final String STATE_IS_REFRESHING = "state:isRefreshing";
+
     @Inject
     SelectorPresenter selectorPresenter;
 
     @Inject
     Logger logger;
 
+    SwipeRefreshLayout swipeRefreshLayout;
     PickerAdapter pickerAdapter;
-
     RecyclerView pickerRecyclerView;
 
     @Override
@@ -86,11 +89,14 @@ public class SelectorFragment extends BaseFragment
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         if (getParentToolbar() != null) {
             getParentToolbar().inflateMenu(R.menu.menu_main);
             getParentToolbar().setOnMenuItemClickListener(this);
         }
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view
+                .findViewById(R.id.swiperefreshlayout_selector);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -103,8 +109,19 @@ public class SelectorFragment extends BaseFragment
 
         if (savedInstanceState != null) {
             pickerAdapter.onRestoreInstanceState(savedInstanceState);
+
+            // this workaround is necessary because of the message queue
+            // implementation in android. If you will try to setRefreshing(true) right away,
+            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
+            // message to hide progress bar which probably is created by layout
+            swipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefreshLayout.setRefreshing(savedInstanceState
+                            .getBoolean(STATE_IS_REFRESHING, false));
+                }
+            });
         } else {
-            Toast.makeText(getActivity(), "CALLED", Toast.LENGTH_SHORT).show();
             selectorPresenter.listPickers();
         }
     }
@@ -114,6 +131,8 @@ public class SelectorFragment extends BaseFragment
         if (pickerAdapter != null) {
             pickerAdapter.onSaveInstanceState(outState);
         }
+
+        outState.putBoolean(STATE_IS_REFRESHING, swipeRefreshLayout.isRefreshing());
         super.onSaveInstanceState(outState);
     }
 
@@ -132,11 +151,13 @@ public class SelectorFragment extends BaseFragment
     @Override
     public void showProgressBar() {
         logger.d(SelectorFragment.class.getSimpleName(), "showProgressBar()");
+        swipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
     public void hideProgressBar() {
         logger.d(SelectorFragment.class.getSimpleName(), "hideProgressBar()");
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -146,13 +167,14 @@ public class SelectorFragment extends BaseFragment
 
     @Override
     public void showNoOrganisationUnitsError() {
-
+        pickerAdapter.swapData(null);
     }
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         Toast.makeText(getActivity(), "CLICK", Toast.LENGTH_LONG).show();
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
+
         switch (item.getItemId()) {
             case R.id.action_refresh: {
                 selectorPresenter.sync();
@@ -163,12 +185,10 @@ public class SelectorFragment extends BaseFragment
         return false;
     }
 
-    // TODO show animation when amount of pickers change
-    // TODO configuration change handling (when dialog is open (using retained fragments? using presenters?))
-    // TODO better APIs to build the tree
     // TODO implement filter in dialog (also think about preserving its state)
+    // TODO show animation when amount of pickers change
+    // TODO better APIs to build the tree
     // TODO provide callbacks to client code (notify clients about changes on each selection)
-    // TODO SwipeRefreshLayout implementation
     private static class PickerAdapter extends RecyclerView.Adapter {
         private static final String PICKER_ADAPTER_STATE = "state:pickerAdapter";
 

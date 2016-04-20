@@ -64,7 +64,7 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
 
         FilterableDialogFragment fragment = new FilterableDialogFragment();
         fragment.setArguments(arguments);
-        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
+        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Dialog);
 
         return fragment;
     }
