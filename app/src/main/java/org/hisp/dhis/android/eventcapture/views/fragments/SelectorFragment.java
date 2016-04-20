@@ -97,6 +97,8 @@ public class SelectorFragment extends BaseFragment
 
         swipeRefreshLayout = (SwipeRefreshLayout) view
                 .findViewById(R.id.swiperefreshlayout_selector);
+        swipeRefreshLayout.setColorSchemeResources(
+                R.color.color_primary_default);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
