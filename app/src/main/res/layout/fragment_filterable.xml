@@ -39,6 +39,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/titlebar_height"
         android:background="@color/color_primary_default"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:orientation="horizontal"
         android:weightSum="1">
 
@@ -64,6 +66,15 @@
             android:src="@drawable/ic_cancel_white" />
 
     </LinearLayout>
+
+    <org.hisp.dhis.client.sdk.ui.views.FontEditText
+        android:id="@+id/edittext_search_picker_items"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:hint="Filter available options"
+        android:textSize="@dimen/text_size_medium"
+        app:font="@string/font_name_regular" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerview_picker_items"

@@ -33,17 +33,15 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment2;
+import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
-import org.hisp.dhis.client.sdk.ui.fragments.PickerFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
 import javax.inject.Inject;
@@ -107,7 +105,7 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
         switch (item.getItemId()) {
             case DRAWER_ITEM_EVENTS_ID: {
                 attachFragment(WrapperFragment.newInstance(
-                        SelectorFragment2.class, getString(R.string.drawer_item_events)));
+                        SelectorFragment.class, getString(R.string.drawer_item_events)));
                 break;
             }
         }
@@ -127,18 +125,5 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     @Override
     public void setUserLetter(CharSequence userLetters) {
         getUsernameLetterTextView().setText(userLetters);
-    }
-
-    @Override
-    public boolean dispatchTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            PickerFragment pickerFragment = (PickerFragment)
-                    getSupportFragmentManager().findFragmentByTag(PickerFragment.TAG);
-
-            if (pickerFragment != null) {
-                pickerFragment.dispatchTouchEvent(event);
-            }
-        }
-        return super.dispatchTouchEvent(event);
     }
 }

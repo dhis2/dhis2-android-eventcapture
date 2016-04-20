@@ -34,8 +34,8 @@ import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter2;
-import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter2Impl;
+import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
@@ -118,10 +118,10 @@ public class UserModule {
 
     @Provides
     @UserScope
-    public SelectorPresenter2 providesSelectorPresenter(
+    public SelectorPresenter providesSelectorPresenter(
             @Nullable UserOrganisationUnitInteractor interactor,
             @Nullable UserProgramInteractor programInteractor,
             Logger logger) {
-        return new SelectorPresenter2Impl(interactor, programInteractor, logger);
+        return new SelectorPresenterImpl(interactor, programInteractor, logger);
     }
 }

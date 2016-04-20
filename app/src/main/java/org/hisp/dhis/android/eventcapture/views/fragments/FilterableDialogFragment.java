@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -49,7 +50,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FilterableDialogFragment extends AppCompatDialogFragment {
-    private static final String ARGS_PICKER = "args:picker";
+    // for fragment manager
+    public static final String TAG = FilterableDialogFragment.class.getSimpleName();
+
+    // for arguments bundle
+    public static final String ARGS_PICKER = "args:picker";
 
     private OnPickerItemClickListener onPickerItemClickListener;
 
@@ -112,7 +117,7 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
         recyclerView.addItemDecoration(new DividerDecoration(
                 ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
 
-        itemAdapter.swapData(picker.getItems());
+        itemAdapter.swapData(picker);
     }
 
     public void setOnPickerItemClickListener(OnPickerItemClickListener clickListener) {
@@ -123,12 +128,11 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
         void onPickerItemClickListener(Picker selectedPicker);
     }
 
-    // TODO show current selection (if there is any)
     // TODO search field
-    // TODO configuration changes
     private class PickerItemAdapter extends RecyclerView.Adapter {
         private final LayoutInflater inflater;
         private final List<Picker> pickers;
+        private Picker picker;
 
         public PickerItemAdapter() {
             inflater = LayoutInflater.from(getActivity());
@@ -146,7 +150,12 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
             PickerItemViewHolder pickerViewHolder = (PickerItemViewHolder) holder;
             Picker picker = pickers.get(position);
 
-            pickerViewHolder.updateViewHolder(picker);
+            if (this.picker.getSelectedItem() != null &&
+                    picker.equals(this.picker.getSelectedItem())) {
+                pickerViewHolder.updateViewHolder(picker, true);
+            } else {
+                pickerViewHolder.updateViewHolder(picker, false);
+            }
         }
 
         @Override
@@ -154,11 +163,12 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
             return pickers.size();
         }
 
-        public void swapData(List<Picker> pickers) {
+        public void swapData(Picker newPicker) {
+            this.picker = newPicker;
             this.pickers.clear();
 
-            if (pickers != null) {
-                this.pickers.addAll(pickers);
+            if (newPicker != null) {
+                this.pickers.addAll(newPicker.getItems());
             }
 
             notifyDataSetChanged();
@@ -174,10 +184,27 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
                 this.textViewLabel = (TextView) itemView;
                 this.onTextViewLabelClickListener = new OnClickListener();
 
+                ColorStateList colorStateList = new ColorStateList(
+                        new int[][]{
+                                // for selected state
+                                new int[]{android.R.attr.state_selected},
+
+                                // default color state
+                                new int[]{}
+                        },
+                        new int[]{
+                                ContextCompat.getColor(
+                                        getActivity(), R.color.color_primary_default),
+                                textViewLabel.getCurrentTextColor()
+                        });
+
+                this.textViewLabel.setTextColor(colorStateList);
+
                 textViewLabel.setOnClickListener(onTextViewLabelClickListener);
             }
 
-            public void updateViewHolder(Picker picker) {
+            public void updateViewHolder(Picker picker, boolean isSelected) {
+                textViewLabel.setSelected(isSelected);
                 textViewLabel.setText(picker.getName());
                 onTextViewLabelClickListener.setPicker(picker);
             }

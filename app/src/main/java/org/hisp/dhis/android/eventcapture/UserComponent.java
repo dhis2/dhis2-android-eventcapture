@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment2;
+import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 
 import dagger.Subcomponent;
 
@@ -53,5 +53,5 @@ public interface UserComponent {
 
     void inject(HomeActivity homeActivity);
 
-    void inject(SelectorFragment2 selectorFragment);
+    void inject(SelectorFragment selectorFragment);
 }

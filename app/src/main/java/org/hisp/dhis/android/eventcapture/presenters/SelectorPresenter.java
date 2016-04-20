@@ -28,7 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+public interface SelectorPresenter extends Presenter {
+    void sync();
 
-public interface SelectorPresenter {
-    void initializeSynchronization(Boolean force);
+    void listPickers();
 }

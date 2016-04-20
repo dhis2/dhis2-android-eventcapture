@@ -43,11 +43,11 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
-import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
 import org.hisp.dhis.android.eventcapture.RxBus;
+import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
 import org.hisp.dhis.android.eventcapture.views.EventListRowImpl;
 import org.hisp.dhis.android.eventcapture.views.ItemListView;
+import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -84,7 +84,7 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
 
     public ItemListFragment() {
         //empty constructor
-   }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -111,22 +111,21 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
         busSubscription = rxBus.toObserverable().subscribe(new Action1<Object>() {
             @Override
             public void call(Object event) {
-                if (event instanceof SelectorFragment.OnOrganisationUnitPickerValueUpdated) {
-                    SelectorFragment.OnOrganisationUnitPickerValueUpdated onOrgUnitSelectedClick =
-                            (SelectorFragment.OnOrganisationUnitPickerValueUpdated) event;
-                    setOrganisationUnitObservable(onOrgUnitSelectedClick.getOrganisationUnitObservable());
-                }
-                if (event instanceof SelectorFragment.OnProgramPickerValueUpdated) {
-                    SelectorFragment.OnProgramPickerValueUpdated onProgramSelectedClick =
-                            (SelectorFragment.OnProgramPickerValueUpdated) event;
-                    setProgramObservable(onProgramSelectedClick.getProgramObservable());
-                }
+//                if (event instanceof SelectorFragment.OnOrganisationUnitPickerValueUpdated) {
+//                    SelectorFragment.OnOrganisationUnitPickerValueUpdated onOrgUnitSelectedClick =
+//                            (SelectorFragment.OnOrganisationUnitPickerValueUpdated) event;
+//                    setOrganisationUnitObservable(onOrgUnitSelectedClick.getOrganisationUnitObservable());
+//                }
+//                if (event instanceof SelectorFragment.OnProgramPickerValueUpdated) {
+//                    SelectorFragment.OnProgramPickerValueUpdated onProgramSelectedClick =
+//                            (SelectorFragment.OnProgramPickerValueUpdated) event;
+//                    setProgramObservable(onProgramSelectedClick.getProgramObservable());
+//                }
 
                 itemListPresenter.loadEventList
                         (organisationUnitObservable,
                                 programObservable);
 
-                //TODO: remove this when the Rx ItemListPresenter NullPointer exception is resolved.
                 activate();
             }
         });
@@ -153,7 +152,7 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
             recyclerView.setAdapter(itemListRowAdapter);
 
             for (ItemListRow itemListRow : itemListRowCollection) {
-                if(itemListRow instanceof EventListRowImpl) {
+                if (itemListRow instanceof EventListRowImpl) {
                     final EventListRowImpl eventListRow = (EventListRowImpl) itemListRow;
 
                     eventListRow.setOnRowClickListener(new View.OnClickListener() {
@@ -260,15 +259,15 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == floatingActionButton.getId()) {
-        Intent intent = new Intent(getContext(), DataEntryActivity.class);
-        intent.putExtra(PROGRAM_UID,
-                programObservable.toBlocking().first().getUId());
-        intent.putExtra(ORG_UNIT_UID,
-                organisationUnitObservable.toBlocking().first().getUId());
-        intent.putExtra(EVENT_UID,"");
+        if (v.getId() == floatingActionButton.getId()) {
+            Intent intent = new Intent(getContext(), DataEntryActivity.class);
+            intent.putExtra(PROGRAM_UID,
+                    programObservable.toBlocking().first().getUId());
+            intent.putExtra(ORG_UNIT_UID,
+                    organisationUnitObservable.toBlocking().first().getUId());
+            intent.putExtra(EVENT_UID, "");
 
-        getContext().startActivity(intent);
+            getContext().startActivity(intent);
         }
 //        else if(v.getId() == editColumnsButton.getId()) {
 //            Timber.d("Edit columns button");
