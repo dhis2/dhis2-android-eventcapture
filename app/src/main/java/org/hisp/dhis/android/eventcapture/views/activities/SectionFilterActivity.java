@@ -5,13 +5,14 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -34,7 +35,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class SectionFilterActivity extends FragmentActivity implements TextWatcher, View.OnClickListener {
+public class SectionFilterActivity extends AppCompatActivity implements TextWatcher, View.OnClickListener {
 
     private String programStageUid;
     private List<ProgramStageSection> sectionsList;
@@ -74,7 +75,12 @@ public class SectionFilterActivity extends FragmentActivity implements TextWatch
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         mToolbar.setTitleTextColor(Color.WHITE);
         mToolbar.setTitle("Sections");
-        
+
+        //show up arrow
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         //initializes the data and adapter.
         initSectionList();
     }
@@ -115,6 +121,12 @@ public class SectionFilterActivity extends FragmentActivity implements TextWatch
             }
         }
         return filteredModelList;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        onBackPressed();
+        return true;
     }
 
     @Override
