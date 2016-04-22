@@ -1,8 +1,35 @@
+/*
+ * Copyright (c) 2016, University of Oslo
+ *
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.hisp.dhis.android.eventcapture.views.activities;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -20,116 +47,54 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenterImpl;
 import org.hisp.dhis.android.eventcapture.views.fragments.ItemListFragment;
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
-import timber.log.Timber;
+public class SectionFilterActivity extends AppCompatActivity implements SectionFilterView,
+        TextWatcher, View.OnClickListener {
 
-public class SectionFilterActivity extends AppCompatActivity implements TextWatcher, View.OnClickListener {
-
-    private String programStageUid;
     private List<ProgramStageSection> sectionsList;
-
-    private Subscription listProgramStageDataElements;
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
     private EditText mSearchTextField;
-    private ImageButton mClearButton;
     private Boolean configChanged = false;
 
-    public List<ProgramStageSection> getSectionList() {
-        return sectionsList;
-    }
+    private SectionFilterPresenterImpl mPresenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (savedInstanceState != null) {
+            configChanged = true;
+        }
+
         Intent intent = getIntent();
-        programStageUid = intent.getStringExtra(ItemListFragment.PROGRAM_STAGE_UID);
+        String programStageUid = intent.getStringExtra(ItemListFragment.PROGRAM_STAGE_UID);
 
         setContentView(R.layout.activity_sctionfilter);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
         mRecyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mClearButton = (ImageButton) findViewById(R.id.button_search_clear);
+        ImageButton mClearButton = (ImageButton) findViewById(R.id.button_search_clear);
         mClearButton.setOnClickListener(this);
 
         mSearchTextField = (EditText) findViewById(R.id.section_search);
         mSearchTextField.addTextChangedListener(this);
 
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        mToolbar.setTitleTextColor(Color.WHITE);
-        mToolbar.setTitle("Sections");
-
-        //show up arrow
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //initializes the data and adapter.
-        initSectionList();
-        if (savedInstanceState != null) {
-            configChanged = true;
-        }
-    }
-
-    public void initSectionList() {
-        listProgramStageDataElements = D2.programStages().get(programStageUid)
-                .map(new Func1<ProgramStage, List<ProgramStageSection>>() {
-                    @Override
-                    public List<ProgramStageSection> call(ProgramStage programStage) {
-                        return D2.programStageSections().list(programStage).toBlocking().first();
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ProgramStageSection>>() {
-                    @Override
-                    public void call(List<ProgramStageSection> programStageSections) {
-                        sectionsList = new ArrayList<>();
-                        sectionsList.addAll(programStageSections);
-                        mAdapter = new SectionFilterAdapter(sectionsList);
-                        mRecyclerView.setAdapter(mAdapter);
-                        if (configChanged) {
-                            onTextChanged(mSearchTextField.getText().toString(), 0, 0, 0);
-                            System.out.println("config changed !");
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Timber.d(throwable.toString());
-                    }
-                });
-    }
-
-    private List<ProgramStageSection> filter(List<ProgramStageSection> models, String query) {
-        query = query.toLowerCase();
-        final List<ProgramStageSection> filteredModelList = new ArrayList<>();
-
-        for (ProgramStageSection model : models) {
-            final String text = model.getName().toLowerCase();
-            if (text.contains(query)) {
-                filteredModelList.add(model);
-            }
-        }
-        return filteredModelList;
+        mPresenter = new SectionFilterPresenterImpl(this, programStageUid);
     }
 
     @Override
@@ -140,8 +105,7 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
         if (sectionsList != null) {
-            List<ProgramStageSection> filteredSections = filter(sectionsList, s.toString());
-            ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
+            ((SectionFilterAdapter) mAdapter).setItems(mPresenter.filter(sectionsList, s.toString()));
             mRecyclerView.scrollToPosition(0);
         }
     }
@@ -159,8 +123,18 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
 
     @Override
     public void onClick(View v) {
-        //clear button clicked.
         mSearchTextField.setText("");
+    }
+
+    @Override
+    public void setSectionList(List<ProgramStageSection> sections) {
+        sectionsList = new ArrayList<>();
+        sectionsList.addAll(sections);
+        mAdapter = new SectionFilterActivity.SectionFilterAdapter(sections);
+        mRecyclerView.setAdapter(mAdapter);
+        if (configChanged) {
+            onTextChanged(mSearchTextField.getText().toString(), 0, 0, 0);
+        }
     }
 
     //**********************************************************************************************
@@ -174,16 +148,13 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
 
         @Override
         public SectionFilterAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.sectionfilter_text_view, parent, false);
-
-            ViewHolder vh = new ViewHolder(v);
-            return vh;
+            return new ViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.sectionfilter_text_view, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            holder.mTextView.setText(mSectionList.get(position).getName());
+        public void onBindViewHolder(ViewHolder viewHolder, int position) {
+            viewHolder.mTextView.setText(mSectionList.get(position).getName());
         }
 
         @Override
@@ -201,9 +172,9 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
         public class ViewHolder extends RecyclerView.ViewHolder {
             public TextView mTextView;
 
-            public ViewHolder(View v) {
-                super(v);
-                mTextView = (TextView) v.findViewById(R.id.sectionlist_text);
+            public ViewHolder(View view) {
+                super(view);
+                mTextView = (TextView) view.findViewById(R.id.sectionlist_text);
                 mTextView.findViewById(R.id.sectionlist_text).setOnClickListener(
                         new View.OnClickListener() {
                             @Override
