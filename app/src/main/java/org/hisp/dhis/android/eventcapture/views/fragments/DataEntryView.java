@@ -35,6 +35,6 @@ import java.util.List;
 
 public interface DataEntryView {
     void initializeViewPager(List<ProgramStageSection> programStageSections);
-
+    void setTitle(String title);
     void setEvent(Event event);
 }

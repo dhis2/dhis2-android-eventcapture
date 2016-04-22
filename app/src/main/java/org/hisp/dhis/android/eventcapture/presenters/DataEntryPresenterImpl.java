@@ -57,6 +57,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
     public DataEntryPresenterImpl(DataEntryView dataEntryView) {
         this.dataEntryView = dataEntryView;
+
     }
 
     public String getProgramStageUid() {
@@ -65,12 +66,17 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
     @Override
     public void listProgramStageSections(String programId) {
+        //init title:
+        String name = D2.programs().get(programId).toBlocking().first().getDisplayName();
+        dataEntryView.setTitle(name);
+
         listProgramStageDataElements = D2.programs().get(programId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<Program, List<ProgramStage>>() {
                     @Override
                     public List<ProgramStage> call(Program program) {
+                        //dataEntryView.setTitle(program.getDisplayName() );
                         return D2.programStages().list(program).toBlocking().first();
                     }
                 }).map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
@@ -93,7 +99,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         Timber.d(throwable.toString());
                     }
                 });
-
     }
 
     @Override
@@ -120,7 +125,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         Event event = new Event();
                         setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
                         return event;
-
                     }
                 }).subscribe(new Action1<Event>() {
                     @Override
@@ -142,20 +146,18 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         List<ProgramStageDataElement> programStageDataElements =
                 D2.programStageDataElements().list(programStage).toBlocking().first();
         List<TrackedEntityDataValue> trackedEntityDataValues = new ArrayList<>();
-
-        for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
-
+//      for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
 //            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
 //                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
 //                    userAccount.getDisplayName(), false);
 
 
 //            trackedEntityDataValues.add(trackedEntityDataValue);
-        }
+//        }
         event.setDataValues(trackedEntityDataValues);
         //TODO fix this stuff
-            TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
-            trackedEntityDataValues.add(trackedEntityDataValue);
+        TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
+        trackedEntityDataValues.add(trackedEntityDataValue);
 
         // event.setTrackedEntityDataValues(trackedEntityDataValues);
 

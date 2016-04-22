@@ -123,7 +123,6 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle("Data Entry");
     }
 
     @Override
@@ -183,6 +182,11 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
                             event.getProgramStage()),
                             "EventDataEntryFragment").commit();
         }
+    }
+
+    @Override
+    public void setTitle(String title) {
+        super.setTitle(title);
     }
 
     @Override
