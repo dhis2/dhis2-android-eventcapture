@@ -60,11 +60,12 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
 
     public static FilterableDialogFragment newInstance(Picker picker) {
         Bundle arguments = new Bundle();
-        arguments.putParcelable(ARGS_PICKER, picker);
+        // arguments.putParcelable(ARGS_PICKER, picker);
+        arguments.putSerializable(ARGS_PICKER, picker);
 
         FilterableDialogFragment fragment = new FilterableDialogFragment();
         fragment.setArguments(arguments);
-        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Dialog);
+        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Base);
 
         return fragment;
     }
@@ -84,7 +85,7 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         Picker picker = null;
         if (getArguments() != null) {
-            picker = getArguments().getParcelable(ARGS_PICKER);
+            picker = (Picker) getArguments().getSerializable(ARGS_PICKER);
         }
 
         if (picker == null) {
@@ -150,8 +151,8 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
             PickerItemViewHolder pickerViewHolder = (PickerItemViewHolder) holder;
             Picker picker = pickers.get(position);
 
-            if (this.picker.getSelectedItem() != null &&
-                    picker.equals(this.picker.getSelectedItem())) {
+            if (this.picker.getSelectedChild() != null &&
+                    picker.equals(this.picker.getSelectedChild())) {
                 pickerViewHolder.updateViewHolder(picker, true);
             } else {
                 pickerViewHolder.updateViewHolder(picker, false);
@@ -168,7 +169,7 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
             this.pickers.clear();
 
             if (newPicker != null) {
-                this.pickers.addAll(newPicker.getItems());
+                this.pickers.addAll(newPicker.getChildren());
             }
 
             notifyDataSetChanged();
@@ -199,8 +200,7 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
                         });
 
                 this.textViewLabel.setTextColor(colorStateList);
-
-                textViewLabel.setOnClickListener(onTextViewLabelClickListener);
+                this.textViewLabel.setOnClickListener(onTextViewLabelClickListener);
             }
 
             public void updateViewHolder(Picker picker, boolean isSelected) {

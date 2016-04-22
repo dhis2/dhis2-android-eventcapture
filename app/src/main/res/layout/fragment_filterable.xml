@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2016, University of Oslo
   ~
   ~ All rights reserved.
@@ -71,8 +70,11 @@
         android:id="@+id/edittext_search_picker_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        android:hint="Filter available options"
+        android:layout_margin="13dp"
+        android:drawableLeft="@drawable/ic_search"
+        android:drawablePadding="4dp"
+        android:drawableStart="@drawable/ic_search"
+        android:hint="@string/filter_options"
         android:textSize="@dimen/text_size_medium"
         app:font="@string/font_name_regular" />
 

@@ -30,6 +30,7 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -78,7 +79,6 @@ public class SelectorFragment extends BaseFragment
 
         ((EventCaptureApp) getActivity().getApplication())
                 .getUserComponent().inject(this);
-        System.out.println("onCreate()");
     }
 
     @Nullable
@@ -174,7 +174,6 @@ public class SelectorFragment extends BaseFragment
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        Toast.makeText(getActivity(), "CLICK", Toast.LENGTH_LONG).show();
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
         switch (item.getItemId()) {
@@ -226,7 +225,7 @@ public class SelectorFragment extends BaseFragment
 
                 // if last picker does not gave any items, we don't want
                 // to show it as picker in the list, but use it as value for parent
-                if (lastPicker.getItems().isEmpty()) {
+                if (lastPicker.getChildren().isEmpty()) {
                     itemCount = itemCount - 1;
                 }
             }
@@ -236,14 +235,17 @@ public class SelectorFragment extends BaseFragment
 
         public void onSaveInstanceState(Bundle outState) {
             if (outState != null && pickerTree != null) {
-                outState.putParcelable(PICKER_ADAPTER_STATE, pickerTree);
+                // outState.putParcelable(PICKER_ADAPTER_STATE, pickerTree);
+                outState.putSerializable(PICKER_ADAPTER_STATE, pickerTree);
             }
         }
 
         public void onRestoreInstanceState(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-                Picker pickerTree = savedInstanceState
-                        .getParcelable(PICKER_ADAPTER_STATE);
+//                Picker pickerTree = savedInstanceState
+//                        .getParcelable(PICKER_ADAPTER_STATE);
+                Picker pickerTree = (Picker) savedInstanceState
+                        .getSerializable(PICKER_ADAPTER_STATE);
                 swapData(pickerTree);
             }
         }
@@ -258,10 +260,10 @@ public class SelectorFragment extends BaseFragment
                 Picker node = getRootNode(pickerTree);
                 do {
                     // we don't want to add leaf nodes to list
-                    if (!node.getItems().isEmpty()) {
+                    if (!node.getChildren().isEmpty()) {
                         pickers.add(node);
                     }
-                } while ((node = node.getSelectedItem()) != null);
+                } while ((node = node.getSelectedChild()) != null);
             }
 
             notifyDataSetChanged();
@@ -304,8 +306,8 @@ public class SelectorFragment extends BaseFragment
             }
 
             public void update(Picker picker) {
-                if (picker.getSelectedItem() != null) {
-                    pickerLabel.setText(picker.getSelectedItem().getName());
+                if (picker.getSelectedChild() != null) {
+                    pickerLabel.setText(picker.getSelectedChild().getName());
                 } else {
                     pickerLabel.setText(picker.getHint());
                 }
@@ -337,8 +339,8 @@ public class SelectorFragment extends BaseFragment
                     return;
                 }
 
-                Picker existingPicker = arguments
-                        .getParcelable(FilterableDialogFragment.ARGS_PICKER);
+                Picker existingPicker = (Picker) arguments
+                        .getSerializable(FilterableDialogFragment.ARGS_PICKER);
                 if (picker.equals(existingPicker)) {
                     FilterableDialogFragment.OnPickerItemClickListener listener =
                             new OnItemClickedListener();

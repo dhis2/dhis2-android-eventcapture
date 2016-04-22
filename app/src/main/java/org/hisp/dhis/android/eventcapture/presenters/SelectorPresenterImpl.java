@@ -138,11 +138,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                             assignedProgram.getUId(),
                                             assignedProgram.getDisplayName(),
                                             organisationUnitPicker);
-                                    organisationUnitPicker.addItem(programPicker);
+                                    organisationUnitPicker.addChild(programPicker);
                                 }
                             }
 
-                            rootPicker.addItem(organisationUnitPicker);
+                            rootPicker.addChild(organisationUnitPicker);
                         }
 
                         return rootPicker;
