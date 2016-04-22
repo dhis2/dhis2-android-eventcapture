@@ -188,8 +188,8 @@ public class SelectorFragment extends BaseFragment
 
     // TODO implement filter in dialog (also think about preserving its state)
     // TODO show animation when amount of pickers change
-    // TODO better APIs to build the tree
     // TODO provide callbacks to client code (notify clients about changes on each selection)
+    // TODO show selection chain in picker list
     private static class PickerAdapter extends RecyclerView.Adapter {
         private static final String PICKER_ADAPTER_STATE = "state:pickerAdapter";
 
@@ -235,15 +235,12 @@ public class SelectorFragment extends BaseFragment
 
         public void onSaveInstanceState(Bundle outState) {
             if (outState != null && pickerTree != null) {
-                // outState.putParcelable(PICKER_ADAPTER_STATE, pickerTree);
                 outState.putSerializable(PICKER_ADAPTER_STATE, pickerTree);
             }
         }
 
         public void onRestoreInstanceState(Bundle savedInstanceState) {
             if (savedInstanceState != null) {
-//                Picker pickerTree = savedInstanceState
-//                        .getParcelable(PICKER_ADAPTER_STATE);
                 Picker pickerTree = (Picker) savedInstanceState
                         .getSerializable(PICKER_ADAPTER_STATE);
                 swapData(pickerTree);

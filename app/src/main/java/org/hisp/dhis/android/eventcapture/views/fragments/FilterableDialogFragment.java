@@ -30,24 +30,30 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
+import org.hisp.dhis.client.sdk.ui.views.callbacks.AbsTextWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class FilterableDialogFragment extends AppCompatDialogFragment {
     // for fragment manager
@@ -65,7 +71,7 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
 
         FilterableDialogFragment fragment = new FilterableDialogFragment();
         fragment.setArguments(arguments);
-        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Base);
+        fragment.setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_Dialog);
 
         return fragment;
     }
@@ -112,13 +118,20 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        PickerItemAdapter itemAdapter = new PickerItemAdapter();
+        final PickerItemAdapter itemAdapter = new PickerItemAdapter(picker);
         recyclerView.setAdapter(itemAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(new DividerDecoration(
                 ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
 
-        itemAdapter.swapData(picker);
+        EditText filterEditText = (EditText) view
+                .findViewById(R.id.edittext_search_picker_items);
+        filterEditText.addTextChangedListener(new AbsTextWatcher() {
+            @Override
+            public void afterTextChanged(Editable editable) {
+                itemAdapter.filter(editable.toString());
+            }
+        });
     }
 
     public void setOnPickerItemClickListener(OnPickerItemClickListener clickListener) {
@@ -129,15 +142,20 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
         void onPickerItemClickListener(Picker selectedPicker);
     }
 
-    // TODO search field
     private class PickerItemAdapter extends RecyclerView.Adapter {
+        // view inflater
         private final LayoutInflater inflater;
-        private final List<Picker> pickers;
-        private Picker picker;
 
-        public PickerItemAdapter() {
-            inflater = LayoutInflater.from(getActivity());
-            pickers = new ArrayList<>();
+        // Adapter data
+        private final Picker currentPicker;
+        private final List<Picker> originalPickers;
+        private final List<Picker> filteredPickers;
+
+        public PickerItemAdapter(Picker currentPicker) {
+            this.inflater = LayoutInflater.from(getActivity());
+            this.currentPicker = isNull(currentPicker, "Picker must not be null");
+            this.originalPickers = currentPicker.getChildren();
+            this.filteredPickers = new ArrayList<>(currentPicker.getChildren());
         }
 
         @Override
@@ -149,10 +167,10 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             PickerItemViewHolder pickerViewHolder = (PickerItemViewHolder) holder;
-            Picker picker = pickers.get(position);
+            Picker picker = filteredPickers.get(position);
 
-            if (this.picker.getSelectedChild() != null &&
-                    picker.equals(this.picker.getSelectedChild())) {
+            if (this.currentPicker.getSelectedChild() != null &&
+                    picker.equals(this.currentPicker.getSelectedChild())) {
                 pickerViewHolder.updateViewHolder(picker, true);
             } else {
                 pickerViewHolder.updateViewHolder(picker, false);
@@ -161,15 +179,17 @@ public class FilterableDialogFragment extends AppCompatDialogFragment {
 
         @Override
         public int getItemCount() {
-            return pickers.size();
+            return filteredPickers.size();
         }
 
-        public void swapData(Picker newPicker) {
-            this.picker = newPicker;
-            this.pickers.clear();
+        private void filter(@NonNull String query) {
+            filteredPickers.clear();
 
-            if (newPicker != null) {
-                this.pickers.addAll(newPicker.getChildren());
+            query = query.toLowerCase();
+            for (Picker picker : originalPickers) {
+                if (picker.getName() != null && picker.getName().toLowerCase().contains(query)) {
+                    filteredPickers.add(picker);
+                }
             }
 
             notifyDataSetChanged();
