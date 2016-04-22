@@ -34,12 +34,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.SimpleOnPageChangeListener;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -48,16 +50,15 @@ import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
-import org.hisp.dhis.android.eventcapture.views.fragments.EventDataEntryFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
+import org.hisp.dhis.android.eventcapture.views.fragments.EventDataEntryFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.List;
 
-public class DataEntryActivity extends FragmentActivity implements DataEntryView {
+public class DataEntryActivity extends AppCompatActivity implements DataEntryView {
     public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUid";
     public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
 
@@ -117,6 +118,12 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
             programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_UID);
             viewPager.setCurrentItem(programStageIx);
         }
+
+        //show up arrow
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("Data Entry");
     }
 
     @Override
@@ -151,6 +158,12 @@ public class DataEntryActivity extends FragmentActivity implements DataEntryView
             programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
             viewPager.setCurrentItem(programStageIx);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        onBackPressed();
+        return true;
     }
 
     @Override
