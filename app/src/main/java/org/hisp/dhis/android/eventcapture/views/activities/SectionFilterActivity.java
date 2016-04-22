@@ -47,6 +47,7 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
     private RecyclerView.LayoutManager mLayoutManager;
     private EditText mSearchTextField;
     private ImageButton mClearButton;
+    private Boolean configChanged = false;
 
     public List<ProgramStageSection> getSectionList() {
         return sectionsList;
@@ -83,6 +84,9 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
 
         //initializes the data and adapter.
         initSectionList();
+        if (savedInstanceState != null) {
+            configChanged = true;
+        }
     }
 
     public void initSectionList() {
@@ -102,6 +106,10 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
                         sectionsList.addAll(programStageSections);
                         mAdapter = new SectionFilterAdapter(sectionsList);
                         mRecyclerView.setAdapter(mAdapter);
+                        if (configChanged) {
+                            onTextChanged(mSearchTextField.getText().toString(), 0, 0, 0);
+                            System.out.println("config changed !");
+                        }
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -114,6 +122,7 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
     private List<ProgramStageSection> filter(List<ProgramStageSection> models, String query) {
         query = query.toLowerCase();
         final List<ProgramStageSection> filteredModelList = new ArrayList<>();
+
         for (ProgramStageSection model : models) {
             final String text = model.getName().toLowerCase();
             if (text.contains(query)) {
@@ -124,26 +133,28 @@ public class SectionFilterActivity extends AppCompatActivity implements TextWatc
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        onBackPressed();
-        return true;
-    }
-
-    @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
     }
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        List<ProgramStageSection> filteredSections = filter(sectionsList, s.toString());
-        ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
-        mRecyclerView.scrollToPosition(0);
+        if (sectionsList != null) {
+            List<ProgramStageSection> filteredSections = filter(sectionsList, s.toString());
+            ((SectionFilterAdapter) mAdapter).setItems(filteredSections);
+            mRecyclerView.scrollToPosition(0);
+        }
     }
 
     @Override
     public void afterTextChanged(Editable s) {
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        onBackPressed();
+        return true;
     }
 
     @Override
