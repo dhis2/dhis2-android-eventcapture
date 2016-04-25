@@ -51,6 +51,9 @@ import rx.subscriptions.CompositeSubscription;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class SelectorPresenterImpl implements SelectorPresenter {
+    private static final String ORGANISATION_UNIT_PICKER = "picker:organisationUnit";
+    private static final String PROGRAM_PICKER = "picker:program";
+
     private final UserOrganisationUnitInteractor organisationUnitInteractor;
     private final UserProgramInteractor programInteractor;
     private final Logger logger;

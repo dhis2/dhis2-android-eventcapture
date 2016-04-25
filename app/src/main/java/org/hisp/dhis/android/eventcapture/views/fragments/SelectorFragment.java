@@ -30,10 +30,10 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
@@ -43,7 +43,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
@@ -108,6 +107,7 @@ public class SelectorFragment extends BaseFragment
         pickerRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_pickers);
         pickerRecyclerView.setLayoutManager(layoutManager);
         pickerRecyclerView.setAdapter(pickerAdapter);
+        pickerRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         if (savedInstanceState != null) {
             pickerAdapter.onRestoreInstanceState(savedInstanceState);
