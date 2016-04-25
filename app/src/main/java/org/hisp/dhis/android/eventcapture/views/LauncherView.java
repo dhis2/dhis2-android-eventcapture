@@ -26,10 +26,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views;
 
-public interface OnAllPickersSelectedListener {
-    void activate();
+public interface LauncherView extends View {
+    void navigateToLogin();
 
-    void deactivate();
+    void navigateToHome();
 }

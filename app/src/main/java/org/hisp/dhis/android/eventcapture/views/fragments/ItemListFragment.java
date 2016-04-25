@@ -112,22 +112,21 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
         busSubscription = rxBus.toObserverable().subscribe(new Action1<Object>() {
             @Override
             public void call(Object event) {
-                if (event instanceof SelectorFragment.OnOrganisationUnitPickerValueUpdated) {
-                    SelectorFragment.OnOrganisationUnitPickerValueUpdated onOrgUnitSelectedClick =
-                            (SelectorFragment.OnOrganisationUnitPickerValueUpdated) event;
-                    setOrganisationUnitObservable(onOrgUnitSelectedClick.getOrganisationUnitObservable());
-                }
-                if (event instanceof SelectorFragment.OnProgramPickerValueUpdated) {
-                    SelectorFragment.OnProgramPickerValueUpdated onProgramSelectedClick =
-                            (SelectorFragment.OnProgramPickerValueUpdated) event;
-                    setProgramObservable(onProgramSelectedClick.getProgramObservable());
-                }
+//                if (event instanceof SelectorFragment.OnOrganisationUnitPickerValueUpdated) {
+//                    SelectorFragment.OnOrganisationUnitPickerValueUpdated onOrgUnitSelectedClick =
+//                            (SelectorFragment.OnOrganisationUnitPickerValueUpdated) event;
+//                    setOrganisationUnitObservable(onOrgUnitSelectedClick.getOrganisationUnitObservable());
+//                }
+//                if (event instanceof SelectorFragment.OnProgramPickerValueUpdated) {
+//                    SelectorFragment.OnProgramPickerValueUpdated onProgramSelectedClick =
+//                            (SelectorFragment.OnProgramPickerValueUpdated) event;
+//                    setProgramObservable(onProgramSelectedClick.getProgramObservable());
+//                }
 
                 itemListPresenter.loadEventList
                         (organisationUnitObservable,
                                 programObservable);
 
-                //TODO: remove this when the Rx ItemListPresenter NullPointer exception is resolved.
                 activate();
             }
         });

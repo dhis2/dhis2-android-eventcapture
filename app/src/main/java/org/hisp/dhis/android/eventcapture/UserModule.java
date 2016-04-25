@@ -34,7 +34,11 @@ import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
+import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -69,6 +73,29 @@ public class UserModule {
     }
 
     @Provides
+    @Nullable
+    @UserScope
+    public UserOrganisationUnitInteractor providesUserOrganisationUnitInteractor() {
+        if (D2.isConfigured()) {
+            return D2.me().organisationUnits();
+        }
+
+        return null;
+    }
+
+
+    @Provides
+    @Nullable
+    @UserScope
+    public UserProgramInteractor providesUserProgramInteractor() {
+        if (D2.isConfigured()) {
+            return D2.me().programs();
+        }
+
+        return null;
+    }
+
+    @Provides
     @UserScope
     public LauncherPresenter providesLauncherPresenter(
             @Nullable UserAccountInteractor accountInteractor) {
@@ -87,5 +114,14 @@ public class UserModule {
     public HomePresenter providesHomerPresenter(
             @Nullable UserAccountInteractor accountInteractor, Logger logger) {
         return new HomePresenterImpl(accountInteractor, logger);
+    }
+
+    @Provides
+    @UserScope
+    public SelectorPresenter providesSelectorPresenter(
+            @Nullable UserOrganisationUnitInteractor interactor,
+            @Nullable UserProgramInteractor programInteractor,
+            Logger logger) {
+        return new SelectorPresenterImpl(interactor, programInteractor, logger);
     }
 }

@@ -36,7 +36,7 @@ import android.support.v7.app.AppCompatActivity;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.LauncherView;
+import org.hisp.dhis.android.eventcapture.views.LauncherView;
 
 import javax.inject.Inject;
 

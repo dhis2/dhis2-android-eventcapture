@@ -26,12 +26,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views;
 
-import org.hisp.dhis.android.eventcapture.views.View;
+import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
 
-public interface LauncherView extends View {
-    void navigateToLogin();
+public interface SelectorView2 extends View {
+    void showProgressBar();
 
-    void navigateToHome();
+    void hideProgressBar();
+
+    void showPickers(Picker picker);
+
+    void showNoOrganisationUnitsError();
 }

@@ -28,9 +28,11 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -76,6 +78,9 @@ public class EventDataEntryFragment extends Fragment implements EventDataEntryVi
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Drawable colorDrawable = ContextCompat.getDrawable(
+                getActivity(), R.color.color_divider);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
@@ -84,7 +89,7 @@ public class EventDataEntryFragment extends Fragment implements EventDataEntryVi
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_eventdataentry);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(rowViewAdapter);
-        recyclerView.addItemDecoration(new DividerDecoration(getContext()));
+        recyclerView.addItemDecoration(new DividerDecoration(colorDrawable));
 
         String eventUId = getArguments().getString(EXTRA_EVENT_UID);
         String sectionUid = getArguments().getString(EXTRA_SECTION_UID);
