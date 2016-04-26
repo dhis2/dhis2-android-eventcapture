@@ -35,7 +35,8 @@ import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
+import org.hisp.dhis.client.sdk.models.program.ProgramType;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.List;
@@ -51,8 +52,7 @@ import rx.subscriptions.CompositeSubscription;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class SelectorPresenterImpl implements SelectorPresenter {
-    private static final String ORGANISATION_UNIT_PICKER = "picker:organisationUnit";
-    private static final String PROGRAM_PICKER = "picker:program";
+    private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
 
     private final UserOrganisationUnitInteractor organisationUnitInteractor;
     private final UserProgramInteractor programInteractor;
@@ -90,8 +90,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         subscription.add(Observable.zip(organisationUnitInteractor.pull(), programInteractor.pull(),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
-                    public List<Program> call(
-                            List<OrganisationUnit> organisationUnits, List<Program> programs) {
+                    public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
                         return programs;
                     }
                 })
@@ -102,6 +101,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     public void call(List<Program> programs) {
                         logger.d(SelectorPresenterImpl.class.getSimpleName(), "sync() - success");
                         selectorView.hideProgressBar();
+                        listPickers();
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -114,40 +114,12 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void listPickers() {
-        logger.d("listPickers()", "called");
+        logger.d(TAG, "listPickers()");
         subscription.add(Observable.zip(organisationUnitInteractor.list(), programInteractor.list(),
                 new Func2<List<OrganisationUnit>, List<Program>, Picker>() {
                     @Override
                     public Picker call(List<OrganisationUnit> units, List<Program> programs) {
-                        Map<String, OrganisationUnit> organisationUnitMap = ModelUtils.toMap(units);
-                        Map<String, Program> assignedProgramsMap = ModelUtils.toMap(programs);
-
-                        Picker rootPicker = Picker.create("Choose organisation unit");
-                        for (String unitKey : organisationUnitMap.keySet()) {
-                            // Creating organisation unit picker items
-                            OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
-                            Picker organisationUnitPicker = Picker.create(
-                                    organisationUnit.getUId(),
-                                    organisationUnit.getDisplayName(),
-                                    "Choose program",
-                                    rootPicker);
-
-                            for (Program program : organisationUnit.getPrograms()) {
-                                Program assignedProgram = assignedProgramsMap.get(program.getUId());
-
-                                if (assignedProgram != null) {
-                                    Picker programPicker = Picker.create(
-                                            assignedProgram.getUId(),
-                                            assignedProgram.getDisplayName(),
-                                            organisationUnitPicker);
-                                    organisationUnitPicker.addChild(programPicker);
-                                }
-                            }
-
-                            rootPicker.addChild(organisationUnitPicker);
-                        }
-
-                        return rootPicker;
+                        return createPickerTree(units, programs);
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -165,5 +137,41 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         throwable.printStackTrace();
                     }
                 }));
+    }
+
+    /*
+     * Goes through given organisation units and programs and builds Picker tree
+     */
+    private static Picker createPickerTree(List<OrganisationUnit> units, List<Program> programs) {
+        Map<String, OrganisationUnit> organisationUnitMap = ModelUtils.toMap(units);
+        Map<String, Program> assignedProgramsMap = ModelUtils.toMap(programs);
+
+        Picker rootPicker = Picker.create("Choose organisation unit");
+        for (String unitKey : organisationUnitMap.keySet()) {
+            // Creating organisation unit picker items
+            OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
+            Picker organisationUnitPicker = Picker.create(
+                    organisationUnit.getUId(),
+                    organisationUnit.getDisplayName(),
+                    "Choose program",
+                    rootPicker);
+
+            for (Program program : organisationUnit.getPrograms()) {
+                Program assignedProgram = assignedProgramsMap.get(program.getUId());
+
+                if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
+                        .equals(assignedProgram.getProgramType())) {
+                    Picker programPicker = Picker.create(
+                            assignedProgram.getUId(),
+                            assignedProgram.getDisplayName(),
+                            organisationUnitPicker);
+                    organisationUnitPicker.addChild(programPicker);
+                }
+            }
+
+            rootPicker.addChild(organisationUnitPicker);
+        }
+
+        return rootPicker;
     }
 }

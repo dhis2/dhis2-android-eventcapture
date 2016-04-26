@@ -46,9 +46,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
-import org.hisp.dhis.client.sdk.ui.views.callbacks.AbsTextWatcher;
+import org.hisp.dhis.client.sdk.ui.views.AbsTextWatcher;
 
 import java.util.ArrayList;
 import java.util.List;

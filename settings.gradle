@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-include ':app', 'core', ':core-android', ':models', ':ui', ':utils'
+include ':app', ':core', ':core-android', ':models', ':ui', ':utils'
 project(':core').projectDir = new File(settingsDir, '../dhis2-android-sdk/core')
 project(':core-android').projectDir = new File(settingsDir, '../dhis2-android-sdk/core-android')
 project(':models').projectDir = new File(settingsDir, '../dhis2-android-sdk/models')

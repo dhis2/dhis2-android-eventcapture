@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.views;
 
-import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 
 public interface SelectorView2 extends View {
     void showProgressBar();

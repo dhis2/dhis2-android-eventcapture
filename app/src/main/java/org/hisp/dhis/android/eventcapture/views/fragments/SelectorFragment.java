@@ -49,7 +49,7 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.SelectorView2;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
-import org.hisp.dhis.client.sdk.ui.models.picker.Picker;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
@@ -186,7 +186,6 @@ public class SelectorFragment extends BaseFragment
         return false;
     }
 
-    // TODO implement filter in dialog (also think about preserving its state)
     // TODO show animation when amount of pickers change
     // TODO provide callbacks to client code (notify clients about changes on each selection)
     // TODO show selection chain in picker list
