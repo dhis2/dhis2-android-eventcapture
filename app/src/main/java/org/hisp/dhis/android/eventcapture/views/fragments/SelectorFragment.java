@@ -28,10 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -41,19 +39,15 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.SelectorView2;
+import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -84,7 +78,7 @@ public class SelectorFragment extends BaseFragment
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_selector_2, container, false);
+        return inflater.inflate(R.layout.fragment_selector, container, false);
     }
 
     @Override
@@ -184,202 +178,5 @@ public class SelectorFragment extends BaseFragment
         }
 
         return false;
-    }
-
-    // TODO show animation when amount of pickers change
-    // TODO provide callbacks to client code (notify clients about changes on each selection)
-    // TODO show selection chain in picker list
-    private static class PickerAdapter extends RecyclerView.Adapter {
-        private static final String PICKER_ADAPTER_STATE = "state:pickerAdapter";
-
-        private final FragmentManager fragmentManager;
-        private final LayoutInflater layoutInflater;
-        private final List<Picker> pickers;
-
-        private Picker pickerTree;
-
-        public PickerAdapter(FragmentManager fragmentManager, Context context) {
-            this.fragmentManager = fragmentManager;
-            this.layoutInflater = LayoutInflater.from(context);
-            this.pickers = new ArrayList<>();
-        }
-
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new PickerViewHolder(layoutInflater.inflate(
-                    R.layout.recyclerview_picker, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            ((PickerViewHolder) holder).update(pickers.get(position));
-        }
-
-        @Override
-        public int getItemCount() {
-            int itemCount = pickers.size();
-
-            if (itemCount > 0) {
-                Picker lastPicker = pickers.get(itemCount - 1);
-
-                // if last picker does not gave any items, we don't want
-                // to show it as picker in the list, but use it as value for parent
-                if (lastPicker.getChildren().isEmpty()) {
-                    itemCount = itemCount - 1;
-                }
-            }
-
-            return itemCount;
-        }
-
-        public void onSaveInstanceState(Bundle outState) {
-            if (outState != null && pickerTree != null) {
-                outState.putSerializable(PICKER_ADAPTER_STATE, pickerTree);
-            }
-        }
-
-        public void onRestoreInstanceState(Bundle savedInstanceState) {
-            if (savedInstanceState != null) {
-                Picker pickerTree = (Picker) savedInstanceState
-                        .getSerializable(PICKER_ADAPTER_STATE);
-                swapData(pickerTree);
-            }
-        }
-
-        public void swapData(Picker pickerTree) {
-            this.pickerTree = pickerTree;
-            this.pickers.clear();
-
-            if (pickerTree != null) {
-
-                // flattening the picker tree into list
-                Picker node = getRootNode(pickerTree);
-                do {
-                    // we don't want to add leaf nodes to list
-                    if (!node.getChildren().isEmpty()) {
-                        pickers.add(node);
-                    }
-                } while ((node = node.getSelectedChild()) != null);
-            }
-
-            notifyDataSetChanged();
-        }
-
-        private Picker getRootNode(Picker picker) {
-            Picker node = picker;
-
-            // walk up the tree
-            while (node.getParent() != null) {
-                node = node.getParent();
-            }
-
-            return node;
-        }
-
-        private class OnItemClickedListener implements
-                FilterableDialogFragment.OnPickerItemClickListener {
-
-            @Override
-            public void onPickerItemClickListener(Picker selectedPicker) {
-                if (selectedPicker.getParent() != null) {
-                    selectedPicker.getParent().setSelectedChild(selectedPicker);
-                }
-
-                // re-render the tree
-                swapData(selectedPicker);
-            }
-        }
-
-        private class PickerViewHolder extends RecyclerView.ViewHolder {
-            private final TextView pickerLabel;
-            private final ImageView cancel;
-
-            public PickerViewHolder(View itemView) {
-                super(itemView);
-
-                pickerLabel = (TextView) itemView.findViewById(R.id.textview_picker);
-                cancel = (ImageView) itemView.findViewById(R.id.imageview_cancel);
-            }
-
-            public void update(Picker picker) {
-                if (picker.getSelectedChild() != null) {
-                    pickerLabel.setText(picker.getSelectedChild().getName());
-                } else {
-                    pickerLabel.setText(picker.getHint());
-                }
-
-                OnClickListener listener = new OnClickListener(picker);
-                pickerLabel.setOnClickListener(listener);
-                cancel.setOnClickListener(listener);
-
-                attachListenerToExistingFragment(picker);
-            }
-
-            private void attachListenerToExistingFragment(Picker picker) {
-                FilterableDialogFragment fragment = (FilterableDialogFragment)
-                        fragmentManager.findFragmentByTag(FilterableDialogFragment.TAG);
-
-                // if we don't have fragment attached to activity,
-                // we don't want to do anything else
-                if (fragment == null) {
-                    return;
-                }
-
-                // get the arguments bundle out from fragment
-                Bundle arguments = fragment.getArguments();
-
-                // if we don't have picker set to fragment, we can't distinguish
-                // the fragment which we need to update
-                if (arguments == null || !arguments
-                        .containsKey(FilterableDialogFragment.ARGS_PICKER)) {
-                    return;
-                }
-
-                Picker existingPicker = (Picker) arguments
-                        .getSerializable(FilterableDialogFragment.ARGS_PICKER);
-                if (picker.equals(existingPicker)) {
-                    FilterableDialogFragment.OnPickerItemClickListener listener =
-                            new OnItemClickedListener();
-                    fragment.setOnPickerItemClickListener(listener);
-                }
-            }
-        }
-
-        private class OnClickListener implements View.OnClickListener {
-            private final Picker picker;
-
-            private OnClickListener(Picker picker) {
-                this.picker = picker;
-            }
-
-            @Override
-            public void onClick(View view) {
-                switch (view.getId()) {
-                    case R.id.textview_picker: {
-                        attachFragment();
-                        break;
-                    }
-                    case R.id.imageview_cancel: {
-                        clearSelection();
-                        break;
-                    }
-                }
-            }
-
-            private void attachFragment() {
-                FilterableDialogFragment.OnPickerItemClickListener listener =
-                        new OnItemClickedListener();
-                FilterableDialogFragment dialogFragment =
-                        FilterableDialogFragment.newInstance(picker);
-
-                dialogFragment.setOnPickerItemClickListener(listener);
-                dialogFragment.show(fragmentManager, FilterableDialogFragment.TAG);
-            }
-
-            private void clearSelection() {
-                picker.setSelectedChild(null);
-                swapData(picker);
-            }
-        }
     }
 }
