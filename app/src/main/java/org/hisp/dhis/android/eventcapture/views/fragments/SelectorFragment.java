@@ -31,6 +31,7 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -45,13 +46,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
 import org.hisp.dhis.android.eventcapture.views.SelectorView;
+import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
@@ -63,7 +64,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class SelectorFragment extends BaseFragment implements SelectorView {
+    private static final int ORG_UNIT_PICKER_IX = 0;
+    private static final int PROGRAM_UNIT_PICKER_IX = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
+
 
     @Inject
     SelectorPresenter selectorPresenter;
@@ -74,6 +78,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // button which is shown only in case
     // when all pickers are set
     FloatingActionButton createEventButton;
+    OnCreateEventButtonClickListener onCreateEventButtonClickListener;
 
     // pull-to-refresh
     SwipeRefreshLayout swipeRefreshLayout;
@@ -109,20 +114,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             });
         }
 
+        onCreateEventButtonClickListener = new OnCreateEventButtonClickListener();
         createEventButton = (FloatingActionButton) view
                 .findViewById(R.id.fab_create_event);
+        createEventButton.setOnClickListener(onCreateEventButtonClickListener);
+
         swipeRefreshLayout = (SwipeRefreshLayout) view
                 .findViewById(R.id.swiperefreshlayout_selector);
         swipeRefreshLayout.setColorSchemeResources(
                 R.color.color_primary_default);
 
-        createEventButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getActivity(),
-                        "Creating event", Toast.LENGTH_SHORT).show();
-            }
-        });
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -212,12 +213,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 return true;
             }
         }
-
         return false;
     }
 
     /* change visibility of floating action button*/
     private void onPickerListChanged(List<Picker> pickers) {
+        onCreateEventButtonClickListener.setPickers(pickers);
         if (areAllPickersPresent(pickers)) {
             showCreateEventButton();
         } else {
@@ -228,8 +229,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     /* check if organisation unit and program are selected */
     private boolean areAllPickersPresent(List<Picker> pickers) {
         return pickers != null && pickers.size() > 1 &&
-                pickers.get(0) != null && pickers.get(0).getSelectedChild() != null &&
-                pickers.get(1) != null && pickers.get(1).getSelectedChild() != null;
+                pickers.get(ORG_UNIT_PICKER_IX) != null &&
+                pickers.get(ORG_UNIT_PICKER_IX).getSelectedChild() != null &&
+                pickers.get(PROGRAM_UNIT_PICKER_IX) != null &&
+                pickers.get(PROGRAM_UNIT_PICKER_IX).getSelectedChild() != null;
     }
 
     private void showCreateEventButton() {
@@ -261,6 +264,45 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 }
             });
             animSetXY.start();
+        }
+    }
+
+    private class OnCreateEventButtonClickListener implements View.OnClickListener {
+        private List<Picker> pickers;
+
+        @Override
+        public void onClick(View v) {
+            String orgUnitUid = getOrganisationUnitUid();
+            String programUid = getProgramUid();
+
+            if (orgUnitUid != null && programUid != null) {
+                Intent intent = new Intent(getActivity(), DataEntryActivity.class);
+                intent.putExtra(DataEntryActivity.ORG_UNIT_UID, orgUnitUid);
+                intent.putExtra(DataEntryActivity.PROGRAM_UID, programUid);
+                intent.putExtra(DataEntryActivity.EVENT_UID, "");
+                startActivity(intent);
+            }
+        }
+
+        public void setPickers(List<Picker> pickers) {
+            this.pickers = pickers;
+        }
+
+        private String getOrganisationUnitUid() {
+            if (pickers != null && !pickers.isEmpty() &&
+                    pickers.get(ORG_UNIT_PICKER_IX).getSelectedChild() != null) {
+                return pickers.get(ORG_UNIT_PICKER_IX).getSelectedChild().getId();
+            }
+            return null;
+        }
+
+        private String getProgramUid() {
+            if (pickers != null && !pickers.isEmpty() &&
+                    pickers.get(PROGRAM_UNIT_PICKER_IX).getSelectedChild() != null) {
+                return pickers.get(PROGRAM_UNIT_PICKER_IX).getSelectedChild().getId();
+            }
+
+            return null;
         }
     }
 }

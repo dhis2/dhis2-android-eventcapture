@@ -63,7 +63,7 @@ import rx.functions.Action1;
 
 public class ItemListFragment extends Fragment implements ItemListView, View.OnClickListener {
     public static final String TAG = ItemListFragment.class.getSimpleName();
-    public static final String ORG_UNIT_UID = "extra:orgUnitUId";
+    public static final String ORG_UNIT_UID = "extra:OrgUnitUId";
     public static final String PROGRAM_UID = "extra:ProgramUId";
     public static final String EVENT_UID = "extra:EventUId";
     public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUId";

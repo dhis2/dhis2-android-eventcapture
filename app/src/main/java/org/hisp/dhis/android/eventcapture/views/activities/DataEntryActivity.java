@@ -61,6 +61,9 @@ import java.util.List;
 public class DataEntryActivity extends AppCompatActivity implements DataEntryView {
     public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUid";
     public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
+    public static final String ORG_UNIT_UID = "extra:OrgUnitUId";
+    public static final String PROGRAM_UID = "extra:ProgramUId";
+    public static final String EVENT_UID = "extra:EventUId";
 
     private String organisationUnitUid;
     private String programUid;
@@ -79,9 +82,9 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         setContentView(R.layout.activity_eventdataentry);
 
         Intent intent = getIntent();
-        organisationUnitUid = intent.getStringExtra(ItemListFragment.ORG_UNIT_UID);
-        programUid = intent.getStringExtra(ItemListFragment.PROGRAM_UID);
-        eventUid = intent.getStringExtra(ItemListFragment.EVENT_UID);
+        organisationUnitUid = intent.getExtras().getString(DataEntryActivity.ORG_UNIT_UID);
+        programUid = intent.getExtras().getString(DataEntryActivity.PROGRAM_UID);
+        eventUid = intent.getExtras().getString(DataEntryActivity.EVENT_UID, "");
 
         Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
         Log.d("PROGRAM DATAENTRY", programUid);
