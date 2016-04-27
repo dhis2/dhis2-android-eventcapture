@@ -106,8 +106,8 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                 onProfileValueChangedListener));
         dataEntities.add(DataEntityText.create("Surname", account.getSurname(), Type.TEXT,
                 onProfileValueChangedListener));
-        dataEntities.add(DataEntityText.create("Gender", account.getGender(), Type.AUTO_COMPLETE,
-                onProfileValueChangedListener));
+//        dataEntities.add(DataEntityText.create("Gender", account.getGender(), Type.AUTO_COMPLETE,
+//                onProfileValueChangedListener));
         dataEntities.add(DataEntityText.create("Birthday", account.getBirthday(), Type.DATE,
                 onProfileValueChangedListener));
         dataEntities.add(DataEntityText.create("Introduction", account.getIntroduction(), Type

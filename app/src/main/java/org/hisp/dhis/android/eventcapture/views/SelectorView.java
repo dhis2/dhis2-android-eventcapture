@@ -26,22 +26,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views;
 
-import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
-import org.hisp.dhis.client.sdk.models.program.Program;
-
-import rx.Observable;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 
 public interface SelectorView extends View {
-    void onStartLoading();
+    void showProgressBar();
 
-    void onFinishLoading();
+    void hideProgressBar();
 
-    void onLoadingError(Throwable throwable);
+    void showPickers(Picker picker);
 
-    void onPickedOrganisationUnit(Observable<OrganisationUnit> organisationUnitObservable);
-
-    void onPickedProgram(Observable<Program> programObservable);
+    void showNoOrganisationUnitsError();
 }

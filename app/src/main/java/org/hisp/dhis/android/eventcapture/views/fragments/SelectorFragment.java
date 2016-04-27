@@ -28,32 +28,41 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar.OnMenuItemClickListener;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
-import org.hisp.dhis.android.eventcapture.views.SelectorView2;
+import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
+import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
+import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
-public class SelectorFragment extends BaseFragment
-        implements SelectorView2, OnMenuItemClickListener {
-
+public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
 
     @Inject
@@ -62,9 +71,16 @@ public class SelectorFragment extends BaseFragment
     @Inject
     Logger logger;
 
+    // button which is shown only in case
+    // when all pickers are set
+    FloatingActionButton createEventButton;
+
+    // pull-to-refresh
     SwipeRefreshLayout swipeRefreshLayout;
-    PickerAdapter pickerAdapter;
+
+    // list of pickers
     RecyclerView pickerRecyclerView;
+    PickerAdapter pickerAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -85,18 +101,39 @@ public class SelectorFragment extends BaseFragment
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         if (getParentToolbar() != null) {
             getParentToolbar().inflateMenu(R.menu.menu_main);
-            getParentToolbar().setOnMenuItemClickListener(this);
+            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return SelectorFragment.this.onMenuItemClick(item);
+                }
+            });
         }
 
+        createEventButton = (FloatingActionButton) view
+                .findViewById(R.id.fab_create_event);
         swipeRefreshLayout = (SwipeRefreshLayout) view
                 .findViewById(R.id.swiperefreshlayout_selector);
         swipeRefreshLayout.setColorSchemeResources(
                 R.color.color_primary_default);
 
+        createEventButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(),
+                        "Creating event", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
         pickerAdapter = new PickerAdapter(getChildFragmentManager(), getActivity());
+        pickerAdapter.setOnPickerListChangeListener(new OnPickerListChangeListener() {
+            @Override
+            public void onPickerListChanged(List<Picker> pickers) {
+                SelectorFragment.this.onPickerListChanged(pickers);
+            }
+        });
 
         pickerRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_pickers);
         pickerRecyclerView.setLayoutManager(layoutManager);
@@ -166,8 +203,7 @@ public class SelectorFragment extends BaseFragment
         pickerAdapter.swapData(null);
     }
 
-    @Override
-    public boolean onMenuItemClick(MenuItem item) {
+    private boolean onMenuItemClick(MenuItem item) {
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
         switch (item.getItemId()) {
@@ -178,5 +214,53 @@ public class SelectorFragment extends BaseFragment
         }
 
         return false;
+    }
+
+    /* change visibility of floating action button*/
+    private void onPickerListChanged(List<Picker> pickers) {
+        if (areAllPickersPresent(pickers)) {
+            showCreateEventButton();
+        } else {
+            hideCreateEventButton();
+        }
+    }
+
+    /* check if organisation unit and program are selected */
+    private boolean areAllPickersPresent(List<Picker> pickers) {
+        return pickers != null && pickers.size() > 1 &&
+                pickers.get(0) != null && pickers.get(0).getSelectedChild() != null &&
+                pickers.get(1) != null && pickers.get(1).getSelectedChild() != null;
+    }
+
+    private void showCreateEventButton() {
+        if (!createEventButton.isShown()) {
+            createEventButton.setVisibility(View.VISIBLE);
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 0, 1);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 0, 1);
+            AnimatorSet animSetXY = new AnimatorSet();
+            animSetXY.playTogether(scaleX, scaleY);
+            animSetXY.setInterpolator(new OvershootInterpolator());
+            animSetXY.setDuration(256);
+            animSetXY.start();
+        }
+    }
+
+    private void hideCreateEventButton() {
+        if (createEventButton.isShown()) {
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 1, 0);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 1, 0);
+            AnimatorSet animSetXY = new AnimatorSet();
+            animSetXY.playTogether(scaleX, scaleY);
+            animSetXY.setInterpolator(new DecelerateInterpolator());
+            animSetXY.setDuration(256);
+            animSetXY.addListener(new AbsAnimationListener() {
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    createEventButton.setVisibility(View.INVISIBLE);
+                }
+            });
+            animSetXY.start();
+        }
     }
 }

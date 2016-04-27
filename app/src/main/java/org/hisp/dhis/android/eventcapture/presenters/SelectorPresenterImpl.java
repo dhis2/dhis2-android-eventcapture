@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.views.SelectorView2;
+import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
@@ -58,7 +58,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final UserProgramInteractor programInteractor;
     private final Logger logger;
     private CompositeSubscription subscription;
-    private SelectorView2 selectorView;
+    private SelectorView selectorView;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor programInteractor,
@@ -71,7 +71,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     public void attachView(View view) {
         isNull(view, "SelectorView must not be null");
-        selectorView = (SelectorView2) view;
+        selectorView = (SelectorView) view;
     }
 
     @Override
