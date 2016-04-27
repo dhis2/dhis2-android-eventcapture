@@ -26,35 +26,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture;
+package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.SectionFilterActivity;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
-import dagger.Subcomponent;
+import java.util.List;
 
-@UserScope
-@Subcomponent(
-        modules = {
-                UserModule.class
-        }
-)
-public interface UserComponent {
+public interface SectionFilterPresenter extends Presenter {
 
-    //------------------------------------------------------------------------
-    // Injection targets
-    //------------------------------------------------------------------------
+    void setProgramStageUid(String uid);
 
-    void inject(LauncherActivity launcherActivity);
-
-    void inject(LoginActivity loginActivity);
-
-    void inject(HomeActivity homeActivity);
-
-    void inject(SelectorFragment selectorFragment);
-
-    void inject(SectionFilterActivity sectionFilterActivity);
+    List<ProgramStageSection> filter(List<ProgramStageSection> models, String query);
 }

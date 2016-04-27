@@ -34,6 +34,8 @@ import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
+import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -123,5 +125,11 @@ public class UserModule {
             @Nullable UserProgramInteractor programInteractor,
             Logger logger) {
         return new SelectorPresenterImpl(interactor, programInteractor, logger);
+    }
+
+    @Provides
+    @UserScope
+    public SectionFilterPresenter provideSectionFilterPresenter() {
+        return new SectionFilterPresenterImpl();
     }
 }

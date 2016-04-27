@@ -29,10 +29,11 @@
 package org.hisp.dhis.android.eventcapture.views.activities;
 
 
+import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.List;
 
-public interface SectionFilterView {
+public interface SectionFilterView extends View {
     void setSectionList(List<ProgramStageSection> sectionsList);
 }

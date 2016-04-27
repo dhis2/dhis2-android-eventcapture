@@ -29,6 +29,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 
+import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.SectionFilterView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -37,22 +38,37 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class SectionFilterPresenterImpl {
-    private SectionFilterView filterView;
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
+public class SectionFilterPresenterImpl implements SectionFilterPresenter {
+
+    private SectionFilterView sectionFilterView;
     private String programStageUid;
 
-    public SectionFilterPresenterImpl(SectionFilterView view, String programStageUid) {
-        this.programStageUid = programStageUid;
-        this.filterView = view;
+    @Override
+    public void attachView(View view) {
+        isNull(view, "SectionFilterView must not be null");
+
+        this.sectionFilterView = (SectionFilterView) view;
         initSectionList();
+    }
+
+    @Override
+    public void detachView() {
+        sectionFilterView = null;
+    }
+
+    public SectionFilterPresenterImpl() {
+    }
+
+    public void setProgramStageUid(String uid) {
+        this.programStageUid = uid;
     }
 
     public void initSectionList() {
@@ -68,7 +84,7 @@ public class SectionFilterPresenterImpl {
                 .subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
                     public void call(List<ProgramStageSection> programStageSections) {
-                        filterView.setSectionList(programStageSections);
+                        sectionFilterView.setSectionList(programStageSections);
                     }
                 }, new Action1<Throwable>() {
                     @Override
