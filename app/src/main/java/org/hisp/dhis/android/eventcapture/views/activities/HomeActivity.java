@@ -39,7 +39,7 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.model.SyncManager;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
-import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
+import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment2;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
@@ -90,7 +90,7 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     @NonNull
     @Override
     protected Fragment getProfileFragment() {
-        return WrapperFragment.newInstance(ProfileFragment.class,
+        return WrapperFragment.newInstance(ProfileFragment2.class,
                 getString(R.string.drawer_item_profile));
     }
 
