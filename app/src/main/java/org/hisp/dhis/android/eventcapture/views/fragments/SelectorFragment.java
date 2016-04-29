@@ -43,6 +43,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
@@ -251,7 +252,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 1, 0);
             AnimatorSet animSetXY = new AnimatorSet();
             animSetXY.playTogether(scaleX, scaleY);
-            animSetXY.setInterpolator(new DecelerateInterpolator());
+            animSetXY.setInterpolator(new AccelerateInterpolator());
             animSetXY.setDuration(256);
             animSetXY.addListener(new AbsAnimationListener() {
 

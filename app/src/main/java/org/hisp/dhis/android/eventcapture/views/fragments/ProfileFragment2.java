@@ -3,6 +3,7 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,7 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter2;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.DataEntity2;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ public class ProfileFragment2 extends Fragment implements ProfileView2 {
 
     @Inject
     ProfilePresenter2 profilePresenter;
+
+    RecyclerView recyclerView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +42,7 @@ public class ProfileFragment2 extends Fragment implements ProfileView2 {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-
+        recyclerView = (RecyclerView) view;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class ProfileFragment2 extends Fragment implements ProfileView2 {
     }
 
     @Override
-    public void showUserAccountFields(List<DataEntity> dataEntities) {
+    public void showUserAccountFields(List<DataEntity2<String>> dataEntities) {
 
     }
 }
