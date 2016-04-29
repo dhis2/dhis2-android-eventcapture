@@ -68,7 +68,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final int PROGRAM_UNIT_PICKER_IX = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
 
-
     @Inject
     SelectorPresenter selectorPresenter;
 

@@ -28,23 +28,31 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.SessionManager;
+import org.hisp.dhis.android.eventcapture.model.SyncManager;
 import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.android.eventcapture.views.View;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -77,7 +85,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void detachView() {
         selectorView = null;
-
         if (!subscription.isUnsubscribed()) {
             subscription.unsubscribe();
             subscription = new CompositeSubscription();
@@ -87,27 +94,43 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void sync() {
         selectorView.showProgressBar();
-        subscription.add(Observable.zip(organisationUnitInteractor.pull(), programInteractor.pull(),
+
+        subscription.add(Observable.zip(
+                organisationUnitInteractor.pull(),
+                programInteractor.pull(),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
                         return programs;
                     }
                 })
+                .map(new Func1<List<Program>, List<ProgramStage>>() {
+                    @Override
+                    public List<ProgramStage> call(List<Program> programs) {
+                        return loadProgramStages(programs);
+                    }
+                })
+                .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
+                    @Override
+                    public List<ProgramStageSection> call(List<ProgramStage> programStages) {
+                        return loadProgramStageSections(programStages);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Program>>() {
+                .subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
-                    public void call(List<Program> programs) {
-                        logger.d(SelectorPresenterImpl.class.getSimpleName(), "sync() - success");
-                        selectorView.hideProgressBar();
+                    public void call(List<ProgramStageSection> stageSections) {
+                        SessionManager.getInstance().setSelectorSynced(true);
+                        SyncManager.getInstance().setLastSyncedNow();
                         listPickers();
+                        selectorView.hideProgressBar();
                     }
                 }, new Action1<Throwable>() {
+
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(SelectorPresenterImpl.class.getSimpleName(),
-                                "sync() failed", throwable);
+                        throwable.printStackTrace();
                     }
                 }));
     }
@@ -168,10 +191,28 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     organisationUnitPicker.addChild(programPicker);
                 }
             }
-
             rootPicker.addChild(organisationUnitPicker);
         }
-
         return rootPicker;
+    }
+
+    private static List<ProgramStage> loadProgramStages(List<Program> programs) {
+        Set<String> stageUids = new HashSet<>();
+        for (Program program : programs) {
+            Set<String> programStageUids = ModelUtils.toUidSet(
+                    program.getProgramStages());
+            stageUids.addAll(programStageUids);
+        }
+        return D2.programStages().pull().toBlocking().first();
+    }
+
+    private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
+        Set<String> sectionUids = new HashSet<>();
+        for (ProgramStage programStage : stages) {
+            Set<String> stageSectionUids = ModelUtils.toUidSet(
+                    programStage.getProgramStageSections());
+            sectionUids.addAll(stageSectionUids);
+        }
+        return D2.programStageSections().pull().toBlocking().first();
     }
 }

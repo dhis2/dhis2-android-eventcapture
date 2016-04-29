@@ -84,6 +84,7 @@ public class SectionFilterActivity extends AppCompatActivity implements SectionF
         Intent intent = getIntent();
         programStageUid = intent.getStringExtra(ItemListFragment.PROGRAM_STAGE_UID);
         sectionFilterPresenter.setProgramStageUid(programStageUid);
+        sectionFilterPresenter.attachView(this);
 
         setContentView(R.layout.activity_sctionfilter);
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
@@ -101,8 +102,6 @@ public class SectionFilterActivity extends AppCompatActivity implements SectionF
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
     }
 
     @Override
@@ -121,8 +120,9 @@ public class SectionFilterActivity extends AppCompatActivity implements SectionF
     @Override
     protected void onResume() {
         super.onResume();
-        sectionFilterPresenter.attachView(this);
         sectionFilterPresenter.setProgramStageUid(programStageUid);
+        sectionFilterPresenter.attachView(this);
+
     }
 
     @Override
