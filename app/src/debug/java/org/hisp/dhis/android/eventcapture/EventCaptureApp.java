@@ -34,6 +34,7 @@ import android.support.multidex.MultiDex;
 
 import com.facebook.stetho.Stetho;
 
+import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
 
 import javax.inject.Inject;
@@ -70,6 +71,8 @@ public final class EventCaptureApp extends Application {
 
         //init rxBus
         rxBus = new RxBus();
+
+        AppAccountManager.getInstance().initialize(getApplicationContext());
 
         // TODO Add LeakCanary support
         // TODO implement debug navigation drawer
