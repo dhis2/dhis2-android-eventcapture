@@ -38,6 +38,8 @@ import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
+import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
@@ -131,5 +133,11 @@ public class UserModule {
     @UserScope
     public SectionFilterPresenter provideSectionFilterPresenter() {
         return new SectionFilterPresenterImpl();
+    }
+
+    @Provides
+    @UserScope
+    public SettingsPresenter provideSettingsPresenter() {
+        return new SettingsPresenterImpl();
     }
 }

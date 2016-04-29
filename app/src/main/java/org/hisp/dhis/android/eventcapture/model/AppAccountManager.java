@@ -83,8 +83,8 @@ public class AppAccountManager {
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
 
         SettingPreferences.init(appContext);
-        if (SettingPreferences.backgroundSynchronization()) {
-            long interval = Long.parseLong(SettingPreferences.synchronizationPeriod());
+        if (SettingPreferences.getBackgroundSyncState()) {
+            long interval = (long) SettingPreferences.getBackgroundSyncFrequency();
             ContentResolver.addPeriodicSync(
                     mAccount,
                     AUTHORITY,

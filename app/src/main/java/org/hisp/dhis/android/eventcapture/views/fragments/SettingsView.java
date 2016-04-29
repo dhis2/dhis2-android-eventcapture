@@ -26,29 +26,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.presenters;
+package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import org.hisp.dhis.android.eventcapture.views.fragments.SettingsView;
+import org.hisp.dhis.android.eventcapture.views.View;
 
-/**
- * Created by Vladislav Georgiev Alfredov on 1/18/16.
- */
-public interface SettingsPresenter {
-    void logout();
-
-    void synchronize();
-
-    void setUpdateFrequency(int frequency);
-
-    int getUpdateFrequency();
-
-    void setBackgroundSynchronisation(Boolean enabled, String warning);
-
-    Boolean getBackgroundSynchronisation();
-
-    Boolean getCrashReports();
-
-    void setCrashReports(Boolean enabled);
-
-    public void setSettingsView(SettingsView settingsView);
+public interface SettingsView extends View {
+    void showMessage(CharSequence message);
 }

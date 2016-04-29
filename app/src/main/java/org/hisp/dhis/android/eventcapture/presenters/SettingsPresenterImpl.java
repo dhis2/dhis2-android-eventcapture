@@ -29,48 +29,30 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
-import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
-import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.android.eventcapture.views.fragments.SettingsView;
+import org.hisp.dhis.client.sdk.ui.SettingPreferences;
 
 /**
  * This is the presenter, using MVP.
  * This class controls what is shown in the view. (AbsSettingsFragment).
- * <p>
+ * <p/>
  * Created by Vladislav Georgiev Alfredov on 1/15/16.
  */
 public class SettingsPresenterImpl implements SettingsPresenter {
-    public static final String CLASS_TAG = SettingsPresenterImpl.class.getSimpleName();
-    public final static String UPDATE_FREQUENCY = "update_frequency";
-    public final static String BACKGROUND_SYNC = "background_sync";
-    public final static String CRASH_REPORTS = "crash_reports";
-    public final static String PREFS_NAME = "DHIS2";
+    public static final String TAG = SettingsPresenterImpl.class.getSimpleName();
 
-    //Default values:
-    public static final int DEFAULT_UPDATE_FREQUENCY = 1440; //one hour
-    public static final Boolean DEFAULT_BACKGROUND_SYNC = true;
-    public static final Boolean DEFAULT_CRASH_REPORTS = true;
-
-    SettingsFragment mSettingsFragment;
-
-    public SettingsPresenterImpl(SettingsFragment callback) {
-        mSettingsFragment = callback;
-    }
+    SettingsView settingsView;
 
     @Override
-    public void logout(Context context) {
+    public void logout() {
         // D2.signOut();
-        D2.me().signOut();
+        ///D2.me().signOut();
 
         // ActivityUtils.changeDefaultActivity(context, true);
-        context.startActivity(new Intent(mSettingsFragment.getActivity(), LoginActivity.class));
+        //context.startActivity(new Intent(settingsView.getActivity(), LoginActivity.class));
 
         //TODO: When loging out functionality works test the following:
         //log in with 1 user, log out and log in with another.
@@ -80,77 +62,53 @@ public class SettingsPresenterImpl implements SettingsPresenter {
     }
 
     @Override
-    public void synchronize(Context context) {
-        //Log.d("SettingsPresenterImpl", "Synchronize clicked, synchronizing...");
+    public void synchronize() {
         AppAccountManager.getInstance().syncNow();
     }
 
     @Override
-    public void setUpdateFrequency(Context context, int frequency) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(UPDATE_FREQUENCY, frequency);
-        editor.apply();
-        //Log.e(CLASS_TAG, "updateFrequency: " + frequency);
-
+    public void setUpdateFrequency(int frequency) {
+        SettingPreferences.setBackgroundSyncFrequency(frequency);
         AppAccountManager.getInstance().setPeriodicSync((long) (frequency * 60));
     }
 
     @Override
-    public int getUpdateFrequency(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        int updateFrequency = sharedPreferences.getInt(UPDATE_FREQUENCY, DEFAULT_UPDATE_FREQUENCY);
-        //Log.e(CLASS_TAG, "updateFrequency: " + updateFrequency);
-        return updateFrequency;
+    public int getUpdateFrequency() {
+        return SettingPreferences.getBackgroundSyncFrequency();
     }
 
     @Override
-    public void setBackgroundSynchronisation(Context context, Boolean enabled) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(BACKGROUND_SYNC, enabled);
-        editor.apply();
-        //Log.e(CLASS_TAG, "backgroundSync: " + enabled);
+    public void setBackgroundSynchronisation(Boolean enabled, String warning) {
+        SettingPreferences.setBackgroundSyncState(enabled);
 
         if (enabled) {
             if (!ContentResolver.getMasterSyncAutomatically()) {
                 //display a notification to the user to enable synchronization globally.
-                mSettingsFragment.showMessage(
-                        mSettingsFragment.getResources().getString(R.string.sys_sync_disabled_warning));
+                settingsView.showMessage(warning);
             }
-            synchronize(context);
-            AppAccountManager.getInstance().setPeriodicSync((long) getUpdateFrequency(context));
+            synchronize();
+            AppAccountManager.getInstance().setPeriodicSync((long) getUpdateFrequency());
         } else {
             AppAccountManager.getInstance().removePeriodicSync();
         }
     }
 
     @Override
-    public Boolean getBackgroundSynchronisation(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        Boolean enabled = sharedPreferences.getBoolean(BACKGROUND_SYNC, DEFAULT_BACKGROUND_SYNC);
-        //Log.e(CLASS_TAG, "getBackroundSync : " + enabled);
-        return enabled;
+    public Boolean getBackgroundSynchronisation() {
+        return SettingPreferences.getBackgroundSyncState();
     }
 
     @Override
-    public Boolean getCrashReports(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        Boolean enabled = sharedPreferences.getBoolean(CRASH_REPORTS, DEFAULT_CRASH_REPORTS);
-        Log.e(CLASS_TAG, " crash reports : " + enabled);
-        return enabled;
+    public Boolean getCrashReports() {
+        return SettingPreferences.getCrashReportsState();
     }
 
     @Override
-    public void setCrashReports(Context context, Boolean enabled) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(CRASH_REPORTS, enabled);
-        editor.apply();
-        Log.e(CLASS_TAG, " crash reports: " + enabled);
+    public void setCrashReports(Boolean enabled) {
+        SettingPreferences.setCrashReportsState(enabled);
     }
 
-    public void setSettingsFragment(SettingsFragment s) {
-        mSettingsFragment = s;
+    public void setSettingsView(SettingsView settingsView) {
+        this.settingsView = settingsView;
     }
 }

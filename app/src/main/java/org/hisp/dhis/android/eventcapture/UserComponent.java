@@ -33,6 +33,7 @@ import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.SectionFilterActivity;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
+import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 
 import dagger.Subcomponent;
 
@@ -57,4 +58,6 @@ public interface UserComponent {
     void inject(SelectorFragment selectorFragment);
 
     void inject(SectionFilterActivity sectionFilterActivity);
+
+    void inject(SettingsFragment settingsFragment);
 }

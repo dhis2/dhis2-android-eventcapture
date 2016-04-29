@@ -28,22 +28,31 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
-import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
+import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 
-public class SettingsFragment extends AbsSettingsFragment {
-    SettingsPresenterImpl mSettingsPresenter;
+import javax.inject.Inject;
+
+public class SettingsFragment extends AbsSettingsFragment implements SettingsView {
+
+    private String androidSyncWarning;
+
+    @Inject
+    SettingsPresenter settingsPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSettingsPresenter = new SettingsPresenterImpl(this);
-        mSettingsPresenter.setSettingsFragment(this);
+        androidSyncWarning = getResources().getString(R.string.sys_sync_disabled_warning);
+
+        ((EventCaptureApp) getActivity().getApplication()).getUserComponent().inject(this);
+        settingsPresenter.setSettingsView(this);
     }
 
     @Override
@@ -53,12 +62,7 @@ public class SettingsFragment extends AbsSettingsFragment {
 
     @Override
     public boolean onBackgroundSynchronizationChanged(boolean isEnabled) {
-        mSettingsPresenter.setBackgroundSynchronisation(getContext(), isEnabled);
-        if (!ContentResolver.getMasterSyncAutomatically() && isEnabled) {
-            //warn the user that synchronization is globally off.
-        }
-
-
+        settingsPresenter.setBackgroundSynchronisation(isEnabled, androidSyncWarning);
         return true;
     }
 
@@ -70,7 +74,7 @@ public class SettingsFragment extends AbsSettingsFragment {
     @Override
     public boolean onSynchronizationPeriodChanged(String newPeriod) {
         Log.d("SettingsFragment", "newPeriod = " + newPeriod);
-        mSettingsPresenter.setUpdateFrequency(getContext(), Integer.parseInt(newPeriod));
+        settingsPresenter.setUpdateFrequency(Integer.parseInt(newPeriod));
         return true;
     }
 
@@ -81,10 +85,11 @@ public class SettingsFragment extends AbsSettingsFragment {
 
     @Override
     public boolean onCrashReportsChanged(boolean isEnabled) {
-        mSettingsPresenter.setCrashReports(getContext(), isEnabled);
+        settingsPresenter.setCrashReports(isEnabled);
         return true;
     }
 
+    @Override
     public void showMessage(CharSequence msg) {
         Snackbar.make(getView(), msg, Snackbar.LENGTH_LONG).show();
     }
