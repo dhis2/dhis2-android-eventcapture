@@ -34,8 +34,8 @@ import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter2;
-import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter2Impl;
+import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
+import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -129,8 +129,8 @@ public class UserModule {
 
     @Provides
     @UserScope
-    public ProfilePresenter2 providesProfilePresenter(
+    public ProfilePresenter providesProfilePresenter(
             @Nullable UserAccountInteractor userAccountInteractor, Logger logger) {
-        return new ProfilePresenter2Impl(userAccountInteractor, logger);
+        return new ProfilePresenterImpl(userAccountInteractor, logger);
     }
 }
