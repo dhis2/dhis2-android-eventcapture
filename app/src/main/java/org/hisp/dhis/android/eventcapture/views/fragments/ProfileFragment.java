@@ -3,6 +3,8 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +14,8 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
 import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
+import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
 
@@ -23,6 +27,8 @@ public class ProfileFragment extends Fragment implements ProfileView {
     ProfilePresenter profilePresenter;
 
     RecyclerView recyclerView;
+
+    RowViewAdapter rowViewAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -42,7 +48,20 @@ public class ProfileFragment extends Fragment implements ProfileView {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        // we want RecyclerView to behave like ListView
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        // Using ItemDecoration in order to implement divider
+        DividerDecoration itemDecoration = new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider));
+
+        rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
+
         recyclerView = (RecyclerView) view;
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(itemDecoration);
+        recyclerView.setAdapter(rowViewAdapter);
     }
 
     @Override
@@ -59,6 +78,6 @@ public class ProfileFragment extends Fragment implements ProfileView {
 
     @Override
     public void showUserAccountFields(List<DataEntity> dataEntities) {
-
+        rowViewAdapter.swap(dataEntities);
     }
 }

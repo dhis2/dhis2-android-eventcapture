@@ -102,19 +102,19 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                 userAccountInteractor, userAccount);
 
         DataEntityEditText firstName = new DataEntityEditText(
-                FIRST_NAME, "First name", "Enter text", InputType.TEXT);
+                FIRST_NAME, "First name", InputType.TEXT);
         firstName.setValue(userAccount.getFirstName());
         firstName.setOnValueChangeListener(changedListener);
         dataEntities.add(firstName);
 
         DataEntityEditText surname = new DataEntityEditText(
-                SURNAME, "Surname", "Enter text", InputType.TEXT);
+                SURNAME, "Surname", InputType.TEXT);
         surname.setValue(userAccount.getSurname());
         surname.setOnValueChangeListener(changedListener);
         dataEntities.add(surname);
 
         DataEntityEditText introduction = new DataEntityEditText(
-                INTRODUCTION, "Introduction", "Enter text", InputType.TEXT);
+                INTRODUCTION, "Introduction", InputType.TEXT);
         introduction.setValue(userAccount.getIntroduction());
         introduction.setOnValueChangeListener(changedListener);
         dataEntities.add(introduction);
@@ -222,7 +222,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                 }
             }
 
-            System.out.println("*** CHANGED ***");
+            System.out.println("*** CHANGED ***: " + id + " " + value);
         }
     }
 }
