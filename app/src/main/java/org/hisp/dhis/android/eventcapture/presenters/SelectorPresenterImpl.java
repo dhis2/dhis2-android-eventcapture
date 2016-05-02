@@ -51,6 +51,8 @@ import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
+
+// TODO put hints (Choose organisation unit) into resources (follow approach with ProfileView)
 public class SelectorPresenterImpl implements SelectorPresenter {
     private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
 
