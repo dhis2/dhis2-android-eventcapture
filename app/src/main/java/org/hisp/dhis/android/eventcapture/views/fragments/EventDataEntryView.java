@@ -28,10 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 
 import java.util.List;
 
 public interface EventDataEntryView {
-    void setDataEntryFields(List<DataEntity> dataEntities);
+    void setDataEntryFields(List<FormEntity> formEntities);
 }

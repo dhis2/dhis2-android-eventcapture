@@ -37,9 +37,8 @@ import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
-import org.hisp.dhis.client.sdk.ui.models.DataEntityText;
-import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.OnFormEntityChangeListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,15 +85,15 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
                         return D2.programStageDataElements().list(programStageSection).toBlocking().first();
                     }
                 })
-                .map(new Func1<List<ProgramStageDataElement>, List<DataEntity>>() {
+                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
                     @Override
-                    public List<DataEntity> call(List<ProgramStageDataElement> programStageDataElements) {
+                    public List<FormEntity> call(List<ProgramStageDataElement> programStageDataElements) {
                         return transformDataEntryForm(programStageDataElements);
                     }
                 })
-                .subscribe(new Action1<List<DataEntity>>() {
+                .subscribe(new Action1<List<FormEntity>>() {
                     @Override
-                    public void call(List<DataEntity> dataEntities) {
+                    public void call(List<FormEntity> dataEntities) {
                         if (eventDataEntryView != null) {
                             eventDataEntryView.setDataEntryFields(dataEntities);
                         }
@@ -164,8 +163,8 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
 //        });
     }
 
-    private List<DataEntity> transformDataEntryForm(List<ProgramStageDataElement> programStageDataElements) {
-        List<DataEntity> dataEntities = new ArrayList<>();
+    private List<FormEntity> transformDataEntryForm(List<ProgramStageDataElement> programStageDataElements) {
+        List<FormEntity> dataEntities = new ArrayList<>();
 
         RxDataEntityValueChangedListener dataEntityValueChangedListener = new RxDataEntityValueChangedListener();
         for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
@@ -220,10 +219,10 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
         return dataEntities;
     }
 
-    private List<DataEntity> transformDataEntryFormWithValues(
+    private List<FormEntity> transformDataEntryFormWithValues(
             HashMap<String, TrackedEntityDataValue> valueHashMap, ProgramStageSection section, Event event) {
 
-        List<DataEntity> dataEntities = new ArrayList<>();
+        List<FormEntity> dataEntities = new ArrayList<>();
         List<ProgramStageDataElement> programStageDataElements = section.getProgramStageDataElements();
         RxDataEntityValueChangedListener dataEntityValueChangedListener = new RxDataEntityValueChangedListener();
         dataEntityValueChangedListener.setEvent(event);
@@ -287,14 +286,12 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
         return dataEntities;
     }
 
-    private class RxDataEntityValueChangedListener implements OnValueChangeListener<Pair<CharSequence, CharSequence>> {
+    private class RxDataEntityValueChangedListener implements OnFormEntityChangeListener {
         private ProgramStageDataElement programStageDataElement;
         private TrackedEntityDataValue trackedEntityDataValue;
         private Event event;
         private Observable saveValueObservable;
 
-
-        @Override
         public void onValueChanged(String id, Pair<CharSequence, CharSequence> keyValuePair) {
 
 //            if(programStageDataElement.getProgramStage().getReportDateDescription().equals(keyValuePair.first)) {
@@ -343,6 +340,11 @@ public class EventDataEntryPresenterImpl implements EventDataEntryPresenter {
 
         public void setEvent(Event event) {
             this.event = event;
+        }
+
+        @Override
+        public void onFormEntityChanged(FormEntity formEntity) {
+
         }
     }
 }

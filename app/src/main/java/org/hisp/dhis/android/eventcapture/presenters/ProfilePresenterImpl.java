@@ -1,70 +1,73 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.views.RxOnValueChangedListener;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileView;
 import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
-import org.hisp.dhis.client.sdk.ui.models.DataEntityEditText;
-import org.hisp.dhis.client.sdk.ui.models.DataEntityEditText.InputType;
-import org.hisp.dhis.client.sdk.ui.models.OnValueChangeListener;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityCharSequence;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityDate;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText.InputType;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import rx.Subscription;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class ProfilePresenterImpl implements ProfilePresenter {
     private static final String TAG = ProfilePresenter.class.getSimpleName();
 
-    private static final String FIRST_NAME = "firstName";
-    private static final String SURNAME = "surname";
-    private static final String BIRTHDAY = "birthday";
-    private static final String INTRODUCTION = "introduction";
-    private static final String EDUCATION = "education";
-    private static final String EMPLOYER = "employer";
-    private static final String INTERESTS = "interests";
-    private static final String JOB_TITLE = "jobTitle";
-    private static final String LANGUAGES = "languages";
-    private static final String EMAIL = "email";
-    private static final String PHONE_NUMBER = "phoneNumber";
-
+    // callback which will be called when values change in view
+    private final RxOnValueChangedListener onFormEntityChangeListener;
     private final UserAccountInteractor userAccountInteractor;
     private final Logger logger;
 
     private ProfileView profileView;
-    private Subscription subscription;
+    private CompositeSubscription subscription;
+    private UserAccount userAccount;
 
     public ProfilePresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
+        this.onFormEntityChangeListener = new RxOnValueChangedListener();
         this.userAccountInteractor = userAccountInteractor;
         this.logger = logger;
     }
 
     @Override
-    public void listUserAccountFields() {
-        logger.d(TAG, "listUserAccountFields()");
+    public void createUserAccountForm() {
+        logger.d(TAG, "createUserAccountForm()");
 
-        subscription = userAccountInteractor.account()
-                .map(new Func1<UserAccount, List<DataEntity>>() {
+        // kill previous subscription
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+        }
+
+        // create a new one
+        subscription = new CompositeSubscription();
+        subscription.add(userAccountInteractor.account()
+                .map(new Func1<UserAccount, List<FormEntity>>() {
                     @Override
-                    public List<DataEntity> call(UserAccount userAccount) {
+                    public List<FormEntity> call(UserAccount userAccount) {
                         return transformUserAccount(userAccount);
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Action1<List<DataEntity>>() {
+                .subscribe(new Action1<List<FormEntity>>() {
                     @Override
-                    public void call(List<DataEntity> entities) {
+                    public void call(List<FormEntity> entities) {
                         if (profileView != null) {
-                            profileView.showUserAccountFields(entities);
+                            profileView.showUserAccountForm(entities);
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -72,7 +75,30 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                     public void call(Throwable throwable) {
                         logger.d(TAG, throwable.getMessage(), throwable);
                     }
-                });
+                }));
+
+        // listening to events which UI emits, save them into database
+        subscription.add(Observable.create(onFormEntityChangeListener)
+                .debounce(512, TimeUnit.MILLISECONDS)
+                .switchMap(new Func1<FormEntity, Observable<Boolean>>() {
+                    @Override
+                    public Observable<Boolean> call(FormEntity formEntity) {
+                        return onFormEntityChanged(formEntity);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean isSaved) {
+                        logger.d(TAG, String.format("UserAccount is saved: %s", isSaved));
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, throwable.getMessage(), throwable);
+                    }
+                }));
     }
 
     @Override
@@ -82,7 +108,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
         // list account fields as soon as
         // presenter is attached to fragment
-        listUserAccountFields();
+        createUserAccountForm();
     }
 
     @Override
@@ -95,134 +121,144 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         }
     }
 
-    private List<DataEntity> transformUserAccount(UserAccount userAccount) {
-        List<DataEntity> dataEntities = new ArrayList<>();
+    private List<FormEntity> transformUserAccount(UserAccount userAccount) {
+        this.userAccount = userAccount;
 
-        OnValueChangedListener changedListener = new OnValueChangedListener(
-                userAccountInteractor, userAccount);
+        isNull(this.userAccount, "userAccount must not be null");
+        isNull(this.profileView, "profileView must not be null");
 
-        DataEntityEditText firstName = new DataEntityEditText(
-                FIRST_NAME, "First name", InputType.TEXT);
+        List<FormEntity> formEntities = new ArrayList<>();
+
+        FormEntityEditText firstName = new FormEntityEditText(ProfileView.ID_FIRST_NAME,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_FIRST_NAME), InputType.TEXT);
         firstName.setValue(userAccount.getFirstName());
-        firstName.setOnValueChangeListener(changedListener);
-        dataEntities.add(firstName);
+        firstName.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(firstName);
 
-        DataEntityEditText surname = new DataEntityEditText(
-                SURNAME, "Surname", InputType.TEXT);
+        FormEntityEditText surname = new FormEntityEditText(ProfileView.ID_SURNAME,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_SURNAME), InputType.TEXT);
         surname.setValue(userAccount.getSurname());
-        surname.setOnValueChangeListener(changedListener);
-        dataEntities.add(surname);
+        surname.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(surname);
 
-        DataEntityEditText introduction = new DataEntityEditText(
-                INTRODUCTION, "Introduction", InputType.TEXT);
+        // TODO add gender
+
+        FormEntityDate birthday = new FormEntityDate(ProfileView.ID_BIRTHDAY,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_BIRTHDAY));
+        birthday.setValue(userAccount.getBirthday());
+        birthday.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(birthday);
+
+        FormEntityEditText introduction = new FormEntityEditText(ProfileView.ID_INTRODUCTION,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_INTRODUCTION), InputType.TEXT);
         introduction.setValue(userAccount.getIntroduction());
-        introduction.setOnValueChangeListener(changedListener);
-        dataEntities.add(introduction);
+        introduction.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(introduction);
 
-        return dataEntities;
+        FormEntityEditText education = new FormEntityEditText(ProfileView.ID_EDUCATION,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_EDUCATION), InputType.TEXT);
+        education.setValue(userAccount.getEducation());
+        education.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(education);
 
-//
-//        DataEntityEditText birthday = new DataEntityDate(
-//                BIRTHDAY, "Birthday", "Enter text", InputType.);
-//        birthday.setValue(userAccount.getBirthday());
-//        birthday.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> education = new DataEntity2<>(
-//                EDUCATION, "Education", DataEntity2.Type.EDITTEXT);
-//        education.setValue(userAccount.getEducation());
-//        education.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> employer = new DataEntity2<>(
-//                EMPLOYER, "Employer", DataEntity2.Type.EDITTEXT);
-//        employer.setValue(userAccount.getEmployer());
-//        employer.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> interests = new DataEntity2<>(
-//                INTERESTS, "Interests", DataEntity2.Type.EDITTEXT);
-//        interests.setValue(userAccount.getInterests());
-//        interests.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> jobTitle = new DataEntity2<>(
-//                JOB_TITLE, "Job title", DataEntity2.Type.EDITTEXT);
-//        jobTitle.setValue(userAccount.getJobTitle());
-//        jobTitle.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> languages = new DataEntity2<>(
-//                LANGUAGES, "Languages", DataEntity2.Type.EDITTEXT);
-//        languages.setValue(userAccount.getLanguages());
-//        languages.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> email = new DataEntity2<>(
-//                EMAIL, "Email", DataEntity2.Type.EDITTEXT);
-//        email.setValue(userAccount.getEmail());
-//        email.setOnValueChangeListener(changedListener);
-//
-//        DataEntity2<String> phoneNumber = new DataEntity2<>(
-//                PHONE_NUMBER, "Phone number", DataEntity2.Type.EDITTEXT);
-//        phoneNumber.setValue(userAccount.getPhoneNumber());
-//        phoneNumber.setOnValueChangeListener(changedListener);
+        FormEntityEditText employer = new FormEntityEditText(ProfileView.ID_EMPLOYER,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_EMPLOYER), InputType.TEXT);
+        employer.setValue(userAccount.getEmployer());
+        employer.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(employer);
+
+        FormEntityEditText interests = new FormEntityEditText(ProfileView.ID_INTERESTS,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_INTERESTS), InputType.TEXT);
+        interests.setValue(userAccount.getInterests());
+        interests.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(interests);
+
+        FormEntityEditText jobTitle = new FormEntityEditText(ProfileView.ID_JOB_TITLE,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_JOB_TITLE), InputType.TEXT);
+        jobTitle.setValue(userAccount.getJobTitle());
+        jobTitle.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(jobTitle);
+
+        FormEntityEditText languages = new FormEntityEditText(ProfileView.ID_LANGUAGES,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_LANGUAGES), InputType.TEXT);
+        languages.setValue(userAccount.getLanguages());
+        languages.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(languages);
+
+        FormEntityEditText email = new FormEntityEditText(ProfileView.ID_EMAIL,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_EMAIL), InputType.TEXT);
+        email.setValue(userAccount.getEmail());
+        email.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(email);
+
+        FormEntityEditText phoneNumber = new FormEntityEditText(ProfileView.ID_PHONE_NUMBER,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_PHONE_NUMBER), InputType.TEXT);
+        phoneNumber.setValue(userAccount.getPhoneNumber());
+        phoneNumber.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(phoneNumber);
+
+        return formEntities;
     }
 
-    private static class OnValueChangedListener implements OnValueChangeListener<String> {
-        private final UserAccountInteractor userAccountInteractor;
-        private final UserAccount userAccount;
-
-        private OnValueChangedListener(UserAccountInteractor userAccountInteractor,
-                                       UserAccount userAccount) {
-            this.userAccountInteractor = userAccountInteractor;
-            this.userAccount = userAccount;
+    private Observable<Boolean> onFormEntityChanged(FormEntity formEntity) {
+        if (userAccount == null) {
+            logger.e(TAG, "onFormEntityChanged() is called without UserAccount");
+            throw new IllegalArgumentException("No UserAccount instance is found");
         }
 
-        @Override
-        public void onValueChanged(String id, String value) {
-            switch (id) {
-                case FIRST_NAME: {
-                    userAccount.setFirstName(value);
-                    break;
-                }
-                case SURNAME: {
-                    userAccount.setSurname(value);
-                    break;
-                }
-                case BIRTHDAY: {
-                    userAccount.setBirthday(value);
-                    break;
-                }
-                case INTRODUCTION: {
-                    userAccount.setIntroduction(value);
-                    break;
-                }
-                case EDUCATION: {
-                    userAccount.setEducation(value);
-                    break;
-                }
-                case EMPLOYER: {
-                    userAccount.setEmployer(value);
-                    break;
-                }
-                case INTERESTS: {
-                    userAccount.setInterests(value);
-                    break;
-                }
-                case JOB_TITLE: {
-                    userAccount.setJobTitle(value);
-                    break;
-                }
-                case LANGUAGES: {
-                    userAccount.setLanguages(value);
-                    break;
-                }
-                case EMAIL: {
-                    userAccount.setEmail(value);
-                    break;
-                }
-                case PHONE_NUMBER: {
-                    userAccount.setPhoneNumber(value);
-                    break;
-                }
+        FormEntityCharSequence formEntityCharSequence = (FormEntityCharSequence) formEntity;
+        String value = formEntityCharSequence.getValue().toString();
+
+        logger.d(TAG, String.format("New value '%s' is emitted for field: '%s'",
+                value, formEntityCharSequence.getLabel()));
+
+        switch (formEntityCharSequence.getId()) {
+            case ProfileView.ID_FIRST_NAME: {
+                userAccount.setFirstName(value);
+                break;
             }
-
-            System.out.println("*** CHANGED ***: " + id + " " + value);
+            case ProfileView.ID_SURNAME: {
+                userAccount.setSurname(value);
+                break;
+            }
+            case ProfileView.ID_BIRTHDAY: {
+                userAccount.setBirthday(value);
+                break;
+            }
+            case ProfileView.ID_INTRODUCTION: {
+                userAccount.setIntroduction(value);
+                break;
+            }
+            case ProfileView.ID_EDUCATION: {
+                userAccount.setEducation(value);
+                break;
+            }
+            case ProfileView.ID_EMPLOYER: {
+                userAccount.setEmployer(value);
+                break;
+            }
+            case ProfileView.ID_INTERESTS: {
+                userAccount.setInterests(value);
+                break;
+            }
+            case ProfileView.ID_JOB_TITLE: {
+                userAccount.setJobTitle(value);
+                break;
+            }
+            case ProfileView.ID_LANGUAGES: {
+                userAccount.setLanguages(value);
+                break;
+            }
+            case ProfileView.ID_EMAIL: {
+                userAccount.setEmail(value);
+                break;
+            }
+            case ProfileView.ID_PHONE_NUMBER: {
+                userAccount.setPhoneNumber(value);
+                break;
+            }
         }
+
+        return userAccountInteractor.save(userAccount);
     }
 }

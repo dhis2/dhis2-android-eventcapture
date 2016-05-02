@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -13,7 +14,7 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
@@ -77,7 +78,37 @@ public class ProfileFragment extends Fragment implements ProfileView {
     }
 
     @Override
-    public void showUserAccountFields(List<DataEntity> dataEntities) {
-        rowViewAdapter.swap(dataEntities);
+    public void showUserAccountForm(List<FormEntity> formEntities) {
+        rowViewAdapter.swap(formEntities);
+    }
+
+    @Override
+    public String getUserAccountFieldLabel(@NonNull @UserAccountFieldId String fieldId) {
+        switch (fieldId) {
+            case ID_FIRST_NAME:
+                return getString(R.string.first_name);
+            case ID_SURNAME:
+                return getString(R.string.surname);
+            case ID_BIRTHDAY:
+                return getString(R.string.birthday);
+            case ID_INTRODUCTION:
+                return getString(R.string.introduction);
+            case ID_EDUCATION:
+                return getString(R.string.education);
+            case ID_EMPLOYER:
+                return getString(R.string.employer);
+            case ID_INTERESTS:
+                return getString(R.string.interests);
+            case ID_JOB_TITLE:
+                return getString(R.string.job_title);
+            case ID_LANGUAGES:
+                return getString(R.string.languages);
+            case ID_EMAIL:
+                return getString(R.string.email);
+            case ID_PHONE_NUMBER:
+                return getString(R.string.phone_number);
+            default:
+                throw new IllegalArgumentException("Unsupported prompt");
+        }
     }
 }
