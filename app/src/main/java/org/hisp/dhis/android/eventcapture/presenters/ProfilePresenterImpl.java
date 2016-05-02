@@ -141,7 +141,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         surname.setOnFormEntityChangeListener(onFormEntityChangeListener);
         formEntities.add(surname);
 
-        // TODO add gender
+        // TODO add gender (Filterable Dialog, take a look into FilterableDialog and Pickers)
 
         FormEntityDate birthday = new FormEntityDate(ProfileView.ID_BIRTHDAY,
                 profileView.getUserAccountFieldLabel(ProfileView.ID_BIRTHDAY));

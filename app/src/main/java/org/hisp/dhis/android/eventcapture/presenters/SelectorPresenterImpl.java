@@ -172,6 +172,24 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             rootPicker.addChild(organisationUnitPicker);
         }
 
+        // Traverse the tree. If there is a path with nodes
+        // which have only one child, set default selection
+        traverseAndSetDefaultSelection(rootPicker);
+
         return rootPicker;
+    }
+
+    private static void traverseAndSetDefaultSelection(Picker tree) {
+        if (tree != null) {
+
+            Picker node = tree;
+            do {
+                if (node.getChildren().size() == 1) {
+                    // get the only child node and set it as selected
+                    Picker singleChild = node.getChildren().get(0);
+                    node.setSelectedChild(singleChild);
+                }
+            } while ((node = node.getSelectedChild()) != null);
+        }
     }
 }
