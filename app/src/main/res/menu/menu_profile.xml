@@ -27,8 +27,17 @@
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_refresh"
+        android:title="@string/sync"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/menu_log_out"
-        android:title="@string/logout_option" />
+        android:title="@string/logout_option"
+        app:showAsAction="never"/>
 </menu>

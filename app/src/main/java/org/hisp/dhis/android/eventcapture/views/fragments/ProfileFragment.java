@@ -1,97 +1,199 @@
-/*
- * Copyright (c) 2016, University of Oslo
- *
- * All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * Neither the name of the HISP project nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
-import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenterImpl;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class ProfileFragment extends BaseFragment implements ProfileView {
-    private RowViewAdapter rowViewAdapter;
-    private ProfilePresenter mProfilePresenter;
+    private static final String STATE_IS_REFRESHING = "state:isRefreshing";
+
+    @Inject
+    ProfilePresenter profilePresenter;
+
+    @Inject
+    Logger logger;
+
+    // pull-to-refresh
+    SwipeRefreshLayout swipeRefreshLayout;
+
+    RecyclerView recyclerView;
+
+    RowViewAdapter rowViewAdapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // injection of profile presenter
+        ((EventCaptureApp) getActivity().getApplication())
+                .getUserComponent().inject(this);
+    }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_profile, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        Drawable colorDrawable = ContextCompat.getDrawable(
-                getActivity(), R.color.color_divider);
+    public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
+        if (getParentToolbar() != null) {
+            getParentToolbar().inflateMenu(R.menu.menu_profile);
+            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return ProfileFragment.this.onMenuItemClick(item);
+                }
+            });
+        }
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        swipeRefreshLayout = (SwipeRefreshLayout) view
+                .findViewById(R.id.swiperefreshlayout_profile);
+        swipeRefreshLayout.setColorSchemeResources(
+                R.color.color_primary_default);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                profilePresenter.sync();
+            }
+        });
+        recyclerView = (RecyclerView) view
+                .findViewById(R.id.recyclerview_profile);
+
+        // we want RecyclerView to behave like ListView
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        rowViewAdapter = new RowViewAdapter(getFragmentManager());
+        // Using ItemDecoration in order to implement divider
+        DividerDecoration itemDecoration = new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider));
 
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_profile);
+        rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setAdapter(rowViewAdapter);
-        recyclerView.addItemDecoration(new DividerDecoration(colorDrawable));
 
-        mProfilePresenter = new ProfilePresenterImpl(this);
-        mProfilePresenter.listUserAccountFields();
-
-        // showRefreshButton();
-        // setOnMenuItemClickListener(this);
+        if (savedInstanceState != null) {
+            // this workaround is necessary because of the message queue
+            // implementation in android. If you will try to setRefreshing(true) right away,
+            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
+            // message to hide progress bar which probably is created by layout
+            swipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefreshLayout.setRefreshing(savedInstanceState
+                            .getBoolean(STATE_IS_REFRESHING, false));
+                }
+            });
+        }
     }
 
     @Override
-    @UiThread
-    public void setProfileFields(List<DataEntity> dataEntities) {
-        rowViewAdapter.swap(dataEntities);
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(STATE_IS_REFRESHING, swipeRefreshLayout.isRefreshing());
+        super.onSaveInstanceState(outState);
     }
-//
-//    @Override
-//    public boolean onMenuItemClick(MenuItem item) {
-//        mProfilePresenter.listUserAccountFields();
-//        return true;
-//    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        profilePresenter.attachView(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        profilePresenter.detachView();
+    }
+
+    @Override
+    public void showProgressBar() {
+        logger.d(SelectorFragment.class.getSimpleName(), "showProgressBar()");
+        swipeRefreshLayout.setRefreshing(true);
+    }
+
+    @Override
+    public void hideProgressBar() {
+        logger.d(SelectorFragment.class.getSimpleName(), "hideProgressBar()");
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void showUserAccountForm(List<FormEntity> formEntities) {
+        rowViewAdapter.swap(formEntities);
+    }
+
+    @Override
+    public String getUserAccountFieldLabel(@NonNull @UserAccountFieldId String fieldId) {
+        switch (fieldId) {
+            case ID_FIRST_NAME:
+                return getString(R.string.first_name);
+            case ID_SURNAME:
+                return getString(R.string.surname);
+            case ID_GENDER:
+                return getString(R.string.gender);
+            case ID_GENDER_MALE:
+                return getString(R.string.gender_male);
+            case ID_GENDER_FEMALE:
+                return getString(R.string.gender_female);
+            case ID_GENDER_OTHER:
+                return getString(R.string.gender_other);
+            case ID_BIRTHDAY:
+                return getString(R.string.birthday);
+            case ID_INTRODUCTION:
+                return getString(R.string.introduction);
+            case ID_EDUCATION:
+                return getString(R.string.education);
+            case ID_EMPLOYER:
+                return getString(R.string.employer);
+            case ID_INTERESTS:
+                return getString(R.string.interests);
+            case ID_JOB_TITLE:
+                return getString(R.string.job_title);
+            case ID_LANGUAGES:
+                return getString(R.string.languages);
+            case ID_EMAIL:
+                return getString(R.string.email);
+            case ID_PHONE_NUMBER:
+                return getString(R.string.phone_number);
+            default:
+                throw new IllegalArgumentException("Unsupported prompt");
+        }
+    }
+
+    private boolean onMenuItemClick(MenuItem item) {
+        logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
+
+        switch (item.getItemId()) {
+            case R.id.action_refresh: {
+                profilePresenter.sync();
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

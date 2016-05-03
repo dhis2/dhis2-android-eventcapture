@@ -44,7 +44,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
@@ -104,7 +104,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         if (getParentToolbar() != null) {
-            getParentToolbar().inflateMenu(R.menu.menu_main);
+            getParentToolbar().inflateMenu(R.menu.menu_refresh);
             getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -122,6 +122,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 .findViewById(R.id.swiperefreshlayout_selector);
         swipeRefreshLayout.setColorSchemeResources(
                 R.color.color_primary_default);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                selectorPresenter.sync();
+            }
+        });
 
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -253,7 +259,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 1, 0);
             AnimatorSet animSetXY = new AnimatorSet();
             animSetXY.playTogether(scaleX, scaleY);
-            animSetXY.setInterpolator(new DecelerateInterpolator());
+            animSetXY.setInterpolator(new AccelerateInterpolator());
             animSetXY.setDuration(256);
             animSetXY.addListener(new AbsAnimationListener() {
 

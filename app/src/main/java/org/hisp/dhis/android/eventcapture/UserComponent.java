@@ -32,6 +32,7 @@ import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.SectionFilterActivity;
+import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 
@@ -60,4 +61,7 @@ public interface UserComponent {
     void inject(SectionFilterActivity sectionFilterActivity);
 
     void inject(SettingsFragment settingsFragment);
+
+    void inject(ProfileFragment profileFragment);
 }
+

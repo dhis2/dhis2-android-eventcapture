@@ -109,7 +109,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     public List<ProgramStage> call(Program program) {
                         return D2.programStages().list(program).toBlocking().first();
                     }
-                }).zipWith(D2.me().account(), new Func2<List<ProgramStage>, UserAccount, Event>() {
+                }).zipWith(D2.me().account().get(), new Func2<List<ProgramStage>, UserAccount, Event>() {
                     @Override
                     public Event call(List<ProgramStage> programStages, UserAccount userAccount) {
                         ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture

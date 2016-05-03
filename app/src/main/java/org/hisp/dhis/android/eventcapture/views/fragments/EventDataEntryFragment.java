@@ -40,9 +40,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.presenters.EventDataEntryPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.EventDataEntryPresenter;
-import org.hisp.dhis.client.sdk.ui.models.DataEntity;
+import org.hisp.dhis.android.eventcapture.presenters.EventDataEntryPresenterImpl;
+import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
@@ -99,7 +101,12 @@ public class EventDataEntryFragment extends Fragment implements EventDataEntryVi
     }
 
     @Override
-    public void setDataEntryFields(List<DataEntity> dataEntities) {
-        rowViewAdapter.swap(dataEntities);
+    public void setDataEntryFields(List<FormEntity> formEntities) {
+        rowViewAdapter.swap(formEntities);
+    }
+
+    private void saveDataValue() {
+        TrackedEntityDataValue dataValue = null;
+        D2.trackedEntityDataValues().save(dataValue);
     }
 }
