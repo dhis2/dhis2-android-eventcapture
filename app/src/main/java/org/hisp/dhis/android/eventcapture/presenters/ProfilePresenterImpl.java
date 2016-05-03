@@ -12,7 +12,9 @@ import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText.InputType;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityFilter;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.ui.rows.DatePickerRowView;
 import org.hisp.dhis.client.sdk.utils.Logger;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class ProfilePresenterImpl implements ProfilePresenter {
     private static final String TAG = ProfilePresenter.class.getSimpleName();
@@ -56,7 +59,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
         // create a new one
         subscription = new CompositeSubscription();
-        subscription.add(userAccountInteractor.account()
+        subscription.add(userAccountInteractor.account().get()
                 .map(new Func1<UserAccount, List<FormEntity>>() {
                     @Override
                     public List<FormEntity> call(UserAccount userAccount) {
@@ -128,6 +131,33 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         if (profileView != null) {
             profileView.showProgressBar();
         }
+
+        if (subscription == null) {
+            subscription = new CompositeSubscription();
+        }
+
+        subscription.add(userAccountInteractor.account().sync()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<UserAccount>() {
+                    @Override
+                    public void call(UserAccount userAccount) {
+                        logger.d(TAG, "UserAccount is successfully synced");
+
+                        if (profileView != null) {
+                            profileView.hideProgressBar();
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "UserAccount sync() failed", throwable);
+
+                        if (profileView != null) {
+                            profileView.hideProgressBar();
+                        }
+                    }
+                }));
     }
 
     private List<FormEntity> transformUserAccount(UserAccount userAccount) {
@@ -186,9 +216,17 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         ///////////////////////////////////////////////////////////////////////////////
         // Other user account fields
         ///////////////////////////////////////////////////////////////////////////////
+
+        // formatting the string
+        String birthdayString = "";
+        if (!isEmpty(userAccount.getBirthday())) {
+            DateTime birthdayDate = DateTime.parse(userAccount.getBirthday());
+            birthdayString = birthdayDate.toString(DatePickerRowView.DATE_FORMAT);
+        }
+
         FormEntityDate birthday = new FormEntityDate(ProfileView.ID_BIRTHDAY,
                 profileView.getUserAccountFieldLabel(ProfileView.ID_BIRTHDAY));
-        birthday.setValue(userAccount.getBirthday());
+        birthday.setValue(birthdayString);
         birthday.setOnFormEntityChangeListener(onFormEntityChangeListener);
         formEntities.add(birthday);
 
@@ -320,6 +358,6 @@ public class ProfilePresenterImpl implements ProfilePresenter {
             }
         }
 
-        return userAccountInteractor.save(userAccount);
+        return userAccountInteractor.account().save(userAccount);
     }
 }

@@ -59,7 +59,7 @@ public class HomePresenterImpl implements HomePresenter {
         isNull(view, "HomeView must not be null");
         homeView = (HomeView) view;
 
-        subscription = userAccountInteractor.account()
+        subscription = userAccountInteractor.account().get()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<UserAccount>() {
