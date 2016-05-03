@@ -146,6 +146,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
                         if (profileView != null) {
                             profileView.hideProgressBar();
+                            createUserAccountForm();
                         }
                     }
                 }, new Action1<Throwable>() {

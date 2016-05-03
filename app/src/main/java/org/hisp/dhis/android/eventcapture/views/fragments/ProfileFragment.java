@@ -74,6 +74,12 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
                 .findViewById(R.id.swiperefreshlayout_profile);
         swipeRefreshLayout.setColorSchemeResources(
                 R.color.color_primary_default);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                profilePresenter.sync();
+            }
+        });
         recyclerView = (RecyclerView) view
                 .findViewById(R.id.recyclerview_profile);
 

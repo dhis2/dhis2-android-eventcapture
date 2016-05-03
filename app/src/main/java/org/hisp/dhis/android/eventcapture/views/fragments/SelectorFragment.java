@@ -115,6 +115,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 .findViewById(R.id.swiperefreshlayout_selector);
         swipeRefreshLayout.setColorSchemeResources(
                 R.color.color_primary_default);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                selectorPresenter.sync();
+            }
+        });
 
         createEventButton.setOnClickListener(new View.OnClickListener() {
             @Override
