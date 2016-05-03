@@ -48,8 +48,6 @@ public final class EventCaptureApp extends Application {
 
     UserComponent userComponent;
 
-    RxBus rxBus;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -68,9 +66,6 @@ public final class EventCaptureApp extends Application {
 
         // adding UserComponent to global dependency graph
         userComponent = appComponent.plus(new UserModule());
-
-        //init rxBus
-        rxBus = new RxBus();
 
         AppAccountManager.getInstance().initialize(getApplicationContext());
 
@@ -97,13 +92,5 @@ public final class EventCaptureApp extends Application {
 
     public UserComponent getUserComponent() {
         return userComponent;
-    }
-
-    public RxBus getRxBusSingleton() {
-        if (rxBus == null) {
-            rxBus = new RxBus();
-        }
-
-        return rxBus;
     }
 }

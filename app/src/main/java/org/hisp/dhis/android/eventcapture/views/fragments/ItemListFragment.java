@@ -41,9 +41,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.RxBus;
 import org.hisp.dhis.android.eventcapture.presenters.ItemListPresenter;
 import org.hisp.dhis.android.eventcapture.views.EventListRowImpl;
 import org.hisp.dhis.android.eventcapture.views.ItemListView;
@@ -58,8 +56,6 @@ import java.util.List;
 
 import fr.castorflex.android.circularprogressbar.CircularProgressBar;
 import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action1;
 
 public class ItemListFragment extends Fragment implements ItemListView, View.OnClickListener {
     public static final String TAG = ItemListFragment.class.getSimpleName();
@@ -71,8 +67,6 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
 
     private ItemListRowAdapter itemListRowAdapter;
     private ItemListPresenter itemListPresenter;
-    private Subscription busSubscription;
-    private RxBus rxBus;
     private Observable<OrganisationUnit> organisationUnitObservable;
     private Observable<Program> programObservable;
 
@@ -100,45 +94,38 @@ public class ItemListFragment extends Fragment implements ItemListView, View.OnC
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        rxBus = ((EventCaptureApp) getActivity().getApplication()).getRxBusSingleton();
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
-
-        busSubscription = rxBus.toObserverable().subscribe(new Action1<Object>() {
-            @Override
-            public void call(Object event) {
-//                if (event instanceof SelectorFragment.OnOrganisationUnitPickerValueUpdated) {
-//                    SelectorFragment.OnOrganisationUnitPickerValueUpdated onOrgUnitSelectedClick =
-//                            (SelectorFragment.OnOrganisationUnitPickerValueUpdated) event;
-//                    setOrganisationUnitObservable(onOrgUnitSelectedClick.getOrganisationUnitObservable());
-//                }
-//                if (event instanceof SelectorFragment.OnProgramPickerValueUpdated) {
-//                    SelectorFragment.OnProgramPickerValueUpdated onProgramSelectedClick =
-//                            (SelectorFragment.OnProgramPickerValueUpdated) event;
-//                    setProgramObservable(onProgramSelectedClick.getProgramObservable());
-//                }
-
-                itemListPresenter.loadEventList
-                        (organisationUnitObservable,
-                                programObservable);
-
-                activate();
-            }
-        });
+//
+//            @Override
+//            public void call(Object event) {
+////                if (event instanceof SelectorFragment.OnOrganisationUnitPickerValueUpdated) {
+////                    SelectorFragment.OnOrganisationUnitPickerValueUpdated onOrgUnitSelectedClick =
+////                            (SelectorFragment.OnOrganisationUnitPickerValueUpdated) event;
+////                    setOrganisationUnitObservable(onOrgUnitSelectedClick.getOrganisationUnitObservable());
+////                }
+////                if (event instanceof SelectorFragment.OnProgramPickerValueUpdated) {
+////                    SelectorFragment.OnProgramPickerValueUpdated onProgramSelectedClick =
+////                            (SelectorFragment.OnProgramPickerValueUpdated) event;
+////                    setProgramObservable(onProgramSelectedClick.getProgramObservable());
+////                }
+//
+//                itemListPresenter.loadEventList
+//                        (organisationUnitObservable,
+//                                programObservable);
+//
+//                activate();
+//            }
+//        });
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (busSubscription != null && !busSubscription.isUnsubscribed()) {
-            busSubscription.unsubscribe();
-            busSubscription = null;
-        }
+//        if (busSubscription != null && !busSubscription.isUnsubscribed()) {
+//            busSubscription.unsubscribe();
+//            busSubscription = null;
+//        }
     }
 
     @Override
