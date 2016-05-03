@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
@@ -184,8 +183,6 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
 
         switch (item.getItemId()) {
             case R.id.action_refresh: {
-                Toast.makeText(getActivity(), "Sync()",
-                        Toast.LENGTH_SHORT).show();
                 profilePresenter.sync();
                 return true;
             }

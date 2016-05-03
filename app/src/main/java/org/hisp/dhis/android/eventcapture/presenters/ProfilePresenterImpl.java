@@ -3,7 +3,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.views.RxOnValueChangedListener;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileView;
-import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityCharSequence;
@@ -32,14 +32,14 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
     // callback which will be called when values change in view
     private final RxOnValueChangedListener onFormEntityChangeListener;
-    private final UserAccountInteractor userAccountInteractor;
+    private final CurrentUserInteractor userAccountInteractor;
     private final Logger logger;
 
     private ProfileView profileView;
     private CompositeSubscription subscription;
     private UserAccount userAccount;
 
-    public ProfilePresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
+    public ProfilePresenterImpl(CurrentUserInteractor userAccountInteractor, Logger logger) {
         this.onFormEntityChangeListener = new RxOnValueChangedListener();
         this.userAccountInteractor = userAccountInteractor;
         this.logger = logger;

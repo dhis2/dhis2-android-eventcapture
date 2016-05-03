@@ -30,15 +30,15 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.LauncherView;
 import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 
 public class LauncherPresenterImpl implements LauncherPresenter {
 
-    UserAccountInteractor userAccountInteractor;
+    CurrentUserInteractor userAccountInteractor;
 
     LauncherView launcherView;
 
-    public LauncherPresenterImpl(UserAccountInteractor userAccountInteractor) {
+    public LauncherPresenterImpl(CurrentUserInteractor userAccountInteractor) {
         this.userAccountInteractor = userAccountInteractor;
     }
 

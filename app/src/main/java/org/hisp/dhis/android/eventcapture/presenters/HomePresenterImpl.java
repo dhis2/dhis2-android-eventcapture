@@ -30,7 +30,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeView;
-import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -43,12 +43,12 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class HomePresenterImpl implements HomePresenter {
-    private final UserAccountInteractor userAccountInteractor;
+    private final CurrentUserInteractor userAccountInteractor;
     private final Logger logger;
     private Subscription subscription;
     private HomeView homeView;
 
-    public HomePresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
+    public HomePresenterImpl(CurrentUserInteractor userAccountInteractor, Logger logger) {
         this.userAccountInteractor = isNull(userAccountInteractor,
                 "UserAccountInteractor must not be null");
         this.logger = isNull(logger, "Logger must not be null");

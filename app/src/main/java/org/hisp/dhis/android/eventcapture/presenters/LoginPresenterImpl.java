@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.OnLoginFinishedListener;
-import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -47,13 +47,13 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
-    private final UserAccountInteractor userAccountInteractor;
+    private final CurrentUserInteractor userAccountInteractor;
     private final CompositeSubscription subscription;
     private final Logger logger;
 
     private LoginView loginView;
 
-    public LoginPresenterImpl(UserAccountInteractor userAccountInteractor, Logger logger) {
+    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, Logger logger) {
         this.userAccountInteractor = userAccountInteractor;
         this.subscription = new CompositeSubscription();
         this.logger = logger;

@@ -41,7 +41,7 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
-import org.hisp.dhis.client.sdk.android.user.UserAccountInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -66,7 +66,7 @@ public class UserModule {
     @Provides
     @Nullable
     @UserScope
-    public UserAccountInteractor providesUserAccountInteractor() {
+    public CurrentUserInteractor providesUserAccountInteractor() {
         if (D2.isConfigured()) {
             return D2.me();
         }
@@ -100,21 +100,21 @@ public class UserModule {
     @Provides
     @UserScope
     public LauncherPresenter providesLauncherPresenter(
-            @Nullable UserAccountInteractor accountInteractor) {
+            @Nullable CurrentUserInteractor accountInteractor) {
         return new LauncherPresenterImpl(accountInteractor);
     }
 
     @Provides
     @UserScope
     public LoginPresenter providesLoginPresenter(
-            @Nullable UserAccountInteractor accountInteractor, Logger logger) {
+            @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, logger);
     }
 
     @Provides
     @UserScope
     public HomePresenter providesHomerPresenter(
-            @Nullable UserAccountInteractor accountInteractor, Logger logger) {
+            @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
         return new HomePresenterImpl(accountInteractor, logger);
     }
 
@@ -130,7 +130,7 @@ public class UserModule {
     @Provides
     @UserScope
     public ProfilePresenter providesProfilePresenter(
-            @Nullable UserAccountInteractor userAccountInteractor, Logger logger) {
+            @Nullable CurrentUserInteractor userAccountInteractor, Logger logger) {
         return new ProfilePresenterImpl(userAccountInteractor, logger);
     }
 }
