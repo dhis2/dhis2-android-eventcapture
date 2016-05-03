@@ -49,6 +49,10 @@ public interface ProfileView extends View {
     String ID_EMAIL = "id:email";
     String ID_PHONE_NUMBER = "id:phoneNumber";
 
+    void showProgressBar();
+
+    void hideProgressBar();
+
     void showUserAccountForm(List<FormEntity> formEntities);
 
     String getUserAccountFieldLabel(@NonNull @UserAccountFieldId String fieldId);

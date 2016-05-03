@@ -123,6 +123,13 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         }
     }
 
+    @Override
+    public void sync() {
+        if (profileView != null) {
+            profileView.showProgressBar();
+        }
+    }
+
     private List<FormEntity> transformUserAccount(UserAccount userAccount) {
         this.userAccount = userAccount;
 

@@ -44,7 +44,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
@@ -101,7 +100,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
         if (getParentToolbar() != null) {
-            getParentToolbar().inflateMenu(R.menu.menu_main);
+            getParentToolbar().inflateMenu(R.menu.menu_refresh);
             getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {

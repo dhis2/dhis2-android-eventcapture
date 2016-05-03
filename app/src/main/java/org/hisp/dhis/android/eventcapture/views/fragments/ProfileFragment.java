@@ -3,29 +3,41 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
+import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-public class ProfileFragment extends Fragment implements ProfileView {
+public class ProfileFragment extends BaseFragment implements ProfileView {
+    private static final String STATE_IS_REFRESHING = "state:isRefreshing";
 
     @Inject
     ProfilePresenter profilePresenter;
+
+    @Inject
+    Logger logger;
+
+    // pull-to-refresh
+    SwipeRefreshLayout swipeRefreshLayout;
 
     RecyclerView recyclerView;
 
@@ -48,7 +60,24 @@ public class ProfileFragment extends Fragment implements ProfileView {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
+        if (getParentToolbar() != null) {
+            getParentToolbar().inflateMenu(R.menu.menu_profile);
+            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return ProfileFragment.this.onMenuItemClick(item);
+                }
+            });
+        }
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view
+                .findViewById(R.id.swiperefreshlayout_profile);
+        swipeRefreshLayout.setColorSchemeResources(
+                R.color.color_primary_default);
+        recyclerView = (RecyclerView) view
+                .findViewById(R.id.recyclerview_profile);
+
         // we want RecyclerView to behave like ListView
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -58,11 +87,29 @@ public class ProfileFragment extends Fragment implements ProfileView {
                 ContextCompat.getDrawable(getActivity(), R.drawable.divider));
 
         rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
-
-        recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setAdapter(rowViewAdapter);
+
+        if (savedInstanceState != null) {
+            // this workaround is necessary because of the message queue
+            // implementation in android. If you will try to setRefreshing(true) right away,
+            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
+            // message to hide progress bar which probably is created by layout
+            swipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefreshLayout.setRefreshing(savedInstanceState
+                            .getBoolean(STATE_IS_REFRESHING, false));
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(STATE_IS_REFRESHING, swipeRefreshLayout.isRefreshing());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -75,6 +122,18 @@ public class ProfileFragment extends Fragment implements ProfileView {
     public void onPause() {
         super.onPause();
         profilePresenter.detachView();
+    }
+
+    @Override
+    public void showProgressBar() {
+        logger.d(SelectorFragment.class.getSimpleName(), "showProgressBar()");
+        swipeRefreshLayout.setRefreshing(true);
+    }
+
+    @Override
+    public void hideProgressBar() {
+        logger.d(SelectorFragment.class.getSimpleName(), "hideProgressBar()");
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -118,5 +177,20 @@ public class ProfileFragment extends Fragment implements ProfileView {
             default:
                 throw new IllegalArgumentException("Unsupported prompt");
         }
+    }
+
+    private boolean onMenuItemClick(MenuItem item) {
+        logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
+
+        switch (item.getItemId()) {
+            case R.id.action_refresh: {
+                Toast.makeText(getActivity(), "Sync()",
+                        Toast.LENGTH_SHORT).show();
+                profilePresenter.sync();
+                return true;
+            }
+        }
+
+        return false;
     }
 }
