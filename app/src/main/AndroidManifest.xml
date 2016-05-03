@@ -50,7 +50,6 @@
 
         <activity android:name=".views.activities.LoginActivity" />
         <activity android:name=".views.activities.HomeActivity" />
-        <activity android:name=".views.activities.DetailsActivity" />
         <activity android:name=".views.activities.DataEntryActivity" />
         <activity android:name=".views.activities.SectionFilterActivity" />
 

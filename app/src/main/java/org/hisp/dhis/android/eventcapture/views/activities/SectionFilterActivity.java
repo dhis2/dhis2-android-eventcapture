@@ -49,7 +49,6 @@ import android.widget.TextView;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenter;
-import org.hisp.dhis.android.eventcapture.views.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
 import java.util.ArrayList;
@@ -57,8 +56,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class SectionFilterActivity extends AppCompatActivity implements SectionFilterView,
-        TextWatcher, View.OnClickListener {
+public class SectionFilterActivity extends AppCompatActivity
+        implements SectionFilterView, TextWatcher, View.OnClickListener {
+
+    private static final String PROGRAM_STAGE_UID = "extra:programStageUid";
 
     private List<ProgramStageSection> sectionsList;
 
@@ -82,7 +83,7 @@ public class SectionFilterActivity extends AppCompatActivity implements SectionF
         ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
 
         Intent intent = getIntent();
-        programStageUid = intent.getStringExtra(ItemListFragment.PROGRAM_STAGE_UID);
+        programStageUid = intent.getStringExtra(PROGRAM_STAGE_UID);
         sectionFilterPresenter.setProgramStageUid(programStageUid);
         sectionFilterPresenter.attachView(this);
 

@@ -52,7 +52,6 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
 import org.hisp.dhis.android.eventcapture.views.fragments.EventDataEntryFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.ItemListFragment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 
@@ -105,8 +104,7 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), SectionFilterActivity.class);
-                intent.putExtra(ItemListFragment.PROGRAM_STAGE_UID,
-                        dataEntryPresenter.getProgramStageUid());
+                intent.putExtra(PROGRAM_STAGE_UID, dataEntryPresenter.getProgramStageUid());
                 startActivityForResult(intent, 1);
             }
         });
