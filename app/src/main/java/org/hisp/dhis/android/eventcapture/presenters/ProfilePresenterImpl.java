@@ -10,6 +10,8 @@ import org.hisp.dhis.client.sdk.ui.models.FormEntityCharSequence;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityDate;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText.InputType;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityFilter;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
@@ -129,6 +131,9 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
         List<FormEntity> formEntities = new ArrayList<>();
 
+        ///////////////////////////////////////////////////////////////////////////////
+        // First name and surname user account fields
+        ///////////////////////////////////////////////////////////////////////////////
         FormEntityEditText firstName = new FormEntityEditText(ProfileView.ID_FIRST_NAME,
                 profileView.getUserAccountFieldLabel(ProfileView.ID_FIRST_NAME), InputType.TEXT);
         firstName.setValue(userAccount.getFirstName());
@@ -141,8 +146,39 @@ public class ProfilePresenterImpl implements ProfilePresenter {
         surname.setOnFormEntityChangeListener(onFormEntityChangeListener);
         formEntities.add(surname);
 
-        // TODO add gender (Filterable Dialog, take a look into FilterableDialog and Pickers)
+        ///////////////////////////////////////////////////////////////////////////////
+        // Building gender picker
+        ///////////////////////////////////////////////////////////////////////////////
+        Picker genderPicker = Picker.create(profileView
+                .getUserAccountFieldLabel(ProfileView.ID_GENDER));
+        Picker pickerItemMale = Picker.create(UserAccount.GENDER_MALE,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_GENDER_MALE), genderPicker);
+        Picker pickerItemFemale = Picker.create(UserAccount.GENDER_FEMALE,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_GENDER_FEMALE), genderPicker);
+        Picker pickerItemOther = Picker.create(UserAccount.GENDER_OTHER,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_GENDER_OTHER), genderPicker);
 
+        genderPicker.addChild(pickerItemMale);
+        genderPicker.addChild(pickerItemFemale);
+        genderPicker.addChild(pickerItemOther);
+
+        if (UserAccount.GENDER_MALE.equals(userAccount.getGender())) {
+            genderPicker.setSelectedChild(pickerItemMale);
+        } else if (UserAccount.GENDER_FEMALE.equals(userAccount.getGender())) {
+            genderPicker.setSelectedChild(pickerItemFemale);
+        } else if (UserAccount.GENDER_OTHER.equals(userAccount.getGender())) {
+            genderPicker.setSelectedChild(pickerItemOther);
+        }
+
+        FormEntityFilter gender = new FormEntityFilter(ProfileView.ID_GENDER,
+                profileView.getUserAccountFieldLabel(ProfileView.ID_GENDER));
+        gender.setPicker(genderPicker);
+        gender.setOnFormEntityChangeListener(onFormEntityChangeListener);
+        formEntities.add(gender);
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // Other user account fields
+        ///////////////////////////////////////////////////////////////////////////////
         FormEntityDate birthday = new FormEntityDate(ProfileView.ID_BIRTHDAY,
                 profileView.getUserAccountFieldLabel(ProfileView.ID_BIRTHDAY));
         birthday.setValue(userAccount.getBirthday());
@@ -206,19 +242,37 @@ public class ProfilePresenterImpl implements ProfilePresenter {
             throw new IllegalArgumentException("No UserAccount instance is found");
         }
 
-        FormEntityCharSequence formEntityCharSequence = (FormEntityCharSequence) formEntity;
-        String value = formEntityCharSequence.getValue().toString();
+        String label = formEntity.getLabel();
+        String value = "";
+
+        if (formEntity instanceof FormEntityCharSequence) {
+            FormEntityCharSequence formEntityCharSequence = (FormEntityCharSequence) formEntity;
+            value = formEntityCharSequence.getValue().toString();
+        }
+
+        if (formEntity instanceof FormEntityFilter) {
+            FormEntityFilter formEntityFilter = (FormEntityFilter) formEntity;
+
+            if (formEntityFilter.getPicker() != null &&
+                    formEntityFilter.getPicker().getSelectedChild() != null) {
+                value = formEntityFilter.getPicker().getSelectedChild().getId();
+            }
+        }
 
         logger.d(TAG, String.format("New value '%s' is emitted for field: '%s'",
-                value, formEntityCharSequence.getLabel()));
+                value, label));
 
-        switch (formEntityCharSequence.getId()) {
+        switch (formEntity.getId()) {
             case ProfileView.ID_FIRST_NAME: {
                 userAccount.setFirstName(value);
                 break;
             }
             case ProfileView.ID_SURNAME: {
                 userAccount.setSurname(value);
+                break;
+            }
+            case ProfileView.ID_GENDER: {
+                userAccount.setGender(value);
                 break;
             }
             case ProfileView.ID_BIRTHDAY: {

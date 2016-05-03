@@ -2,6 +2,10 @@
 <resources>
     <string name="first_name">First name</string>
     <string name="surname">Surname</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="gender_other">Other</string>
     <string name="birthday">Birthday</string>
     <string name="introduction">Introduction</string>
     <string name="education">Education</string>

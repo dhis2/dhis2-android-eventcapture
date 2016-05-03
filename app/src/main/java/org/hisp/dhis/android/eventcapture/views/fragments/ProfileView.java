@@ -16,6 +16,10 @@ public interface ProfileView extends View {
     @StringDef({
             ID_FIRST_NAME,
             ID_SURNAME,
+            ID_GENDER,
+            ID_GENDER_MALE,
+            ID_GENDER_FEMALE,
+            ID_GENDER_OTHER,
             ID_BIRTHDAY,
             ID_INTRODUCTION,
             ID_EDUCATION,
@@ -31,6 +35,10 @@ public interface ProfileView extends View {
 
     String ID_FIRST_NAME = "id:firstName";
     String ID_SURNAME = "id:surname";
+    String ID_GENDER = "id:gender";
+    String ID_GENDER_MALE = "id:genderMale";
+    String ID_GENDER_FEMALE = "id:genderFemale";
+    String ID_GENDER_OTHER = "id:other";
     String ID_BIRTHDAY = "id:birthday";
     String ID_INTRODUCTION = "id:introduction";
     String ID_EDUCATION = "id:education";

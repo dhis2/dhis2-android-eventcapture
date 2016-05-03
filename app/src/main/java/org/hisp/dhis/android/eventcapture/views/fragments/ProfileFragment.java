@@ -89,6 +89,14 @@ public class ProfileFragment extends Fragment implements ProfileView {
                 return getString(R.string.first_name);
             case ID_SURNAME:
                 return getString(R.string.surname);
+            case ID_GENDER:
+                return getString(R.string.gender);
+            case ID_GENDER_MALE:
+                return getString(R.string.gender_male);
+            case ID_GENDER_FEMALE:
+                return getString(R.string.gender_female);
+            case ID_GENDER_OTHER:
+                return getString(R.string.gender_other);
             case ID_BIRTHDAY:
                 return getString(R.string.birthday);
             case ID_INTRODUCTION:
