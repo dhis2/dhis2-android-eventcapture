@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,6 +18,7 @@ import android.view.MenuItem;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
+import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.FormSectionView;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 
@@ -27,26 +29,27 @@ import javax.inject.Inject;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
-public class FormSectionActivity2 extends AppCompatActivity implements FormSectionView {
+public class FormSectionsActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
     private static final String ARG_PROGRAM_ID = "arg:programId";
 
     @Inject
     FormSectionPresenter formSectionPresenter;
 
-    Toolbar dataEntryToolbar;
+    CollapsingToolbarLayout collapsingToolbarLayout;
+    Toolbar toolbar;
 
     // section tabs
-    TabLayout formSectionTabs;
+    TabLayout tabLayout;
 
     // view pager
-    ViewPager formSectionViewPager;
-    FormSectionsAdapter formSectionsAdapter;
+    ViewPager viewPager;
+    FormSectionsAdapter viewPagerAdapter;
 
     public static void navigateTo(Activity activity, String organisationUnitId, String programId) {
         isNull(activity, "activity must not be null");
 
-        Intent intent = new Intent(activity, FormSectionActivity2.class);
+        Intent intent = new Intent(activity, FormSectionsActivity.class);
         intent.putExtra(ARG_ORGANISATION_UNIT_ID, organisationUnitId);
         intent.putExtra(ARG_PROGRAM_ID, programId);
         activity.startActivity(intent);
@@ -63,26 +66,26 @@ public class FormSectionActivity2 extends AppCompatActivity implements FormSecti
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_data_entry);
+        setContentView(R.layout.activity_form_sections);
 
-        // injecting dependencies into FormSectionActivity
+        // injecting dependencies into FormSectionsActivity
         ((EventCaptureApp) getApplication())
                 .getUserComponent().inject(this);
 
-        dataEntryToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(dataEntryToolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
-        formSectionTabs = (TabLayout) findViewById(R.id.tablayout_data_entry);
-        formSectionViewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
-        formSectionsAdapter = new FormSectionsAdapter(getSupportFragmentManager());
+        tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
+        viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
+        viewPagerAdapter = new FormSectionsAdapter(getSupportFragmentManager());
 
-        formSectionViewPager.setAdapter(formSectionsAdapter);
-        formSectionTabs.setupWithViewPager(formSectionViewPager);
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
 
         formSectionPresenter.createDataEntryForm(
                 getOrganisationUnitId(), getProgramId());
@@ -102,7 +105,12 @@ public class FormSectionActivity2 extends AppCompatActivity implements FormSecti
 
     @Override
     public void showFormSections(List<FormSection> formSections) {
-        formSectionsAdapter.swapData(formSections);
+        viewPagerAdapter.swapData(formSections);
+    }
+
+    @Override
+    public void showTitle(String title) {
+        collapsingToolbarLayout.setTitle(title);
     }
 
     @Override
@@ -125,7 +133,7 @@ public class FormSectionActivity2 extends AppCompatActivity implements FormSecti
 
         @Override
         public Fragment getItem(int position) {
-            return null;
+            return new DataEntryFragment();
         }
 
         @Override

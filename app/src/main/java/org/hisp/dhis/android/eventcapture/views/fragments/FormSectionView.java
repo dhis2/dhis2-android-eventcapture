@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface FormSectionView extends View {
     void showFormSections(List<FormSection> formSections);
+
+    void showTitle(String title);
 }

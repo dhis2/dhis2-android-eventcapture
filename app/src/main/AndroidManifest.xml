@@ -50,11 +50,11 @@
 
         <activity android:name=".views.activities.LoginActivity" />
         <activity android:name=".views.activities.HomeActivity" />
-        <activity android:name=".views.activities.FormSectionActivity2" />
-        <activity android:name=".views.activities.SectionFilterActivity" />
+        <activity android:name=".views.activities.FormSectionsActivity" />>
 
         <!-- stub Authenticator service -->
         <service android:name=".model.AuthenticatorService">
+
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

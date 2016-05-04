@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <style name="CustomEditText" parent="@style/Base.V7.Widget.AppCompat.EditText">
-        <item name="android:textColorHint">@android:color/white</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-</resources>

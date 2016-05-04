@@ -28,11 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity2;
+import org.hisp.dhis.android.eventcapture.views.activities.FormSectionsActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.SectionFilterActivity;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
@@ -51,20 +50,21 @@ public interface UserComponent {
     // Injection targets
     //------------------------------------------------------------------------
 
+    // activities
     void inject(LauncherActivity launcherActivity);
 
     void inject(LoginActivity loginActivity);
 
     void inject(HomeActivity homeActivity);
 
-    void inject(SelectorFragment selectorFragment);
+    void inject(FormSectionsActivity formSectionActivity);
 
-    void inject(SectionFilterActivity sectionFilterActivity);
+
+    // fragments
+    void inject(SelectorFragment selectorFragment);
 
     void inject(SettingsFragment settingsFragment);
 
     void inject(ProfileFragment profileFragment);
-
-    void inject(FormSectionActivity2 formSectionActivity);
 }
 

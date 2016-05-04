@@ -10,6 +10,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -61,6 +62,40 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
 
         subscription = new CompositeSubscription();
         subscription.add(programStageInteractor.list(program)
+                .map(new Func1<List<ProgramStage>, String>() {
+                    @Override
+                    public String call(List<ProgramStage> stages) {
+                        // since this form is intended to be used in event capture
+                        // and programs for event capture apps consist only from one
+                        // and only one program stage, we can just retrieve it from the list
+                        if (stages != null && !stages.isEmpty()) {
+                            ProgramStage programStage = stages.get(0);
+
+                            if (programStage != null) {
+                                return programStage.getDisplayName();
+                            }
+                        }
+
+                        return null;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<String>() {
+                    @Override
+                    public void call(String label) {
+                        if (formSectionView != null) {
+                            formSectionView.showTitle(label);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Error retrieving ProgramStage", throwable);
+                    }
+                }));
+
+        subscription.add(programStageInteractor.list(program)
                 .switchMap(new Func1<List<ProgramStage>, Observable<List<ProgramStageSection>>>() {
 
                     @Override
@@ -78,7 +113,14 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 .map(new Func1<List<ProgramStageSection>, List<FormSection>>() {
                     @Override
                     public List<FormSection> call(List<ProgramStageSection> programStageSections) {
-                        return null;
+                        List<FormSection> formSections = new ArrayList<>();
+
+                        for (ProgramStageSection section : programStageSections) {
+                            formSections.add(new FormSection(
+                                    section.getUId(), section.getDisplayName()));
+                        }
+
+                        return formSections;
                     }
                 })
                 .subscribeOn(Schedulers.io())
