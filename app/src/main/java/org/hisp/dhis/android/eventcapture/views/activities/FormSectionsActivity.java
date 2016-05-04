@@ -19,7 +19,6 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.FormSectionView;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     FormSectionPresenter formSectionPresenter;
 
     CollapsingToolbarLayout collapsingToolbarLayout;
-    Toolbar toolbar;
 
     // section tabs
     TabLayout tabLayout;
@@ -72,7 +70,7 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         ((EventCaptureApp) getApplication())
                 .getUserComponent().inject(this);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         if (getSupportActionBar() != null) {

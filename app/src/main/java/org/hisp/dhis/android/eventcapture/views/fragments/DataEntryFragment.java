@@ -8,15 +8,49 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 public class DataEntryFragment extends BaseFragment implements DataEntryView {
+    private static final String ARG_PROGRAM_STAGE_SECTION_ID = "arg:programStageSectionId";
+
+    @Inject
+    DataEntryPresenter dataEntryPresenter;
 
     RecyclerView recyclerView;
+
+    RowViewAdapter rowViewAdapter;
+
+    public static DataEntryFragment newInstance(String programStageSectionId) {
+        Bundle arguments = new Bundle();
+        arguments.putString(ARG_PROGRAM_STAGE_SECTION_ID, programStageSectionId);
+
+        DataEntryFragment dataEntryFragment = new DataEntryFragment();
+        dataEntryFragment.setArguments(arguments);
+
+        return dataEntryFragment;
+    }
+
+    private String getProgramStageSectionId() {
+        return getArguments().getString(ARG_PROGRAM_STAGE_SECTION_ID);
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // inject dependencies
+        ((EventCaptureApp) getActivity().getApplication())
+                .getUserComponent().inject(this);
+    }
 
     @Nullable
     @Override
@@ -28,14 +62,29 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-
+        rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
 
         recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(rowViewAdapter);
+
+        dataEntryPresenter.createDataEntryForm(getProgramStageSectionId());
+    }
+
+    @Override
+    public void onResume() {
+        dataEntryPresenter.attachView(this);
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        dataEntryPresenter.detachView();
+        super.onPause();
     }
 
     @Override
     public void showDataEntryForm(List<FormEntity> formEntities) {
-
+        rowViewAdapter.swap(formEntities);
     }
 }

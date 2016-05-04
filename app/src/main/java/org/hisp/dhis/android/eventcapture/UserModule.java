@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
@@ -174,5 +176,12 @@ public class UserModule {
     public ProfilePresenter providesProfilePresenter(
             @Nullable CurrentUserInteractor userAccountInteractor, Logger logger) {
         return new ProfilePresenterImpl(userAccountInteractor, logger);
+    }
+
+    @Provides
+    @UserScope
+    public DataEntryPresenter providesDataEntryPresenter(
+            @Nullable ProgramStageSectionInteractor stageSectionInteractor, Logger logger) {
+        return new DataEntryPresenterImpl(stageSectionInteractor, logger);
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views.activities;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;

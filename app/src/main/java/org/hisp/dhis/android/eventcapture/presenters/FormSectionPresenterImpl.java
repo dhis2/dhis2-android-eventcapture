@@ -1,7 +1,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.android.eventcapture.views.fragments.FormSectionView;
+import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.models.program.Program;
