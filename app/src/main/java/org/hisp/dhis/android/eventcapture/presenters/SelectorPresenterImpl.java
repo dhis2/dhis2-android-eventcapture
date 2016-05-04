@@ -30,7 +30,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.model.SessionManager;
 import org.hisp.dhis.android.eventcapture.model.SyncManager;
-import org.hisp.dhis.android.eventcapture.views.SelectorView;
+import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;

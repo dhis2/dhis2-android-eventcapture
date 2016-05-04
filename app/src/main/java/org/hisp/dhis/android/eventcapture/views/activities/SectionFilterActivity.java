@@ -202,7 +202,7 @@ public class SectionFilterActivity extends AppCompatActivity
                             @Override
                             public void onClick(View v) {
                                 Intent returnIntent = new Intent();
-                                returnIntent.putExtra(DataEntryActivity.PROGRAM_STAGE_UID,
+                                returnIntent.putExtra(FormSectionActivity.PROGRAM_STAGE_UID,
                                         mSectionList.get(getAdapterPosition()).getUId());
                                 setResult(Activity.RESULT_OK, returnIntent);
                                 finish();

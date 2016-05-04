@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
@@ -44,6 +46,8 @@ import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
@@ -90,7 +94,6 @@ public class UserModule {
         return null;
     }
 
-
     @Provides
     @Nullable
     @UserScope
@@ -100,6 +103,36 @@ public class UserModule {
         }
 
         return null;
+    }
+
+    @Provides
+    @Nullable
+    @UserScope
+    public ProgramStageInteractor providesProgramStageInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programStages();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @UserScope
+    public ProgramStageSectionInteractor providesProgramStageSectionInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programStageSections();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @UserScope
+    public FormSectionPresenter providesFormSectionPresenter(
+            @Nullable ProgramStageInteractor programStageInteractor,
+            @Nullable ProgramStageSectionInteractor stageSectionInteractor, Logger logger) {
+        return new FormSectionPresenterImpl(programStageInteractor, stageSectionInteractor, logger);
     }
 
     @Provides

@@ -50,14 +50,15 @@ import android.widget.TextSwitcher;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
-import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
+import org.hisp.dhis.android.eventcapture.views.fragments.FormSectionView;
 import org.hisp.dhis.android.eventcapture.views.fragments.EventDataEntryFragment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
+import org.hisp.dhis.client.sdk.ui.models.FormSection;
 
 import java.util.List;
 
-public class DataEntryActivity extends AppCompatActivity implements DataEntryView {
+public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     public static final String PROGRAM_STAGE_UID = "extra:ProgramStageUid";
     public static final String PROGRAM_STAGE_IX = "extra:ProgramStageIx";
     public static final String ORG_UNIT_UID = "extra:OrgUnitUId";
@@ -81,9 +82,9 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         setContentView(R.layout.activity_eventdataentry);
 
         Intent intent = getIntent();
-        organisationUnitUid = intent.getExtras().getString(DataEntryActivity.ORG_UNIT_UID);
-        programUid = intent.getExtras().getString(DataEntryActivity.PROGRAM_UID);
-        eventUid = intent.getExtras().getString(DataEntryActivity.EVENT_UID, "");
+        organisationUnitUid = intent.getExtras().getString(FormSectionActivity.ORG_UNIT_UID);
+        programUid = intent.getExtras().getString(FormSectionActivity.PROGRAM_UID);
+        eventUid = intent.getExtras().getString(FormSectionActivity.EVENT_UID, "");
 
         Log.d("ORGUNIT DATAENTRY", organisationUnitUid);
         Log.d("PROGRAM DATAENTRY", programUid);
@@ -116,7 +117,7 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         }
 
         if (savedInstanceState != null) {
-            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_UID);
+            programStageIx = savedInstanceState.getInt(FormSectionActivity.PROGRAM_STAGE_UID);
             viewPager.setCurrentItem(programStageIx);
         }
 
@@ -130,7 +131,7 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
-                String sectionUid = data.getStringExtra(DataEntryActivity.PROGRAM_STAGE_UID);
+                String sectionUid = data.getStringExtra(FormSectionActivity.PROGRAM_STAGE_UID);
                 System.out.println("sectionUid: " + sectionUid);
                 for (int i = 0; i < programStageSections.size(); i++) {
                     if (programStageSections.get(i).getUId().equals(sectionUid)) {
@@ -147,7 +148,7 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // save selected ix, orgUnitUid, progUid, eventUid ??
-        outState.putInt(DataEntryActivity.PROGRAM_STAGE_IX, programStageIx);
+        outState.putInt(FormSectionActivity.PROGRAM_STAGE_IX, programStageIx);
     }
 
     @Override
@@ -155,7 +156,7 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         super.onRestoreInstanceState(savedInstanceState);
         // restore selected ix, orgUnitUid, progUid, eventUid ??
         if (savedInstanceState != null) {
-            programStageIx = savedInstanceState.getInt(DataEntryActivity.PROGRAM_STAGE_IX);
+            programStageIx = savedInstanceState.getInt(FormSectionActivity.PROGRAM_STAGE_IX);
             viewPager.setCurrentItem(programStageIx);
         }
     }
@@ -166,7 +167,7 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         return true;
     }
 
-    @Override
+    // @Override
     @UiThread
     public void initializeViewPager(List<ProgramStageSection> programStageSections) {
         this.programStageSections = programStageSections;
@@ -185,14 +186,19 @@ public class DataEntryActivity extends AppCompatActivity implements DataEntryVie
         }
     }
 
-    @Override
+    // @Override
     public void setTitle(String title) {
         super.setTitle(title);
     }
 
-    @Override
+    // @Override
     public void setEvent(Event event) {
         this.event = event;
+    }
+
+    @Override
+    public void showFormSections(List<FormSection> formSections) {
+
     }
 
     //**********************************************************************************************

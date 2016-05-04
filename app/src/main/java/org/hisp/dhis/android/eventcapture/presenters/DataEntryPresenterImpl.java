@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
+import org.hisp.dhis.android.eventcapture.views.fragments.FormSectionView;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -49,14 +49,14 @@ import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public class DataEntryPresenterImpl implements DataEntryPresenter {
-    private DataEntryView dataEntryView;
+public class DataEntryPresenterImpl {
+    private FormSectionView formSectionView;
     private Subscription listProgramStageDataElements;
     private Subscription programStageSubscription;
     private String programStageUid;
 
-    public DataEntryPresenterImpl(DataEntryView dataEntryView) {
-        this.dataEntryView = dataEntryView;
+    public DataEntryPresenterImpl(FormSectionView formSectionView) {
+        this.formSectionView = formSectionView;
 
     }
 
@@ -64,11 +64,11 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         return programStageUid;
     }
 
-    @Override
+    // @Override
     public void listProgramStageSections(String programId) {
         //init title:
         String name = D2.programs().get(programId).toBlocking().first().getDisplayName();
-        dataEntryView.setTitle(name);
+        // formSectionView.setTitle(name);
 
         listProgramStageDataElements = D2.programs().get(programId)
                 .subscribeOn(Schedulers.io())
@@ -76,7 +76,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 .map(new Func1<Program, List<ProgramStage>>() {
                     @Override
                     public List<ProgramStage> call(Program program) {
-                        //dataEntryView.setTitle(program.getDisplayName() );
+                        //formSectionView.setTitle(program.getDisplayName() );
                         return D2.programStages().list(program).toBlocking().first();
                     }
                 }).map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
@@ -89,8 +89,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 }).subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
                     public void call(List<ProgramStageSection> programStageSections) {
-                        if (dataEntryView != null) {
-                            dataEntryView.initializeViewPager(programStageSections);
+                        if (formSectionView != null) {
+                            // formSectionView.initializeViewPager(programStageSections);
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -101,7 +101,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 });
     }
 
-    @Override
+    // @Override
     public void createNewEvent(final String organisationUnitId, final String programId) {
         programStageSubscription = D2.programs().get(programId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .map(new Func1<Program, List<ProgramStage>>() {
@@ -129,8 +129,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 }).subscribe(new Action1<Event>() {
                     @Override
                     public void call(Event event) {
-                        if (dataEntryView != null) {
-                            dataEntryView.setEvent(event);
+                        if (formSectionView != null) {
+                            // formSectionView.setEvent(event);
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -163,7 +163,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
     }
 
-    @Override
+    // @Override
     public Event getEvent(String eventUId) {
         Event event = D2.events().get(eventUId).toBlocking().first();
         return event;
@@ -181,7 +181,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 //
 //        listProgramStageDataElements = null;
 //        programStageSubscription = null;
-//        dataEntryView = null;
+//        formSectionView = null;
 //    }
 //
 //    @Override
