@@ -66,7 +66,6 @@ public final class EventCaptureApp extends Application {
 
         // adding UserComponent to global dependency graph
         userComponent = appComponent.plus(new UserModule());
-
         AppAccountManager.getInstance().initialize(getApplicationContext());
 
         // TODO Add LeakCanary support

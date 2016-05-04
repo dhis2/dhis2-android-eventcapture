@@ -132,6 +132,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     @Override
                     public void call(Throwable throwable) {
+                        //TODO: show error message ?
+                        selectorView.hideProgressBar();
                         throwable.printStackTrace();
                     }
                 }));
@@ -195,11 +197,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             }
             rootPicker.addChild(organisationUnitPicker);
         }
-
         // Traverse the tree. If there is a path with nodes
         // which have only one child, set default selection
         traverseAndSetDefaultSelection(rootPicker);
-
         return rootPicker;
     }
 
@@ -210,7 +210,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     program.getProgramStages());
             stageUids.addAll(programStageUids);
         }
-        return D2.programStages().pull().toBlocking().first();
+        return D2.programStages().pull(stageUids).toBlocking().first();
     }
 
     private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
@@ -220,7 +220,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     programStage.getProgramStageSections());
             sectionUids.addAll(stageSectionUids);
         }
-        return D2.programStageSections().pull().toBlocking().first();
+        return D2.programStageSections().pull(sectionUids).toBlocking().first();
     }
 
     private static void traverseAndSetDefaultSelection(Picker tree) {
