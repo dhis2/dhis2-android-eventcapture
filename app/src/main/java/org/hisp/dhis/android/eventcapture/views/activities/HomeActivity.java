@@ -37,11 +37,13 @@ import android.view.View;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncManager;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.activities.AbsHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
@@ -66,6 +68,10 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
         if (savedInstanceState == null) {
             onNavigationItemSelected(getNavigationView().getMenu()
                     .findItem(DRAWER_ITEM_EVENTS_ID));
+        }
+
+        if (D2.isConfigured()) {
+            AppAccountManager.getInstance().initialize(getApplicationContext());
         }
     }
 
