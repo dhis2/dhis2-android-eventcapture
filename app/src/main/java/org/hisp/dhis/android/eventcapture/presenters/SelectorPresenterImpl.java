@@ -30,15 +30,18 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.model.SessionManager;
 import org.hisp.dhis.android.eventcapture.model.SyncManager;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
@@ -66,15 +69,25 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private final UserOrganisationUnitInteractor organisationUnitInteractor;
     private final UserProgramInteractor programInteractor;
+    private final ProgramStageInteractor programStageInteractor;
+    private final ProgramStageSectionInteractor programStageSectionInteractor;
+    private final ProgramStageDataElementInteractor programStageDataElementInteractor;
     private final Logger logger;
+
     private CompositeSubscription subscription;
     private SelectorView selectorView;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor programInteractor,
+                                 ProgramStageInteractor programStageInteractor,
+                                 ProgramStageSectionInteractor programStageSectionInteractor,
+                                 ProgramStageDataElementInteractor stageDataElementInteractor,
                                  Logger logger) {
         this.organisationUnitInteractor = interactor;
         this.programInteractor = programInteractor;
+        this.programStageInteractor = programStageInteractor;
+        this.programStageSectionInteractor = programStageSectionInteractor;
+        this.programStageDataElementInteractor = stageDataElementInteractor;
         this.subscription = new CompositeSubscription();
         this.logger = logger;
     }
@@ -106,25 +119,25 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         return programs;
                     }
                 })
-                .map(new Func1<List<Program>, List<ProgramStage>>() {
+                .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
                     @Override
-                    public List<ProgramStage> call(List<Program> programs) {
-                        return loadProgramStages(programs);
-                    }
-                })
-                .map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
-                    @Override
-                    public List<ProgramStageSection> call(List<ProgramStage> programStages) {
-                        return loadProgramStageSections(programStages);
+                    public List<ProgramStageDataElement> call(List<Program> programs) {
+                        List<ProgramStage> programStages =
+                                loadProgramStages(programs);
+                        List<ProgramStageSection> programStageSections =
+                                loadProgramStageSections(programStages);
+
+                        return loadProgramStageDataElements(programStages, programStageSections);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ProgramStageSection>>() {
+                .subscribe(new Action1<List<ProgramStageDataElement>>() {
                     @Override
-                    public void call(List<ProgramStageSection> stageSections) {
+                    public void call(List<ProgramStageDataElement> stageDataElements) {
                         SessionManager.getInstance().setSelectorSynced(true);
                         SyncManager.getInstance().setLastSyncedNow();
+
                         listPickers();
                         selectorView.hideProgressBar();
                     }
@@ -197,30 +210,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             }
             rootPicker.addChild(organisationUnitPicker);
         }
+
         // Traverse the tree. If there is a path with nodes
         // which have only one child, set default selection
         traverseAndSetDefaultSelection(rootPicker);
         return rootPicker;
-    }
-
-    private static List<ProgramStage> loadProgramStages(List<Program> programs) {
-        Set<String> stageUids = new HashSet<>();
-        for (Program program : programs) {
-            Set<String> programStageUids = ModelUtils.toUidSet(
-                    program.getProgramStages());
-            stageUids.addAll(programStageUids);
-        }
-        return D2.programStages().pull(stageUids).toBlocking().first();
-    }
-
-    private static List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
-        Set<String> sectionUids = new HashSet<>();
-        for (ProgramStage programStage : stages) {
-            Set<String> stageSectionUids = ModelUtils.toUidSet(
-                    programStage.getProgramStageSections());
-            sectionUids.addAll(stageSectionUids);
-        }
-        return D2.programStageSections().pull(sectionUids).toBlocking().first();
     }
 
     private static void traverseAndSetDefaultSelection(Picker tree) {
@@ -235,5 +229,48 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }
             } while ((node = node.getSelectedChild()) != null);
         }
+    }
+
+    private List<ProgramStage> loadProgramStages(List<Program> programs) {
+        Set<String> stageUids = new HashSet<>();
+
+        for (Program program : programs) {
+            Set<String> programStageUids = ModelUtils.toUidSet(
+                    program.getProgramStages());
+            stageUids.addAll(programStageUids);
+        }
+
+        return programStageInteractor.pull(stageUids).toBlocking().first();
+    }
+
+    private List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
+        Set<String> sectionUids = new HashSet<>();
+
+        for (ProgramStage programStage : stages) {
+            Set<String> stageSectionUids = ModelUtils.toUidSet(
+                    programStage.getProgramStageSections());
+            sectionUids.addAll(stageSectionUids);
+        }
+
+        return programStageSectionInteractor.pull(sectionUids).toBlocking().first();
+    }
+
+    private List<ProgramStageDataElement> loadProgramStageDataElements(
+            List<ProgramStage> stages, List<ProgramStageSection> programStageSections) {
+        Set<String> dataElementUids = new HashSet<>();
+
+        for (ProgramStage programStage : stages) {
+            Set<String> stageDataElementUids = ModelUtils.toUidSet(
+                    programStage.getProgramStageDataElements());
+            dataElementUids.addAll(stageDataElementUids);
+        }
+
+        for (ProgramStageSection programStageSection : programStageSections) {
+            Set<String> stageSectionElements = ModelUtils.toUidSet(
+                    programStageSection.getProgramStageDataElements());
+            dataElementUids.addAll(stageSectionElements);
+        }
+
+        return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
     }
 }

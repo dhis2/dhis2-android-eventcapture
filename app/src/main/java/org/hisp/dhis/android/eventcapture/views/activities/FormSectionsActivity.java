@@ -131,7 +131,7 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
         @Override
         public Fragment getItem(int position) {
-            return new DataEntryFragment();
+            return DataEntryFragment.newInstance("");
         }
 
         @Override

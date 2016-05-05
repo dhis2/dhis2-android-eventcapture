@@ -46,6 +46,7 @@ import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
@@ -128,6 +129,17 @@ public class UserModule {
     }
 
     @Provides
+    @Nullable
+    @UserScope
+    public ProgramStageDataElementInteractor providesProgramStageDataElementInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programStageDataElements();
+        }
+
+        return null;
+    }
+
+    @Provides
     @UserScope
     public FormSectionPresenter providesFormSectionPresenter(
             @Nullable ProgramStageInteractor programStageInteractor,
@@ -161,8 +173,13 @@ public class UserModule {
     public SelectorPresenter providesSelectorPresenter(
             @Nullable UserOrganisationUnitInteractor interactor,
             @Nullable UserProgramInteractor programInteractor,
+            @Nullable ProgramStageInteractor programStageInteractor,
+            @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             Logger logger) {
-        return new SelectorPresenterImpl(interactor, programInteractor, logger);
+        return new SelectorPresenterImpl(
+                interactor, programInteractor, programStageInteractor,
+                programStageSectionInteractor, programStageDataElementInteractor, logger);
     }
 
     @Provides
