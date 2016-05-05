@@ -29,4 +29,5 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 public interface HomePresenter extends Presenter {
+    void calculateLastSyncedPeriod();
 }

@@ -36,4 +36,6 @@ public interface HomeView extends View {
     void setUserInfo(CharSequence userInfo);
 
     void setUserLetter(CharSequence userLetter);
+
+    void showLastSyncedMessage(String message);
 }

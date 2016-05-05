@@ -30,10 +30,9 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import android.content.ContentResolver;
 
-import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsView;
-import org.hisp.dhis.client.sdk.ui.SettingPreferences;
+import org.hisp.dhis.client.sdk.ui.AppPreferences;
 
 /**
  * This is the presenter, using MVP.
@@ -44,7 +43,15 @@ import org.hisp.dhis.client.sdk.ui.SettingPreferences;
 public class SettingsPresenterImpl implements SettingsPresenter {
     public static final String TAG = SettingsPresenterImpl.class.getSimpleName();
 
-    SettingsView settingsView;
+    private SettingsView settingsView;
+
+    private final AppPreferences appPreferences;
+    private final AppAccountManager appAccountManager;
+
+    public SettingsPresenterImpl(AppPreferences appPreferences, AppAccountManager appAccountManager) {
+        this.appPreferences = appPreferences;
+        this.appAccountManager = appAccountManager;
+    }
 
     @Override
     public void logout() {
@@ -63,23 +70,23 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
     @Override
     public void synchronize() {
-        AppAccountManager.getInstance().syncNow();
+        appAccountManager.syncNow();
     }
 
     @Override
     public void setUpdateFrequency(int frequency) {
-        SettingPreferences.setBackgroundSyncFrequency(frequency);
-        AppAccountManager.getInstance().setPeriodicSync((long) (frequency * 60));
+        appPreferences.setBackgroundSyncFrequency(frequency);
+        appAccountManager.setPeriodicSync((long) (frequency * 60));
     }
 
     @Override
     public int getUpdateFrequency() {
-        return SettingPreferences.getBackgroundSyncFrequency();
+        return appPreferences.getBackgroundSyncFrequency();
     }
 
     @Override
     public void setBackgroundSynchronisation(Boolean enabled, String warning) {
-        SettingPreferences.setBackgroundSyncState(enabled);
+        appPreferences.setBackgroundSyncState(enabled);
 
         if (enabled) {
             if (!ContentResolver.getMasterSyncAutomatically()) {
@@ -87,25 +94,25 @@ public class SettingsPresenterImpl implements SettingsPresenter {
                 settingsView.showMessage(warning);
             }
             synchronize();
-            AppAccountManager.getInstance().setPeriodicSync((long) getUpdateFrequency());
+            appAccountManager.setPeriodicSync((long) getUpdateFrequency());
         } else {
-            AppAccountManager.getInstance().removePeriodicSync();
+            appAccountManager.removePeriodicSync();
         }
     }
 
     @Override
     public Boolean getBackgroundSynchronisation() {
-        return SettingPreferences.getBackgroundSyncState();
+        return appPreferences.getBackgroundSyncState();
     }
 
     @Override
     public Boolean getCrashReports() {
-        return SettingPreferences.getCrashReportsState();
+        return appPreferences.getCrashReportsState();
     }
 
     @Override
     public void setCrashReports(Boolean enabled) {
-        SettingPreferences.setCrashReportsState(enabled);
+        appPreferences.setCrashReportsState(enabled);
     }
 
     public void setSettingsView(SettingsView settingsView) {

@@ -2,47 +2,32 @@ package org.hisp.dhis.android.eventcapture.model;
 
 import android.support.annotation.Nullable;
 
-import org.hisp.dhis.client.sdk.ui.SettingPreferences;
+import org.hisp.dhis.client.sdk.ui.AppPreferences;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-public class SyncManager {
-
-    static private SyncManager instance;
+public class SyncDateWrapper {
     public static final long DAY_IN_MILLISECONDS = 86400000; //1000milliseconds * 60sec * 60 min * 24h
 
-    private long lastSynced = 0l;
+    private AppPreferences appPreferences;
 
-    private SyncManager() {}
-
-    static public SyncManager getInstance() {
-        if (instance == null) {
-            instance = new SyncManager();
-        }
-        return instance;
-    }
-
-    public void sync() {
-        //...metadata sync code calls go here...
-        //and on success :
-        setLastSyncedNow();
+    public SyncDateWrapper(AppPreferences appPreferences) {
+        this.appPreferences = appPreferences;
     }
 
     public void setLastSyncedNow() {
-        lastSynced = Calendar.getInstance().getTime().getTime();
-        SettingPreferences.setLastSynched(lastSynced);
+        long lastSynced = Calendar.getInstance().getTime().getTime();
+        appPreferences.setLastSynced(lastSynced);
     }
 
     @Nullable
     public Date getLastSyncedDate() {
-        if (lastSynced == 0l) {
-            lastSynced = SettingPreferences.getLastSynced();
-            if (lastSynced == 0l) {
-                return null;
-            }
+        long lastSynced = appPreferences.getLastSynced();
+        if (lastSynced == 0L) {
+            return null;
         }
         Date date = new Date();
         date.setTime(lastSynced);
@@ -50,27 +35,23 @@ public class SyncManager {
     }
 
     public long getLastSyncedLong() {
-        if (lastSynced == 0l) {
-            lastSynced = SettingPreferences.getLastSynced();
-        }
-        return lastSynced;
+        return appPreferences.getLastSynced();
     }
 
     public String getLastSyncedString() {
-        getLastSyncedLong();
+        long lastSynced = getLastSyncedLong();
         if (lastSynced == 0f) {
             return "Never";
         } else {
             Long diff = Calendar.getInstance().getTime().getTime() - lastSynced;
-
             if (diff >= DAY_IN_MILLISECONDS) {
                 Date d = getLastSyncedDate();
                 SimpleDateFormat dt = new SimpleDateFormat("dd/mm/yy hh:mm");
                 return dt.format(d);
             } else {
                 Long hours = TimeUnit.MILLISECONDS.toHours(diff);
-                Long minutes = TimeUnit.MILLISECONDS.toMinutes(diff - hours*3600000);
-
+                Long minutes = TimeUnit.MILLISECONDS.toMinutes(
+                        diff - TimeUnit.HOURS.toMillis(hours));
                 String result = "";
                 if (hours > 0) {
                     result += hours + "h ";
@@ -80,6 +61,4 @@ public class SyncManager {
             }
         }
     }
-
-
 }

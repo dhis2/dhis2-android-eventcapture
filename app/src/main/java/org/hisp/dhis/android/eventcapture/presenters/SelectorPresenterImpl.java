@@ -29,7 +29,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.model.SessionManager;
-import org.hisp.dhis.android.eventcapture.model.SyncManager;
+import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -66,16 +66,19 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private final UserOrganisationUnitInteractor organisationUnitInteractor;
     private final UserProgramInteractor programInteractor;
+    private final SyncDateWrapper syncDateWrapper;
     private final Logger logger;
     private CompositeSubscription subscription;
     private SelectorView selectorView;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor programInteractor,
+                                 SyncDateWrapper syncDateWrapper,
                                  Logger logger) {
         this.organisationUnitInteractor = interactor;
         this.programInteractor = programInteractor;
         this.subscription = new CompositeSubscription();
+        this.syncDateWrapper = syncDateWrapper;
         this.logger = logger;
     }
 
@@ -124,7 +127,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(List<ProgramStageSection> stageSections) {
                         SessionManager.getInstance().setSelectorSynced(true);
-                        SyncManager.getInstance().setLastSyncedNow();
+                        syncDateWrapper.setLastSyncedNow();
                         listPickers();
                         selectorView.hideProgressBar();
                     }
@@ -132,7 +135,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     @Override
                     public void call(Throwable throwable) {
-                        //TODO: show error message ?
                         selectorView.hideProgressBar();
                         throwable.printStackTrace();
                     }
