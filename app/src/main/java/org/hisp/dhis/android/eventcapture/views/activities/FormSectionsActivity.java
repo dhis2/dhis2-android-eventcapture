@@ -78,6 +78,8 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
+        collapsingToolbarLayout = (CollapsingToolbarLayout)
+                findViewById(R.id.collapsingtoolbarlayout_data_entry);
         tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
         viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
         viewPagerAdapter = new FormSectionsAdapter(getSupportFragmentManager());
@@ -131,7 +133,8 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
         @Override
         public Fragment getItem(int position) {
-            return DataEntryFragment.newInstance("");
+            FormSection formSection = formSections.get(position);
+            return DataEntryFragment.newInstance(formSection.getId());
         }
 
         @Override
@@ -141,7 +144,8 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return formSections.get(position).getLabel();
+            FormSection formSection = formSections.get(position);
+            return formSection.getLabel();
         }
 
         public void swapData(List<FormSection> formSections) {

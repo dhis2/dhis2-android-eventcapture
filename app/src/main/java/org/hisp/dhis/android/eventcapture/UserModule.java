@@ -198,7 +198,10 @@ public class UserModule {
     @Provides
     @UserScope
     public DataEntryPresenter providesDataEntryPresenter(
-            @Nullable ProgramStageSectionInteractor stageSectionInteractor, Logger logger) {
-        return new DataEntryPresenterImpl(stageSectionInteractor, logger);
+            @Nullable ProgramStageSectionInteractor stageSectionInteractor,
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
+            Logger logger) {
+        return new DataEntryPresenterImpl(stageSectionInteractor,
+                programStageDataElementInteractor, logger);
     }
 }
