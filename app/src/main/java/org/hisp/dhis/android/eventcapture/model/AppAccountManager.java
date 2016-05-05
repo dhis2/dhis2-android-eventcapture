@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
@@ -13,9 +14,10 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
  * A singleton class to abstract/wrap and simplify interactions with Account in relation to synchronizing.
  */
 public class AppAccountManager {
+    private static final String TAG = AppAccountManager.class.getSimpleName();
 
     //private static AppAccountManager instance;
-    public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.datasync.provider";
+    public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
     public static final String ACCOUNT_TYPE = "example.com";
     public static String accountName = "default dhis2 account";
 
@@ -116,5 +118,4 @@ public class AppAccountManager {
          */
         ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
     }
-
 }
