@@ -18,7 +18,7 @@ public class AppAccountManager {
 
     //private static AppAccountManager instance;
     public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
-    public static final String ACCOUNT_TYPE = "example.com";
+    public static final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
     public static String accountName = "default dhis2 account";
 
     private Account mAccount;

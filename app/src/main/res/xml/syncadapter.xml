@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:contentAuthority="org.hisp.dhis.android.eventcapture.model.provider"
 
-    android:accountType="example.com"
+    android:accountType="org.hisp.dhis.android.eventcapture"
     android:userVisible="true"
     android:supportsUploading="false"
     android:allowParallelSyncs="false"
