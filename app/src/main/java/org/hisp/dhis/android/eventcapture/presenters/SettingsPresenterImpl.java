@@ -36,7 +36,7 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
 
 /**
  * This is the presenter, using MVP.
- * This class controls what is shown in the view. (AbsSettingsFragment).
+ * This class controls what is shown in the view.
  * <p/>
  * Created by Vladislav Georgiev Alfredov on 1/15/16.
  */
@@ -74,9 +74,9 @@ public class SettingsPresenterImpl implements SettingsPresenter {
     }
 
     @Override
-    public void setUpdateFrequency(int frequency) {
-        appPreferences.setBackgroundSyncFrequency(frequency);
-        appAccountManager.setPeriodicSync((long) (frequency * 60));
+    public void setUpdateFrequency(int minutes) {
+        appPreferences.setBackgroundSyncFrequency(minutes);
+        appAccountManager.setPeriodicSync(minutes);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SettingsPresenterImpl implements SettingsPresenter {
                 settingsView.showMessage(warning);
             }
             synchronize();
-            appAccountManager.setPeriodicSync((long) getUpdateFrequency());
+            appAccountManager.setPeriodicSync(getUpdateFrequency());
         } else {
             appAccountManager.removePeriodicSync();
         }

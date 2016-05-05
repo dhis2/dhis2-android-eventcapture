@@ -81,12 +81,13 @@ public class AppAccountManager {
         ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
 
         if (appPreferences.getBackgroundSyncState()) {
-            long interval = (long) appPreferences.getBackgroundSyncFrequency();
+            long minutes = (long) appPreferences.getBackgroundSyncFrequency();
+            long seconds = minutes * 60;
             ContentResolver.addPeriodicSync(
                     mAccount,
                     AUTHORITY,
                     Bundle.EMPTY,
-                    interval);
+                    seconds);
         }
     }
 
@@ -94,12 +95,13 @@ public class AppAccountManager {
         ContentResolver.removePeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY);
     }
 
-    public void setPeriodicSync(Long interval) {
+    public void setPeriodicSync(int minutes) {
+        Long seconds = ((long) minutes) * 60;
         ContentResolver.addPeriodicSync(
                 mAccount,
                 AUTHORITY,
                 Bundle.EMPTY,
-                interval);
+                seconds);
     }
 
     public void syncNow() {
