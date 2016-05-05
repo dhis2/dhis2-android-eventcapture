@@ -28,7 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.SessionManager;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.android.eventcapture.views.View;
@@ -126,7 +125,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .subscribe(new Action1<List<ProgramStageSection>>() {
                     @Override
                     public void call(List<ProgramStageSection> stageSections) {
-                        SessionManager.getInstance().setSelectorSynced(true);
                         syncDateWrapper.setLastSyncedNow();
                         listPickers();
                         selectorView.hideProgressBar();
