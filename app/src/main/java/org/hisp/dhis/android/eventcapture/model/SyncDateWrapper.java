@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class SyncDateWrapper {
-    public static final long DAY_IN_MILLISECONDS = 86400000; //1000milliseconds * 60sec * 60 min * 24h
+    public static final int DAYS_OLD = 1;
 
     private AppPreferences appPreferences;
 
@@ -44,7 +44,8 @@ public class SyncDateWrapper {
             return "Never";
         } else {
             Long diff = Calendar.getInstance().getTime().getTime() - lastSynced;
-            if (diff >= DAY_IN_MILLISECONDS) {
+            if (diff >= TimeUnit.DAYS.toMillis(DAYS_OLD)) {
+
                 Date d = getLastSyncedDate();
                 SimpleDateFormat dt = new SimpleDateFormat("dd/mm/yy hh:mm");
                 return dt.format(d);
