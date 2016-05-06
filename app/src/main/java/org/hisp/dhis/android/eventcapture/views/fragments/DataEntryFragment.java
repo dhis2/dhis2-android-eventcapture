@@ -2,27 +2,29 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
+import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
+import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
+import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.List;
-
-import javax.inject.Inject;
 
 public class DataEntryFragment extends BaseFragment implements DataEntryView {
     private static final String ARG_PROGRAM_STAGE_SECTION_ID = "arg:programStageSectionId";
 
-    @Inject
+    // @Inject
     DataEntryPresenter dataEntryPresenter;
 
     RecyclerView recyclerView;
@@ -48,8 +50,8 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         super.onCreate(savedInstanceState);
 
         // inject dependencies
-        ((EventCaptureApp) getActivity().getApplication())
-                .getUserComponent().inject(this);
+//        ((EventCaptureApp) getActivity().getApplication())
+//                .getUserComponent().inject(this);
     }
 
     @Nullable
@@ -64,10 +66,18 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
 
+        // Using ItemDecoration in order to implement divider
+        DividerDecoration itemDecoration = new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider));
+
         recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setAdapter(rowViewAdapter);
 
+        // TODO HACK!
+        dataEntryPresenter = new DataEntryPresenterImpl(D2.programStageSections(),
+                D2.programStageDataElements(), new LoggerImpl());
         dataEntryPresenter.createDataEntryForm(getProgramStageSectionId());
     }
 

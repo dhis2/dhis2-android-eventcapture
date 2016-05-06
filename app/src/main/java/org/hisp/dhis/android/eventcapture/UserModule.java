@@ -28,10 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
@@ -75,7 +71,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public CurrentUserInteractor providesUserAccountInteractor() {
         if (D2.isConfigured()) {
             return D2.me();
@@ -86,7 +82,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public UserOrganisationUnitInteractor providesUserOrganisationUnitInteractor() {
         if (D2.isConfigured()) {
             return D2.me().organisationUnits();
@@ -97,7 +93,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public UserProgramInteractor providesUserProgramInteractor() {
         if (D2.isConfigured()) {
             return D2.me().programs();
@@ -108,7 +104,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public ProgramStageInteractor providesProgramStageInteractor() {
         if (D2.isConfigured()) {
             return D2.programStages();
@@ -119,7 +115,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public ProgramStageSectionInteractor providesProgramStageSectionInteractor() {
         if (D2.isConfigured()) {
             return D2.programStageSections();
@@ -130,7 +126,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public ProgramStageDataElementInteractor providesProgramStageDataElementInteractor() {
         if (D2.isConfigured()) {
             return D2.programStageDataElements();
@@ -140,36 +136,28 @@ public class UserModule {
     }
 
     @Provides
-    @UserScope
-    public FormSectionPresenter providesFormSectionPresenter(
-            @Nullable ProgramStageInteractor programStageInteractor,
-            @Nullable ProgramStageSectionInteractor stageSectionInteractor, Logger logger) {
-        return new FormSectionPresenterImpl(programStageInteractor, stageSectionInteractor, logger);
-    }
-
-    @Provides
-    @UserScope
+    @PerUser
     public LauncherPresenter providesLauncherPresenter(
             @Nullable CurrentUserInteractor accountInteractor) {
         return new LauncherPresenterImpl(accountInteractor);
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public LoginPresenter providesLoginPresenter(
             @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, logger);
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public HomePresenter providesHomerPresenter(
             @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
         return new HomePresenterImpl(accountInteractor, logger);
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public SelectorPresenter providesSelectorPresenter(
             @Nullable UserOrganisationUnitInteractor interactor,
             @Nullable UserProgramInteractor programInteractor,
@@ -183,25 +171,15 @@ public class UserModule {
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public SettingsPresenter provideSettingsPresenter() {
         return new SettingsPresenterImpl();
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public ProfilePresenter providesProfilePresenter(
             @Nullable CurrentUserInteractor userAccountInteractor, Logger logger) {
         return new ProfilePresenterImpl(userAccountInteractor, logger);
-    }
-
-    @Provides
-    @UserScope
-    public DataEntryPresenter providesDataEntryPresenter(
-            @Nullable ProgramStageSectionInteractor stageSectionInteractor,
-            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
-            Logger logger) {
-        return new DataEntryPresenterImpl(stageSectionInteractor,
-                programStageDataElementInteractor, logger);
     }
 }

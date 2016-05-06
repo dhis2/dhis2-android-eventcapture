@@ -39,13 +39,20 @@ import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 
 import dagger.Subcomponent;
 
-@UserScope
+@PerUser
 @Subcomponent(
         modules = {
                 UserModule.class
         }
 )
 public interface UserComponent {
+
+    //------------------------------------------------------------------------
+    // Sub-modules
+    //------------------------------------------------------------------------
+
+    FormComponent plus(FormModule formModule);
+
 
     //------------------------------------------------------------------------
     // Injection targets
