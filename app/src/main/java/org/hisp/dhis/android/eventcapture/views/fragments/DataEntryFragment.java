@@ -12,9 +12,6 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
@@ -48,15 +45,6 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         return getArguments().getString(ARG_PROGRAM_STAGE_SECTION_ID);
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // inject dependencies
-        ((EventCaptureApp) getActivity().getApplication())
-                .getFormComponent().inject(this);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -77,7 +65,16 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addItemDecoration(itemDecoration);
         recyclerView.setAdapter(rowViewAdapter);
+    }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // injection point was changed from onCreate() to onActivityCreated()
+        // because od stupid fragment lifecycle
+        ((EventCaptureApp) getActivity().getApplication())
+                .getFormComponent().inject(this);
         dataEntryPresenter.createDataEntryForm(getProgramStageSectionId());
     }
 

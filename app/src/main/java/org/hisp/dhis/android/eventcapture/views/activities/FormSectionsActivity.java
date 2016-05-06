@@ -66,10 +66,8 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_sections);
 
-        // injecting dependencies into FormSectionsActivity
+        // injecting dependencies
         ((EventCaptureApp) getApplication()).createFormComponent().inject(this);
-//        ((EventCaptureApp) getApplication())
-//                .getFormComponent().inject(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -83,19 +81,21 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
                 findViewById(R.id.collapsingtoolbarlayout_data_entry);
         tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
         viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
+
+        // see showFormSections() in order to find the place
+        // where adapter is attached to ViewPager
         viewPagerAdapter = new FormSectionsAdapter(getSupportFragmentManager());
 
-        viewPager.setAdapter(viewPagerAdapter);
-        tabLayout.setupWithViewPager(viewPager);
-
-        formSectionPresenter.createDataEntryForm(
-                getOrganisationUnitId(), getProgramId());
+        // start building the form
+        formSectionPresenter.createDataEntryForm(getOrganisationUnitId(), getProgramId());
     }
 
     @Override
     protected void onDestroy() {
+
         // release component
         ((EventCaptureApp) getApplication()).releaseFormComponent();
+
         super.onDestroy();
     }
 
@@ -114,6 +114,14 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     @Override
     public void showFormSections(List<FormSection> formSections) {
         viewPagerAdapter.swapData(formSections);
+
+        // in order not to loose state of ViewPager, first we
+        // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
+        viewPager.setAdapter(viewPagerAdapter);
+
+        // TabLayout will fail on you, if ViewPager which is going to be
+        // attached does not contain ViewPagerAdapter set to it.
+        tabLayout.setupWithViewPager(viewPager);
     }
 
     @Override
