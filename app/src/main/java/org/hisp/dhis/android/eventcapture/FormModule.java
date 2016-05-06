@@ -30,7 +30,6 @@ public class FormModule {
     }
 
     @Provides
-    @PerUser
     public DataEntryPresenter providesDataEntryPresenter(
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,

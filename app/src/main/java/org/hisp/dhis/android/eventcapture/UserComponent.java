@@ -65,8 +65,6 @@ public interface UserComponent {
 
     void inject(HomeActivity homeActivity);
 
-    void inject(FormSectionsActivity formSectionActivity);
-
 
     // fragments
     void inject(SelectorFragment selectorFragment);
@@ -74,7 +72,5 @@ public interface UserComponent {
     void inject(SettingsFragment settingsFragment);
 
     void inject(ProfileFragment profileFragment);
-
-    void inject(DataEntryFragment dataEntryFragment);
 }
 

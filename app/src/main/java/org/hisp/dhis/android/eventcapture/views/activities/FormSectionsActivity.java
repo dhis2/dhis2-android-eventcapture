@@ -67,8 +67,9 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         setContentView(R.layout.activity_form_sections);
 
         // injecting dependencies into FormSectionsActivity
-        ((EventCaptureApp) getApplication())
-                .getUserComponent().inject(this);
+        ((EventCaptureApp) getApplication()).createFormComponent().inject(this);
+//        ((EventCaptureApp) getApplication())
+//                .getFormComponent().inject(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -89,6 +90,13 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
         formSectionPresenter.createDataEntryForm(
                 getOrganisationUnitId(), getProgramId());
+    }
+
+    @Override
+    protected void onDestroy() {
+        // release component
+        ((EventCaptureApp) getApplication()).releaseFormComponent();
+        super.onDestroy();
     }
 
     @Override

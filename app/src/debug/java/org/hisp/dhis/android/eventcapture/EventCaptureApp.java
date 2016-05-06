@@ -38,6 +38,8 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 
 import javax.inject.Inject;
 
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 public final class EventCaptureApp extends Application {
 
     @Inject
@@ -46,6 +48,8 @@ public final class EventCaptureApp extends Application {
     AppComponent appComponent;
 
     UserComponent userComponent;
+
+    FormComponent formComponent;
 
     @Override
     public void onCreate() {
@@ -83,11 +87,25 @@ public final class EventCaptureApp extends Application {
         return userComponent;
     }
 
+    public FormComponent createFormComponent() {
+        isNull(userComponent, "UserComponent must not be null");
+        formComponent = userComponent.plus(new FormModule());
+        return formComponent;
+    }
+
     public AppComponent getAppComponent() {
         return appComponent;
     }
 
     public UserComponent getUserComponent() {
         return userComponent;
+    }
+
+    public FormComponent getFormComponent() {
+        return formComponent;
+    }
+
+    public void releaseFormComponent() {
+        formComponent = null;
     }
 }
