@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
@@ -29,6 +30,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class FormSectionsActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
@@ -41,12 +43,9 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     TextView textViewOrganisationUnit;
     TextView textViewProgram;
 
-    // section tabs
+    // section tabs and view pager
     TabLayout tabLayout;
-
-    // view pager
     ViewPager viewPager;
-    FormSectionsAdapter viewPagerAdapter;
 
     // prompts
     String organisationUnit;
@@ -92,10 +91,6 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
         viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
 
-        // see showFormSections() in order to find the place
-        // where adapter is attached to ViewPager
-        viewPagerAdapter = new FormSectionsAdapter(getSupportFragmentManager());
-
         // start building the form
         formSectionPresenter.createDataEntryForm(getOrganisationUnitId(), getProgramId());
 
@@ -105,7 +100,6 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
     @Override
     protected void onDestroy() {
-
         // release component
         ((EventCaptureApp) getApplication()).releaseFormComponent();
 
@@ -125,7 +119,23 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     }
 
     @Override
+    public void showFormDefaultSection(String formSectionId) {
+        FormSingleSectionAdapter viewPagerAdapter =
+                new FormSingleSectionAdapter(getSupportFragmentManager());
+        viewPagerAdapter.swapData(formSectionId);
+
+        // in order not to loose state of ViewPager, first we
+        // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
+        viewPager.setAdapter(viewPagerAdapter);
+
+        // hide tab layout
+        tabLayout.setVisibility(View.GONE);
+    }
+
+    @Override
     public void showFormSections(List<FormSection> formSections) {
+        FormSectionsAdapter viewPagerAdapter =
+                new FormSectionsAdapter(getSupportFragmentManager());
         viewPagerAdapter.swapData(formSections);
 
         // in order not to loose state of ViewPager, first we
@@ -161,7 +171,42 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         return super.onOptionsItemSelected(item);
     }
 
-    // there was no argument for putting this adapter in standalone file
+    /*
+    *
+    * This adapter exists only in order to satisfy cases when there is no
+    * sections assigned to program stage. As the result, we have to
+    * use program stage itself as section
+    *
+    */
+    private static class FormSingleSectionAdapter extends FragmentStatePagerAdapter {
+        private static final int DEFAULT_STAGE_COUNT = 1;
+        private static final int DEFAULT_STAGE_POSITION = 0;
+        private String formSectionId;
+
+        public FormSingleSectionAdapter(FragmentManager fragmentManager) {
+            super(fragmentManager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (DEFAULT_STAGE_POSITION == position && !isEmpty(formSectionId)) {
+                return DataEntryFragment.newInstanceForStage(formSectionId);
+            }
+
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            return isEmpty(formSectionId) ? 0 : DEFAULT_STAGE_COUNT;
+        }
+
+        public void swapData(String programStageId) {
+            this.formSectionId = programStageId;
+            this.notifyDataSetChanged();
+        }
+    }
+
     private static class FormSectionsAdapter extends FragmentStatePagerAdapter {
         private final List<FormSection> formSections;
 
@@ -173,7 +218,7 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         @Override
         public Fragment getItem(int position) {
             FormSection formSection = formSections.get(position);
-            return DataEntryFragment.newInstance(formSection.getId());
+            return DataEntryFragment.newInstanceForSection(formSection.getId());
         }
 
         @Override

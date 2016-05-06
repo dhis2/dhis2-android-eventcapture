@@ -36,10 +36,11 @@ public class FormModule {
 
     @Provides
     public DataEntryPresenter providesDataEntryPresenter(
+            @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             Logger logger) {
-        return new DataEntryPresenterImpl(stageSectionInteractor,
+        return new DataEntryPresenterImpl(programStageInteractor, stageSectionInteractor,
                 programStageDataElementInteractor, logger);
     }
 }

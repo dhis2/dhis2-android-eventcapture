@@ -3,8 +3,10 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
+import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
@@ -28,6 +30,7 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 public class DataEntryPresenterImpl implements DataEntryPresenter {
     private static final String TAG = DataEntryPresenterImpl.class.getSimpleName();
 
+    private final ProgramStageInteractor stageInteractor;
     private final ProgramStageSectionInteractor sectionInteractor;
     private final ProgramStageDataElementInteractor dataElementInteractor;
     private final Logger logger;
@@ -35,9 +38,11 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     private DataEntryView dataEntryView;
     private CompositeSubscription subscription;
 
-    public DataEntryPresenterImpl(ProgramStageSectionInteractor sectionInteractor,
+    public DataEntryPresenterImpl(ProgramStageInteractor stageInteractor,
+                                  ProgramStageSectionInteractor sectionInteractor,
                                   ProgramStageDataElementInteractor dataElementInteractor,
                                   Logger logger) {
+        this.stageInteractor = stageInteractor;
         this.sectionInteractor = sectionInteractor;
         this.dataElementInteractor = dataElementInteractor;
         this.logger = logger;
@@ -59,8 +64,54 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     }
 
     @Override
-    public void createDataEntryForm(String programStageSectionId) {
+    public void createDataEntryFormStage(String programStageId) {
+        logger.d(TAG, "ProgramStageId: " + programStageId);
+
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+
+        subscription = new CompositeSubscription();
+        subscription.add(stageInteractor.get(programStageId)
+                .switchMap(new Func1<ProgramStage, Observable<List<ProgramStageDataElement>>>() {
+                    @Override
+                    public Observable<List<ProgramStageDataElement>> call(ProgramStage stage) {
+                        return dataElementInteractor.list(stage);
+                    }
+                })
+                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
+
+                    @Override
+                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
+                        return transformDataElementsToFormEntities(dataElements);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<FormEntity>>() {
+                    @Override
+                    public void call(List<FormEntity> formEntities) {
+                        if (dataEntryView != null) {
+                            dataEntryView.showDataEntryForm(formEntities);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Something went wrong during form construction", throwable);
+                    }
+                }));
+    }
+
+    @Override
+    public void createDataEntryFormSection(String programStageSectionId) {
         logger.d(TAG, "ProgramStageSectionId: " + programStageSectionId);
+
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
 
         subscription = new CompositeSubscription();
         subscription.add(sectionInteractor.get(programStageSectionId)
@@ -94,95 +145,94 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 }));
     }
 
-    // TODO consider creating new scope for data-entry screen (otherwise, we can run into weird-ass bugs)
     private List<FormEntity> transformDataElementsToFormEntities(
             List<ProgramStageDataElement> stageDataElements) {
         List<FormEntity> formEntities = new ArrayList<>();
 
         if (stageDataElements != null && !stageDataElements.isEmpty()) {
             for (int i = 0; i < 3; i++)
-            for (ProgramStageDataElement stageDataElement : stageDataElements) {
-                if (stageDataElement.getDataElement() == null) {
-                    throw new RuntimeException("Malformed meta-data: program stage data element" +
-                            " does not have reference to data element");
-                }
+                for (ProgramStageDataElement stageDataElement : stageDataElements) {
+                    if (stageDataElement.getDataElement() == null) {
+                        throw new RuntimeException("Malformed meta-data: program stage data element" +
+                                " does not have reference to data element");
+                    }
 
-                DataElement dataElement = stageDataElement.getDataElement();
-                logger.d(TAG, "ValueType: " + dataElement.getValueType());
+                    DataElement dataElement = stageDataElement.getDataElement();
+                    logger.d(TAG, "ValueType: " + dataElement.getValueType());
 
-                switch (dataElement.getValueType()) {
-                    case TEXT: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.TEXT));
-                        break;
+                    switch (dataElement.getValueType()) {
+                        case TEXT: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.TEXT));
+                            break;
+                        }
+                        case LONG_TEXT: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.LONG_TEXT));
+                            break;
+                        }
+                        case PHONE_NUMBER: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.TEXT));
+                            break;
+                        }
+                        case EMAIL: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.TEXT));
+                            break;
+                        }
+                        case BOOLEAN: {
+                            break;
+                        }
+                        case TRUE_ONLY: {
+                            break;
+                        }
+                        case DATE: {
+                            formEntities.add(new FormEntityDate(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement)));
+                            break;
+                        }
+                        case NUMBER: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.NUMBER));
+                            break;
+                        }
+                        case INTEGER: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.INTEGER));
+                            break;
+                        }
+                        case INTEGER_POSITIVE: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.INTEGER_POSITIVE));
+                            break;
+                        }
+                        case INTEGER_NEGATIVE: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.INTEGER_NEGATIVE));
+                            break;
+                        }
+                        case INTEGER_ZERO_OR_POSITIVE: {
+                            formEntities.add(new FormEntityEditText(
+                                    dataElement.getUId(), getFormEntityLabel(dataElement),
+                                    FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE));
+                            break;
+                        }
+                        case COORDINATE: {
+                            break;
+                        }
+                        default:
+                            logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
                     }
-                    case LONG_TEXT: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.LONG_TEXT));
-                        break;
-                    }
-                    case PHONE_NUMBER: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.TEXT));
-                        break;
-                    }
-                    case EMAIL: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.TEXT));
-                        break;
-                    }
-                    case BOOLEAN: {
-                        break;
-                    }
-                    case TRUE_ONLY: {
-                        break;
-                    }
-                    case DATE: {
-                        formEntities.add(new FormEntityDate(
-                                dataElement.getUId(), getFormEntityLabel(dataElement)));
-                        break;
-                    }
-                    case NUMBER: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.NUMBER));
-                        break;
-                    }
-                    case INTEGER: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER));
-                        break;
-                    }
-                    case INTEGER_POSITIVE: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER_POSITIVE));
-                        break;
-                    }
-                    case INTEGER_NEGATIVE: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER_NEGATIVE));
-                        break;
-                    }
-                    case INTEGER_ZERO_OR_POSITIVE: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE));
-                        break;
-                    }
-                    case COORDINATE: {
-                        break;
-                    }
-                    default:
-                        logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
                 }
-            }
         }
 
         return formEntities;

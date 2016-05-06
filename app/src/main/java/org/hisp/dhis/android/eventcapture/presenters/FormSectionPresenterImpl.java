@@ -13,10 +13,10 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -123,48 +123,53 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         program.setUId(programId);
 
         return programStageInteractor.list(program)
-                .switchMap(new Func1<List<ProgramStage>, Observable<List<ProgramStageSection>>>() {
+                .map(new Func1<List<ProgramStage>, SimpleEntry<ProgramStage, List<FormSection>>>() {
 
                     @Override
-                    public Observable<List<ProgramStageSection>> call(List<ProgramStage> stages) {
+                    public SimpleEntry<ProgramStage, List<FormSection>> call(List<ProgramStage> stages) {
                         // since this form is intended to be used in event capture
                         // and programs for event capture apps consist only from one
                         // and only one program stage, we can just retrieve it from the list
-                        if (stages != null && !stages.isEmpty()) {
-                            return programStageSectionInteractor.list(stages.get(0));
+                        if (stages == null || stages.isEmpty()) {
+                            logger.e(TAG, "Form construction failed. No program " +
+                                    "stages are assigned to given program: " + programId);
+                            return null;
                         }
 
-                        return null;
-                    }
-                })
-                .map(new Func1<List<ProgramStageSection>, List<FormSection>>() {
-                    @Override
-                    public List<FormSection> call(List<ProgramStageSection> programStageSections) {
+                        ProgramStage programStage = stages.get(0);
+                        List<ProgramStageSection> stageSections = programStageSectionInteractor
+                                .list(programStage).toBlocking().first();
+
+                        // transform sections
                         List<FormSection> formSections = new ArrayList<>();
-
-                        for (ProgramStageSection section : programStageSections) {
-                            formSections.add(new FormSection(
-                                    section.getUId(), section.getDisplayName()));
+                        if (stageSections != null && !stageSections.isEmpty()) {
+                            for (ProgramStageSection section : stageSections) {
+                                formSections.add(new FormSection(
+                                        section.getUId(), section.getDisplayName()));
+                            }
                         }
 
-                        return formSections;
+                        return new SimpleEntry<>(programStage, formSections);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<FormSection>>() {
+                .subscribe(new Action1<SimpleEntry<ProgramStage, List<FormSection>>>() {
                     @Override
-                    public void call(List<FormSection> formSections) {
-                        logger.d(TAG, "ProgramStageSections are loaded: " + formSections);
-
-                        if (formSectionView != null) {
-                            formSectionView.showFormSections(formSections);
+                    public void call(SimpleEntry<ProgramStage, List<FormSection>> results) {
+                        if (results != null && formSectionView != null) {
+                            if (results.getValue() == null ||
+                                    results.getValue().isEmpty()) {
+                                formSectionView.showFormDefaultSection(results.getKey().getUId());
+                            } else {
+                                formSectionView.showFormSections(results.getValue());
+                            }
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.d(TAG, "Form construction failed", throwable);
+                        logger.e(TAG, "Form construction failed", throwable);
                     }
                 });
     }
