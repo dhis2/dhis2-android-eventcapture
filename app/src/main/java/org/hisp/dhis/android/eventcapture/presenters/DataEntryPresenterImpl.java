@@ -100,6 +100,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         List<FormEntity> formEntities = new ArrayList<>();
 
         if (stageDataElements != null && !stageDataElements.isEmpty()) {
+            for (int i = 0; i < 3; i++)
             for (ProgramStageDataElement stageDataElement : stageDataElements) {
                 if (stageDataElement.getDataElement() == null) {
                     throw new RuntimeException("Malformed meta-data: program stage data element" +
@@ -112,25 +113,25 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 switch (dataElement.getValueType()) {
                     case TEXT: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.TEXT));
                         break;
                     }
                     case LONG_TEXT: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.LONG_TEXT));
                         break;
                     }
                     case PHONE_NUMBER: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.TEXT));
                         break;
                     }
                     case EMAIL: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.TEXT));
                         break;
                     }
@@ -142,36 +143,36 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     }
                     case DATE: {
                         formEntities.add(new FormEntityDate(
-                                dataElement.getUId(), getFormEntitylabel(dataElement)));
+                                dataElement.getUId(), getFormEntityLabel(dataElement)));
                         break;
                     }
                     case NUMBER: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.NUMBER));
                         break;
                     }
                     case INTEGER: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.INTEGER));
                         break;
                     }
                     case INTEGER_POSITIVE: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.INTEGER_POSITIVE));
                         break;
                     }
                     case INTEGER_NEGATIVE: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.INTEGER_NEGATIVE));
                         break;
                     }
                     case INTEGER_ZERO_OR_POSITIVE: {
                         formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntitylabel(dataElement),
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
                                 FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE));
                         break;
                     }
@@ -187,7 +188,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         return formEntities;
     }
 
-    private String getFormEntitylabel(DataElement dataElement) {
+    private String getFormEntityLabel(DataElement dataElement) {
         return isEmpty(dataElement.getDisplayFormName()) ?
                 dataElement.getDisplayName() : dataElement.getDisplayFormName();
     }

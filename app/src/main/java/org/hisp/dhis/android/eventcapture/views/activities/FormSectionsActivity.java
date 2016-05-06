@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,7 +12,10 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
@@ -35,7 +37,9 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     @Inject
     FormSectionPresenter formSectionPresenter;
 
-    CollapsingToolbarLayout collapsingToolbarLayout;
+    // collapsing toolbar views
+    TextView textViewOrganisationUnit;
+    TextView textViewProgram;
 
     // section tabs
     TabLayout tabLayout;
@@ -43,6 +47,10 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     // view pager
     ViewPager viewPager;
     FormSectionsAdapter viewPagerAdapter;
+
+    // prompts
+    String organisationUnit;
+    String program;
 
     public static void navigateTo(Activity activity, String organisationUnitId, String programId) {
         isNull(activity, "activity must not be null");
@@ -75,10 +83,12 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
-        collapsingToolbarLayout = (CollapsingToolbarLayout)
-                findViewById(R.id.collapsingtoolbarlayout_data_entry);
+        textViewOrganisationUnit = (TextView) findViewById(R.id.textview_organisation_unit);
+        textViewProgram = (TextView) findViewById(R.id.textview_program);
+
         tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
         viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
 
@@ -88,6 +98,9 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
         // start building the form
         formSectionPresenter.createDataEntryForm(getOrganisationUnitId(), getProgramId());
+
+        organisationUnit = getString(R.string.organisation_unit);
+        program = getString(R.string.program);
     }
 
     @Override
@@ -126,7 +139,16 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
     @Override
     public void showTitle(String title) {
-        collapsingToolbarLayout.setTitle(title);
+        Spanned spannedTitle = Html.fromHtml(String.format(
+                "<b>%s</b>:<br/><u>%s</u>", organisationUnit, title));
+        textViewOrganisationUnit.setText(spannedTitle);
+    }
+
+    @Override
+    public void showSubtitle(String subtitle) {
+        Spanned spannedSubtitle = Html.fromHtml(String.format(
+                "<b>%s</b>:<br/><u>%s</u>", program, subtitle));
+        textViewProgram.setText(spannedSubtitle);
     }
 
     @Override
@@ -139,6 +161,7 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         return super.onOptionsItemSelected(item);
     }
 
+    // there was no argument for putting this adapter in standalone file
     private static class FormSectionsAdapter extends FragmentStatePagerAdapter {
         private final List<FormSection> formSections;
 

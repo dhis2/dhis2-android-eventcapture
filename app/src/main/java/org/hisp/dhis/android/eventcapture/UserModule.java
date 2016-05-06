@@ -41,7 +41,9 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
@@ -130,6 +132,28 @@ public class UserModule {
     public ProgramStageDataElementInteractor providesProgramStageDataElementInteractor() {
         if (D2.isConfigured()) {
             return D2.programStageDataElements();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public OrganisationUnitInteractor providesOrganisationUnitInteractor() {
+        if (D2.isConfigured()) {
+            return D2.organisationUnits();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramInteractor providesProgramInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programs();
         }
 
         return null;

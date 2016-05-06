@@ -73,8 +73,9 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
 
         // injection point was changed from onCreate() to onActivityCreated()
         // because od stupid fragment lifecycle
-        ((EventCaptureApp) getActivity().getApplication())
-                .getFormComponent().inject(this);
+        ((EventCaptureApp) getActivity().getApplication()).getFormComponent().inject(this);
+
+        // construct the data-entry form
         dataEntryPresenter.createDataEntryForm(getProgramStageSectionId());
     }
 

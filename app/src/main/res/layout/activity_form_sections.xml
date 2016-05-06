@@ -15,8 +15,37 @@
             android:id="@+id/collapsingtoolbarlayout_data_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+            app:titleEnabled="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/collapsing_toolbar_height"
+                android:gravity="bottom"
+                android:orientation="vertical">
+
+                <org.hisp.dhis.client.sdk.ui.views.FontTextView
+                    android:id="@+id/textview_organisation_unit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/keyline_default"
+                    android:paddingLeft="@dimen/keyline_default"
+                    android:paddingRight="@dimen/keyline_default"
+                    android:textSize="@dimen/text_size_medium"
+                    app:font="@string/font_name_light" />
+
+                <org.hisp.dhis.client.sdk.ui.views.FontTextView
+                    android:id="@+id/textview_program"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="@dimen/keyline_default"
+                    android:paddingLeft="@dimen/keyline_default"
+                    android:paddingRight="@dimen/keyline_default"
+                    android:textSize="@dimen/text_size_medium"
+                    app:font="@string/font_name_regular" />
+            </LinearLayout>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -25,7 +54,8 @@
                 android:background="?attr/colorPrimary"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:titleTextColor="@android:color/white" />
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

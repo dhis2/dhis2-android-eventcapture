@@ -9,4 +9,6 @@ public interface FormSectionView extends View {
     void showFormSections(List<FormSection> formSections);
 
     void showTitle(String title);
+
+    void showSubtitle(String subtitle);
 }
