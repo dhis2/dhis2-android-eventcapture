@@ -34,7 +34,7 @@
                     android:paddingLeft="@dimen/keyline_default"
                     android:paddingRight="@dimen/keyline_default"
                     android:textSize="@dimen/text_size_medium"
-                    app:font="@string/font_name_light" />
+                    app:font="@string/font_name_regular" />
 
                 <org.hisp.dhis.client.sdk.ui.views.FontTextView
                     android:id="@+id/textview_program"
