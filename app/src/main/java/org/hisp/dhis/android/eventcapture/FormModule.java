@@ -4,6 +4,7 @@ import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenterImpl;
+import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
@@ -39,8 +40,9 @@ public class FormModule {
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
+            @Nullable OptionSetInteractor optionSetInteractor,
             Logger logger) {
         return new DataEntryPresenterImpl(programStageInteractor, stageSectionInteractor,
-                programStageDataElementInteractor, logger);
+                programStageDataElementInteractor, optionSetInteractor, logger);
     }
 }

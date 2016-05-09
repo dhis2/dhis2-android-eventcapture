@@ -41,6 +41,7 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
@@ -154,6 +155,17 @@ public class UserModule {
     public ProgramInteractor providesProgramInteractor() {
         if (D2.isConfigured()) {
             return D2.programs();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public OptionSetInteractor providesOptionSetInteractor() {
+        if (D2.isConfigured()) {
+            return D2.optionSets();
         }
 
         return null;
