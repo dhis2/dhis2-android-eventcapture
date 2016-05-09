@@ -13,9 +13,11 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityCheckBox;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityDate;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityFilter;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityRadioButtons;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -33,7 +35,6 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 
-// TODO Solve the bug related to OptionSet absence in data-elements
 // TODO Improve performance by syncing only programs based on type (WITH OR WITHOUT REGISTRATION)
 public class DataEntryPresenterImpl implements DataEntryPresenter {
     private static final String TAG = DataEntryPresenterImpl.class.getSimpleName();
@@ -90,10 +91,16 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         return dataElementInteractor.list(stage);
                     }
                 })
-                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
+                .map(new Func1<List<ProgramStageDataElement>, List<DataElement>>() {
+                    @Override
+                    public List<DataElement> call(List<ProgramStageDataElement> stageDataElements) {
+                        return transformProgramStageDataElements(stageDataElements);
+                    }
+                })
+                .map(new Func1<List<DataElement>, List<FormEntity>>() {
 
                     @Override
-                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
+                    public List<FormEntity> call(List<DataElement> dataElements) {
                         return transformDataElementsToFormEntities(dataElements);
                     }
                 })
@@ -131,10 +138,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         return dataElementInteractor.list(stage);
                     }
                 })
-                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
-
+                .map(new Func1<List<ProgramStageDataElement>, List<DataElement>>() {
                     @Override
-                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
+                    public List<DataElement> call(List<ProgramStageDataElement> stageDataElements) {
+                        return transformProgramStageDataElements(stageDataElements);
+                    }
+                })
+                .map(new Func1<List<DataElement>, List<FormEntity>>() {
+                    @Override
+                    public List<FormEntity> call(List<DataElement> dataElements) {
                         return transformDataElementsToFormEntities(dataElements);
                     }
                 })
@@ -155,123 +167,117 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 }));
     }
 
-    private List<FormEntity> transformDataElementsToFormEntities(
+    private List<DataElement> transformProgramStageDataElements(
             List<ProgramStageDataElement> stageDataElements) {
+        if (stageDataElements == null || stageDataElements.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<DataElement> dataElements = new ArrayList<>();
+        for (ProgramStageDataElement stageDataElement : stageDataElements) {
+            DataElement dataElement = stageDataElement.getDataElement();
+            if (dataElement == null) {
+                throw new RuntimeException("Malformed metadata: Program" +
+                        "StageDataElement does not have reference to DataElement");
+            }
+
+
+            OptionSet optionSet = dataElement.getOptionSet();
+            if (optionSet != null) {
+                List<Option> options = optionSetInteractor.list(
+                        dataElement.getOptionSet()).toBlocking().first();
+                optionSet.setOptions(options);
+            }
+
+            dataElements.add(dataElement);
+        }
+
+        return dataElements;
+    }
+
+    private List<FormEntity> transformDataElementsToFormEntities(List<DataElement> dataElements) {
         List<FormEntity> formEntities = new ArrayList<>();
 
-        if (stageDataElements != null && !stageDataElements.isEmpty()) {
-            for (ProgramStageDataElement stageDataElement : stageDataElements) {
-                if (stageDataElement.getDataElement() == null) {
-                    throw new RuntimeException("Malformed meta-data: program stage data element" +
-                            " does not have reference to data element");
-                }
+        for (DataElement dataElement : dataElements) {
+            FormEntity formEntity = transformDataElement(dataElement);
 
-                DataElement dataElement = stageDataElement.getDataElement();
-                logger.d(TAG, "DataElement: " + dataElement.getDisplayName());
-                logger.d(TAG, "ValueType: " + dataElement.getValueType());
-
-                if (dataElement.getOptionSet() != null) {
-                    System.out.println("OptionSetId: " + dataElement.getOptionSet());
-
-                    List<Option> options = optionSetInteractor.list(
-                            dataElement.getOptionSet()).toBlocking().first();
-
-                    System.out.println("Options: " + options);
-                    Picker picker = Picker.create(dataElement.getDisplayName());
-                    if (options != null && !options.isEmpty()) {
-                        for (Option option : options) {
-                            picker.addChild(Picker.create(
-                                    option.getCode(), option.getDisplayName(), picker));
-                        }
-                    }
-
-                    FormEntityFilter formEntityFilter = new FormEntityFilter(
-                            dataElement.getUId(), dataElement.getDisplayName());
-                    formEntityFilter.setPicker(picker);
-
-                    formEntities.add(formEntityFilter);
-                    continue;
-
-                    // List<Option> options = null;
-                    // continue;
-                }
-
-                switch (dataElement.getValueType()) {
-                    case TEXT: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.TEXT));
-                        break;
-                    }
-                    case LONG_TEXT: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.LONG_TEXT));
-                        break;
-                    }
-                    case PHONE_NUMBER: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.TEXT));
-                        break;
-                    }
-                    case EMAIL: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.TEXT));
-                        break;
-                    }
-                    case BOOLEAN: {
-                        break;
-                    }
-                    case TRUE_ONLY: {
-                        break;
-                    }
-                    case DATE: {
-                        formEntities.add(new FormEntityDate(
-                                dataElement.getUId(), getFormEntityLabel(dataElement)));
-                        break;
-                    }
-                    case NUMBER: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.NUMBER));
-                        break;
-                    }
-                    case INTEGER: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER));
-                        break;
-                    }
-                    case INTEGER_POSITIVE: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER_POSITIVE));
-                        break;
-                    }
-                    case INTEGER_NEGATIVE: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER_NEGATIVE));
-                        break;
-                    }
-                    case INTEGER_ZERO_OR_POSITIVE: {
-                        formEntities.add(new FormEntityEditText(
-                                dataElement.getUId(), getFormEntityLabel(dataElement),
-                                FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE));
-                        break;
-                    }
-                    case COORDINATE: {
-                        break;
-                    }
-                    default:
-                        logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
-                }
+            if (formEntity != null) {
+                formEntities.add(formEntity);
             }
         }
 
         return formEntities;
+    }
+
+    private FormEntity transformDataElement(DataElement dataElement) {
+        logger.d(TAG, "DataElement: " + dataElement.getDisplayName());
+        logger.d(TAG, "ValueType: " + dataElement.getValueType());
+
+        // in case if we have option set linked to data-element, we
+        // need to process it regardless of data-element value type
+        if (dataElement.getOptionSet() != null) {
+            List<Option> options = dataElement.getOptionSet().getOptions();
+
+            Picker picker = Picker.create(dataElement.getDisplayName());
+            if (options != null && !options.isEmpty()) {
+                for (Option option : options) {
+                    picker.addChild(Picker.create(
+                            option.getCode(), option.getDisplayName(), picker));
+                }
+            }
+
+            FormEntityFilter formEntityFilter = new FormEntityFilter(
+                    dataElement.getUId(), dataElement.getDisplayName());
+            formEntityFilter.setPicker(picker);
+
+            return formEntityFilter;
+        }
+
+        switch (dataElement.getValueType()) {
+            // GO THROUGH WIDGETS
+            case TEXT:
+                return new FormEntityEditText(dataElement.getUId(),
+                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.TEXT);
+            case LONG_TEXT:
+                return new FormEntityEditText(dataElement.getUId(),
+                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.LONG_TEXT);
+            case PHONE_NUMBER:
+                return new FormEntityEditText(dataElement.getUId(),
+                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.TEXT);
+            case EMAIL:
+                return new FormEntityEditText(dataElement.getUId(),
+                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.TEXT);
+            case NUMBER:
+                return new FormEntityEditText(dataElement.getUId(),
+                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.NUMBER);
+            case INTEGER:
+                return new FormEntityEditText(dataElement.getUId(),
+                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.INTEGER);
+            case INTEGER_POSITIVE:
+                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(dataElement),
+                        FormEntityEditText.InputType.INTEGER_POSITIVE);
+            case INTEGER_NEGATIVE:
+                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(dataElement),
+                        FormEntityEditText.InputType.INTEGER_NEGATIVE);
+            case INTEGER_ZERO_OR_POSITIVE:
+                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(dataElement),
+                        FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE);
+
+            // REVISE WIDGETS
+            case BOOLEAN:
+                return new FormEntityRadioButtons(dataElement.getUId(),
+                        getFormEntityLabel(dataElement));
+            case TRUE_ONLY:
+                return new FormEntityCheckBox(dataElement.getUId(),
+                        getFormEntityLabel(dataElement));
+            case DATE:
+                return new FormEntityDate(dataElement.getUId(), getFormEntityLabel(dataElement));
+            case COORDINATE:
+                return null;
+            default:
+                logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
+                return null;
+        }
     }
 
     private String getFormEntityLabel(DataElement dataElement) {
