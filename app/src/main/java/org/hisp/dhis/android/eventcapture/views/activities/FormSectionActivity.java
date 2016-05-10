@@ -47,6 +47,10 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
+
+// TODO disable filtering in cases when we don't have sections
+// TODO check if configuration changes are handled properly
+// TODO solve performance issues with RX
 public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
     private static final String ARG_PROGRAM_ID = "arg:programId";
@@ -118,7 +122,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         organisationUnit = getString(R.string.organisation_unit);
         program = getString(R.string.program);
 
-        sectionsDrawer = (DrawerLayout) findViewById(R.id.drawerLayout_form_sections);
+        sectionsDrawer = (DrawerLayout) findViewById(R.id.drawerlayout_form_sections);
 
         recyclerViewItemAdapter = new PickerItemAdapter(this);
         recyclerViewItemAdapter.setOnPickerItemClickListener(new OnPickerItemClickListener() {
@@ -260,6 +264,16 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         Spanned spannedSubtitle = Html.fromHtml(String.format(
                 "<b>%s</b>:<br/><u>%s</u>", program, subtitle));
         textViewProgram.setText(spannedSubtitle);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (sectionsDrawer.isDrawerOpen(GravityCompat.END)) {
+            sectionsDrawer.closeDrawer(GravityCompat.END);
+            return;
+        }
+
+        super.onBackPressed();
     }
 
     //**********************************************************************************************

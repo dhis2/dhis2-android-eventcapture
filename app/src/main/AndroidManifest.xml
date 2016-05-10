@@ -49,8 +49,10 @@
         </activity>
 
         <activity android:name=".views.activities.LoginActivity"/>
-        <activity android:name=".views.activities.HomeActivity"/>
-        <activity android:name=".views.activities.FormSectionActivity"/>
+        <activity
+            android:name=".views.activities.HomeActivity"
+            android:theme="@style/AppTheme.Main"/>
+        <activity android:name=".views.activities.FormSectionActivity" />
 
         <!-- stub Authenticator service -->
         <service android:name=".model.AuthenticatorService">

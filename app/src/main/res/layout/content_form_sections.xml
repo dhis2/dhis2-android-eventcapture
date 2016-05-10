@@ -15,7 +15,6 @@
             android:id="@+id/collapsingtoolbarlayout_data_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
             app:titleEnabled="false">

@@ -33,5 +33,4 @@
 
     <dimen name="titlebar_height">56dp</dimen>
     <dimen name="collapsing_toolbar_height">196dp</dimen>
-    <dimen name="navigation_drawer_width">260dp</dimen>
 </resources>
