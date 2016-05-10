@@ -4,12 +4,15 @@ package org.hisp.dhis.android.eventcapture.views.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -29,10 +32,12 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
+import org.hisp.dhis.client.sdk.ui.adapters.OnPickerItemClickListener;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerItemAdapter;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.views.AbsTextWatcher;
+import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +58,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     TextView textViewOrganisationUnit;
     TextView textViewProgram;
 
+    // Drawer layout with section filtering
+    DrawerLayout sectionsDrawer;
     EditText sectionFilterEditText;
-    RecyclerView recyclerView;
-    PickerItemAdapter pickerItemAdapter;
+    RecyclerView recyclerViewSections;
+    PickerItemAdapter recyclerViewItemAdapter;
 
     // section tabs and view pager
     TabLayout tabLayout;
@@ -111,14 +118,41 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         organisationUnit = getString(R.string.organisation_unit);
         program = getString(R.string.program);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        sectionsDrawer = (DrawerLayout) findViewById(R.id.drawerLayout_form_sections);
 
-        pickerItemAdapter = new PickerItemAdapter(this);
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
-        if (recyclerView != null) {
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(pickerItemAdapter);
+        recyclerViewItemAdapter = new PickerItemAdapter(this);
+        recyclerViewItemAdapter.setOnPickerItemClickListener(new OnPickerItemClickListener() {
+            @Override
+            public void onPickerItemClickListener(Picker selectedPicker) {
+                PagerAdapter pagerAdapter = viewPager.getAdapter();
+
+                if (pagerAdapter != null && (pagerAdapter instanceof FormSectionsAdapter)) {
+                    FormSectionsAdapter sectionsAdapter = (FormSectionsAdapter) pagerAdapter;
+                    List<FormSection> formSections = sectionsAdapter.getData();
+
+                    for (int position = 0; position < formSections.size(); position++) {
+                        FormSection formSection = formSections.get(position);
+
+                        if (formSection.getId().equals(selectedPicker.getId())) {
+                            viewPager.setCurrentItem(position);
+                            break;
+                        }
+                    }
+                }
+
+                sectionsDrawer.closeDrawer(GravityCompat.END);
+            }
+        });
+
+        recyclerViewSections = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
+        if (recyclerViewSections != null) {
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+            recyclerViewSections.setLayoutManager(layoutManager);
+            recyclerViewSections.addItemDecoration(new DividerDecoration(
+                    ContextCompat.getDrawable(this, R.drawable.divider)));
+            recyclerViewSections.setAdapter(recyclerViewItemAdapter);
         }
 
         sectionFilterEditText = (EditText) findViewById(R.id.edittext_filter_picker_items);
@@ -126,7 +160,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             sectionFilterEditText.addTextChangedListener(new AbsTextWatcher() {
                 @Override
                 public void afterTextChanged(Editable editable) {
-                    pickerItemAdapter.filter(editable.toString());
+                    recyclerViewItemAdapter.filter(editable.toString());
                 }
             });
         }
@@ -166,10 +200,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 return true;
             }
             case R.id.filter_button:
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayout_form_sections);
-                if (drawer != null) {
-                    drawer.openDrawer(GravityCompat.END);
-                }
+                sectionsDrawer.openDrawer(GravityCompat.END);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -207,11 +238,13 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     @Override
     public void showDrawerSections(Picker picker) {
-        pickerItemAdapter.swapData(picker);
-        recyclerView.setAdapter(pickerItemAdapter);
+        recyclerViewItemAdapter.swapData(picker);
+        recyclerViewSections.setAdapter(recyclerViewItemAdapter);
 
+        // in case if configuration change happened and we already had filter string set
+        // to field, we have to perform filtering afterwards
         if (!isEmpty(sectionFilterEditText.getText())) {
-            pickerItemAdapter.filter(sectionFilterEditText.getText().toString());
+            recyclerViewItemAdapter.filter(sectionFilterEditText.getText().toString());
         }
     }
 
@@ -290,6 +323,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         public CharSequence getPageTitle(int position) {
             FormSection formSection = formSections.get(position);
             return formSection.getLabel();
+        }
+
+        @NonNull
+        public List<FormSection> getData() {
+            return formSections;
         }
 
         public void swapData(List<FormSection> formSections) {
