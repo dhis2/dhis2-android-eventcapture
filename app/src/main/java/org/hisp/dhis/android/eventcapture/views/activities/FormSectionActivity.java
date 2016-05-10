@@ -19,10 +19,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
@@ -31,6 +31,8 @@ import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerItemAdapter;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.ui.views.AbsTextWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
-public class FormSectionActivity extends AppCompatActivity implements FormSectionView, TextWatcher, View.OnClickListener {
+public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
     private static final String ARG_PROGRAM_ID = "arg:programId";
 
@@ -51,9 +53,9 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     TextView textViewOrganisationUnit;
     TextView textViewProgram;
 
+    EditText sectionFilterEditText;
     RecyclerView recyclerView;
     PickerItemAdapter pickerItemAdapter;
-
 
     // section tabs and view pager
     TabLayout tabLayout;
@@ -79,7 +81,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     private String getProgramId() {
         return getIntent().getExtras().getString(ARG_PROGRAM_ID, null);
     }
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,11 +111,25 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         organisationUnit = getString(R.string.organisation_unit);
         program = getString(R.string.program);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerview_picker_items);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
-        pickerItemAdapter = new PickerItemAdapter(this, null);
+        pickerItemAdapter = new PickerItemAdapter(this);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
+        if (recyclerView != null) {
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(pickerItemAdapter);
+        }
+
+        sectionFilterEditText = (EditText) findViewById(R.id.edittext_filter_picker_items);
+        if (sectionFilterEditText != null) {
+            sectionFilterEditText.addTextChangedListener(new AbsTextWatcher() {
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    pickerItemAdapter.filter(editable.toString());
+                }
+            });
+        }
     }
 
     @Override
@@ -144,13 +159,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     @Override
-    public void onOptionsMenuClosed(Menu menu) {
-        super.onOptionsMenuClosed(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home: {
+                super.onBackPressed();
+                return true;
+            }
             case R.id.filter_button:
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayout_form_sections);
                 if (drawer != null) {
@@ -161,7 +175,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 return super.onOptionsItemSelected(item);
         }
     }
-
 
     @Override
     public void showFormDefaultSection(String formSectionId) {
@@ -193,6 +206,16 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     @Override
+    public void showDrawerSections(Picker picker) {
+        pickerItemAdapter.swapData(picker);
+        recyclerView.setAdapter(pickerItemAdapter);
+
+        if (!isEmpty(sectionFilterEditText.getText())) {
+            pickerItemAdapter.filter(sectionFilterEditText.getText().toString());
+        }
+    }
+
+    @Override
     public void showTitle(String title) {
         Spanned spannedTitle = Html.fromHtml(String.format(
                 "<b>%s</b>:<br/><u>%s</u>", organisationUnit, title));
@@ -204,26 +227,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         Spanned spannedSubtitle = Html.fromHtml(String.format(
                 "<b>%s</b>:<br/><u>%s</u>", program, subtitle));
         textViewProgram.setText(spannedSubtitle);
-    }
-
-    @Override
-    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-    }
-
-    @Override
-    public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-    }
-
-    @Override
-    public void afterTextChanged(Editable s) {
-
-    }
-
-    @Override
-    public void onClick(View v) {
-
     }
 
     //**********************************************************************************************

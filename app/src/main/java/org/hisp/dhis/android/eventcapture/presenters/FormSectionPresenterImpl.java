@@ -11,6 +11,7 @@ import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -123,10 +124,10 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         program.setUId(programId);
 
         return programStageInteractor.list(program)
-                .map(new Func1<List<ProgramStage>, SimpleEntry<ProgramStage, List<FormSection>>>() {
+                .map(new Func1<List<ProgramStage>, SimpleEntry<Picker, List<FormSection>>>() {
 
                     @Override
-                    public SimpleEntry<ProgramStage, List<FormSection>> call(List<ProgramStage> stages) {
+                    public SimpleEntry<Picker, List<FormSection>> call(List<ProgramStage> stages) {
                         // since this form is intended to be used in event capture
                         // and programs for event capture apps consist only from one
                         // and only one program stage, we can just retrieve it from the list
@@ -140,29 +141,34 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         List<ProgramStageSection> stageSections = programStageSectionInteractor
                                 .list(programStage).toBlocking().first();
 
+
+                        Picker picker = Picker.create(programStage.getUId(),
+                                programStage.getDisplayName());
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
                         if (stageSections != null && !stageSections.isEmpty()) {
                             for (ProgramStageSection section : stageSections) {
                                 formSections.add(new FormSection(
                                         section.getUId(), section.getDisplayName()));
+                                picker.addChild(Picker.create(section.getUId(),
+                                        section.getDisplayName(), picker));
                             }
                         }
 
-                        return new SimpleEntry<>(programStage, formSections);
+                        return new SimpleEntry<>(picker, formSections);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<SimpleEntry<ProgramStage, List<FormSection>>>() {
+                .subscribe(new Action1<SimpleEntry<Picker, List<FormSection>>>() {
                     @Override
-                    public void call(SimpleEntry<ProgramStage, List<FormSection>> results) {
+                    public void call(SimpleEntry<Picker, List<FormSection>> results) {
                         if (results != null && formSectionView != null) {
-                            if (results.getValue() == null ||
-                                    results.getValue().isEmpty()) {
-                                formSectionView.showFormDefaultSection(results.getKey().getUId());
+                            if (results.getValue() == null || results.getValue().isEmpty()) {
+                                formSectionView.showFormDefaultSection(results.getKey().getId());
                             } else {
                                 formSectionView.showFormSections(results.getValue());
+                                formSectionView.showDrawerSections(results.getKey());
                             }
                         }
                     }
