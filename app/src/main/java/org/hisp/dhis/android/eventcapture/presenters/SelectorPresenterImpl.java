@@ -47,6 +47,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -122,8 +123,19 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
                     @Override
                     public List<ProgramStageDataElement> call(List<Program> programs) {
+                        List<Program> programsWithoutRegistration = new ArrayList<>();
+
+                        if (programs != null && !programs.isEmpty()) {
+                            for (Program program : programs) {
+                                if (ProgramType.WITHOUT_REGISTRATION
+                                        .equals(program.getProgramType())) {
+                                    programsWithoutRegistration.add(program);
+                                }
+                            }
+                        }
+
                         List<ProgramStage> programStages =
-                                loadProgramStages(programs);
+                                loadProgramStages(programsWithoutRegistration);
                         List<ProgramStageSection> programStageSections =
                                 loadProgramStageSections(programStages);
 
