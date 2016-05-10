@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +25,7 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class DataEntryFragment extends BaseFragment implements DataEntryView {
+    private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
     private static final String ARG_PROGRAM_STAGE_ID = "arg:programStageId";
     private static final String ARG_PROGRAM_STAGE_SECTION_ID = "arg:programStageSectionId";
 
@@ -34,7 +36,7 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
 
     RowViewAdapter rowViewAdapter;
 
-    public static DataEntryFragment newInstanceForStage(String programStageId) {
+    public static DataEntryFragment newInstanceForStage(@NonNull String programStageId) {
         Bundle arguments = new Bundle();
         arguments.putString(ARG_PROGRAM_STAGE_ID, programStageId);
 
@@ -44,7 +46,7 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         return dataEntryFragment;
     }
 
-    public static DataEntryFragment newInstanceForSection(String programStageSectionId) {
+    public static DataEntryFragment newInstanceForSection(@NonNull String programStageSectionId) {
         Bundle arguments = new Bundle();
         arguments.putString(ARG_PROGRAM_STAGE_SECTION_ID, programStageSectionId);
 
@@ -93,12 +95,14 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         ((EventCaptureApp) getActivity().getApplication()).getFormComponent().inject(this);
 
         if (!isEmpty(getProgramStageId())) {
-            dataEntryPresenter.createDataEntryFormStage(getProgramStageId());
+            // Pass event id into presenter
+            dataEntryPresenter.createDataEntryFormStage("", getProgramStageId());
             return;
         }
 
         if (!isEmpty(getProgramStageSectionId())) {
-            dataEntryPresenter.createDataEntryFormSection(getProgramStageSectionId());
+            // Pass event id into presenter
+            dataEntryPresenter.createDataEntryFormSection("", getProgramStageSectionId());
         }
     }
 
