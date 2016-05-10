@@ -34,7 +34,7 @@
                     android:paddingLeft="@dimen/keyline_default"
                     android:paddingRight="@dimen/keyline_default"
                     android:textSize="@dimen/text_size_medium"
-                    app:font="@string/font_name_regular" />
+                    app:font="@string/font_name_regular"/>
 
                 <org.hisp.dhis.client.sdk.ui.views.FontTextView
                     android:id="@+id/textview_program"
@@ -44,7 +44,7 @@
                     android:paddingLeft="@dimen/keyline_default"
                     android:paddingRight="@dimen/keyline_default"
                     android:textSize="@dimen/text_size_medium"
-                    app:font="@string/font_name_regular" />
+                    app:font="@string/font_name_regular"/>
             </LinearLayout>
 
             <android.support.v7.widget.Toolbar
@@ -55,7 +55,7 @@
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                app:titleTextColor="@android:color/white" />
+                app:titleTextColor="@android:color/white"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -63,12 +63,13 @@
             android:id="@+id/tablayout_data_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="scrollable" />
+            app:tabMode="scrollable"/>
+
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/viewpager_dataentry"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 </android.support.design.widget.CoordinatorLayout>

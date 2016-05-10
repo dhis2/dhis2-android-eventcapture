@@ -1,6 +1,6 @@
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.views.activities.FormSectionsActivity;
+import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 
 import dagger.Subcomponent;
@@ -17,7 +17,7 @@ public interface FormComponent {
     // Injection targets
     //------------------------------------------------------------------------
 
-    void inject(FormSectionsActivity formSectionsActivity);
+    void inject(FormSectionActivity formSectionActivity);
 
     void inject(DataEntryFragment dataEntryFragment);
 }

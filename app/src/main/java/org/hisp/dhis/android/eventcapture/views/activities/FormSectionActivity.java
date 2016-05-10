@@ -9,11 +9,18 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextWatcher;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -22,6 +29,7 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
+import org.hisp.dhis.client.sdk.ui.adapters.PickerItemAdapter;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 
 import java.util.ArrayList;
@@ -32,7 +40,7 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
-public class FormSectionsActivity extends AppCompatActivity implements FormSectionView {
+public class FormSectionActivity extends AppCompatActivity implements FormSectionView, TextWatcher, View.OnClickListener {
     private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
     private static final String ARG_PROGRAM_ID = "arg:programId";
 
@@ -42,6 +50,10 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     // collapsing toolbar views
     TextView textViewOrganisationUnit;
     TextView textViewProgram;
+
+    RecyclerView recyclerView;
+    PickerItemAdapter pickerItemAdapter;
+
 
     // section tabs and view pager
     TabLayout tabLayout;
@@ -54,7 +66,7 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     public static void navigateTo(Activity activity, String organisationUnitId, String programId) {
         isNull(activity, "activity must not be null");
 
-        Intent intent = new Intent(activity, FormSectionsActivity.class);
+        Intent intent = new Intent(activity, FormSectionActivity.class);
         intent.putExtra(ARG_ORGANISATION_UNIT_ID, organisationUnitId);
         intent.putExtra(ARG_PROGRAM_ID, programId);
         activity.startActivity(intent);
@@ -68,10 +80,11 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         return getIntent().getExtras().getString(ARG_PROGRAM_ID, null);
     }
 
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_form_sections);
+        setContentView(R.layout.activity_filter_sections);
 
         // injecting dependencies
         ((EventCaptureApp) getApplication()).createFormComponent().inject(this);
@@ -96,6 +109,12 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
 
         organisationUnit = getString(R.string.organisation_unit);
         program = getString(R.string.program);
+
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerview_picker_items);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        pickerItemAdapter = new PickerItemAdapter(this, null);
     }
 
     @Override
@@ -117,6 +136,32 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         formSectionPresenter.detachView();
         super.onPause();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_form_sections, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onOptionsMenuClosed(Menu menu) {
+        super.onOptionsMenuClosed(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.filter_button:
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawerLayout_form_sections);
+                if (drawer != null) {
+                    drawer.openDrawer(GravityCompat.END);
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
     @Override
     public void showFormDefaultSection(String formSectionId) {
@@ -162,15 +207,26 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            super.onBackPressed();
-            return true;
-        }
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+
+    }
+
+    @Override
+    public void onClick(View v) {
+
+    }
+
+    //**********************************************************************************************
     /*
     *
     * This adapter exists only in order to satisfy cases when there is no
@@ -207,6 +263,7 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
         }
     }
 
+    //**********************************************************************************************
     private static class FormSectionsAdapter extends FragmentStatePagerAdapter {
         private final List<FormSection> formSections;
 
@@ -238,7 +295,6 @@ public class FormSectionsActivity extends AppCompatActivity implements FormSecti
             if (formSections != null) {
                 this.formSections.addAll(formSections);
             }
-
             notifyDataSetChanged();
         }
     }

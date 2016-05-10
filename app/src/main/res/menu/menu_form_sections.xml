@@ -26,15 +26,13 @@
 ~ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<resources>
-    <string name="app_name">DHIS2 Event Capture</string>
+    <item
+        android:id="@+id/filter_button"
+        android:icon="@drawable/ic_filter_list"
+        android:title="@string/filter_title"
+        app:showAsAction="always"/>
 
-    <!-- Navigation drawer strings -->
-    <string name="drawer_item_events">Events</string>
-
-    <string name="error">Error</string>
-    <string name="invalid_credentials_error">Unable to log in due to invalid credentials.</string>
-    <string name="filter_title">Filter</string>
-    <string name="filter_sections">Filter sections</string>
-</resources>
+</menu>
