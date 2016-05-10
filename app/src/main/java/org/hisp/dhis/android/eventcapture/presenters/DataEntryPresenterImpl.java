@@ -1,191 +1,281 @@
-/*
- * Copyright (c) 2016, University of Oslo
- *
- * All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * Neither the name of the HISP project nor the names of its contributors may
- * be used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
-import org.hisp.dhis.client.sdk.android.api.D2;
-import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
+import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
+import org.hisp.dhis.client.sdk.models.optionset.Option;
+import org.hisp.dhis.client.sdk.models.optionset.OptionSet;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
-import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
-import org.hisp.dhis.client.sdk.models.user.UserAccount;
+import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityDate;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityFilter;
+import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Subscription;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
-import timber.log.Timber;
+import rx.subscriptions.CompositeSubscription;
 
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
+
+
+// TODO Solve the bug related to OptionSet absence in data-elements
+// TODO Improve performance by syncing only programs based on type (WITH OR WITHOUT REGISTRATION)
 public class DataEntryPresenterImpl implements DataEntryPresenter {
+    private static final String TAG = DataEntryPresenterImpl.class.getSimpleName();
+
+    private final ProgramStageInteractor stageInteractor;
+    private final ProgramStageSectionInteractor sectionInteractor;
+    private final ProgramStageDataElementInteractor dataElementInteractor;
+    private final OptionSetInteractor optionSetInteractor;
+    private final Logger logger;
+
     private DataEntryView dataEntryView;
-    private Subscription listProgramStageDataElements;
-    private Subscription programStageSubscription;
-    private String programStageUid;
+    private CompositeSubscription subscription;
 
-    public DataEntryPresenterImpl(DataEntryView dataEntryView) {
-        this.dataEntryView = dataEntryView;
-
-    }
-
-    public String getProgramStageUid() {
-        return programStageUid;
+    public DataEntryPresenterImpl(ProgramStageInteractor stageInteractor,
+                                  ProgramStageSectionInteractor sectionInteractor,
+                                  ProgramStageDataElementInteractor dataElementInteractor,
+                                  OptionSetInteractor optionSetInteractor, Logger logger) {
+        this.stageInteractor = stageInteractor;
+        this.sectionInteractor = sectionInteractor;
+        this.dataElementInteractor = dataElementInteractor;
+        this.optionSetInteractor = optionSetInteractor;
+        this.logger = logger;
     }
 
     @Override
-    public void listProgramStageSections(String programId) {
-        //init title:
-        String name = D2.programs().get(programId).toBlocking().first().getDisplayName();
-        dataEntryView.setTitle(name);
+    public void attachView(View view) {
+        isNull(view, "view must not be null");
+        dataEntryView = (DataEntryView) view;
+    }
 
-        listProgramStageDataElements = D2.programs().get(programId)
+    @Override
+    public void detachView() {
+        dataEntryView = null;
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+    }
+
+    @Override
+    public void createDataEntryFormStage(String programStageId) {
+        logger.d(TAG, "ProgramStageId: " + programStageId);
+
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+
+        subscription = new CompositeSubscription();
+        subscription.add(stageInteractor.get(programStageId)
+                .switchMap(new Func1<ProgramStage, Observable<List<ProgramStageDataElement>>>() {
+                    @Override
+                    public Observable<List<ProgramStageDataElement>> call(ProgramStage stage) {
+                        return dataElementInteractor.list(stage);
+                    }
+                })
+                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
+
+                    @Override
+                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
+                        return transformDataElementsToFormEntities(dataElements);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Program, List<ProgramStage>>() {
+                .subscribe(new Action1<List<FormEntity>>() {
                     @Override
-                    public List<ProgramStage> call(Program program) {
-                        //dataEntryView.setTitle(program.getDisplayName() );
-                        return D2.programStages().list(program).toBlocking().first();
-                    }
-                }).map(new Func1<List<ProgramStage>, List<ProgramStageSection>>() {
-                    @Override
-                    public List<ProgramStageSection> call(List<ProgramStage> programStages) {
-                        ProgramStage stage = programStages.get(0);
-                        programStageUid = stage.getUId();
-                        return D2.programStageSections().list(stage).toBlocking().first();
-                    }
-                }).subscribe(new Action1<List<ProgramStageSection>>() {
-                    @Override
-                    public void call(List<ProgramStageSection> programStageSections) {
+                    public void call(List<FormEntity> formEntities) {
                         if (dataEntryView != null) {
-                            dataEntryView.initializeViewPager(programStageSections);
+                            dataEntryView.showDataEntryForm(formEntities);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d(throwable.toString());
+                        logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
-                });
+                }));
     }
 
     @Override
-    public void createNewEvent(final String organisationUnitId, final String programId) {
-        programStageSubscription = D2.programs().get(programId).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .map(new Func1<Program, List<ProgramStage>>() {
-                    @Override
-                    public List<ProgramStage> call(Program program) {
-                        return D2.programStages().list(program).toBlocking().first();
-                    }
-                }).zipWith(D2.me().account().get(), new Func2<List<ProgramStage>, UserAccount, Event>() {
-                    @Override
-                    public Event call(List<ProgramStage> programStages, UserAccount userAccount) {
-                        ProgramStage currentProgramStage = programStages.get(0); //only one stage in event capture
-//                        Event event = D2.events().create(
-//                                organisationUnitId, programId,
+    public void createDataEntryFormSection(String programStageSectionId) {
+        logger.d(TAG, "ProgramStageSectionId: " + programStageSectionId);
 
-//                                currentProgramStage.getUId(), Event.EventStatus.ACTIVE).toBlocking().first();
-//                        setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
-//                        return event;
-                        //TODO fix this stuff
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
 
-//                                currentProgramStage.getUId(), Event.STATUS_ACTIVE).toBlocking().first();
-                        Event event = new Event();
-                        setEmptyTrackedEntityDataValues(event, currentProgramStage, userAccount);
-                        return event;
-                    }
-                }).subscribe(new Action1<Event>() {
+        subscription = new CompositeSubscription();
+        subscription.add(sectionInteractor.get(programStageSectionId)
+                .switchMap(new Func1<ProgramStageSection, Observable<List<ProgramStageDataElement>>>() {
                     @Override
-                    public void call(Event event) {
+                    public Observable<List<ProgramStageDataElement>> call(ProgramStageSection stage) {
+                        return dataElementInteractor.list(stage);
+                    }
+                })
+                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
+
+                    @Override
+                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
+                        return transformDataElementsToFormEntities(dataElements);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<FormEntity>>() {
+                    @Override
+                    public void call(List<FormEntity> formEntities) {
                         if (dataEntryView != null) {
-                            dataEntryView.setEvent(event);
+                            dataEntryView.showDataEntryForm(formEntities);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Timber.d(throwable.toString());
+                        logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
-                });
+                }));
     }
 
-    private void setEmptyTrackedEntityDataValues(Event event, ProgramStage programStage, UserAccount userAccount) {
-        String EMPTY_FIELD = "";
-        List<ProgramStageDataElement> programStageDataElements =
-                D2.programStageDataElements().list(programStage).toBlocking().first();
-        List<TrackedEntityDataValue> trackedEntityDataValues = new ArrayList<>();
-//      for (ProgramStageDataElement programStageDataElement : programStageDataElements) {
-//            TrackedEntityDataValue trackedEntityDataValue = TrackedEntityDataValue.create(
-//                    event, programStageDataElement.getDataElement().getUId(), EMPTY_FIELD,
-//                    userAccount.getDisplayName(), false);
+    private List<FormEntity> transformDataElementsToFormEntities(
+            List<ProgramStageDataElement> stageDataElements) {
+        List<FormEntity> formEntities = new ArrayList<>();
 
+        if (stageDataElements != null && !stageDataElements.isEmpty()) {
+            for (ProgramStageDataElement stageDataElement : stageDataElements) {
+                if (stageDataElement.getDataElement() == null) {
+                    throw new RuntimeException("Malformed meta-data: program stage data element" +
+                            " does not have reference to data element");
+                }
 
-//            trackedEntityDataValues.add(trackedEntityDataValue);
-//        }
-        event.setDataValues(trackedEntityDataValues);
-        //TODO fix this stuff
-        TrackedEntityDataValue trackedEntityDataValue = new TrackedEntityDataValue();
-        trackedEntityDataValues.add(trackedEntityDataValue);
+                DataElement dataElement = stageDataElement.getDataElement();
+                logger.d(TAG, "DataElement: " + dataElement.getDisplayName());
+                logger.d(TAG, "ValueType: " + dataElement.getValueType());
 
-        // event.setTrackedEntityDataValues(trackedEntityDataValues);
+                if (dataElement.getOptionSet() != null) {
+                    System.out.println("OptionSetId: " + dataElement.getOptionSet());
 
+                    List<Option> options = optionSetInteractor.list(
+                            dataElement.getOptionSet()).toBlocking().first();
+
+                    System.out.println("Options: " + options);
+                    Picker picker = Picker.create(dataElement.getDisplayName());
+                    if (options != null && !options.isEmpty()) {
+                        for (Option option : options) {
+                            picker.addChild(Picker.create(
+                                    option.getCode(), option.getDisplayName(), picker));
+                        }
+                    }
+
+                    FormEntityFilter formEntityFilter = new FormEntityFilter(
+                            dataElement.getUId(), dataElement.getDisplayName());
+                    formEntityFilter.setPicker(picker);
+
+                    formEntities.add(formEntityFilter);
+                    continue;
+
+                    // List<Option> options = null;
+                    // continue;
+                }
+
+                switch (dataElement.getValueType()) {
+                    case TEXT: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.TEXT));
+                        break;
+                    }
+                    case LONG_TEXT: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.LONG_TEXT));
+                        break;
+                    }
+                    case PHONE_NUMBER: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.TEXT));
+                        break;
+                    }
+                    case EMAIL: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.TEXT));
+                        break;
+                    }
+                    case BOOLEAN: {
+                        break;
+                    }
+                    case TRUE_ONLY: {
+                        break;
+                    }
+                    case DATE: {
+                        formEntities.add(new FormEntityDate(
+                                dataElement.getUId(), getFormEntityLabel(dataElement)));
+                        break;
+                    }
+                    case NUMBER: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.NUMBER));
+                        break;
+                    }
+                    case INTEGER: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.INTEGER));
+                        break;
+                    }
+                    case INTEGER_POSITIVE: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.INTEGER_POSITIVE));
+                        break;
+                    }
+                    case INTEGER_NEGATIVE: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.INTEGER_NEGATIVE));
+                        break;
+                    }
+                    case INTEGER_ZERO_OR_POSITIVE: {
+                        formEntities.add(new FormEntityEditText(
+                                dataElement.getUId(), getFormEntityLabel(dataElement),
+                                FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE));
+                        break;
+                    }
+                    case COORDINATE: {
+                        break;
+                    }
+                    default:
+                        logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
+                }
+            }
+        }
+
+        return formEntities;
     }
 
-    @Override
-    public Event getEvent(String eventUId) {
-        Event event = D2.events().get(eventUId).toBlocking().first();
-        return event;
+    private String getFormEntityLabel(DataElement dataElement) {
+        return isEmpty(dataElement.getDisplayFormName()) ?
+                dataElement.getDisplayName() : dataElement.getDisplayFormName();
     }
-
-//    @Override
-//    public void onDestroy() {
-//        if (listProgramStageDataElements != null && !listProgramStageDataElements.isUnsubscribed()) {
-//            listProgramStageDataElements.unsubscribe();
-//        }
-//
-//        if (programStageSubscription != null && !programStageSubscription.isUnsubscribed()) {
-//            programStageSubscription.unsubscribe();
-//        }
-//
-//        listProgramStageDataElements = null;
-//        programStageSubscription = null;
-//        dataEntryView = null;
-//    }
-//
-//    @Override
-//    public String getKey() {
-//        return this.getClass().getSimpleName();
-//    }
 }

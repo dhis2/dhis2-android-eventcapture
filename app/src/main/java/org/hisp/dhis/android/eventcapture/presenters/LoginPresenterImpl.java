@@ -45,7 +45,6 @@ import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
-
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
     private final CurrentUserInteractor userAccountInteractor;
     private final CompositeSubscription subscription;

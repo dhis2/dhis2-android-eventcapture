@@ -31,7 +31,6 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -51,8 +50,7 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
-import org.hisp.dhis.android.eventcapture.views.SelectorView;
-import org.hisp.dhis.android.eventcapture.views.activities.DataEntryActivity;
+import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
@@ -128,7 +126,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 selectorPresenter.sync();
             }
         });
-
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -281,11 +278,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             String programUid = getProgramUid();
 
             if (orgUnitUid != null && programUid != null) {
-                Intent intent = new Intent(getActivity(), DataEntryActivity.class);
-                intent.putExtra(DataEntryActivity.ORG_UNIT_UID, orgUnitUid);
-                intent.putExtra(DataEntryActivity.PROGRAM_UID, programUid);
-                intent.putExtra(DataEntryActivity.EVENT_UID, "");
-                startActivity(intent);
+                FormSectionActivity.navigateTo(getActivity(), orgUnitUid, programUid);
             }
         }
 

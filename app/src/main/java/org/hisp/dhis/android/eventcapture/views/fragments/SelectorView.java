@@ -26,8 +26,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views;
+package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 
 public interface SelectorView extends View {

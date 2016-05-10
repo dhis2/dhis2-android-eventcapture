@@ -36,14 +36,18 @@ import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.SectionFilterPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
+import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
@@ -70,7 +74,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public CurrentUserInteractor providesUserAccountInteractor() {
         if (D2.isConfigured()) {
             return D2.me();
@@ -81,7 +85,7 @@ public class UserModule {
 
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public UserOrganisationUnitInteractor providesUserOrganisationUnitInteractor() {
         if (D2.isConfigured()) {
             return D2.me().organisationUnits();
@@ -90,10 +94,9 @@ public class UserModule {
         return null;
     }
 
-
     @Provides
     @Nullable
-    @UserScope
+    @PerUser
     public UserProgramInteractor providesUserProgramInteractor() {
         if (D2.isConfigured()) {
             return D2.me().programs();
@@ -103,49 +106,114 @@ public class UserModule {
     }
 
     @Provides
-    @UserScope
+    @Nullable
+    @PerUser
+    public ProgramStageInteractor providesProgramStageInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programStages();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramStageSectionInteractor providesProgramStageSectionInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programStageSections();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramStageDataElementInteractor providesProgramStageDataElementInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programStageDataElements();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public OrganisationUnitInteractor providesOrganisationUnitInteractor() {
+        if (D2.isConfigured()) {
+            return D2.organisationUnits();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramInteractor providesProgramInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programs();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public OptionSetInteractor providesOptionSetInteractor() {
+        if (D2.isConfigured()) {
+            return D2.optionSets();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @PerUser
     public LauncherPresenter providesLauncherPresenter(
             @Nullable CurrentUserInteractor accountInteractor) {
         return new LauncherPresenterImpl(accountInteractor);
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public LoginPresenter providesLoginPresenter(
             @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, logger);
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public HomePresenter providesHomerPresenter(
             @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
         return new HomePresenterImpl(accountInteractor, logger);
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public SelectorPresenter providesSelectorPresenter(
             @Nullable UserOrganisationUnitInteractor interactor,
             @Nullable UserProgramInteractor programInteractor,
+            @Nullable ProgramStageInteractor programStageInteractor,
+            @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             Logger logger) {
-        return new SelectorPresenterImpl(interactor, programInteractor, logger);
+        return new SelectorPresenterImpl(
+                interactor, programInteractor, programStageInteractor,
+                programStageSectionInteractor, programStageDataElementInteractor, logger);
     }
 
     @Provides
-    @UserScope
-    public SectionFilterPresenter provideSectionFilterPresenter() {
-        return new SectionFilterPresenterImpl();
-    }
-
-    @Provides
-    @UserScope
+    @PerUser
     public SettingsPresenter provideSettingsPresenter() {
         return new SettingsPresenterImpl();
     }
 
     @Provides
-    @UserScope
+    @PerUser
     public ProfilePresenter providesProfilePresenter(
             @Nullable CurrentUserInteractor userAccountInteractor, Logger logger) {
         return new ProfilePresenterImpl(userAccountInteractor, logger);

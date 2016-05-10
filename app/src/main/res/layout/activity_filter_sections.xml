@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawerlayout_form_sections"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        layout="@layout/content_form_sections"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:layout_width="@dimen/navigation_drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@android:color/white"
+        android:orientation="vertical">
+
+        <org.hisp.dhis.client.sdk.ui.views.FontEditText
+            android:id="@+id/edittext_filter_picker_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="13dp"
+            android:drawableLeft="@drawable/ic_search"
+            android:drawablePadding="4dp"
+            android:drawableStart="@drawable/ic_search"
+            android:hint="@string/filter_sections"
+            android:textSize="@dimen/text_size_medium"
+            app:font="@string/font_name_regular" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_sectionfilter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
+
+</android.support.v4.widget.DrawerLayout>

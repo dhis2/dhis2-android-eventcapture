@@ -26,12 +26,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import java.util.List;
+import javax.inject.Scope;
 
-public interface EventDataEntryView {
-    void setDataEntryFields(List<FormEntity> formEntities);
+@Scope
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PerUser {
 }

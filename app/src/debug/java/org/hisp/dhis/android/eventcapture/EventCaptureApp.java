@@ -38,6 +38,8 @@ import org.hisp.dhis.client.sdk.android.api.D2;
 
 import javax.inject.Inject;
 
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 public final class EventCaptureApp extends Application {
 
     @Inject
@@ -47,7 +49,7 @@ public final class EventCaptureApp extends Application {
 
     UserComponent userComponent;
 
-    RxBus rxBus;
+    FormComponent formComponent;
 
     @Override
     public void onCreate() {
@@ -68,9 +70,6 @@ public final class EventCaptureApp extends Application {
         // adding UserComponent to global dependency graph
         userComponent = appComponent.plus(new UserModule());
 
-        //init rxBus
-        rxBus = new RxBus();
-
         // TODO Add LeakCanary support
         // TODO implement debug navigation drawer
     }
@@ -88,6 +87,12 @@ public final class EventCaptureApp extends Application {
         return userComponent;
     }
 
+    public FormComponent createFormComponent() {
+        isNull(userComponent, "UserComponent must not be null");
+        formComponent = userComponent.plus(new FormModule());
+        return formComponent;
+    }
+
     public AppComponent getAppComponent() {
         return appComponent;
     }
@@ -96,11 +101,11 @@ public final class EventCaptureApp extends Application {
         return userComponent;
     }
 
-    public RxBus getRxBusSingleton() {
-        if (rxBus == null) {
-            rxBus = new RxBus();
-        }
+    public FormComponent getFormComponent() {
+        return formComponent;
+    }
 
-        return rxBus;
+    public void releaseFormComponent() {
+        formComponent = null;
     }
 }

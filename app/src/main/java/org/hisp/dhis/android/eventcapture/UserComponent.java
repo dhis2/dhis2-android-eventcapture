@@ -31,14 +31,13 @@ package org.hisp.dhis.android.eventcapture;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.SectionFilterActivity;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
 
 import dagger.Subcomponent;
 
-@UserScope
+@PerUser
 @Subcomponent(
         modules = {
                 UserModule.class
@@ -47,18 +46,26 @@ import dagger.Subcomponent;
 public interface UserComponent {
 
     //------------------------------------------------------------------------
+    // Sub-modules
+    //------------------------------------------------------------------------
+
+    FormComponent plus(FormModule formModule);
+
+
+    //------------------------------------------------------------------------
     // Injection targets
     //------------------------------------------------------------------------
 
+    // activities
     void inject(LauncherActivity launcherActivity);
 
     void inject(LoginActivity loginActivity);
 
     void inject(HomeActivity homeActivity);
 
-    void inject(SelectorFragment selectorFragment);
 
-    void inject(SectionFilterActivity sectionFilterActivity);
+    // fragments
+    void inject(SelectorFragment selectorFragment);
 
     void inject(SettingsFragment settingsFragment);
 
