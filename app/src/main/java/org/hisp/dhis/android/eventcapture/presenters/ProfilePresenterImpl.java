@@ -1,5 +1,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
+import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.RxOnValueChangedListener;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.ProfileView;
@@ -31,20 +33,28 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class ProfilePresenterImpl implements ProfilePresenter {
-    private static final String TAG = ProfilePresenter.class.getSimpleName();
+    static final String TAG = ProfilePresenter.class.getSimpleName();
 
     // callback which will be called when values change in view
     private final RxOnValueChangedListener onFormEntityChangeListener;
-    private final CurrentUserInteractor userAccountInteractor;
+    private final CurrentUserInteractor currentUserAccountInteractor;
     private final Logger logger;
+
+    private AppAccountManager appAccountManager;
+    private SyncDateWrapper syncDateWrapper;
 
     private ProfileView profileView;
     private CompositeSubscription subscription;
     private UserAccount userAccount;
 
-    public ProfilePresenterImpl(CurrentUserInteractor userAccountInteractor, Logger logger) {
+    public ProfilePresenterImpl(CurrentUserInteractor currentUserAccountInteractor,
+                                AppAccountManager appAccountManager,
+                                SyncDateWrapper syncDateWrapper,
+                                Logger logger) {
         this.onFormEntityChangeListener = new RxOnValueChangedListener();
-        this.userAccountInteractor = userAccountInteractor;
+        this.currentUserAccountInteractor = currentUserAccountInteractor;
+        this.appAccountManager = appAccountManager;
+        this.syncDateWrapper = syncDateWrapper;
         this.logger = logger;
     }
 
@@ -59,7 +69,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
         // create a new one
         subscription = new CompositeSubscription();
-        subscription.add(userAccountInteractor.account().get()
+        subscription.add(currentUserAccountInteractor.account().get()
                 .map(new Func1<UserAccount, List<FormEntity>>() {
                     @Override
                     public List<FormEntity> call(UserAccount userAccount) {
@@ -136,7 +146,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
             subscription = new CompositeSubscription();
         }
 
-        subscription.add(userAccountInteractor.account().sync()
+        subscription.add(currentUserAccountInteractor.account().sync()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<UserAccount>() {
@@ -159,6 +169,18 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                         }
                     }
                 }));
+    }
+
+    @Override
+    public void logout() {
+        //remove the android account: (no sync)
+        appAccountManager.removePeriodicSync();
+        appAccountManager.removeAccount();
+
+        // remove last synced (assume next user will be different)
+        syncDateWrapper.clearLastSynced();
+
+        currentUserAccountInteractor.signOut().toBlocking().first();
     }
 
     private List<FormEntity> transformUserAccount(UserAccount userAccount) {
@@ -359,6 +381,6 @@ public class ProfilePresenterImpl implements ProfilePresenter {
             }
         }
 
-        return userAccountInteractor.account().save(userAccount);
+        return currentUserAccountInteractor.account().save(userAccount);
     }
 }

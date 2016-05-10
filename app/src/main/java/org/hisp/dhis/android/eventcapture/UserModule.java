@@ -242,8 +242,10 @@ public class UserModule {
 
     @Provides
     @PerUser
-    public ProfilePresenter providesProfilePresenter(
-            @Nullable CurrentUserInteractor userAccountInteractor, Logger logger) {
-        return new ProfilePresenterImpl(userAccountInteractor, logger);
+    public ProfilePresenter providesProfilePresenter(@Nullable CurrentUserInteractor userAccountInteractor,
+                                                     AppAccountManager appAccountManager,
+                                                     SyncDateWrapper syncDateWrapper,
+                                                     Logger logger) {
+        return new ProfilePresenterImpl(userAccountInteractor, appAccountManager, syncDateWrapper, logger);
     }
 }

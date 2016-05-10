@@ -45,14 +45,13 @@ public class AppAccountManager {
     * Account removal stub functionality.
     * Requires api 22.
     * */
-    /* disabled for now:
-    private void removeAccount(Context context) {
-        //TODO: call this on logout from the app, to keep only one account for the app.
-        if (mAccount != null) {
-            AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+    public void removeAccount() {
+        if (mAccount != null && appContext != null) {
+            AccountManager accountManager =
+                    (AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE);
             accountManager.removeAccountExplicitly(mAccount);
         }
-    }*/
+    }
 
     public Account createAccount() {
         // Create the account type and default account

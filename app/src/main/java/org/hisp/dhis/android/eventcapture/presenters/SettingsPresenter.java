@@ -34,7 +34,6 @@ import org.hisp.dhis.android.eventcapture.views.fragments.SettingsView;
  * Created by Vladislav Georgiev Alfredov on 1/18/16.
  */
 public interface SettingsPresenter {
-    void logout();
 
     void synchronize();
 

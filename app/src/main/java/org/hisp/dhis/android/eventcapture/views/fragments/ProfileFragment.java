@@ -1,10 +1,13 @@
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,6 +19,7 @@ import android.view.ViewGroup;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
+import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
@@ -28,27 +32,25 @@ import javax.inject.Inject;
 
 public class ProfileFragment extends BaseFragment implements ProfileView {
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
+    private static final String TAG = ProfileFragment.class.getSimpleName();
 
     @Inject
     ProfilePresenter profilePresenter;
-
     @Inject
     Logger logger;
-
-    // pull-to-refresh
+    // pull-to-refresh:
     SwipeRefreshLayout swipeRefreshLayout;
-
     RecyclerView recyclerView;
-
     RowViewAdapter rowViewAdapter;
+    AlertDialog alertDialog;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // injection of profile presenter
-        ((EventCaptureApp) getActivity().getApplication())
-                .getUserComponent().inject(this);
+        ((EventCaptureApp) getActivity().getApplication()).getUserComponent().inject(this);
+        alertDialog = createAlertDialog();
     }
 
     @Nullable
@@ -119,14 +121,16 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
 
     @Override
     public void onResume() {
-        super.onResume();
         profilePresenter.attachView(this);
+        super.onResume();
     }
 
     @Override
     public void onPause() {
-        super.onPause();
+        alertDialog.dismiss();
         profilePresenter.detachView();
+        super.onPause();
+
     }
 
     @Override
@@ -192,8 +196,38 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
                 profilePresenter.sync();
                 return true;
             }
+            case R.id.menu_log_out: {
+                alertDialog.show();
+                return true;
+            }
         }
-
         return false;
+    }
+
+    private AlertDialog createAlertDialog() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setIcon(R.drawable.ic_warning);
+        alertDialogBuilder.setTitle(R.string.warning_logout_header);
+        alertDialogBuilder.setMessage(R.string.warning_logout_body);
+        alertDialogBuilder.setPositiveButton(R.string.warning_logout_confirm,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        profilePresenter.logout();
+                        Intent logoutIntent = new Intent(getContext(), LoginActivity.class);
+                        startActivity(logoutIntent);
+                        getActivity().finish();
+                    }
+                }
+        );
+        alertDialogBuilder.setNegativeButton(R.string.warning_logout_dismiss,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //stub... just dismiss
+                    }
+                }
+        );
+        return alertDialogBuilder.create();
     }
 }

@@ -23,6 +23,10 @@ public class SyncDateWrapper {
         appPreferences.setLastSynced(lastSynced);
     }
 
+    public void clearLastSynced() {
+        appPreferences.setLastSynced(0L);
+    }
+
     @Nullable
     public Date getLastSyncedDate() {
         long lastSynced = appPreferences.getLastSynced();
