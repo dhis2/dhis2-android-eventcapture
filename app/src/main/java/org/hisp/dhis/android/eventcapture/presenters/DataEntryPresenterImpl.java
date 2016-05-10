@@ -2,6 +2,7 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
@@ -75,7 +76,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     }
 
     @Override
-    public void createDataEntryFormStage(String programStageId) {
+    public void createDataEntryFormStage(String eventId, String programStageId) {
         logger.d(TAG, "ProgramStageId: " + programStageId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -121,8 +122,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 }));
     }
 
+    /*
+    * 1) User first gets into FormSectionActivity:
+    *    - We get organisation unit, program ids in as parameters (and, event optionally)
+    *         If we don't have event, we should create one. DataEntry views should not
+    *         know anything about event creation.
+    */
+
     @Override
-    public void createDataEntryFormSection(String programStageSectionId) {
+    public void createDataEntryFormSection(String eventId, String programStageSectionId) {
         logger.d(TAG, "ProgramStageSectionId: " + programStageSectionId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
