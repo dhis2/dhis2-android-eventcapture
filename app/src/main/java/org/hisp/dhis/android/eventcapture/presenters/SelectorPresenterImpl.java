@@ -28,8 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.SessionManager;
-import org.hisp.dhis.android.eventcapture.model.SyncManager;
+import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
@@ -73,6 +72,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
     private final ProgramStageDataElementInteractor programStageDataElementInteractor;
+    private final SyncDateWrapper syncDateWrapper;
     private final Logger logger;
 
     private CompositeSubscription subscription;
@@ -83,6 +83,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  ProgramStageInteractor programStageInteractor,
                                  ProgramStageSectionInteractor programStageSectionInteractor,
                                  ProgramStageDataElementInteractor stageDataElementInteractor,
+                                 SyncDateWrapper syncDateWrapper,
                                  Logger logger) {
         this.organisationUnitInteractor = interactor;
         this.programInteractor = programInteractor;
@@ -90,6 +91,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.programStageSectionInteractor = programStageSectionInteractor;
         this.programStageDataElementInteractor = stageDataElementInteractor;
         this.subscription = new CompositeSubscription();
+        this.syncDateWrapper = syncDateWrapper;
         this.logger = logger;
     }
 
@@ -112,8 +114,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         selectorView.showProgressBar();
 
         subscription.add(Observable.zip(
-                organisationUnitInteractor.pull(),
-                programInteractor.pull(),
+                organisationUnitInteractor.pull(), programInteractor.pull(),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
@@ -147,18 +148,22 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .subscribe(new Action1<List<ProgramStageDataElement>>() {
                     @Override
                     public void call(List<ProgramStageDataElement> stageDataElements) {
-                        SessionManager.getInstance().setSelectorSynced(true);
-                        SyncManager.getInstance().setLastSyncedNow();
+                        syncDateWrapper.setLastSyncedNow();
+
+                        if (selectorView != null) {
+                            selectorView.hideProgressBar();
+                        }
 
                         listPickers();
-                        selectorView.hideProgressBar();
                     }
                 }, new Action1<Throwable>() {
 
                     @Override
                     public void call(Throwable throwable) {
-                        //TODO: show error message ?
-                        selectorView.hideProgressBar();
+                        if (selectorView != null) {
+                            selectorView.hideProgressBar();
+                        }
+
                         throwable.printStackTrace();
                     }
                 }));

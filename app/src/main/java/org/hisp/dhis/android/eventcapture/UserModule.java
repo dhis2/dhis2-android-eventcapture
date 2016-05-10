@@ -28,6 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import android.content.Context;
+
+import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
+import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
@@ -51,6 +55,8 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
+import org.hisp.dhis.client.sdk.ui.AppPreferences;
+import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.annotation.Nullable;
@@ -70,6 +76,25 @@ public class UserModule {
         // it can throw exception in case if configuration has failed
         Configuration configuration = new Configuration(serverUrl);
         D2.configure(configuration).toBlocking().first();
+    }
+
+    @Provides
+    @PerUser
+    public AppPreferences providesAppPreferences(Context context) {
+        return new AppPreferencesImpl(context);
+    }
+
+    @Provides
+    @PerUser
+    public SyncDateWrapper provideSyncManager(AppPreferences appPreferences) {
+        return new SyncDateWrapper(appPreferences);
+    }
+
+    @Provides
+    @PerUser
+    public AppAccountManager providesAppAccountManager(Context context,
+                                                       AppPreferences appPreferences) {
+        return new AppAccountManager(context, appPreferences);
     }
 
     @Provides
@@ -188,8 +213,9 @@ public class UserModule {
     @Provides
     @PerUser
     public HomePresenter providesHomerPresenter(
-            @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
-        return new HomePresenterImpl(accountInteractor, logger);
+            @Nullable CurrentUserInteractor accountInteractor, AppPreferences appPreferences,
+            SyncDateWrapper syncDateWrapper, Logger logger) {
+        return new HomePresenterImpl(accountInteractor, appPreferences, syncDateWrapper, logger);
     }
 
     @Provides
@@ -200,16 +226,18 @@ public class UserModule {
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
-            Logger logger) {
-        return new SelectorPresenterImpl(
-                interactor, programInteractor, programStageInteractor,
-                programStageSectionInteractor, programStageDataElementInteractor, logger);
+            SyncDateWrapper syncDateWrapper, Logger logger) {
+        return new SelectorPresenterImpl(interactor, programInteractor, programStageInteractor,
+                programStageSectionInteractor, programStageDataElementInteractor,
+                syncDateWrapper, logger);
+
     }
 
     @Provides
     @PerUser
-    public SettingsPresenter provideSettingsPresenter() {
-        return new SettingsPresenterImpl();
+    public SettingsPresenter provideSettingsPresenter(
+            AppPreferences appPreferences, AppAccountManager appAccountManager) {
+        return new SettingsPresenterImpl(appPreferences, appAccountManager);
     }
 
     @Provides

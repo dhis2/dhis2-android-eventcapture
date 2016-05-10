@@ -72,9 +72,8 @@ public class SettingsFragment extends AbsSettingsFragment implements SettingsVie
     }
 
     @Override
-    public boolean onSynchronizationPeriodChanged(String newPeriod) {
-        Log.d("SettingsFragment", "newPeriod = " + newPeriod);
-        settingsPresenter.setUpdateFrequency(Integer.parseInt(newPeriod));
+    public boolean onSynchronizationPeriodChanged(String newPeriodMinutes) {
+        settingsPresenter.setUpdateFrequency(Integer.parseInt(newPeriodMinutes));
         return true;
     }
 

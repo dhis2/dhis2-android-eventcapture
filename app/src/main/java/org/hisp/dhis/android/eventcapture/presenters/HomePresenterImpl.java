@@ -28,10 +28,12 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeView;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
+import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import rx.Subscription;
@@ -44,13 +46,20 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class HomePresenterImpl implements HomePresenter {
     private final CurrentUserInteractor userAccountInteractor;
+    private final AppPreferences appPreferences;
+    private final SyncDateWrapper syncDateWrapper;
     private final Logger logger;
+
     private Subscription subscription;
     private HomeView homeView;
 
-    public HomePresenterImpl(CurrentUserInteractor userAccountInteractor, Logger logger) {
+
+    public HomePresenterImpl(CurrentUserInteractor userAccountInteractor,
+                             AppPreferences appPreferences, SyncDateWrapper syncDateWrapper, Logger logger) {
         this.userAccountInteractor = isNull(userAccountInteractor,
                 "UserAccountInteractor must not be null");
+        this.appPreferences = appPreferences;
+        this.syncDateWrapper = syncDateWrapper;
         this.logger = isNull(logger, "Logger must not be null");
     }
 
@@ -101,5 +110,11 @@ public class HomePresenterImpl implements HomePresenter {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
+    }
+
+    @Override
+    public void calculateLastSyncedPeriod() {
+        String lastSynced = syncDateWrapper.getLastSyncedString();
+        homeView.showLastSyncedMessage(lastSynced);
     }
 }
