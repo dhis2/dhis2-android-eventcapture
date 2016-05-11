@@ -75,6 +75,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final Logger logger;
 
     private CompositeSubscription subscription;
+    private boolean isSyncedInitially;
     private SelectorView selectorView;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
@@ -89,19 +90,28 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = programStageSectionInteractor;
         this.programStageDataElementInteractor = stageDataElementInteractor;
-        this.subscription = new CompositeSubscription();
         this.syncDateWrapper = syncDateWrapper;
         this.logger = logger;
+
+        this.subscription = new CompositeSubscription();
+        this.isSyncedInitially = false;
     }
 
     public void attachView(View view) {
         isNull(view, "SelectorView must not be null");
         selectorView = (SelectorView) view;
+
+        // check if metadata was synced,
+        // if not, sync it
+        if (!isSyncedInitially) {
+            sync();
+        }
     }
 
     @Override
     public void detachView() {
         selectorView = null;
+
         if (!subscription.isUnsubscribed()) {
             subscription.unsubscribe();
             subscription = new CompositeSubscription();
@@ -110,7 +120,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void sync() {
-        selectorView.showProgressBar();
+        if (selectorView != null) {
+            selectorView.showProgressBar();
+        }
 
         subscription.add(Observable.zip(
                 organisationUnitInteractor.pull(), programInteractor.pull(),
@@ -147,6 +159,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .subscribe(new Action1<List<ProgramStageDataElement>>() {
                     @Override
                     public void call(List<ProgramStageDataElement> stageDataElements) {
+                        isSyncedInitially = true;
                         syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
@@ -221,10 +234,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                 if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
                         .equals(assignedProgram.getProgramType())) {
-                    Picker programPicker = Picker.create(
-                            assignedProgram.getUId(),
-                            assignedProgram.getDisplayName(),
-                            organisationUnitPicker);
+                    Picker programPicker = Picker.create(assignedProgram.getUId(),
+                            assignedProgram.getDisplayName(), organisationUnitPicker);
                     organisationUnitPicker.addChild(programPicker);
                 }
             }

@@ -64,6 +64,8 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class SelectorFragment extends BaseFragment implements SelectorView {
+    private static final String TAG = SelectorFragment.class.getSimpleName();
+
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
@@ -122,19 +124,33 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void onResume() {
         super.onResume();
+
+        logger.d(TAG, "onResume()");
         selectorPresenter.attachView(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+        logger.d(TAG, "onPause()");
         selectorPresenter.detachView();
     }
 
     @Override
     public void showProgressBar() {
         logger.d(SelectorFragment.class.getSimpleName(), "showProgressBar()");
-        swipeRefreshLayout.setRefreshing(true);
+
+        // this workaround is necessary because of the message queue
+        // implementation in android. If you will try to setRefreshing(true) right away,
+        // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
+        // message to hide progress bar which probably is created by layout
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(true);
+            }
+        });
     }
 
     @Override
@@ -204,11 +220,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
 
         if (savedInstanceState != null) {
-
-            // this workaround is necessary because of the message queue
-            // implementation in android. If you will try to setRefreshing(true) right away,
-            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
-            // message to hide progress bar which probably is created by layout
             swipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
