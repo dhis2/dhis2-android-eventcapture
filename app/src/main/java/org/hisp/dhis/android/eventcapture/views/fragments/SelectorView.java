@@ -28,10 +28,26 @@
 
 package org.hisp.dhis.android.eventcapture.views.fragments;
 
+import android.support.annotation.StringDef;
+
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 public interface SelectorView extends View {
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            ID_CHOOSE_ORGANISATION_UNIT,
+            ID_CHOOSE_PROGRAM
+    })
+    @interface PickerLabelId {
+    }
+
+    String ID_CHOOSE_ORGANISATION_UNIT = "chooseOrganisationUnit";
+    String ID_CHOOSE_PROGRAM = "chooseProgram";
+
     void showProgressBar();
 
     void hideProgressBar();
@@ -39,4 +55,6 @@ public interface SelectorView extends View {
     void showPickers(Picker picker);
 
     void showNoOrganisationUnitsError();
+
+    String getPickerLabel(@PickerLabelId String pickerLabelId);
 }

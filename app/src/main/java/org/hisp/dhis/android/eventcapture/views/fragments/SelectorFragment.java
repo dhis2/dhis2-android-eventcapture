@@ -61,6 +61,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+
 public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
@@ -149,6 +151,20 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void showNoOrganisationUnitsError() {
         pickerAdapter.swapData(null);
+    }
+
+    @Override
+    public String getPickerLabel(@PickerLabelId String pickerLabelId) {
+        isNull(pickerLabelId, "pickerLabelId must not be null");
+
+        switch(pickerLabelId) {
+            case ID_CHOOSE_ORGANISATION_UNIT:
+                return getString(R.string.choose_organisation_unit);
+            case ID_CHOOSE_PROGRAM:
+                return getString(R.string.choose_program);
+            default:
+                throw new IllegalArgumentException("Unsupported PickerLabelId");
+        }
     }
 
     private void setupToolbar() {

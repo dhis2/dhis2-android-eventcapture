@@ -63,7 +63,6 @@ import rx.subscriptions.CompositeSubscription;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 
-// TODO put hints (Choose organisation unit) into resources (follow approach with ProfileView)
 public class SelectorPresenterImpl implements SelectorPresenter {
     private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
 
@@ -199,19 +198,23 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     /*
      * Goes through given organisation units and programs and builds Picker tree
      */
-    private static Picker createPickerTree(List<OrganisationUnit> units, List<Program> programs) {
+    private Picker createPickerTree(List<OrganisationUnit> units, List<Program> programs) {
         Map<String, OrganisationUnit> organisationUnitMap = ModelUtils.toMap(units);
         Map<String, Program> assignedProgramsMap = ModelUtils.toMap(programs);
 
-        Picker rootPicker = Picker.create("Choose organisation unit");
+        String chooseOrganisationUnit = selectorView != null ? selectorView
+                .getPickerLabel(SelectorView.ID_CHOOSE_ORGANISATION_UNIT) : "";
+        String chooseProgram = selectorView != null ? selectorView
+                .getPickerLabel(SelectorView.ID_CHOOSE_PROGRAM) : "";
+
+        Picker rootPicker = Picker.create(chooseOrganisationUnit);
         for (String unitKey : organisationUnitMap.keySet()) {
+
             // Creating organisation unit picker items
             OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
             Picker organisationUnitPicker = Picker.create(
-                    organisationUnit.getUId(),
-                    organisationUnit.getDisplayName(),
-                    "Choose program",
-                    rootPicker);
+                    organisationUnit.getUId(), organisationUnit.getDisplayName(),
+                    chooseProgram, rootPicker);
 
             for (Program program : organisationUnit.getPrograms()) {
                 Program assignedProgram = assignedProgramsMap.get(program.getUId());
