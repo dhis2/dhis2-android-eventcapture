@@ -167,8 +167,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     private void setupFloatingActionButton(final View rootView) {
         onCreateEventButtonClickListener = new OnCreateEventButtonClickListener();
+
         createEventButton = (FloatingActionButton) rootView.findViewById(R.id.fab_create_event);
         createEventButton.setOnClickListener(onCreateEventButtonClickListener);
+
+        // button visibility will be changed as soon as pickers are loaded
+        createEventButton.setVisibility(View.INVISIBLE);
     }
 
     private void setupSwipeRefreshLayout(final View rootView, final Bundle savedInstanceState) {
