@@ -62,8 +62,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class SelectorFragment extends BaseFragment implements SelectorView {
-    private static final int ORG_UNIT_PICKER_IX = 0;
-    private static final int PROGRAM_UNIT_PICKER_IX = 1;
+    private static final int ORG_UNIT_PICKER_ID = 0;
+    private static final int PROGRAM_UNIT_PICKER_ID = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
 
     @Inject
@@ -100,66 +100,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     @Override
-    public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
-        if (getParentToolbar() != null) {
-            getParentToolbar().inflateMenu(R.menu.menu_refresh);
-            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    return SelectorFragment.this.onMenuItemClick(item);
-                }
-            });
-        }
-
-        onCreateEventButtonClickListener = new OnCreateEventButtonClickListener();
-        createEventButton = (FloatingActionButton) view
-                .findViewById(R.id.fab_create_event);
-        createEventButton.setOnClickListener(onCreateEventButtonClickListener);
-
-        swipeRefreshLayout = (SwipeRefreshLayout) view
-                .findViewById(R.id.swiperefreshlayout_selector);
-        swipeRefreshLayout.setColorSchemeResources(
-                R.color.color_primary_default);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                selectorPresenter.sync();
-            }
-        });
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-        pickerAdapter = new PickerAdapter(getChildFragmentManager(), getActivity());
-        pickerAdapter.setOnPickerListChangeListener(new OnPickerListChangeListener() {
-            @Override
-            public void onPickerListChanged(List<Picker> pickers) {
-                SelectorFragment.this.onPickerListChanged(pickers);
-            }
-        });
-
-        pickerRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_pickers);
-        pickerRecyclerView.setLayoutManager(layoutManager);
-        pickerRecyclerView.setAdapter(pickerAdapter);
-        pickerRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        if (savedInstanceState != null) {
-            pickerAdapter.onRestoreInstanceState(savedInstanceState);
-
-            // this workaround is necessary because of the message queue
-            // implementation in android. If you will try to setRefreshing(true) right away,
-            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
-            // message to hide progress bar which probably is created by layout
-            swipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    swipeRefreshLayout.setRefreshing(savedInstanceState
-                            .getBoolean(STATE_IS_REFRESHING, false));
-                }
-            });
-        } else {
-            selectorPresenter.listPickers();
-        }
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        setupToolbar();
+        setupFloatingActionButton(view);
+        setupSwipeRefreshLayout(view, savedInstanceState);
+        setupRecyclerView(view, savedInstanceState);
     }
 
     @Override
@@ -206,6 +151,78 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         pickerAdapter.swapData(null);
     }
 
+    private void setupToolbar() {
+        if (getParentToolbar() == null) {
+            return;
+        }
+
+        getParentToolbar().inflateMenu(R.menu.menu_refresh);
+        getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return SelectorFragment.this.onMenuItemClick(item);
+            }
+        });
+    }
+
+    private void setupFloatingActionButton(final View rootView) {
+        onCreateEventButtonClickListener = new OnCreateEventButtonClickListener();
+        createEventButton = (FloatingActionButton) rootView.findViewById(R.id.fab_create_event);
+        createEventButton.setOnClickListener(onCreateEventButtonClickListener);
+    }
+
+    private void setupSwipeRefreshLayout(final View rootView, final Bundle savedInstanceState) {
+        swipeRefreshLayout = (SwipeRefreshLayout) rootView
+                .findViewById(R.id.swiperefreshlayout_selector);
+        swipeRefreshLayout.setColorSchemeResources(R.color.color_primary_default);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                selectorPresenter.sync();
+            }
+        });
+
+
+        if (savedInstanceState != null) {
+
+            // this workaround is necessary because of the message queue
+            // implementation in android. If you will try to setRefreshing(true) right away,
+            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
+            // message to hide progress bar which probably is created by layout
+            swipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefreshLayout.setRefreshing(savedInstanceState
+                            .getBoolean(STATE_IS_REFRESHING, false));
+                }
+            });
+        }
+    }
+
+    private void setupRecyclerView(final View rootView, final Bundle savedInstanceState) {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        pickerAdapter = new PickerAdapter(getChildFragmentManager(), getActivity());
+        pickerAdapter.setOnPickerListChangeListener(new OnPickerListChangeListener() {
+            @Override
+            public void onPickerListChanged(List<Picker> pickers) {
+                SelectorFragment.this.onPickerListChanged(pickers);
+            }
+        });
+
+        pickerRecyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview_pickers);
+        pickerRecyclerView.setLayoutManager(layoutManager);
+        pickerRecyclerView.setAdapter(pickerAdapter);
+        pickerRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        if (savedInstanceState != null) {
+            pickerAdapter.onRestoreInstanceState(savedInstanceState);
+        } else {
+            selectorPresenter.listPickers();
+        }
+    }
+
     private boolean onMenuItemClick(MenuItem item) {
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
@@ -231,10 +248,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     /* check if organisation unit and program are selected */
     private boolean areAllPickersPresent(List<Picker> pickers) {
         return pickers != null && pickers.size() > 1 &&
-                pickers.get(ORG_UNIT_PICKER_IX) != null &&
-                pickers.get(ORG_UNIT_PICKER_IX).getSelectedChild() != null &&
-                pickers.get(PROGRAM_UNIT_PICKER_IX) != null &&
-                pickers.get(PROGRAM_UNIT_PICKER_IX).getSelectedChild() != null;
+                pickers.get(ORG_UNIT_PICKER_ID) != null &&
+                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null &&
+                pickers.get(PROGRAM_UNIT_PICKER_ID) != null &&
+                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null;
     }
 
     private void showCreateEventButton() {
@@ -288,16 +305,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         private String getOrganisationUnitUid() {
             if (pickers != null && !pickers.isEmpty() &&
-                    pickers.get(ORG_UNIT_PICKER_IX).getSelectedChild() != null) {
-                return pickers.get(ORG_UNIT_PICKER_IX).getSelectedChild().getId();
+                    pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
+                return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getId();
             }
             return null;
         }
 
         private String getProgramUid() {
             if (pickers != null && !pickers.isEmpty() &&
-                    pickers.get(PROGRAM_UNIT_PICKER_IX).getSelectedChild() != null) {
-                return pickers.get(PROGRAM_UNIT_PICKER_IX).getSelectedChild().getId();
+                    pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
+                return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
             }
 
             return null;
