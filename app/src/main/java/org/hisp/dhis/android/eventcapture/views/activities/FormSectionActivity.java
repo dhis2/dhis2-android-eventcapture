@@ -98,73 +98,13 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         // injecting dependencies
         ((EventCaptureApp) getApplication()).createFormComponent().inject(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setHomeButtonEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
-
-        textViewOrganisationUnit = (TextView) findViewById(R.id.textview_organisation_unit);
-        textViewProgram = (TextView) findViewById(R.id.textview_program);
-
-        tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
-        viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
+        setupToolbar();
+        setupLabels();
+        setupViewPager();
+        setupNavigationDrawer();
 
         // start building the form
         formSectionPresenter.createDataEntryForm(getEventUid());
-
-        organisationUnit = getString(R.string.organisation_unit);
-        program = getString(R.string.program);
-
-        sectionsDrawer = (DrawerLayout) findViewById(R.id.drawerlayout_form_sections);
-
-        recyclerViewItemAdapter = new PickerItemAdapter(this);
-        recyclerViewItemAdapter.setOnPickerItemClickListener(new OnPickerItemClickListener() {
-            @Override
-            public void onPickerItemClickListener(Picker selectedPicker) {
-                PagerAdapter pagerAdapter = viewPager.getAdapter();
-
-                if (pagerAdapter != null && (pagerAdapter instanceof FormSectionsAdapter)) {
-                    FormSectionsAdapter sectionsAdapter = (FormSectionsAdapter) pagerAdapter;
-                    List<FormSection> formSections = sectionsAdapter.getData();
-
-                    for (int position = 0; position < formSections.size(); position++) {
-                        FormSection formSection = formSections.get(position);
-
-                        if (formSection.getId().equals(selectedPicker.getId())) {
-                            viewPager.setCurrentItem(position);
-                            break;
-                        }
-                    }
-                }
-
-                sectionsDrawer.closeDrawer(GravityCompat.END);
-            }
-        });
-
-        recyclerViewSections = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
-        if (recyclerViewSections != null) {
-            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-            recyclerViewSections.setLayoutManager(layoutManager);
-            recyclerViewSections.addItemDecoration(new DividerDecoration(
-                    ContextCompat.getDrawable(this, R.drawable.divider)));
-            recyclerViewSections.setAdapter(recyclerViewItemAdapter);
-        }
-
-        sectionFilterEditText = (EditText) findViewById(R.id.edittext_filter_picker_items);
-        if (sectionFilterEditText != null) {
-            sectionFilterEditText.addTextChangedListener(new AbsTextWatcher() {
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    recyclerViewItemAdapter.filter(editable.toString());
-                }
-            });
-        }
     }
 
     @Override
@@ -281,6 +221,80 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
 
         super.onBackPressed();
+    }
+
+    private void setupToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+    }
+
+    private void setupLabels() {
+        textViewOrganisationUnit = (TextView) findViewById(R.id.textview_organisation_unit);
+        textViewProgram = (TextView) findViewById(R.id.textview_program);
+
+        organisationUnit = getString(R.string.organisation_unit);
+        program = getString(R.string.program);
+    }
+
+    private void setupViewPager() {
+        tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
+        viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
+    }
+
+    private void setupNavigationDrawer() {
+        sectionsDrawer = (DrawerLayout) findViewById(R.id.drawerlayout_form_sections);
+
+        recyclerViewItemAdapter = new PickerItemAdapter(this);
+        recyclerViewItemAdapter.setOnPickerItemClickListener(new OnPickerItemClickListener() {
+
+            @Override
+            public void onPickerItemClickListener(Picker selectedPicker) {
+                PagerAdapter pagerAdapter = viewPager.getAdapter();
+
+                if (pagerAdapter != null && (pagerAdapter instanceof FormSectionsAdapter)) {
+                    FormSectionsAdapter sectionsAdapter = (FormSectionsAdapter) pagerAdapter;
+                    List<FormSection> formSections = sectionsAdapter.getData();
+
+                    for (int position = 0; position < formSections.size(); position++) {
+                        FormSection formSection = formSections.get(position);
+
+                        if (formSection.getId().equals(selectedPicker.getId())) {
+                            viewPager.setCurrentItem(position);
+                            break;
+                        }
+                    }
+                }
+
+                sectionsDrawer.closeDrawer(GravityCompat.END);
+            }
+        });
+
+        recyclerViewSections = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
+        if (recyclerViewSections != null) {
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+            recyclerViewSections.setLayoutManager(layoutManager);
+            recyclerViewSections.addItemDecoration(new DividerDecoration(
+                    ContextCompat.getDrawable(this, R.drawable.divider)));
+            recyclerViewSections.setAdapter(recyclerViewItemAdapter);
+        }
+
+        sectionFilterEditText = (EditText) findViewById(R.id.edittext_filter_picker_items);
+        if (sectionFilterEditText != null) {
+            sectionFilterEditText.addTextChangedListener(new AbsTextWatcher() {
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    recyclerViewItemAdapter.filter(editable.toString());
+                }
+            });
+        }
     }
 
     //********************************************************************************
