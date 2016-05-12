@@ -31,10 +31,16 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -84,6 +90,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     // pull-to-refresh
     SwipeRefreshLayout swipeRefreshLayout;
+    BottomSheetBehavior<CardView> bottomSheetBehavior;
+
+
+    CoordinatorLayout coordinatorLayout;
+    CardView bottomSheetView;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -106,7 +117,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        setupToolbar();
+        setupToolbar(view);
+        setupBottomSheet(view, savedInstanceState);
         setupFloatingActionButton(view);
         setupSwipeRefreshLayout(view, savedInstanceState);
         setupRecyclerView(view, savedInstanceState);
@@ -152,16 +164,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 swipeRefreshLayout.setRefreshing(true);
             }
         });
-
-        // lock pickers
     }
 
     @Override
     public void hideProgressBar() {
         logger.d(SelectorFragment.class.getSimpleName(), "hideProgressBar()");
         swipeRefreshLayout.setRefreshing(false);
-
-        // unlock pickers
     }
 
     @Override
@@ -194,13 +202,24 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
-    private void setupToolbar() {
-        if (getParentToolbar() == null) {
-            return;
-        }
+    private void setupToolbar(View view) {
+        Drawable buttonDrawable = DrawableCompat.wrap(ContextCompat
+                .getDrawable(getActivity(), R.drawable.ic_menu));
+        DrawableCompat.setTint(buttonDrawable, ContextCompat
+                .getColor(getContext(), android.R.color.white));
 
-        getParentToolbar().inflateMenu(R.menu.menu_refresh);
-        getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.drawer_item_events);
+        toolbar.inflateMenu(R.menu.menu_refresh);
+        toolbar.setNavigationIcon(buttonDrawable);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleNavigationDrawer();
+            }
+        });
+
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 return SelectorFragment.this.onMenuItemClick(item);
@@ -265,6 +284,20 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
+    private void setupBottomSheet(View view, Bundle savedInstanceState) {
+        coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorlayout_selector);
+        bottomSheetView = (CardView) view.findViewById(R.id.card_view_bottom_sheet);
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView);
+        bottomSheetBehavior.setPeekHeight(getResources()
+                .getDimensionPixelSize(R.dimen.bottomsheet_peek_height));
+        bottomSheetBehavior.setHideable(true);
+
+        if (savedInstanceState == null) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
     private boolean onMenuItemClick(MenuItem item) {
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
@@ -297,6 +330,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void showCreateEventButton() {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+
         if (!createEventButton.isShown()) {
             createEventButton.setVisibility(View.VISIBLE);
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 0, 1);
@@ -310,6 +347,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void hideCreateEventButton() {
+        if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+
         if (createEventButton.isShown()) {
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 1, 0);
             ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 1, 0);

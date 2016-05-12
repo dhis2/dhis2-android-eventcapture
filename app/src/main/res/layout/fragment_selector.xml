@@ -1,4 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
   ~ Copyright (c) 2016, University of Oslo
   ~
   ~ All rights reserved.
@@ -26,16 +28,21 @@
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinatorlayout_selector"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
+
+    <include layout="@layout/toolbar" />
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swiperefreshlayout_selector"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview_pickers"
@@ -47,14 +54,51 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view_bottom_sheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="6dp"
+        app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <org.hisp.dhis.client.sdk.ui.views.FontTextView
+                android:id="@+id/textview_events_count"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/bottomsheet_peek_height"
+                android:padding="@dimen/keyline_default"
+                android:text="Events (72)"
+                android:textSize="18sp"
+                app:font="@string/font_name_regular" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/color_divider" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerview_events"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_create_event"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/keyline_default"
         android:src="@drawable/ic_add"
-        app:elevation="4dp"
+        app:elevation="8dp"
+        app:layout_anchor="@id/card_view_bottom_sheet"
+        app:layout_anchorGravity="right|end"
         app:pressedTranslationZ="8dp" />
 
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

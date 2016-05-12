@@ -31,6 +31,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <dimen name="bottomsheet_peek_height">88dp</dimen>
+
     <dimen name="titlebar_height">56dp</dimen>
     <dimen name="collapsing_toolbar_height">196dp</dimen>
 </resources>
