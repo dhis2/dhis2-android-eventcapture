@@ -31,6 +31,7 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 import android.support.annotation.StringDef;
 
 import org.hisp.dhis.android.eventcapture.views.View;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 
 import java.lang.annotation.Retention;
@@ -55,6 +56,8 @@ public interface SelectorView extends View {
     void showPickers(Picker picker);
 
     void showNoOrganisationUnitsError();
+
+    void navigateToFormSectionActivity(Event event);
 
     String getPickerLabel(@PickerLabelId String pickerLabelId);
 }

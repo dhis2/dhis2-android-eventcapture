@@ -31,12 +31,16 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
+import org.hisp.dhis.client.sdk.android.event.EventInteractor;
+import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -66,11 +70,17 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 public class SelectorPresenterImpl implements SelectorPresenter {
     private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
 
-    private final UserOrganisationUnitInteractor organisationUnitInteractor;
-    private final UserProgramInteractor programInteractor;
+    private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
+    private final UserProgramInteractor userProgramInteractor;
+    private final OrganisationUnitInteractor organisationUnitInteractor;
+    private final ProgramInteractor programInteractor;
+
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
     private final ProgramStageDataElementInteractor programStageDataElementInteractor;
+
+    private final EventInteractor eventInteractor;
+
     private final SyncDateWrapper syncDateWrapper;
     private final Logger logger;
 
@@ -79,17 +89,22 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private SelectorView selectorView;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
-                                 UserProgramInteractor programInteractor,
+                                 UserProgramInteractor userProgramInteractor,
+                                 OrganisationUnitInteractor organisationUnitInteractor,
+                                 ProgramInteractor programInteractor,
                                  ProgramStageInteractor programStageInteractor,
                                  ProgramStageSectionInteractor programStageSectionInteractor,
                                  ProgramStageDataElementInteractor stageDataElementInteractor,
-                                 SyncDateWrapper syncDateWrapper,
+                                 EventInteractor eventInteractor, SyncDateWrapper syncDateWrapper,
                                  Logger logger) {
-        this.organisationUnitInteractor = interactor;
+        this.userOrganisationUnitInteractor = interactor;
+        this.userProgramInteractor = userProgramInteractor;
+        this.organisationUnitInteractor = organisationUnitInteractor;
         this.programInteractor = programInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = programStageSectionInteractor;
         this.programStageDataElementInteractor = stageDataElementInteractor;
+        this.eventInteractor = eventInteractor;
         this.syncDateWrapper = syncDateWrapper;
         this.logger = logger;
 
@@ -125,7 +140,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         }
 
         subscription.add(Observable.zip(
-                organisationUnitInteractor.pull(), programInteractor.pull(),
+                userOrganisationUnitInteractor.pull(), userProgramInteractor.pull(),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
@@ -184,7 +199,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void listPickers() {
         logger.d(TAG, "listPickers()");
-        subscription.add(Observable.zip(organisationUnitInteractor.list(), programInteractor.list(),
+        subscription.add(Observable.zip(userOrganisationUnitInteractor.list(), userProgramInteractor.list(),
                 new Func2<List<OrganisationUnit>, List<Program>, Picker>() {
                     @Override
                     public Picker call(List<OrganisationUnit> units, List<Program> programs) {
@@ -206,6 +221,58 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         throwable.printStackTrace();
                     }
                 }));
+    }
+
+    @Override
+    public void createEvent(final String orgUnitId, final String programId) {
+        final OrganisationUnit orgUnit = new OrganisationUnit();
+        final Program program = new Program();
+
+        orgUnit.setUId(orgUnitId);
+        program.setUId(programId);
+
+        subscription.add(programStageInteractor.list(program)
+                .map(new Func1<List<ProgramStage>, ProgramStage>() {
+                    @Override
+                    public ProgramStage call(List<ProgramStage> stages) {
+                        if (stages != null && !stages.isEmpty()) {
+                            return stages.get(0);
+                        }
+
+                        return null;
+                    }
+                })
+                .map(new Func1<ProgramStage, Event>() {
+                    @Override
+                    public Event call(ProgramStage programStage) {
+                        if (programStage == null) {
+                            throw new IllegalArgumentException("In order to create event, " +
+                                    "we need program stage to be in place");
+                        }
+
+                        Event event = eventInteractor.create(orgUnit, program,
+                                programStage, Event.EventStatus.ACTIVE);
+                        eventInteractor.save(event).toBlocking().first();
+
+                        return event;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        if (selectorView != null) {
+                            selectorView.navigateToFormSectionActivity(event);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Failed creating event", throwable);
+                    }
+                })
+        );
     }
 
     /*

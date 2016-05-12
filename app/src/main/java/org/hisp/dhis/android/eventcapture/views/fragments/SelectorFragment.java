@@ -51,6 +51,7 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
@@ -151,12 +152,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 swipeRefreshLayout.setRefreshing(true);
             }
         });
+
+        // lock pickers
     }
 
     @Override
     public void hideProgressBar() {
         logger.d(SelectorFragment.class.getSimpleName(), "hideProgressBar()");
         swipeRefreshLayout.setRefreshing(false);
+
+        // unlock pickers
     }
 
     @Override
@@ -167,6 +172,13 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void showNoOrganisationUnitsError() {
         pickerAdapter.swapData(null);
+    }
+
+    @Override
+    public void navigateToFormSectionActivity(Event event) {
+        logger.d(TAG, "EventCreated: " + event.getUId());
+
+        // FormSectionActivity.navigateTo(getActivity(), orgUnitUid, programUid);
     }
 
     @Override
@@ -326,7 +338,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             String programUid = getProgramUid();
 
             if (orgUnitUid != null && programUid != null) {
-                FormSectionActivity.navigateTo(getActivity(), orgUnitUid, programUid);
+                selectorPresenter.createEvent(orgUnitUid, programUid);
             }
         }
 

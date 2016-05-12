@@ -45,6 +45,7 @@ import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
@@ -197,6 +198,17 @@ public class UserModule {
     }
 
     @Provides
+    @Nullable
+    @PerUser
+    public EventInteractor providesEventInteractor() {
+        if (D2.isConfigured()) {
+            return D2.events();
+        }
+
+        return null;
+    }
+
+    @Provides
     @PerUser
     public LauncherPresenter providesLauncherPresenter(
             @Nullable CurrentUserInteractor accountInteractor) {
@@ -221,16 +233,21 @@ public class UserModule {
     @Provides
     @PerUser
     public SelectorPresenter providesSelectorPresenter(
-            @Nullable UserOrganisationUnitInteractor interactor,
-            @Nullable UserProgramInteractor programInteractor,
+            @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
+            @Nullable UserProgramInteractor userProgramInteractor,
+            @Nullable OrganisationUnitInteractor organisationUnitInteractor,
+            @Nullable ProgramInteractor programInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
+            @Nullable EventInteractor eventInteractor,
             SyncDateWrapper syncDateWrapper, Logger logger) {
-        return new SelectorPresenterImpl(interactor, programInteractor, programStageInteractor,
-                programStageSectionInteractor, programStageDataElementInteractor,
-                syncDateWrapper, logger);
 
+        return new SelectorPresenterImpl(userOrganisationUnitInteractor,
+                userProgramInteractor, organisationUnitInteractor,
+                programInteractor, programStageInteractor,
+                programStageSectionInteractor, programStageDataElementInteractor,
+                eventInteractor, syncDateWrapper, logger);
     }
 
     @Provides

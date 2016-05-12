@@ -32,4 +32,6 @@ public interface SelectorPresenter extends Presenter {
     void sync();
 
     void listPickers();
+
+    void createEvent(String organisationUnitId, String programId);
 }
