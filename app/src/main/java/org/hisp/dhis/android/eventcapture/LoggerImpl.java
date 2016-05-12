@@ -41,51 +41,51 @@ public class LoggerImpl implements Logger {
 
     @Override
     public void v(String tag, String message) {
-        Timber.v(message);
+        Timber.v(tag, message);
     }
 
     @Override
     public void v(String tag, String message, Throwable throwable) {
-        Timber.v(throwable, message);
+        Timber.v(throwable, tag, message);
     }
 
     @Override
     public void d(String tag, String message) {
-        Timber.d(message);
+        Timber.d(tag, message);
     }
 
     @Override
     public void d(String tag, String message, Throwable throwable) {
-        Timber.d(throwable, message);
+        Timber.d(throwable, tag, message);
     }
 
     @Override
     public void i(String tag, String message) {
-        Timber.i(message);
+        Timber.i(tag, message);
     }
 
     @Override
     public void i(String tag, String message, Throwable throwable) {
-        Timber.i(throwable, message);
+        Timber.i(throwable, tag, message);
     }
 
     @Override
     public void w(String tag, String message) {
-        Timber.w(message);
+        Timber.w(tag, message);
     }
 
     @Override
     public void w(String tag, String message, Throwable throwable) {
-        Timber.w(throwable, message);
+        Timber.w(throwable, tag, message);
     }
 
     @Override
     public void e(String tag, String message) {
-        Timber.e(message);
+        Timber.e(tag, message);
     }
 
     @Override
     public void e(String tag, String message, Throwable throwable) {
-        Timber.e(throwable, message);
+        Timber.e(throwable, tag, message);
     }
 }

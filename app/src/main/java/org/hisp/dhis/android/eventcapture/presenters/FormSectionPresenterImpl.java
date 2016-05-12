@@ -2,10 +2,12 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
+import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -18,6 +20,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -34,6 +37,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     private final ProgramInteractor programInteractor;
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
+
+    private final EventInteractor eventInteractor;
+
     private final Logger logger;
 
     private FormSectionView formSectionView;
@@ -43,11 +49,12 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                     ProgramInteractor programInteractor,
                                     ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
-                                    Logger logger) {
+                                    EventInteractor eventInteractor, Logger logger) {
         this.organisationUnitInteractor = organisationUnitInteractor;
         this.programInteractor = programInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
+        this.eventInteractor = eventInteractor;
         this.logger = logger;
     }
 
@@ -67,16 +74,32 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     }
 
     @Override
-    public void createDataEntryForm(final String organisationUnitId, final String programId) {
+    public void createDataEntryForm(final String eventUid) {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
             subscription = null;
         }
 
         subscription = new CompositeSubscription();
-        subscription.add(showTitle(organisationUnitId));
-        subscription.add(showSubtitle(programId));
-        subscription.add(showFormSections(programId));
+        subscription.add(eventInteractor.get(eventUid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        isNull(event, String.format("Event with uid %s does not exist", eventUid));
+
+                        // fire next operations
+                        subscription.add(showTitle(event.getOrgUnit()));
+                        subscription.add(showSubtitle(event.getProgram()));
+                        subscription.add(showFormSections(event.getProgram()));
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, null, throwable);
+                    }
+                }));
     }
 
     private Subscription showTitle(final String organisationUnitId) {

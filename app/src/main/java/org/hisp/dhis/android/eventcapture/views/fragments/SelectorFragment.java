@@ -176,16 +176,15 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void navigateToFormSectionActivity(Event event) {
-        logger.d(TAG, "EventCreated: " + event.getUId());
-
-        // FormSectionActivity.navigateTo(getActivity(), orgUnitUid, programUid);
+        logger.d(TAG, String.format("Event with uid=%s is created", event.getUId()));
+        FormSectionActivity.navigateTo(getActivity(), event.getUId());
     }
 
     @Override
     public String getPickerLabel(@PickerLabelId String pickerLabelId) {
         isNull(pickerLabelId, "pickerLabelId must not be null");
 
-        switch(pickerLabelId) {
+        switch (pickerLabelId) {
             case ID_CHOOSE_ORGANISATION_UNIT:
                 return getString(R.string.choose_organisation_unit);
             case ID_CHOOSE_PROGRAM:

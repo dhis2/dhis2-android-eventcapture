@@ -48,12 +48,9 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 
-// TODO disable filtering in cases when we don't have sections
 // TODO check if configuration changes are handled properly
-// TODO solve performance issues with RX
 public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
-    private static final String ARG_ORGANISATION_UNIT_ID = "arg:organisationUnitId";
-    private static final String ARG_PROGRAM_ID = "arg:programId";
+    private static final String ARG_EVENT_UID = "arg:eventUid";
 
     @Inject
     FormSectionPresenter formSectionPresenter;
@@ -76,21 +73,21 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     String organisationUnit;
     String program;
 
-    public static void navigateTo(Activity activity, String organisationUnitId, String programId) {
+    public static void navigateTo(Activity activity, String eventUid) {
         isNull(activity, "activity must not be null");
 
         Intent intent = new Intent(activity, FormSectionActivity.class);
-        intent.putExtra(ARG_ORGANISATION_UNIT_ID, organisationUnitId);
-        intent.putExtra(ARG_PROGRAM_ID, programId);
+        intent.putExtra(ARG_EVENT_UID, eventUid);
         activity.startActivity(intent);
     }
 
-    private String getOrganisationUnitId() {
-        return getIntent().getExtras().getString(ARG_ORGANISATION_UNIT_ID, null);
-    }
+    private String getEventUid() {
+        if (getIntent().getExtras() == null || getIntent().getExtras()
+                .getString(ARG_EVENT_UID, null) == null) {
+            throw new IllegalArgumentException("You must pass event uid in intent extras");
+        }
 
-    private String getProgramId() {
-        return getIntent().getExtras().getString(ARG_PROGRAM_ID, null);
+        return getIntent().getExtras().getString(ARG_EVENT_UID, null);
     }
 
     @Override
@@ -117,7 +114,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
 
         // start building the form
-        formSectionPresenter.createDataEntryForm(getOrganisationUnitId(), getProgramId());
+        formSectionPresenter.createDataEntryForm(getEventUid());
 
         organisationUnit = getString(R.string.organisation_unit);
         program = getString(R.string.program);
@@ -192,7 +189,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_form_sections, menu);
+        if (sectionsDrawer.getDrawerLockMode(GravityCompat.END) !=
+                DrawerLayout.LOCK_MODE_LOCKED_CLOSED) {
+            getMenuInflater().inflate(R.menu.menu_form_sections, menu);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -223,6 +224,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
         // hide tab layout
         tabLayout.setVisibility(View.GONE);
+
+        // if we don't have sections, we don't need to show navigation drawer
+        sectionsDrawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
+
+        // we also need to hide filter icon
+        supportInvalidateOptionsMenu();
     }
 
     @Override
@@ -276,7 +283,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         super.onBackPressed();
     }
 
-    //**********************************************************************************************
+    //********************************************************************************
     /*
     *
     * This adapter exists only in order to satisfy cases when there is no
@@ -313,7 +320,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
-    //**********************************************************************************************
+    //********************************************************************************
     private static class FormSectionsAdapter extends FragmentStatePagerAdapter {
         private final List<FormSection> formSections;
 
