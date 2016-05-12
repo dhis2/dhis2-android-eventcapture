@@ -72,7 +72,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/bottomsheet_peek_height"
                 android:padding="@dimen/keyline_default"
-                android:text="Events (72)"
                 android:textSize="18sp"
                 app:font="@string/font_name_regular" />
 

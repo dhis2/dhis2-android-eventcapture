@@ -36,6 +36,7 @@ import org.hisp.dhis.client.sdk.ui.models.Picker;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 public interface SelectorView extends View {
     @Retention(RetentionPolicy.SOURCE)
@@ -54,6 +55,8 @@ public interface SelectorView extends View {
     void hideProgressBar();
 
     void showPickers(Picker picker);
+
+    void showEvents(List<Event> events);
 
     void showNoOrganisationUnitsError();
 

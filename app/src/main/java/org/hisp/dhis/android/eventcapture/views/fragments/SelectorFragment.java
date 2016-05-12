@@ -51,6 +51,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
+import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
@@ -65,6 +66,7 @@ import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -95,6 +97,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     CoordinatorLayout coordinatorLayout;
     CardView bottomSheetView;
+    TextView eventsCounts;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -178,6 +181,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     @Override
+    public void showEvents(List<Event> events) {
+        int eventCount = 0;
+        if (events != null && !events.isEmpty()) {
+            eventCount = events.size();
+        }
+
+        eventsCounts.setText(String.format(Locale.getDefault(), "%s (%d)",
+                getString(R.string.drawer_item_events), eventCount));
+    }
+
+    @Override
     public void showNoOrganisationUnitsError() {
         pickerAdapter.swapData(null);
     }
@@ -248,7 +262,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             }
         });
 
-
         if (savedInstanceState != null) {
             swipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -287,6 +300,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     private void setupBottomSheet(View view, Bundle savedInstanceState) {
         coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorlayout_selector);
         bottomSheetView = (CardView) view.findViewById(R.id.card_view_bottom_sheet);
+        eventsCounts = (TextView) view.findViewById(R.id.textview_events_count);
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView);
         bottomSheetBehavior.setPeekHeight(getResources()
@@ -315,6 +329,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         onCreateEventButtonClickListener.setPickers(pickers);
         if (areAllPickersPresent(pickers)) {
             showCreateEventButton();
+
+            // load existing events
+            selectorPresenter.listEvents(getOrganisationUnitUid(pickers), getProgramUid(pickers));
         } else {
             hideCreateEventButton();
         }
@@ -374,8 +391,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         @Override
         public void onClick(View v) {
-            String orgUnitUid = getOrganisationUnitUid();
-            String programUid = getProgramUid();
+            String orgUnitUid = getOrganisationUnitUid(pickers);
+            String programUid = getProgramUid(pickers);
 
             if (orgUnitUid != null && programUid != null) {
                 selectorPresenter.createEvent(orgUnitUid, programUid);
@@ -385,22 +402,22 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         public void setPickers(List<Picker> pickers) {
             this.pickers = pickers;
         }
+    }
 
-        private String getOrganisationUnitUid() {
-            if (pickers != null && !pickers.isEmpty() &&
-                    pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
-                return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getId();
-            }
-            return null;
+    private static String getOrganisationUnitUid(List<Picker> pickers) {
+        if (pickers != null && !pickers.isEmpty() &&
+                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getId();
+        }
+        return null;
+    }
+
+    private static String getProgramUid(List<Picker> pickers) {
+        if (pickers != null && !pickers.isEmpty() &&
+                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
         }
 
-        private String getProgramUid() {
-            if (pickers != null && !pickers.isEmpty() &&
-                    pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
-                return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
-            }
-
-            return null;
-        }
+        return null;
     }
 }

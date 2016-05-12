@@ -224,6 +224,32 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     }
 
     @Override
+    public void listEvents(String organisationUnitId, String programId) {
+        OrganisationUnit orgUnit = new OrganisationUnit();
+        Program program = new Program();
+
+        orgUnit.setUId(organisationUnitId);
+        program.setUId(programId);
+
+        subscription.add(eventInteractor.list(orgUnit, program)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<Event>>() {
+                    @Override
+                    public void call(List<Event> events) {
+                        if (selectorView != null) {
+                            selectorView.showEvents(events);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Failed loading events", throwable);
+                    }
+                }));
+    }
+
+    @Override
     public void createEvent(final String orgUnitId, final String programId) {
         final OrganisationUnit orgUnit = new OrganisationUnit();
         final Program program = new Program();

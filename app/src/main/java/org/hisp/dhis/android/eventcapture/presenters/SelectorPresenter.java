@@ -33,5 +33,7 @@ public interface SelectorPresenter extends Presenter {
 
     void listPickers();
 
+    void listEvents(String organisationUnitId, String programId);
+
     void createEvent(String organisationUnitId, String programId);
 }
