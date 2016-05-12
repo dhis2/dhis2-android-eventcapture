@@ -123,13 +123,13 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         formSectionPresenter.createDataEntryForm(getEventUid());
     }
 
-    @Override
-    protected void onDestroy() {
-        // release component
-        ((EventCaptureApp) getApplication()).releaseFormComponent();
-
-        super.onDestroy();
-    }
+//    @Override
+//    protected void onDestroy() {
+//        // release component
+//        // ((EventCaptureApp) getApplication()).releaseFormComponent();
+//
+//        super.onDestroy();
+//    }
 
     @Override
     protected void onResume() {

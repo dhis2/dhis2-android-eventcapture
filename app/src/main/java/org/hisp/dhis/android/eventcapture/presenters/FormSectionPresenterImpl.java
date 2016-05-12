@@ -29,6 +29,8 @@ import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
+
+// TODO cache metadata and data in memory
 public class FormSectionPresenterImpl implements FormSectionPresenter {
     private static final String TAG = FormSectionPresenterImpl.class.getSimpleName();
 
