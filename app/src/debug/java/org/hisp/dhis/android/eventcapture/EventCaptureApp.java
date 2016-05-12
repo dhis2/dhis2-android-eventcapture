@@ -49,6 +49,7 @@ public final class EventCaptureApp extends Application {
 
     UserComponent userComponent;
 
+    // we need to preserve this component unless someone explicitly asks to remove it
     FormComponent formComponent;
 
     @Override

@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
+import org.hisp.dhis.android.eventcapture.FormComponent;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
@@ -95,8 +96,23 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filter_sections);
 
-        // injecting dependencies
-        ((EventCaptureApp) getApplication()).createFormComponent().inject(this);
+        FormComponent formComponent = ((EventCaptureApp) getApplication()).getFormComponent();
+
+        // first time activity is created
+        if (savedInstanceState == null) {
+            // it means we found old component and we have to release it
+            if (formComponent != null) {
+                // create new instance of component
+                ((EventCaptureApp) getApplication()).releaseFormComponent();
+            }
+
+            formComponent = ((EventCaptureApp) getApplication()).createFormComponent();
+        } else {
+            formComponent = ((EventCaptureApp) getApplication()).getFormComponent();
+        }
+
+        // inject dependencies
+        formComponent.inject(this);
 
         setupToolbar();
         setupLabels();
