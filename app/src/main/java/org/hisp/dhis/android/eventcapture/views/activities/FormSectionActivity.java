@@ -20,13 +20,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.Html;
-import android.text.Spanned;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
@@ -57,8 +54,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     FormSectionPresenter formSectionPresenter;
 
     // collapsing toolbar views
-    TextView textViewOrganisationUnit;
-    TextView textViewProgram;
+    // TextView textViewOrganisationUnit;
+    // TextView textViewProgram;
 
     // Drawer layout with section filtering
     DrawerLayout sectionsDrawer;
@@ -71,8 +68,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     ViewPager viewPager;
 
     // prompts
-    String organisationUnit;
-    String program;
+    // String organisationUnit;
+    // String program;
 
     public static void navigateTo(Activity activity, String eventUid) {
         isNull(activity, "activity must not be null");
@@ -217,16 +214,16 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     @Override
     public void showTitle(String title) {
-        Spanned spannedTitle = Html.fromHtml(String.format(
-                "<b>%s</b>:<br/><u>%s</u>", organisationUnit, title));
-        textViewOrganisationUnit.setText(spannedTitle);
+        // Spanned spannedTitle = Html.fromHtml(String.format(
+        //         "<b>%s</b>:<br/><u>%s</u>", organisationUnit, title));
+        // textViewOrganisationUnit.setText(spannedTitle);
     }
 
     @Override
     public void showSubtitle(String subtitle) {
-        Spanned spannedSubtitle = Html.fromHtml(String.format(
-                "<b>%s</b>:<br/><u>%s</u>", program, subtitle));
-        textViewProgram.setText(spannedSubtitle);
+        // Spanned spannedSubtitle = Html.fromHtml(String.format(
+        //         "<b>%s</b>:<br/><u>%s</u>", program, subtitle));
+        // textViewProgram.setText(spannedSubtitle);
     }
 
     @Override
@@ -251,11 +248,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     private void setupLabels() {
-        textViewOrganisationUnit = (TextView) findViewById(R.id.textview_organisation_unit);
-        textViewProgram = (TextView) findViewById(R.id.textview_program);
-
-        organisationUnit = getString(R.string.organisation_unit);
-        program = getString(R.string.program);
+        // textViewOrganisationUnit = (TextView) findViewById(R.id.textview_organisation_unit);
+        // textViewProgram = (TextView) findViewById(R.id.textview_program);
+        // organisationUnit = getString(R.string.organisation_unit);
+        // program = getString(R.string.program);
     }
 
     private void setupViewPager() {
