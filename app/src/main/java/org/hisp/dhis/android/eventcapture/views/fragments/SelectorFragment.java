@@ -94,10 +94,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     SwipeRefreshLayout swipeRefreshLayout;
     BottomSheetBehavior<CardView> bottomSheetBehavior;
 
-
     CoordinatorLayout coordinatorLayout;
     CardView bottomSheetView;
-    TextView eventsCounts;
+
+    TextView selectedOrganisationUnit;
+    TextView selectedProgram;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -182,13 +183,13 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void showEvents(List<Event> events) {
-        int eventCount = 0;
-        if (events != null && !events.isEmpty()) {
-            eventCount = events.size();
-        }
-
-        eventsCounts.setText(String.format(Locale.getDefault(), "%s (%d)",
-                getString(R.string.drawer_item_events), eventCount));
+//        int eventCount = 0;
+//        if (events != null && !events.isEmpty()) {
+//            eventCount = events.size();
+//        }
+//
+//        eventsCounts.setText(String.format(Locale.getDefault(), "%s (%d)",
+//                getString(R.string.drawer_item_events), eventCount));
     }
 
     @Override
@@ -300,12 +301,13 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     private void setupBottomSheet(View view, Bundle savedInstanceState) {
         coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorlayout_selector);
         bottomSheetView = (CardView) view.findViewById(R.id.card_view_bottom_sheet);
-        eventsCounts = (TextView) view.findViewById(R.id.textview_events_count);
+
+        selectedOrganisationUnit = (TextView) view.findViewById(R.id.textview_organisation_unit);
+        selectedProgram = (TextView) view.findViewById(R.id.textview_program);
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView);
         bottomSheetBehavior.setPeekHeight(getResources()
                 .getDimensionPixelSize(R.dimen.bottomsheet_peek_height));
-        bottomSheetBehavior.setHideable(true);
 
         if (savedInstanceState == null) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -347,10 +349,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void showCreateEventButton() {
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_HIDDEN) {
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
-
         if (!createEventButton.isShown()) {
             createEventButton.setVisibility(View.VISIBLE);
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 0, 1);
@@ -364,10 +362,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void hideCreateEventButton() {
-        if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        }
-
         if (createEventButton.isShown()) {
             ObjectAnimator scaleX = ObjectAnimator.ofFloat(createEventButton, "scaleX", 1, 0);
             ObjectAnimator scaleY = ObjectAnimator.ofFloat(createEventButton, "scaleY", 1, 0);
