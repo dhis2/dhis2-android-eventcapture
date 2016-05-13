@@ -10,22 +10,15 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
@@ -33,11 +26,9 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 import org.hisp.dhis.client.sdk.ui.adapters.OnPickerItemClickListener;
-import org.hisp.dhis.client.sdk.ui.adapters.PickerItemAdapter;
+import org.hisp.dhis.client.sdk.ui.fragments.FilterableDialogFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
-import org.hisp.dhis.client.sdk.ui.views.AbsTextWatcher;
-import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +53,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     TextView textViewOrganisationUnit;
     TextView textViewProgram;
 
-    // Drawer layout with section filtering
-    DrawerLayout sectionsDrawer;
-    EditText sectionFilterEditText;
-    RecyclerView recyclerViewSections;
-    PickerItemAdapter recyclerViewItemAdapter;
+    //local storage for:
+    Picker formSectionsPicker;
 
     // section tabs and view pager
     TabLayout tabLayout;
@@ -122,53 +110,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         organisationUnit = getString(R.string.organisation_unit);
         program = getString(R.string.program);
 
-        sectionsDrawer = (DrawerLayout) findViewById(R.id.drawerlayout_form_sections);
-
-        recyclerViewItemAdapter = new PickerItemAdapter(this);
-        recyclerViewItemAdapter.setOnPickerItemClickListener(new OnPickerItemClickListener() {
-            @Override
-            public void onPickerItemClickListener(Picker selectedPicker) {
-                PagerAdapter pagerAdapter = viewPager.getAdapter();
-
-                if (pagerAdapter != null && (pagerAdapter instanceof FormSectionsAdapter)) {
-                    FormSectionsAdapter sectionsAdapter = (FormSectionsAdapter) pagerAdapter;
-                    List<FormSection> formSections = sectionsAdapter.getData();
-
-                    for (int position = 0; position < formSections.size(); position++) {
-                        FormSection formSection = formSections.get(position);
-
-                        if (formSection.getId().equals(selectedPicker.getId())) {
-                            viewPager.setCurrentItem(position);
-                            break;
-                        }
-                    }
-                }
-
-                sectionsDrawer.closeDrawer(GravityCompat.END);
-            }
-        });
-
-        recyclerViewSections = (RecyclerView) findViewById(R.id.recyclerview_sectionfilter);
-        if (recyclerViewSections != null) {
-            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-            recyclerViewSections.setLayoutManager(layoutManager);
-            recyclerViewSections.addItemDecoration(new DividerDecoration(
-                    ContextCompat.getDrawable(this, R.drawable.divider)));
-            recyclerViewSections.setAdapter(recyclerViewItemAdapter);
-        }
-
-        sectionFilterEditText = (EditText) findViewById(R.id.edittext_filter_picker_items);
-        if (sectionFilterEditText != null) {
-            sectionFilterEditText.addTextChangedListener(new AbsTextWatcher() {
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    recyclerViewItemAdapter.filter(editable.toString());
-                }
-            });
-        }
+        // attach listener if dialog opened (post-configuration change)
+        attachListenerToExistingFragment();
     }
+
 
     @Override
     protected void onDestroy() {
@@ -204,7 +149,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 return true;
             }
             case R.id.filter_button:
-                sectionsDrawer.openDrawer(GravityCompat.END);
+                showFilterableDialog(formSectionsPicker);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -240,16 +185,25 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         tabLayout.setupWithViewPager(viewPager);
     }
 
-    @Override
-    public void showDrawerSections(Picker picker) {
-        recyclerViewItemAdapter.swapData(picker);
-        recyclerViewSections.setAdapter(recyclerViewItemAdapter);
+    private void showFilterableDialog(Picker picker) {
+        FilterableDialogFragment dialogFragment = FilterableDialogFragment.newInstance(picker);
+        dialogFragment.setOnPickerItemClickListener(new OnSearchSectionsClickListener());
+        dialogFragment.show(getSupportFragmentManager(), FilterableDialogFragment.TAG);
+    }
 
-        // in case if configuration change happened and we already had filter string set
-        // to field, we have to perform filtering afterwards
-        if (!isEmpty(sectionFilterEditText.getText())) {
-            recyclerViewItemAdapter.filter(sectionFilterEditText.getText().toString());
+    @Override
+    public void setFormSectionsPicker(Picker picker) {
+        formSectionsPicker = picker;
+    }
+
+    private void attachListenerToExistingFragment() {
+        FilterableDialogFragment dialogFragment = (FilterableDialogFragment) getSupportFragmentManager().findFragmentByTag(FilterableDialogFragment.TAG);
+        // if we don't have fragment attached to activity,
+        // we don't want to do anything else
+        if (dialogFragment == null) {
+            return;
         }
+        dialogFragment.setOnPickerItemClickListener(new OnSearchSectionsClickListener());
     }
 
     @Override
@@ -268,12 +222,29 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     @Override
     public void onBackPressed() {
-        if (sectionsDrawer.isDrawerOpen(GravityCompat.END)) {
-            sectionsDrawer.closeDrawer(GravityCompat.END);
-            return;
-        }
-
         super.onBackPressed();
+    }
+
+    //**********************************************************************************************
+    private class OnSearchSectionsClickListener implements OnPickerItemClickListener {
+        @Override
+        public void onPickerItemClickListener(Picker selectedPicker) {
+            PagerAdapter pagerAdapter = viewPager.getAdapter();
+
+            if (pagerAdapter != null && (pagerAdapter instanceof FormSectionsAdapter)) {
+                FormSectionsAdapter sectionsAdapter = (FormSectionsAdapter) pagerAdapter;
+                List<FormSection> formSections = sectionsAdapter.getData();
+
+                for (int position = 0; position < formSections.size(); position++) {
+                    FormSection formSection = formSections.get(position);
+
+                    if (formSection.getId().equals(selectedPicker.getId())) {
+                        viewPager.setCurrentItem(position);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     //**********************************************************************************************

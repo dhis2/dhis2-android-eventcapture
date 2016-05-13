@@ -142,8 +142,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                 .list(programStage).toBlocking().first();
 
 
-                        Picker picker = Picker.create(programStage.getUId(),
-                                programStage.getDisplayName());
+                        Picker picker = Picker.create(programStage.getUId(), "Choose section");
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
                         if (stageSections != null && !stageSections.isEmpty()) {
@@ -168,7 +167,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                 formSectionView.showFormDefaultSection(results.getKey().getId());
                             } else {
                                 formSectionView.showFormSections(results.getValue());
-                                formSectionView.showDrawerSections(results.getKey());
+                                formSectionView.setFormSectionsPicker(results.getKey());
                             }
                         }
                     }

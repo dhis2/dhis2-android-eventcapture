@@ -20,7 +20,7 @@ public interface FormSectionView extends View {
      */
     void showFormSections(List<FormSection> formSections);
 
-    void showDrawerSections(Picker picker);
+    void setFormSectionsPicker(Picker picker);
 
     void showTitle(String title);
 
