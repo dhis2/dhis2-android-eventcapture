@@ -8,7 +8,6 @@ import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
@@ -91,9 +90,8 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         isNull(event, String.format("Event with uid %s does not exist", eventUid));
 
                         // fire next operations
-                        subscription.add(showTitle(event.getOrgUnit()));
-                        subscription.add(showSubtitle(event.getProgram()));
-                        subscription.add(showFormSections(event.getProgram()));
+                        subscription.add(showFormPickers(event));
+                        subscription.add(showFormSections(event));
                     }
                 }, new Action1<Throwable>() {
                     @Override
@@ -103,49 +101,66 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 }));
     }
 
-    private Subscription showTitle(final String organisationUnitId) {
-        return organisationUnitInteractor.get(organisationUnitId)
+    private Subscription showFormPickers(final Event event) {
+        final Program program = new Program();
+        program.setUId(event.getProgram());
+
+        return programStageInteractor.list(program)
+                .map(new Func1<List<ProgramStage>, ProgramStage>() {
+                    @Override
+                    public ProgramStage call(List<ProgramStage> stages) {
+                        // since this form is intended to be used in event capture
+                        // and programs for event capture apps consist only from one
+                        // and only one program stage, we can just retrieve it from the list
+                        if (stages == null || stages.isEmpty()) {
+                            logger.e(TAG, "Form construction failed. No program " +
+                                    "stages are assigned to given program: " + program.getUId());
+                            return null;
+                        }
+
+                        return stages.get(0);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<OrganisationUnit>() {
+                .subscribe(new Action1<ProgramStage>() {
                     @Override
-                    public void call(OrganisationUnit organisationUnit) {
-                        if (formSectionView != null && organisationUnit != null) {
-                            formSectionView.showTitle(organisationUnit.getDisplayName());
+                    public void call(ProgramStage programStage) {
+                        if (formSectionView != null) {
+                            String eventDate = event.getEventDate() != null ?
+                                    event.getEventDate().toString() : "";
+                            formSectionView.showReportDatePicker(
+                                    programStage.getReportDateDescription(), eventDate);
+
+                            if (programStage.isCaptureCoordinates()) {
+                                String latitude = null;
+                                String longitude = null;
+
+                                if (event.getCoordinate() != null &&
+                                        event.getCoordinate().getLatitude() != null) {
+                                    latitude = String.valueOf(event.getCoordinate().getLatitude());
+                                }
+
+                                if (event.getCoordinate() != null &&
+                                        event.getCoordinate().getLongitude() != null) {
+                                    longitude = String.valueOf(event.getCoordinate().getLongitude());
+                                }
+
+                                formSectionView.showCoordinatesPicker(latitude, longitude);
+                            }
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "OrganisationUnit with id: " + organisationUnitId +
-                                " was not found", throwable);
+                        logger.e(TAG, "Failed to fetch program stage", throwable);
                     }
                 });
     }
 
-    private Subscription showSubtitle(final String programId) {
-        return programInteractor.get(programId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Program>() {
-                    @Override
-                    public void call(Program program) {
-                        if (formSectionView != null && program != null) {
-                            formSectionView.showSubtitle(program.getDisplayName());
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        logger.e(TAG, "Program with id: " + programId +
-                                " was not found", throwable);
-                    }
-                });
-    }
-
-    private Subscription showFormSections(final String programId) {
-        Program program = new Program();
-        program.setUId(programId);
+    private Subscription showFormSections(final Event event) {
+        final Program program = new Program();
+        program.setUId(event.getProgram());
 
         return programStageInteractor.list(program)
                 .map(new Func1<List<ProgramStage>, SimpleEntry<Picker, List<FormSection>>>() {
@@ -157,7 +172,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         // and only one program stage, we can just retrieve it from the list
                         if (stages == null || stages.isEmpty()) {
                             logger.e(TAG, "Form construction failed. No program " +
-                                    "stages are assigned to given program: " + programId);
+                                    "stages are assigned to given program: " + program.getUId());
                             return null;
                         }
 
@@ -166,7 +181,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                 .list(programStage).toBlocking().first();
 
 
+                        // TODO remove hardcoded prompt
                         Picker picker = Picker.create(programStage.getUId(), "Choose section");
+
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
                         if (stageSections != null && !stageSections.isEmpty()) {
