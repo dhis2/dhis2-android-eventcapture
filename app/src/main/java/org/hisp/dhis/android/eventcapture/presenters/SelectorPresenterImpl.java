@@ -240,10 +240,20 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     public List<ReportEntity> call(List<Event> events) {
                         List<ReportEntity> reportEntities = new ArrayList<>();
 
-                        for (Event event: events) {
+                        for (int position = 0; position < events.size(); position++) {
+                            Event event = events.get(position);
+
+                            ReportEntity.Status status;
+                            if (position % 3 == 0) {
+                                status = ReportEntity.Status.SENT;
+                            } else if (position % 2 == 0) {
+                                status = ReportEntity.Status.OFFLINE;
+                            } else {
+                                status = ReportEntity.Status.ERROR;
+                            }
+
                             reportEntities.add(new ReportEntity(
-                                    event.getUId(), ReportEntity.Status.SENT,
-                                    "Some event is here",
+                                    event.getUId(), status, "Some event is here",
                                     "Another important line which describes something",
                                     "One more line with some information"));
                         }

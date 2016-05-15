@@ -1,7 +1,9 @@
 package org.hisp.dhis.android.eventcapture.views.adapters;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -73,8 +75,15 @@ public class ReportEntityAdapter extends RecyclerView.Adapter {
         final TextView lineOne;
         final TextView lineTwo;
         final TextView lineThree;
-
         final OnRecyclerViewItemClickListener onRecyclerViewItemClickListener;
+
+        final Drawable drawableSent;
+        final Drawable drawableOffline;
+        final Drawable drawableError;
+
+        final int colorSent;
+        final int colorOffline;
+        final int colorError;
 
         public ReportEntityViewHolder(View itemView) {
             super(itemView);
@@ -92,10 +101,38 @@ public class ReportEntityAdapter extends RecyclerView.Adapter {
 
             onRecyclerViewItemClickListener = new OnRecyclerViewItemClickListener();
             itemView.setOnClickListener(onRecyclerViewItemClickListener);
+
+            Context context = itemView.getContext();
+
+            drawableSent = ContextCompat.getDrawable(context, R.drawable.ic_sent);
+            drawableOffline = ContextCompat.getDrawable(context, R.drawable.ic_offline);
+            drawableError = ContextCompat.getDrawable(context, R.drawable.ic_error);
+
+            colorSent = ContextCompat.getColor(context, R.color.color_material_green_default);
+            colorOffline = ContextCompat.getColor(context, R.color.color_accent_default);
+            colorError = ContextCompat.getColor(context, R.color.color_material_red_default);
         }
 
         public void update(ReportEntity reportEntity) {
             onRecyclerViewItemClickListener.setReportEntity(reportEntity);
+
+            switch (reportEntity.getStatus()) {
+                case SENT: {
+                    statusBackground.setFillColor(colorSent);
+                    statusIcon.setImageDrawable(drawableSent);
+                    break;
+                }
+                case OFFLINE: {
+                    statusBackground.setFillColor(colorOffline);
+                    statusIcon.setImageDrawable(drawableOffline);
+                    break;
+                }
+                case ERROR: {
+                    statusBackground.setFillColor(colorError);
+                    statusIcon.setImageDrawable(drawableError);
+                    break;
+                }
+            }
 
             lineOne.setText(reportEntity.getLineOne());
             lineTwo.setText(reportEntity.getLineTwo());
