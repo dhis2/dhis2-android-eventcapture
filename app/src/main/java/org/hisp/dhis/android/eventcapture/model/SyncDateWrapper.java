@@ -14,8 +14,11 @@ public class SyncDateWrapper {
     private static final long DAYS_OLD = 1L;
     private static final long NEVER = 0L;
 
-    // TODO shift "Never" prompt to resources
-    private static final String NEVER_PROMPT = "never";
+    // TODO: move strings to resources
+    private static final String DATE_FORMAT = "dd/mm/yy hh:mm";
+    private static final String NEVER_SYNCED = "never";
+    private static final String MIN_AGO = "m ago";
+    private static final String HOURS = "h";
 
     private final AppPreferences appPreferences;
     private final Calendar calendar;
@@ -43,7 +46,6 @@ public class SyncDateWrapper {
             date.setTime(lastSynced);
             return date;
         }
-
         return null;
     }
 
@@ -52,29 +54,27 @@ public class SyncDateWrapper {
     }
 
     public String getLastSyncedString() {
-        long lastSynced = getLastSyncedLong();
+        long lastSync = getLastSyncedLong();
 
-        if (lastSynced == NEVER) {
-            return NEVER_PROMPT;
+        if (lastSync == NEVER) {
+            return NEVER_SYNCED;
         }
 
-        Long diff = calendar.getTime().getTime() - lastSynced;
+        Long diff = calendar.getTime().getTime() - lastSync;
         if (diff >= TimeUnit.DAYS.toMillis(DAYS_OLD)) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/mm/yy hh:mm");
-            return dateFormat.format(getLastSyncedDate());
+            return new SimpleDateFormat(DATE_FORMAT)
+                    .format(getLastSyncedDate());
         }
 
         Long hours = TimeUnit.MILLISECONDS.toHours(diff);
         Long minutes = TimeUnit.MILLISECONDS.toMinutes(
                 diff - TimeUnit.HOURS.toMillis(hours));
 
-        // TODO shift letters and keywords like "ago" to resources
         String result = "";
         if (hours > 0) {
-            result += hours + "h ";
+            result += hours + HOURS;
         }
-
-        result += minutes + "m ago";
+        result += minutes + MIN_AGO;
         return result;
     }
 }
