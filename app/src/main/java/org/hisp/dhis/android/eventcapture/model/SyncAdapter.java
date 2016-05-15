@@ -9,23 +9,68 @@ import android.content.SyncResult;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
+
+import javax.inject.Inject;
+
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
+
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
+    private static final String TAG = SyncAdapter.class.getSimpleName();
 
     ContentResolver mContentResolver;
+
+    @Inject
+    SyncWrapper syncWrapper;
+    @Inject
+    SyncDateWrapper syncDateWrapper;
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
+
+        //inject the syncWrapper:
+        ((EventCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
     }
 
     public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         mContentResolver = context.getContentResolver();
+
+        //inject the syncWrapper:
+        ((EventCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        //TODO: sync implementation code
-        Log.d("SyncAdapter", "***---sync---***");
+        if (syncWrapper != null) {
+            Log.d(TAG, "onPerformSync: syncing");
+
+            syncWrapper.sync()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            new Action1() {
+                                @Override
+                                public void call(Object o) {
+                                    syncDateWrapper.setLastSyncedNow();
+                                    Log.i(TAG, "Synchronization successful.");
+                                }
+                            },
+                            new Action1<Throwable>() {
+                                @Override
+                                public void call(Throwable throwable) {
+                                    //??Log.i(TAG, "Problem with synchronization.");
+                                    Log.e(TAG, "sync: Exception while syncing! ");
+                                    throwable.printStackTrace();
+                                }
+                            }
+                    );
+
+        } else {
+            Log.d(TAG, "onPerformSync: syncWrapper is null !");
+        }
     }
 }

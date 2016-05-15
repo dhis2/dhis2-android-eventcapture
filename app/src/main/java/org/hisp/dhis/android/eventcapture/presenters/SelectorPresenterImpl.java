@@ -29,6 +29,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
+import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
@@ -45,16 +46,12 @@ import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -82,11 +79,13 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final EventInteractor eventInteractor;
 
     private final SyncDateWrapper syncDateWrapper;
+    private final SyncWrapper syncWrapper;
     private final Logger logger;
 
     private CompositeSubscription subscription;
     private boolean isSyncedInitially;
     private SelectorView selectorView;
+
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
@@ -95,7 +94,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  ProgramStageInteractor programStageInteractor,
                                  ProgramStageSectionInteractor programStageSectionInteractor,
                                  ProgramStageDataElementInteractor stageDataElementInteractor,
-                                 EventInteractor eventInteractor, SyncDateWrapper syncDateWrapper,
+                                 EventInteractor eventInteractor,
+                                 SyncDateWrapper syncDateWrapper,
+                                 SyncWrapper syncWrapper,
                                  Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
@@ -106,8 +107,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.programStageDataElementInteractor = stageDataElementInteractor;
         this.eventInteractor = eventInteractor;
         this.syncDateWrapper = syncDateWrapper;
+        this.syncWrapper = syncWrapper;
         this.logger = logger;
-
         this.subscription = new CompositeSubscription();
         this.isSyncedInitially = false;
     }
@@ -135,40 +136,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void sync() {
-        if (selectorView != null) {
-            selectorView.showProgressBar();
-        }
-
-        subscription.add(Observable.zip(
-                userOrganisationUnitInteractor.pull(), userProgramInteractor.pull(),
-                new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
-                    @Override
-                    public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
-                        return programs;
-                    }
-                })
-                .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
-                    @Override
-                    public List<ProgramStageDataElement> call(List<Program> programs) {
-                        List<Program> programsWithoutRegistration = new ArrayList<>();
-
-                        if (programs != null && !programs.isEmpty()) {
-                            for (Program program : programs) {
-                                if (ProgramType.WITHOUT_REGISTRATION
-                                        .equals(program.getProgramType())) {
-                                    programsWithoutRegistration.add(program);
-                                }
-                            }
-                        }
-
-                        List<ProgramStage> programStages =
-                                loadProgramStages(programsWithoutRegistration);
-                        List<ProgramStageSection> programStageSections =
-                                loadProgramStageSections(programStages);
-
-                        return loadProgramStageDataElements(programStages, programStageSections);
-                    }
-                })
+        selectorView.showProgressBar();
+        syncWrapper.sync()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<ProgramStageDataElement>>() {
@@ -180,7 +149,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
                         }
-
                         listPickers();
                     }
                 }, new Action1<Throwable>() {
@@ -193,7 +161,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                         throwable.printStackTrace();
                     }
-                }));
+                });
     }
 
     @Override
@@ -353,48 +321,5 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }
             } while ((node = node.getSelectedChild()) != null);
         }
-    }
-
-    private List<ProgramStage> loadProgramStages(List<Program> programs) {
-        Set<String> stageUids = new HashSet<>();
-
-        for (Program program : programs) {
-            Set<String> programStageUids = ModelUtils.toUidSet(
-                    program.getProgramStages());
-            stageUids.addAll(programStageUids);
-        }
-
-        return programStageInteractor.pull(stageUids).toBlocking().first();
-    }
-
-    private List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
-        Set<String> sectionUids = new HashSet<>();
-
-        for (ProgramStage programStage : stages) {
-            Set<String> stageSectionUids = ModelUtils.toUidSet(
-                    programStage.getProgramStageSections());
-            sectionUids.addAll(stageSectionUids);
-        }
-
-        return programStageSectionInteractor.pull(sectionUids).toBlocking().first();
-    }
-
-    private List<ProgramStageDataElement> loadProgramStageDataElements(
-            List<ProgramStage> stages, List<ProgramStageSection> programStageSections) {
-        Set<String> dataElementUids = new HashSet<>();
-
-        for (ProgramStage programStage : stages) {
-            Set<String> stageDataElementUids = ModelUtils.toUidSet(
-                    programStage.getProgramStageDataElements());
-            dataElementUids.addAll(stageDataElementUids);
-        }
-
-        for (ProgramStageSection programStageSection : programStageSections) {
-            Set<String> stageSectionElements = ModelUtils.toUidSet(
-                    programStageSection.getProgramStageDataElements());
-            dataElementUids.addAll(stageSectionElements);
-        }
-
-        return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
     }
 }

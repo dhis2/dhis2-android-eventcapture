@@ -17,7 +17,7 @@ public class SyncService extends Service {
         /* Create syncAdapter as a singleton. */
         synchronized (sSyncAdapterLock) {
             if (sSyncAdapter == null) {
-                sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+                sSyncAdapter = new SyncAdapter(getApplicationContext(), true, true);
             }
         }
     }
