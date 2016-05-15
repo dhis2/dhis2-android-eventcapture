@@ -2,7 +2,6 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
@@ -92,16 +91,16 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         return dataElementInteractor.list(stage);
                     }
                 })
-                .map(new Func1<List<ProgramStageDataElement>, List<DataElement>>() {
+                .map(new Func1<List<ProgramStageDataElement>, List<ProgramStageDataElement>>() {
                     @Override
-                    public List<DataElement> call(List<ProgramStageDataElement> stageDataElements) {
+                    public List<ProgramStageDataElement> call(List<ProgramStageDataElement> stageDataElements) {
                         return transformProgramStageDataElements(stageDataElements);
                     }
                 })
-                .map(new Func1<List<DataElement>, List<FormEntity>>() {
+                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
 
                     @Override
-                    public List<FormEntity> call(List<DataElement> dataElements) {
+                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
                         return transformDataElementsToFormEntities(dataElements);
                     }
                 })
@@ -146,15 +145,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         return dataElementInteractor.list(stage);
                     }
                 })
-                .map(new Func1<List<ProgramStageDataElement>, List<DataElement>>() {
+                .map(new Func1<List<ProgramStageDataElement>, List<ProgramStageDataElement>>() {
                     @Override
-                    public List<DataElement> call(List<ProgramStageDataElement> stageDataElements) {
-                        return transformProgramStageDataElements(stageDataElements);
+                    public List<ProgramStageDataElement> call(List<ProgramStageDataElement> elements) {
+                        return transformProgramStageDataElements(elements);
                     }
                 })
-                .map(new Func1<List<DataElement>, List<FormEntity>>() {
+                .map(new Func1<List<ProgramStageDataElement>, List<FormEntity>>() {
                     @Override
-                    public List<FormEntity> call(List<DataElement> dataElements) {
+                    public List<FormEntity> call(List<ProgramStageDataElement> dataElements) {
                         return transformDataElementsToFormEntities(dataElements);
                     }
                 })
@@ -175,13 +174,13 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 }));
     }
 
-    private List<DataElement> transformProgramStageDataElements(
+    private List<ProgramStageDataElement> transformProgramStageDataElements(
             List<ProgramStageDataElement> stageDataElements) {
         if (stageDataElements == null || stageDataElements.isEmpty()) {
             return new ArrayList<>();
         }
 
-        List<DataElement> dataElements = new ArrayList<>();
+        // List<DataElement> dataElements = new ArrayList<>();
         for (ProgramStageDataElement stageDataElement : stageDataElements) {
             DataElement dataElement = stageDataElement.getDataElement();
             if (dataElement == null) {
@@ -189,24 +188,22 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         "StageDataElement does not have reference to DataElement");
             }
 
-
             OptionSet optionSet = dataElement.getOptionSet();
             if (optionSet != null) {
                 List<Option> options = optionSetInteractor.list(
                         dataElement.getOptionSet()).toBlocking().first();
                 optionSet.setOptions(options);
             }
-
-            dataElements.add(dataElement);
         }
 
-        return dataElements;
+        return stageDataElements;
     }
 
-    private List<FormEntity> transformDataElementsToFormEntities(List<DataElement> dataElements) {
+    private List<FormEntity> transformDataElementsToFormEntities(
+            List<ProgramStageDataElement> dataElements) {
         List<FormEntity> formEntities = new ArrayList<>();
 
-        for (DataElement dataElement : dataElements) {
+        for (ProgramStageDataElement dataElement : dataElements) {
             FormEntity formEntity = transformDataElement(dataElement);
 
             if (formEntity != null) {
@@ -217,7 +214,9 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         return formEntities;
     }
 
-    private FormEntity transformDataElement(DataElement dataElement) {
+    private FormEntity transformDataElement(ProgramStageDataElement stageDataElement) {
+        DataElement dataElement = stageDataElement.getDataElement();
+
         logger.d(TAG, "DataElement: " + dataElement.getDisplayName());
         logger.d(TAG, "ValueType: " + dataElement.getValueType());
 
@@ -235,7 +234,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             }
 
             FormEntityFilter formEntityFilter = new FormEntityFilter(
-                    dataElement.getUId(), dataElement.getDisplayName());
+                    dataElement.getUId(), getFormEntityLabel(stageDataElement));
             formEntityFilter.setPicker(picker);
 
             return formEntityFilter;
@@ -245,41 +244,41 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             // GO THROUGH WIDGETS
             case TEXT:
                 return new FormEntityEditText(dataElement.getUId(),
-                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.TEXT);
+                        getFormEntityLabel(stageDataElement), FormEntityEditText.InputType.TEXT);
             case LONG_TEXT:
                 return new FormEntityEditText(dataElement.getUId(),
-                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.LONG_TEXT);
+                        getFormEntityLabel(stageDataElement), FormEntityEditText.InputType.LONG_TEXT);
             case PHONE_NUMBER:
                 return new FormEntityEditText(dataElement.getUId(),
-                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.TEXT);
+                        getFormEntityLabel(stageDataElement), FormEntityEditText.InputType.TEXT);
             case EMAIL:
                 return new FormEntityEditText(dataElement.getUId(),
-                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.TEXT);
+                        getFormEntityLabel(stageDataElement), FormEntityEditText.InputType.TEXT);
             case NUMBER:
                 return new FormEntityEditText(dataElement.getUId(),
-                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.NUMBER);
+                        getFormEntityLabel(stageDataElement), FormEntityEditText.InputType.NUMBER);
             case INTEGER:
                 return new FormEntityEditText(dataElement.getUId(),
-                        getFormEntityLabel(dataElement), FormEntityEditText.InputType.INTEGER);
+                        getFormEntityLabel(stageDataElement), FormEntityEditText.InputType.INTEGER);
             case INTEGER_POSITIVE:
-                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(dataElement),
+                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(stageDataElement),
                         FormEntityEditText.InputType.INTEGER_POSITIVE);
             case INTEGER_NEGATIVE:
-                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(dataElement),
+                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(stageDataElement),
                         FormEntityEditText.InputType.INTEGER_NEGATIVE);
             case INTEGER_ZERO_OR_POSITIVE:
-                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(dataElement),
+                return new FormEntityEditText(dataElement.getUId(), getFormEntityLabel(stageDataElement),
                         FormEntityEditText.InputType.INTEGER_ZERO_OR_POSITIVE);
 
             // REVISE WIDGETS
             case BOOLEAN:
                 return new FormEntityRadioButtons(dataElement.getUId(),
-                        getFormEntityLabel(dataElement));
+                        getFormEntityLabel(stageDataElement));
             case TRUE_ONLY:
                 return new FormEntityCheckBox(dataElement.getUId(),
-                        getFormEntityLabel(dataElement));
+                        getFormEntityLabel(stageDataElement));
             case DATE:
-                return new FormEntityDate(dataElement.getUId(), getFormEntityLabel(dataElement));
+                return new FormEntityDate(dataElement.getUId(), getFormEntityLabel(stageDataElement));
             case COORDINATE:
                 return null;
             default:
@@ -288,8 +287,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         }
     }
 
-    private String getFormEntityLabel(DataElement dataElement) {
-        return isEmpty(dataElement.getDisplayFormName()) ?
+    private String getFormEntityLabel(ProgramStageDataElement stageDataElement) {
+        DataElement dataElement = stageDataElement.getDataElement();
+        String label = isEmpty(dataElement.getDisplayFormName()) ?
                 dataElement.getDisplayName() : dataElement.getDisplayFormName();
+
+        if (stageDataElement.isCompulsory()) {
+            label = label + " (*)";
+        }
+
+        return label;
     }
 }
