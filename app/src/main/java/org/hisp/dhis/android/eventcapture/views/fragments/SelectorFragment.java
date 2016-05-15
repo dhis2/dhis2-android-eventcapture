@@ -71,6 +71,7 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final String TAG = SelectorFragment.class.getSimpleName();
@@ -85,8 +86,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Inject
     Logger logger;
 
-    // button which is shown only in case
-    // when all pickers are set
+    // button which is shown only in case when all pickers are set
     FloatingActionButton createEventButton;
     OnCreateEventButtonClickListener onCreateEventButtonClickListener;
 
@@ -121,7 +121,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        setupToolbar(view);
+        setupToolbar();
         setupBottomSheet(view, savedInstanceState);
         setupFloatingActionButton(view);
         setupSwipeRefreshLayout(view, savedInstanceState);
@@ -217,29 +217,31 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
-    private void setupToolbar(View view) {
+    @Override
+    public boolean onBackPressed() {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+
+        return false;
+    }
+
+    private void setupToolbar() {
         Drawable buttonDrawable = DrawableCompat.wrap(ContextCompat
                 .getDrawable(getActivity(), R.drawable.ic_menu));
         DrawableCompat.setTint(buttonDrawable, ContextCompat
                 .getColor(getContext(), android.R.color.white));
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.drawer_item_events);
-        toolbar.inflateMenu(R.menu.menu_refresh);
-        toolbar.setNavigationIcon(buttonDrawable);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleNavigationDrawer();
-            }
-        });
-
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return SelectorFragment.this.onMenuItemClick(item);
-            }
-        });
+        if (getParentToolbar() != null) {
+            getParentToolbar().inflateMenu(R.menu.menu_refresh);
+            getParentToolbar().setNavigationIcon(buttonDrawable);
+            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return SelectorFragment.this.onMenuItemClick(item);
+                }
+            });
+        }
     }
 
     private void setupFloatingActionButton(final View rootView) {
@@ -328,6 +330,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     /* change visibility of floating action button*/
     private void onPickerListChanged(List<Picker> pickers) {
+        updateLabels(pickers);
+
         onCreateEventButtonClickListener.setPickers(pickers);
         if (areAllPickersPresent(pickers)) {
             showCreateEventButton();
@@ -359,6 +363,15 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             animSetXY.setDuration(256);
             animSetXY.start();
         }
+
+        if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+            bottomSheetView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }, 256);
+        }
     }
 
     private void hideCreateEventButton() {
@@ -378,6 +391,28 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             });
             animSetXY.start();
         }
+    }
+
+    private void updateLabels(List<Picker> pickers) {
+        String orgUnitLabel;
+        String programLabel;
+
+        if (!isEmpty(getOrganisationUnitLabel(pickers))) {
+            orgUnitLabel = String.format(Locale.getDefault(), "%s: %s",
+                    getString(R.string.organisation_unit), getOrganisationUnitLabel(pickers));
+        } else {
+            orgUnitLabel = String.format(Locale.getDefault(), "%s: %s",
+                    getString(R.string.organisation_unit), "none");
+        }
+
+        if (!isEmpty(getProgramLabel(pickers))) {
+            programLabel = getProgramLabel(pickers);
+        } else {
+            programLabel = "None";
+        }
+
+        selectedOrganisationUnit.setText(orgUnitLabel);
+        selectedProgram.setText(programLabel);
     }
 
     private class OnCreateEventButtonClickListener implements View.OnClickListener {
@@ -403,6 +438,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
             return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getId();
         }
+
+        return null;
+    }
+
+    private static String getOrganisationUnitLabel(List<Picker> pickers) {
+        if (pickers != null && !pickers.isEmpty() &&
+                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getName();
+        }
+
         return null;
     }
 
@@ -410,6 +455,15 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         if (pickers != null && !pickers.isEmpty() &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
             return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
+        }
+
+        return null;
+    }
+
+    private static String getProgramLabel(List<Picker> pickers) {
+        if (pickers != null && !pickers.isEmpty() &&
+                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getName();
         }
 
         return null;

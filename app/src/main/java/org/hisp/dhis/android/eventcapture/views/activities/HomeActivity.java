@@ -109,7 +109,8 @@ public class HomeActivity extends AbsHomeActivity implements HomeView {
     protected boolean onItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case DRAWER_ITEM_EVENTS_ID: {
-                attachFragment(new SelectorFragment());
+                attachFragment(WrapperFragment.newInstance(
+                        SelectorFragment.class, getString(R.string.drawer_item_events)));
                 break;
             }
         }

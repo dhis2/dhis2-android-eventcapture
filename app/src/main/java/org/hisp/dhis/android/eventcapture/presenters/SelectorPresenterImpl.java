@@ -199,7 +199,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void listPickers() {
         logger.d(TAG, "listPickers()");
-        subscription.add(Observable.zip(userOrganisationUnitInteractor.list(), userProgramInteractor.list(),
+        subscription.add(Observable.zip(
+                userOrganisationUnitInteractor.list(),
+                userProgramInteractor.list(),
                 new Func2<List<OrganisationUnit>, List<Program>, Picker>() {
                     @Override
                     public Picker call(List<OrganisationUnit> units, List<Program> programs) {
