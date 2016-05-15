@@ -38,17 +38,15 @@
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swiperefreshlayout_selector"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_height="match_parent">
 
-        <android.support.v4.widget.NestedScrollView
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_events"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <!--<android.support.v7.widget.RecyclerView-->
-        <!--android:id="@+id/recyclerview_events"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent" />-->
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

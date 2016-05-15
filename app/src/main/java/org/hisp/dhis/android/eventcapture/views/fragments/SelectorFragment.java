@@ -55,14 +55,18 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.model.ReportEntity;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
+import org.hisp.dhis.android.eventcapture.views.adapters.ReportEntityAdapter;
+import org.hisp.dhis.android.eventcapture.views.adapters.ReportEntityAdapter.OnReportEntityClickListener;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.List;
@@ -94,15 +98,21 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     SwipeRefreshLayout swipeRefreshLayout;
     BottomSheetBehavior<CardView> bottomSheetBehavior;
 
+    // bottom sheet layout
     CoordinatorLayout coordinatorLayout;
     CardView bottomSheetView;
 
+    // selected organisation unit and program
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
     PickerAdapter pickerAdapter;
+
+    // list of events
+    RecyclerView reportEntityRecyclerView;
+    ReportEntityAdapter reportEntityAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -125,7 +135,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         setupBottomSheet(view, savedInstanceState);
         setupFloatingActionButton(view);
         setupSwipeRefreshLayout(view, savedInstanceState);
-        setupRecyclerView(view, savedInstanceState);
+        setupPickerRecyclerView(view, savedInstanceState);
+        setupReportEntityRecyclerView(view, savedInstanceState);
     }
 
     @Override
@@ -182,14 +193,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     @Override
-    public void showEvents(List<Event> events) {
-//        int eventCount = 0;
-//        if (events != null && !events.isEmpty()) {
-//            eventCount = events.size();
-//        }
-//
-//        eventsCounts.setText(String.format(Locale.getDefault(), "%s (%d)",
-//                getString(R.string.drawer_item_events), eventCount));
+    public void showReportEntities(List<ReportEntity> reportEntities) {
+        logger.d(TAG, "amount of report entities: " + reportEntities.size());
+        reportEntityAdapter.swapData(reportEntities);
     }
 
     @Override
@@ -276,7 +282,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
-    private void setupRecyclerView(final View rootView, final Bundle savedInstanceState) {
+    private void setupPickerRecyclerView(final View rootView, final Bundle savedInstanceState) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
@@ -300,6 +306,26 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
+    private void setupReportEntityRecyclerView(View view, Bundle savedInstanceState) {
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        reportEntityAdapter = new ReportEntityAdapter(getActivity());
+        reportEntityAdapter.setOnReportEntityClickListener(new OnReportEntityClickListener() {
+            @Override
+            public void onReportEntityClicked(ReportEntity reportEntity) {
+                SelectorFragment.this.onReportEntityClicked(reportEntity);
+            }
+        });
+
+        reportEntityRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_events);
+        reportEntityRecyclerView.setLayoutManager(layoutManager);
+        reportEntityRecyclerView.setAdapter(reportEntityAdapter);
+        reportEntityRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        reportEntityRecyclerView.addItemDecoration(new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
+    }
+
     private void setupBottomSheet(View view, Bundle savedInstanceState) {
         coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorlayout_selector);
         bottomSheetView = (CardView) view.findViewById(R.id.card_view_bottom_sheet);
@@ -314,6 +340,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         if (savedInstanceState == null) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
+    }
+
+    private void onReportEntityClicked(ReportEntity reportEntity) {
+        FormSectionActivity.navigateTo(getActivity(), reportEntity.getId());
     }
 
     private boolean onMenuItemClick(MenuItem item) {

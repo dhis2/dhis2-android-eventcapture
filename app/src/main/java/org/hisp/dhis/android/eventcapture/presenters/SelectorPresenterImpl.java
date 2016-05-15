@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.ReportEntity;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
@@ -234,13 +235,29 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         program.setUId(programId);
 
         subscription.add(eventInteractor.list(orgUnit, program)
+                .map(new Func1<List<Event>, List<ReportEntity>>() {
+                    @Override
+                    public List<ReportEntity> call(List<Event> events) {
+                        List<ReportEntity> reportEntities = new ArrayList<>();
+
+                        for (Event event: events) {
+                            reportEntities.add(new ReportEntity(
+                                    event.getUId(), ReportEntity.Status.SENT,
+                                    "Some event is here",
+                                    "Another important line which describes something",
+                                    "One more line with some information"));
+                        }
+
+                        return reportEntities;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Event>>() {
+                .subscribe(new Action1<List<ReportEntity>>() {
                     @Override
-                    public void call(List<Event> events) {
+                    public void call(List<ReportEntity> reportEntities) {
                         if (selectorView != null) {
-                            selectorView.showEvents(events);
+                            selectorView.showReportEntities(reportEntities);
                         }
                     }
                 }, new Action1<Throwable>() {

@@ -30,6 +30,7 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.support.annotation.StringDef;
 
+import org.hisp.dhis.android.eventcapture.model.ReportEntity;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
@@ -56,7 +57,7 @@ public interface SelectorView extends View {
 
     void showPickers(Picker picker);
 
-    void showEvents(List<Event> events);
+    void showReportEntities(List<ReportEntity> reportEntities);
 
     void showNoOrganisationUnitsError();
 
