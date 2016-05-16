@@ -371,6 +371,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         } else {
             hideCreateEventButton();
         }
+        selectorPresenter.onPickersSelectionsChanged(pickers);
     }
 
     /* check if organisation unit and program are selected */
@@ -482,7 +483,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private static String getProgramUid(List<Picker> pickers) {
-        if (pickers != null && !pickers.isEmpty() &&
+        if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
             return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
         }
@@ -491,7 +492,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private static String getProgramLabel(List<Picker> pickers) {
-        if (pickers != null && !pickers.isEmpty() &&
+        if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
             return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getName();
         }
