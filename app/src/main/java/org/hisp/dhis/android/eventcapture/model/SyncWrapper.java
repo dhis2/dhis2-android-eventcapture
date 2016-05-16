@@ -28,12 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.model;
 
-import android.content.Context;
-
-import org.hisp.dhis.client.sdk.android.event.EventInteractor;
-import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
@@ -56,36 +51,25 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 
 public class SyncWrapper {
-    UserOrganisationUnitInteractor userOrganisationUnitInteractor;
-    UserProgramInteractor userProgramInteractor;
-    OrganisationUnitInteractor organisationUnitInteractor;
-    ProgramInteractor programInteractor;
-    ProgramStageInteractor programStageInteractor;
-    ProgramStageSectionInteractor programStageSectionInteractor;
-    ProgramStageDataElementInteractor programStageDataElementInteractor;
-    EventInteractor eventInteractor;
+    private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
+    private final UserProgramInteractor userProgramInteractor;
+    private final ProgramStageInteractor programStageInteractor;
+    private final ProgramStageSectionInteractor programStageSectionInteractor;
+    private final ProgramStageDataElementInteractor programStageDataElementInteractor;
 
-    public SyncWrapper(Context context,
-                       UserOrganisationUnitInteractor userOrganisationUnitInteractor,
+    public SyncWrapper(UserOrganisationUnitInteractor userOrganisationUnitInteractor,
                        UserProgramInteractor userProgramInteractor,
-                       OrganisationUnitInteractor organisationUnitInteractor,
-                       ProgramInteractor programInteractor,
                        ProgramStageInteractor programStageInteractor,
                        ProgramStageSectionInteractor programStageSectionInteractor,
-                       ProgramStageDataElementInteractor programStageDataElementInteractor,
-                       EventInteractor eventInteractor) {
-        
+                       ProgramStageDataElementInteractor programStageDataElementInteractor) {
         this.userOrganisationUnitInteractor = userOrganisationUnitInteractor;
         this.userProgramInteractor = userProgramInteractor;
-        this.organisationUnitInteractor = organisationUnitInteractor;
-        this.programInteractor = programInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = programStageSectionInteractor;
         this.programStageDataElementInteractor = programStageDataElementInteractor;
-        this.eventInteractor = eventInteractor;
     }
 
-    public Observable sync() {
+    public Observable<List<ProgramStageDataElement>> sync() {
         return Observable.zip(
                 userOrganisationUnitInteractor.pull(),
                 userProgramInteractor.pull(),

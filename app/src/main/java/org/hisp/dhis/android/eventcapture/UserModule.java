@@ -236,25 +236,16 @@ public class UserModule {
     @Provides
     @PerUser
     public SyncWrapper provideSyncWrapper(
-            Context context,
             @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
             @Nullable UserProgramInteractor userProgramInteractor,
-            @Nullable OrganisationUnitInteractor organisationUnitInteractor,
-            @Nullable ProgramInteractor programInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
-            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
-            @Nullable EventInteractor eventInteractor) {
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor) {
 
-        return new SyncWrapper(context,
-                userOrganisationUnitInteractor,
-                userProgramInteractor,
-                organisationUnitInteractor,
-                programInteractor,
-                programStageInteractor,
-                programStageSectionInteractor,
-                programStageDataElementInteractor,
-                eventInteractor);
+        return new SyncWrapper(
+                userOrganisationUnitInteractor, userProgramInteractor,
+                programStageInteractor, programStageSectionInteractor,
+                programStageDataElementInteractor);
     }
 
     @Provides
