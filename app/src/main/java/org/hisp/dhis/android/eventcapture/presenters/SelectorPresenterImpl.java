@@ -34,12 +34,8 @@ import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
-import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -71,13 +67,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
-    private final OrganisationUnitInteractor organisationUnitInteractor;
-    private final ProgramInteractor programInteractor;
-
     private final ProgramStageInteractor programStageInteractor;
-    private final ProgramStageSectionInteractor programStageSectionInteractor;
-    private final ProgramStageDataElementInteractor programStageDataElementInteractor;
-
     private final EventInteractor eventInteractor;
 
     private final SyncDateWrapper syncDateWrapper;
@@ -88,25 +78,16 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private boolean isSyncedInitially;
     private SelectorView selectorView;
 
-
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
-                                 OrganisationUnitInteractor organisationUnitInteractor,
-                                 ProgramInteractor programInteractor,
                                  ProgramStageInteractor programStageInteractor,
-                                 ProgramStageSectionInteractor programStageSectionInteractor,
-                                 ProgramStageDataElementInteractor stageDataElementInteractor,
                                  EventInteractor eventInteractor,
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
                                  Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
-        this.organisationUnitInteractor = organisationUnitInteractor;
-        this.programInteractor = programInteractor;
         this.programStageInteractor = programStageInteractor;
-        this.programStageSectionInteractor = programStageSectionInteractor;
-        this.programStageDataElementInteractor = stageDataElementInteractor;
         this.eventInteractor = eventInteractor;
         this.syncDateWrapper = syncDateWrapper;
         this.syncWrapper = syncWrapper;
