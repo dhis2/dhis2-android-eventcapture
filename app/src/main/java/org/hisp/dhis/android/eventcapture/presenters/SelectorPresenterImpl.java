@@ -51,6 +51,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
