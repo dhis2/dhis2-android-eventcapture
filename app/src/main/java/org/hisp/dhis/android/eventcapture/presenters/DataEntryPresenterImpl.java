@@ -358,16 +358,27 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 formEntityEditText.setValue(dataValue.getValue());
                 return formEntityEditText;
             }
+            case DATE: {
+                FormEntityDate formEntityDate = new FormEntityDate(dataElement.getUId(),
+                        getFormEntityLabel(stageDataElement), dataValue);
+                formEntityDate.setOnFormEntityChangeListener(onValueChangedListener);
+                formEntityDate.setValue(dataValue.getValue());
+                return formEntityDate;
+            }
 
             // REVISE WIDGETS
-            case BOOLEAN:
-                return new FormEntityRadioButtons(dataElement.getUId(),
-                        getFormEntityLabel(stageDataElement));
-            case TRUE_ONLY:
-                return new FormEntityCheckBox(dataElement.getUId(),
-                        getFormEntityLabel(stageDataElement));
-            case DATE:
-                return new FormEntityDate(dataElement.getUId(), getFormEntityLabel(stageDataElement));
+            case BOOLEAN: {
+                FormEntityRadioButtons formEntityRadioButtons = new FormEntityRadioButtons(
+                        dataElement.getUId(), getFormEntityLabel(stageDataElement), dataValue);
+                formEntityRadioButtons.setValue(dataValue.getValue());
+                return formEntityRadioButtons;
+            }
+            case TRUE_ONLY: {
+                FormEntityCheckBox formEntityCheckBox = new FormEntityCheckBox(
+                        dataElement.getUId(), getFormEntityLabel(stageDataElement), dataValue);
+                formEntityCheckBox.setValue(dataValue.getValue());
+                return formEntityCheckBox;
+            }
             case COORDINATE:
                 return null;
             default:
