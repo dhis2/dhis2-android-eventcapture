@@ -47,7 +47,6 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 
-// TODO Improve performance by syncing only programs based on type (WITH OR WITHOUT REGISTRATION)
 public class DataEntryPresenterImpl implements DataEntryPresenter {
     private static final String TAG = DataEntryPresenterImpl.class.getSimpleName();
 
