@@ -152,7 +152,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     public void showFormDefaultSection(String formSectionId) {
         FormSingleSectionAdapter viewPagerAdapter =
                 new FormSingleSectionAdapter(getSupportFragmentManager());
-        viewPagerAdapter.swapData(formSectionId);
+        viewPagerAdapter.swapData(getEventUid(), formSectionId);
 
         // in order not to loose state of ViewPager, first we
         // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
@@ -172,7 +172,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     public void showFormSections(List<FormSection> formSections) {
         FormSectionsAdapter viewPagerAdapter =
                 new FormSectionsAdapter(getSupportFragmentManager());
-        viewPagerAdapter.swapData(formSections);
+        viewPagerAdapter.swapData(getEventUid(), formSections);
 
         // in order not to loose state of ViewPager, first we
         // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
@@ -293,6 +293,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     private static class FormSingleSectionAdapter extends FragmentStatePagerAdapter {
         private static final int DEFAULT_STAGE_COUNT = 1;
         private static final int DEFAULT_STAGE_POSITION = 0;
+        private String eventId;
         private String formSectionId;
 
         public FormSingleSectionAdapter(FragmentManager fragmentManager) {
@@ -302,7 +303,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         @Override
         public Fragment getItem(int position) {
             if (DEFAULT_STAGE_POSITION == position && !isEmpty(formSectionId)) {
-                return DataEntryFragment.newInstanceForStage(formSectionId);
+                return DataEntryFragment.newInstanceForStage(eventId, formSectionId);
             }
 
             return null;
@@ -313,7 +314,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             return isEmpty(formSectionId) ? 0 : DEFAULT_STAGE_COUNT;
         }
 
-        public void swapData(String programStageId) {
+        public void swapData(String eventId, String programStageId) {
+            this.eventId = eventId;
             this.formSectionId = programStageId;
             this.notifyDataSetChanged();
         }
@@ -321,6 +323,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     private static class FormSectionsAdapter extends FragmentStatePagerAdapter {
         private final List<FormSection> formSections;
+        private String eventId;
 
         public FormSectionsAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -330,7 +333,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         @Override
         public Fragment getItem(int position) {
             FormSection formSection = formSections.get(position);
-            return DataEntryFragment.newInstanceForSection(formSection.getId());
+            return DataEntryFragment.newInstanceForSection(eventId, formSection.getId());
         }
 
         @Override
@@ -349,7 +352,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             return formSections;
         }
 
-        public void swapData(List<FormSection> formSections) {
+        public void swapData(String eventId, List<FormSection> formSections) {
+            this.eventId = eventId;
             this.formSections.clear();
 
             if (formSections != null) {

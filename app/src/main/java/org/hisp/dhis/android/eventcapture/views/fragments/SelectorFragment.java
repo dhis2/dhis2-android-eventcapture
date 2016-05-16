@@ -464,6 +464,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
+    // TODO IndexOutOfBoundException
     private static String getOrganisationUnitUid(List<Picker> pickers) {
         if (pickers != null && !pickers.isEmpty() &&
                 pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
@@ -473,6 +474,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
+    // TODO IndexOutOfBoundException
     private static String getOrganisationUnitLabel(List<Picker> pickers) {
         if (pickers != null && !pickers.isEmpty() &&
                 pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
@@ -482,6 +484,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
+    // TODO IndexOutOfBoundException
     private static String getProgramUid(List<Picker> pickers) {
         if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
@@ -491,6 +494,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
+    // TODO IndexOutOfBoundException
     private static String getProgramLabel(List<Picker> pickers) {
         if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {

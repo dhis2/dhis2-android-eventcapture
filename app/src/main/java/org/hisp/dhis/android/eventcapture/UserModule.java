@@ -54,6 +54,7 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteracto
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
+import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
@@ -208,6 +209,17 @@ public class UserModule {
     public EventInteractor providesEventInteractor() {
         if (D2.isConfigured()) {
             return D2.events();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public TrackedEntityDataValueInteractor provideTrackedEntityDataValueInteractor() {
+        if (D2.isConfigured()) {
+            return D2.trackedEntityDataValues();
         }
 
         return null;
