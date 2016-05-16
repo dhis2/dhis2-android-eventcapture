@@ -17,6 +17,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
@@ -45,21 +48,16 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     FormSectionPresenter formSectionPresenter;
 
     // collapsing toolbar views
-    // TextView textViewOrganisationUnit;
-    // TextView textViewProgram;
-
-    // local storage for:
-    // Picker formSectionsPicker;
+    TextView textViewReportDate;
+    LinearLayout linearLayoutCoordinates;
+    EditText editTextLatitude;
+    EditText editTextLongitude;
 
     // section tabs and view pager
     TabLayout tabLayout;
     ViewPager viewPager;
 
     FilterableDialogFragment sectionDialogFragment;
-
-    // prompts
-    // String organisationUnit;
-    // String program;
 
     public static void navigateTo(Activity activity, String eventUid) {
         isNull(activity, "activity must not be null");
@@ -81,7 +79,14 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_filter_sections);
+        setContentView(R.layout.activity_form_sections);
+
+        setupToolbar();
+        setupPickers();
+        setupViewPager();
+
+        // attach listener if dialog opened (post-configuration change)
+        attachListenerToExistingFragment();
 
         FormComponent formComponent = ((EventCaptureApp) getApplication()).getFormComponent();
 
@@ -101,15 +106,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         // inject dependencies
         formComponent.inject(this);
 
-        setupToolbar();
-        setupLabels();
-        setupViewPager();
-
         // start building the form
         formSectionPresenter.createDataEntryForm(getEventUid());
-
-        // attach listener if dialog opened (post-configuration change)
-        attachListenerToExistingFragment();
     }
 
     @Override
@@ -129,11 +127,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         if (sectionDialogFragment != null) {
             getMenuInflater().inflate(R.menu.menu_form_sections, menu);
         }
-
-//        if (sectionsDrawer.getDrawerLockMode(GravityCompat.END) !=
-//                DrawerLayout.LOCK_MODE_LOCKED_CLOSED) {
-//            getMenuInflater().inflate(R.menu.menu_form_sections, menu);
-//        }
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -159,7 +152,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     public void showFormDefaultSection(String formSectionId) {
         FormSingleSectionAdapter viewPagerAdapter =
                 new FormSingleSectionAdapter(getSupportFragmentManager());
-        viewPagerAdapter.swapData(formSectionId);
+        viewPagerAdapter.swapData(getEventUid(), formSectionId);
 
         // in order not to loose state of ViewPager, first we
         // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
@@ -179,11 +172,14 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     public void showFormSections(List<FormSection> formSections) {
         FormSectionsAdapter viewPagerAdapter =
                 new FormSectionsAdapter(getSupportFragmentManager());
-        viewPagerAdapter.swapData(formSections);
+        viewPagerAdapter.swapData(getEventUid(), formSections);
 
         // in order not to loose state of ViewPager, first we
         // have to fill FormSectionsAdapter with data, and only then set it to ViewPager
         viewPager.setAdapter(viewPagerAdapter);
+
+        // hide tab layout
+        tabLayout.setVisibility(View.VISIBLE);
 
         // TabLayout will fail on you, if ViewPager which is going to be
         // attached does not contain ViewPagerAdapter set to it.
@@ -199,17 +195,30 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     @Override
-    public void showTitle(String title) {
-        // Spanned spannedTitle = Html.fromHtml(String.format(
-        //         "<b>%s</b>:<br/><u>%s</u>", organisationUnit, title));
-        // textViewOrganisationUnit.setText(spannedTitle);
+    public void showReportDatePicker(String hint, String value) {
+        if (!isEmpty(hint)) {
+            textViewReportDate.setHint(hint);
+        }
+
+        if (!isEmpty(value)) {
+            textViewReportDate.setText(value);
+        }
     }
 
     @Override
-    public void showSubtitle(String subtitle) {
-        // Spanned spannedSubtitle = Html.fromHtml(String.format(
-        //         "<b>%s</b>:<br/><u>%s</u>", program, subtitle));
-        // textViewProgram.setText(spannedSubtitle);
+    public void showCoordinatesPicker(String latitude, String longitude) {
+        if (linearLayoutCoordinates.getVisibility() == View.INVISIBLE ||
+                linearLayoutCoordinates.getVisibility() == View.GONE) {
+            linearLayoutCoordinates.setVisibility(View.VISIBLE);
+        }
+
+        if (!isEmpty(latitude)) {
+            editTextLatitude.setText(latitude);
+        }
+
+        if (!isEmpty(longitude)) {
+            editTextLongitude.setText(longitude);
+        }
     }
 
     private void attachListenerToExistingFragment() {
@@ -234,19 +243,25 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
-    private void setupLabels() {
-        // textViewOrganisationUnit = (TextView) findViewById(R.id.textview_organisation_unit);
-        // textViewProgram = (TextView) findViewById(R.id.textview_program);
-        // organisationUnit = getString(R.string.organisation_unit);
-        // program = getString(R.string.program);
+    private void setupPickers() {
+        textViewReportDate = (TextView) findViewById(R.id.textview_report_date);
+        linearLayoutCoordinates = (LinearLayout) findViewById(R.id.linearlayout_coordinates);
+        editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
+        editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
+
+        // since coordinates are optional, initially they should be hidden
+        linearLayoutCoordinates.setVisibility(View.GONE);
     }
 
     private void setupViewPager() {
         tabLayout = (TabLayout) findViewById(R.id.tablayout_data_entry);
         viewPager = (ViewPager) findViewById(R.id.viewpager_dataentry);
+
+        // hide tab layout initially in order to prevent UI
+        // jumps in cases when we don't have sections
+        tabLayout.setVisibility(View.GONE);
     }
 
-    // ******************************************************************************************
     private class OnSearchSectionsClickListener implements OnPickerItemClickListener {
         @Override
         public void onPickerItemClickListener(Picker selectedPicker) {
@@ -268,7 +283,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
-    // ******************************************************************************************
     /*
     *
     * This adapter exists only in order to satisfy cases when there is no
@@ -279,6 +293,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     private static class FormSingleSectionAdapter extends FragmentStatePagerAdapter {
         private static final int DEFAULT_STAGE_COUNT = 1;
         private static final int DEFAULT_STAGE_POSITION = 0;
+        private String eventId;
         private String formSectionId;
 
         public FormSingleSectionAdapter(FragmentManager fragmentManager) {
@@ -288,7 +303,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         @Override
         public Fragment getItem(int position) {
             if (DEFAULT_STAGE_POSITION == position && !isEmpty(formSectionId)) {
-                return DataEntryFragment.newInstanceForStage(formSectionId);
+                return DataEntryFragment.newInstanceForStage(eventId, formSectionId);
             }
 
             return null;
@@ -299,15 +314,16 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             return isEmpty(formSectionId) ? 0 : DEFAULT_STAGE_COUNT;
         }
 
-        public void swapData(String programStageId) {
+        public void swapData(String eventId, String programStageId) {
+            this.eventId = eventId;
             this.formSectionId = programStageId;
             this.notifyDataSetChanged();
         }
     }
 
-    //********************************************************************************
     private static class FormSectionsAdapter extends FragmentStatePagerAdapter {
         private final List<FormSection> formSections;
+        private String eventId;
 
         public FormSectionsAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -317,7 +333,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         @Override
         public Fragment getItem(int position) {
             FormSection formSection = formSections.get(position);
-            return DataEntryFragment.newInstanceForSection(formSection.getId());
+            return DataEntryFragment.newInstanceForSection(eventId, formSection.getId());
         }
 
         @Override
@@ -336,7 +352,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             return formSections;
         }
 
-        public void swapData(List<FormSection> formSections) {
+        public void swapData(String eventId, List<FormSection> formSections) {
+            this.eventId = eventId;
             this.formSections.clear();
 
             if (formSections != null) {

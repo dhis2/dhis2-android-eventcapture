@@ -28,25 +28,25 @@
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
 
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/coordinatorlayout_selector"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/toolbar" />
-
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swiperefreshlayout_selector"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview_events"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/bottomsheet_peek_height"
+            android:paddingTop="8dp" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -66,22 +66,24 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/bottomsheet_peek_height"
+                android:gravity="center_vertical"
                 android:orientation="vertical"
                 android:padding="@dimen/keyline_default">
-
-                <org.hisp.dhis.client.sdk.ui.views.FontTextView
-                    android:id="@+id/textview_organisation_unit"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_size_large"
-                    app:font="@string/font_name_regular" />
 
                 <org.hisp.dhis.client.sdk.ui.views.FontTextView
                     android:id="@+id/textview_program"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_size_medium"
+                    android:layout_marginBottom="4dp"
+                    android:textSize="@dimen/text_size_large"
                     app:font="@string/font_name_regular" />
+
+                <org.hisp.dhis.client.sdk.ui.views.FontTextView
+                    android:id="@+id/textview_organisation_unit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="@dimen/text_size_medium"
+                    app:font="@string/font_name_light" />
             </LinearLayout>
 
             <View

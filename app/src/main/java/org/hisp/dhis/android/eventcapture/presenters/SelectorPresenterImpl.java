@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.ReportEntity;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
@@ -167,7 +168,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void listPickers() {
         logger.d(TAG, "listPickers()");
-        subscription.add(Observable.zip(userOrganisationUnitInteractor.list(), userProgramInteractor.list(),
+        subscription.add(Observable.zip(
+                userOrganisationUnitInteractor.list(),
+                userProgramInteractor.list(),
                 new Func2<List<OrganisationUnit>, List<Program>, Picker>() {
                     @Override
                     public Picker call(List<OrganisationUnit> units, List<Program> programs) {
@@ -200,13 +203,39 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         program.setUId(programId);
 
         subscription.add(eventInteractor.list(orgUnit, program)
+                .map(new Func1<List<Event>, List<ReportEntity>>() {
+                    @Override
+                    public List<ReportEntity> call(List<Event> events) {
+                        List<ReportEntity> reportEntities = new ArrayList<>();
+
+                        for (int position = 0; position < events.size(); position++) {
+                            Event event = events.get(position);
+
+                            ReportEntity.Status status;
+                            if (position % 3 == 0) {
+                                status = ReportEntity.Status.SENT;
+                            } else if (position % 2 == 0) {
+                                status = ReportEntity.Status.OFFLINE;
+                            } else {
+                                status = ReportEntity.Status.ERROR;
+                            }
+
+                            reportEntities.add(new ReportEntity(
+                                    event.getUId(), status, "Some event is here",
+                                    "Another important line which describes something",
+                                    "One more line with some information"));
+                        }
+
+                        return reportEntities;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Event>>() {
+                .subscribe(new Action1<List<ReportEntity>>() {
                     @Override
-                    public void call(List<Event> events) {
+                    public void call(List<ReportEntity> reportEntities) {
                         if (selectorView != null) {
-                            selectorView.showEvents(events);
+                            selectorView.showReportEntities(reportEntities);
                         }
                     }
                 }, new Action1<Throwable>() {

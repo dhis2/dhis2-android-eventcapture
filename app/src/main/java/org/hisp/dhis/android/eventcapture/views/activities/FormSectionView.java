@@ -22,7 +22,10 @@ public interface FormSectionView extends View {
 
     void setFormSectionsPicker(Picker picker);
 
-    void showTitle(String title);
+    void showReportDatePicker(String hint, String value);
 
-    void showSubtitle(String subtitle);
+    void showCoordinatesPicker(String latitude, String longitude);
+
+    // void showTitle(String title);
+    // void showSubtitle(String subtitle);
 }
