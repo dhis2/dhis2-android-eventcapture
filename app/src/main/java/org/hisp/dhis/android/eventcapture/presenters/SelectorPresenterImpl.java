@@ -35,20 +35,27 @@ import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.models.common.state.State;
+import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
+import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntity;
+import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import rx.Observable;
@@ -60,6 +67,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 
 public class SelectorPresenterImpl implements SelectorPresenter {
@@ -68,6 +76,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
     private final ProgramStageInteractor programStageInteractor;
+    private final ProgramStageDataElementInteractor programStageDataElementInteractor;
     private final EventInteractor eventInteractor;
 
     private final SyncDateWrapper syncDateWrapper;
@@ -81,6 +90,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
                                  ProgramStageInteractor programStageInteractor,
+                                 ProgramStageDataElementInteractor stageDataElementInteractor,
                                  EventInteractor eventInteractor,
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
@@ -88,6 +98,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
+        this.programStageDataElementInteractor = stageDataElementInteractor;
         this.eventInteractor = eventInteractor;
         this.syncDateWrapper = syncDateWrapper;
         this.syncWrapper = syncWrapper;
@@ -178,37 +189,34 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void listEvents(String organisationUnitId, String programId) {
-        OrganisationUnit orgUnit = new OrganisationUnit();
-        Program program = new Program();
+        final OrganisationUnit orgUnit = new OrganisationUnit();
+        final Program program = new Program();
 
         orgUnit.setUId(organisationUnitId);
         program.setUId(programId);
 
-        subscription.add(eventInteractor.list(orgUnit, program)
-                .map(new Func1<List<Event>, List<ReportEntity>>() {
+        subscription.add(programStageInteractor.list(program)
+                .switchMap(new Func1<List<ProgramStage>, Observable<List<ReportEntity>>>() {
                     @Override
-                    public List<ReportEntity> call(List<Event> events) {
-                        List<ReportEntity> reportEntities = new ArrayList<>();
-
-                        for (int position = 0; position < events.size(); position++) {
-                            Event event = events.get(position);
-
-                            ReportEntity.Status status;
-                            if (position % 3 == 0) {
-                                status = ReportEntity.Status.SENT;
-                            } else if (position % 2 == 0) {
-                                status = ReportEntity.Status.OFFLINE;
-                            } else {
-                                status = ReportEntity.Status.ERROR;
-                            }
-
-                            reportEntities.add(new ReportEntity(
-                                    event.getUId(), status, "Some event is here",
-                                    "Another important line which describes something",
-                                    "One more line with some information"));
+                    public Observable<List<ReportEntity>> call(List<ProgramStage> stages) {
+                        if (stages == null || stages.isEmpty()) {
+                            throw new IllegalArgumentException(
+                                    "Program should contain at least one program stage");
                         }
 
-                        return reportEntities;
+                        Observable<List<ProgramStageDataElement>> stageDataElements =
+                                programStageDataElementInteractor.list(stages.get(0));
+
+                        return Observable.zip(
+                                stageDataElements, eventInteractor.list(orgUnit, program),
+                                new Func2<List<ProgramStageDataElement>, List<Event>, List<ReportEntity>>() {
+
+                                    @Override
+                                    public List<ReportEntity> call(List<ProgramStageDataElement> stageDataElements,
+                                                                   List<Event> events) {
+                                        return transformEvents(stageDataElements, events);
+                                    }
+                                });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -278,6 +286,113 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     }
                 })
         );
+    }
+
+    private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
+                                               List<Event> events) {
+        List<ProgramStageDataElement> filteredElements =
+                filterProgramStageDataElements(dataElements);
+
+        List<ReportEntity> reportEntities = new ArrayList<>();
+        for (Event event : events) {
+
+            // status of event
+            ReportEntity.Status status;
+
+            // TODO remove hack
+            // get state of event from database
+            State state = eventInteractor.get(event).toBlocking().first();
+
+            switch (state.getAction()) {
+                case SYNCED: {
+                    status = ReportEntity.Status.SENT;
+                    break;
+                }
+                case TO_POST:
+                case TO_UPDATE: {
+                    status = ReportEntity.Status.OFFLINE;
+                    break;
+                }
+                case ERROR: {
+                    status = ReportEntity.Status.ERROR;
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException(
+                            "Unsupported event state: " + state.getAction());
+                }
+            }
+
+            System.out.println("Values: " + event.getDataValues());
+            Map<String, String> dataElementToValueMap =
+                    mapDataElementToValue(event.getDataValues());
+            System.out.println("ValueMap: " + dataElementToValueMap);
+
+            String lineOne = null;
+            String lineTwo = null;
+            String lineThree = null;
+
+            for (int index = 0; index < 3; index++) {
+                ProgramStageDataElement stageDataElement = filteredElements.size() > index ?
+                        filteredElements.get(index) : null;
+
+                if (stageDataElement != null) {
+                    DataElement dataElement = stageDataElement.getDataElement();
+
+                    String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
+                            dataElement.getDisplayFormName() : dataElement.getDisplayName();
+                    String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
+                            dataElementName, dataElementToValueMap.get(dataElement.getUId()));
+
+                    switch (index) {
+                        case 0: {
+                            lineOne = dataElementLabel;
+                            break;
+                        }
+                        case 1: {
+                            lineTwo = dataElementLabel;
+                            break;
+                        }
+                        case 2: {
+                            lineThree = dataElementLabel;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            reportEntities.add(new ReportEntity(event.getUId(),
+                    status, lineOne, lineTwo, lineThree));
+        }
+
+        return reportEntities;
+    }
+
+    private List<ProgramStageDataElement> filterProgramStageDataElements(
+            List<ProgramStageDataElement> dataElements) {
+
+        List<ProgramStageDataElement> filteredElements = new ArrayList<>();
+        if (dataElements != null && !dataElements.isEmpty()) {
+            for (ProgramStageDataElement dataElement : dataElements) {
+                if (dataElement.isDisplayInReports()) {
+                    filteredElements.add(dataElement);
+                }
+            }
+        }
+
+        return filteredElements;
+    }
+
+    private Map<String, String> mapDataElementToValue(List<TrackedEntityDataValue> dataValues) {
+        Map<String, String> dataElementToValueMap = new HashMap<>();
+
+        if (dataValues != null && !dataValues.isEmpty()) {
+            for (TrackedEntityDataValue dataValue : dataValues) {
+                dataElementToValueMap.put(dataValue.getDataElement(), dataValue.getValue());
+            }
+        }
+
+        return dataElementToValueMap;
     }
 
     /*

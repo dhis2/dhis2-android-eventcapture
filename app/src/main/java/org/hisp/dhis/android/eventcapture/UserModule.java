@@ -254,11 +254,13 @@ public class UserModule {
             @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
             @Nullable UserProgramInteractor userProgramInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             @Nullable EventInteractor eventInteractor,
             SyncDateWrapper syncDateWrapper, SyncWrapper syncWrapper, Logger logger) {
         return new SelectorPresenterImpl(
                 userOrganisationUnitInteractor, userProgramInteractor,
-                programStageInteractor, eventInteractor, syncDateWrapper, syncWrapper, logger);
+                programStageInteractor, programStageDataElementInteractor,
+                eventInteractor, syncDateWrapper, syncWrapper, logger);
     }
 
     @Provides

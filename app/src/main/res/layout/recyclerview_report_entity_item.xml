@@ -46,6 +46,7 @@
             android:id="@+id/textview_line_one"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
             android:singleLine="true"
             android:textSize="@dimen/text_size_medium"
             app:font="@string/font_name_light" />
@@ -54,6 +55,7 @@
             android:id="@+id/textview_line_two"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
             android:singleLine="true"
             android:textSize="@dimen/text_size_medium"
             app:font="@string/font_name_light" />
@@ -62,6 +64,7 @@
             android:id="@+id/textview_line_three"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
             android:singleLine="true"
             android:textSize="@dimen/text_size_medium"
             app:font="@string/font_name_light" />
