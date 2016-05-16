@@ -12,6 +12,7 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteracto
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.annotation.Nullable;
@@ -40,14 +41,15 @@ public class FormModule {
 
     @Provides
     public DataEntryPresenter providesDataEntryPresenter(
+            @Nullable CurrentUserInteractor currentUserInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             @Nullable OptionSetInteractor optionSetInteractor,
             @Nullable EventInteractor eventInteractor,
             @Nullable TrackedEntityDataValueInteractor dataValueInteractor,  Logger logger) {
-        return new DataEntryPresenterImpl(programStageInteractor, stageSectionInteractor,
-                programStageDataElementInteractor, optionSetInteractor, eventInteractor,
-                dataValueInteractor, logger);
+        return new DataEntryPresenterImpl(currentUserInteractor, programStageInteractor,
+                stageSectionInteractor, programStageDataElementInteractor, optionSetInteractor,
+                eventInteractor, dataValueInteractor, logger);
     }
 }

@@ -9,6 +9,8 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteracto
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
+import org.hisp.dhis.client.sdk.core.common.network.UserCredentials;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.optionset.Option;
@@ -39,7 +41,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func2;
+import rx.functions.Func3;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -49,6 +51,8 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class DataEntryPresenterImpl implements DataEntryPresenter {
     private static final String TAG = DataEntryPresenterImpl.class.getSimpleName();
+
+    private final CurrentUserInteractor currentUserInteractor;
 
     private final ProgramStageInteractor stageInteractor;
     private final ProgramStageSectionInteractor sectionInteractor;
@@ -65,13 +69,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     private CompositeSubscription subscription;
 
 
-    public DataEntryPresenterImpl(ProgramStageInteractor stageInteractor,
+    public DataEntryPresenterImpl(CurrentUserInteractor currentUserInteractor,
+                                  ProgramStageInteractor stageInteractor,
                                   ProgramStageSectionInteractor sectionInteractor,
                                   ProgramStageDataElementInteractor dataElementInteractor,
                                   OptionSetInteractor optionSetInteractor,
                                   EventInteractor eventInteractor,
                                   TrackedEntityDataValueInteractor dataValueInteractor,
                                   Logger logger) {
+        this.currentUserInteractor = currentUserInteractor;
         this.stageInteractor = stageInteractor;
         this.sectionInteractor = sectionInteractor;
         this.dataElementInteractor = dataElementInteractor;
@@ -113,12 +119,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         subscription.add(Observable.zip(
                 eventInteractor.get(eventId),
                 stageInteractor.get(programStageId),
-                new Func2<Event, ProgramStage, List<FormEntity>>() {
+                currentUserInteractor.userCredentials(),
+                new Func3<Event, ProgramStage, UserCredentials, List<FormEntity>>() {
                     @Override
-                    public List<FormEntity> call(Event event, ProgramStage stage) {
-                        List<ProgramStageDataElement> dataElements = dataElementInteractor
-                                .list(stage).toBlocking().first();
-                        return transformProgramStageDataElements(event, dataElements);
+                    public List<FormEntity> call(Event event, ProgramStage stage,
+                                                 UserCredentials userCredentials) {
+                        List<ProgramStageDataElement> dataElements =
+                                dataElementInteractor.list(stage).toBlocking().first();
+                        String username = userCredentials.getUsername();
+                        return transformProgramStageDataElements(username, event, dataElements);
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -152,12 +161,15 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         subscription.add(Observable.zip(
                 eventInteractor.get(eventId),
                 sectionInteractor.get(programStageSectionId),
-                new Func2<Event, ProgramStageSection, List<FormEntity>>() {
+                currentUserInteractor.userCredentials(),
+                new Func3<Event, ProgramStageSection, UserCredentials, List<FormEntity>>() {
                     @Override
-                    public List<FormEntity> call(Event event, ProgramStageSection stageSection) {
+                    public List<FormEntity> call(Event event, ProgramStageSection stageSection,
+                                                 UserCredentials userCredentials) {
                         List<ProgramStageDataElement> dataElements = dataElementInteractor
                                 .list(stageSection).toBlocking().first();
-                        return transformProgramStageDataElements(event, dataElements);
+                        String username = userCredentials.getUsername();
+                        return transformProgramStageDataElements(username, event, dataElements);
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -206,7 +218,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     }
 
     private List<FormEntity> transformProgramStageDataElements(
-            Event event, List<ProgramStageDataElement> stageDataElements) {
+            String username, Event event, List<ProgramStageDataElement> stageDataElements) {
         if (stageDataElements == null || stageDataElements.isEmpty()) {
             return new ArrayList<>();
         }
@@ -238,7 +250,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         for (ProgramStageDataElement stageDataElement : stageDataElements) {
             DataElement dataElement = stageDataElement.getDataElement();
             FormEntity formEntity = transformDataElement(
-                    event, dataValueMap.get(dataElement.getUId()), stageDataElement);
+                    username, event, dataValueMap.get(dataElement.getUId()), stageDataElement);
 
             if (formEntity != null) {
                 formEntities.add(formEntity);
@@ -248,7 +260,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         return formEntities;
     }
 
-    private FormEntity transformDataElement(Event event, TrackedEntityDataValue dataValue,
+    private FormEntity transformDataElement(String username, Event event,
+                                            TrackedEntityDataValue dataValue,
                                             ProgramStageDataElement stageDataElement) {
         DataElement dataElement = stageDataElement.getDataElement();
 
@@ -260,12 +273,10 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             dataValue = new TrackedEntityDataValue();
             dataValue.setEvent(event);
             dataValue.setDataElement(dataElement.getUId());
-
-            // TODO get user name from D2
-            dataValue.setStoredBy("android");
+            dataValue.setStoredBy(username);
         }
 
-        System.out.println("transformDataElement() -> TrackedEntityDataValue: " +
+        logger.d(TAG, "transformDataElement() -> TrackedEntityDataValue: " +
                 dataValue + " localId: " + dataValue.getId());
 
         // in case if we have option set linked to data-element, we
@@ -379,7 +390,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 formEntityCheckBox.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityCheckBox;
             }
-
             default:
                 logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
                 return null;
