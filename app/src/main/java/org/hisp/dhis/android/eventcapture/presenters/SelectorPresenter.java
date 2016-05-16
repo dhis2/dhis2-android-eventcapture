@@ -28,6 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.client.sdk.ui.models.Picker;
+
+import java.util.List;
+
 public interface SelectorPresenter extends Presenter {
     void sync();
 
@@ -36,4 +40,6 @@ public interface SelectorPresenter extends Presenter {
     void listEvents(String organisationUnitId, String programId);
 
     void createEvent(String organisationUnitId, String programId);
+
+    void onPickersSelectionsChanged(List<Picker> pickerList);
 }

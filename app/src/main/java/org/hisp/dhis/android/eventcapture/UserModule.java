@@ -67,7 +67,6 @@ import javax.annotation.Nullable;
 import dagger.Module;
 import dagger.Provides;
 
-
 @Module
 public class UserModule {
 
@@ -79,6 +78,12 @@ public class UserModule {
         // it can throw exception in case if configuration has failed
         Configuration configuration = new Configuration(serverUrl);
         D2.configure(configuration).toBlocking().first();
+    }
+
+    @Provides
+    @PerUser
+    public SessionPreferences provideSessionPreferences(Context context) {
+        return new SessionPreferencesImpl(context);
     }
 
     @Provides
@@ -256,11 +261,12 @@ public class UserModule {
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             @Nullable EventInteractor eventInteractor,
+            SessionPreferences sessionPreferences,
             SyncDateWrapper syncDateWrapper, SyncWrapper syncWrapper, Logger logger) {
         return new SelectorPresenterImpl(
                 userOrganisationUnitInteractor, userProgramInteractor,
                 programStageInteractor, programStageDataElementInteractor,
-                eventInteractor, syncDateWrapper, syncWrapper, logger);
+                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper, logger);
     }
 
     @Provides
