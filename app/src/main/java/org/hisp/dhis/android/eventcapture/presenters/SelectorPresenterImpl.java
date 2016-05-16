@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.SessionPreferences;
 import org.hisp.dhis.android.eventcapture.model.ReportEntity;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
@@ -36,6 +37,7 @@ import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -51,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import retrofit2.http.HEAD;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -61,15 +64,14 @@ import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
-
 public class SelectorPresenterImpl implements SelectorPresenter {
     private static final String TAG = SelectorPresenterImpl.class.getSimpleName();
-
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
     private final ProgramStageInteractor programStageInteractor;
     private final EventInteractor eventInteractor;
 
+    private final SessionPreferences sessionPreferences;
     private final SyncDateWrapper syncDateWrapper;
     private final SyncWrapper syncWrapper;
     private final Logger logger;
@@ -81,14 +83,16 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
                                  ProgramStageInteractor programStageInteractor,
-                                 EventInteractor eventInteractor,
-                                 SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
+                                 EventInteractor eventInteractor,
+                                 SessionPreferences sessionPreferences,
+                                 SyncDateWrapper syncDateWrapper,
                                  Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
         this.eventInteractor = eventInteractor;
+        this.sessionPreferences = sessionPreferences;
         this.syncDateWrapper = syncDateWrapper;
         this.syncWrapper = syncWrapper;
         this.logger = logger;
@@ -114,6 +118,22 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         if (!subscription.isUnsubscribed()) {
             subscription.unsubscribe();
             subscription = new CompositeSubscription();
+        }
+    }
+
+    @Override
+    public void onPickersSelectionsChanged(List<Picker> pickerList) {
+        if (pickerList != null) {
+            sessionPreferences.clearSelectedPickers();
+            for (int index = 0; index < pickerList.size(); index++) {
+                Picker current = pickerList.get(index);
+                Picker child = current.getSelectedChild();
+                if (child == null) { //done with pickers. exit.
+                    return;
+                }
+                String pickerId = child.getId();
+                sessionPreferences.setSelectedPickerUid(index, pickerId);
+            }
         }
     }
 
@@ -314,9 +334,14 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             rootPicker.addChild(organisationUnitPicker);
         }
 
-        // Traverse the tree. If there is a path with nodes
-        // which have only one child, set default selection
-        traverseAndSetDefaultSelection(rootPicker);
+        //Set saved selections or default ones :
+        if (sessionPreferences.getSelectedPickerUid(0) != null) {
+            traverseAndSetSavedSelection(rootPicker);
+        } else {
+            // Traverse the tree. If there is a path with nodes
+            // which have only one child, set default selection
+            traverseAndSetDefaultSelection(rootPicker);
+        }
         return rootPicker;
     }
 
@@ -331,6 +356,24 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     node.setSelectedChild(singleChild);
                 }
             } while ((node = node.getSelectedChild()) != null);
+        }
+    }
+
+    private void traverseAndSetSavedSelection(Picker node) {
+        int treeLevel = 0;
+        while (node != null) {
+            String pickerId = sessionPreferences.getSelectedPickerUid(treeLevel);
+            if (pickerId != null) {
+                for (Picker child : node.getChildren()) {
+
+                    if (child.getId().equals(pickerId)) {
+                        node.setSelectedChild(child);
+                        break;
+                    }
+                }
+            }
+            treeLevel++;
+            node = node.getSelectedChild();
         }
     }
 }
