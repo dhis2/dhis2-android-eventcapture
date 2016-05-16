@@ -365,22 +365,21 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 formEntityDate.setValue(dataValue.getValue());
                 return formEntityDate;
             }
-
-            // REVISE WIDGETS
             case BOOLEAN: {
                 FormEntityRadioButtons formEntityRadioButtons = new FormEntityRadioButtons(
                         dataElement.getUId(), getFormEntityLabel(stageDataElement), dataValue);
                 formEntityRadioButtons.setValue(dataValue.getValue());
+                formEntityRadioButtons.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityRadioButtons;
             }
             case TRUE_ONLY: {
                 FormEntityCheckBox formEntityCheckBox = new FormEntityCheckBox(
                         dataElement.getUId(), getFormEntityLabel(stageDataElement), dataValue);
                 formEntityCheckBox.setValue(dataValue.getValue());
+                formEntityCheckBox.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityCheckBox;
             }
-            case COORDINATE:
-                return null;
+
             default:
                 logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
                 return null;
