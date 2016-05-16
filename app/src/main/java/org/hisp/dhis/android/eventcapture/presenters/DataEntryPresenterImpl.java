@@ -27,6 +27,7 @@ import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityEditText.InputType;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityFilter;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityRadioButtons;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityText;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -249,12 +250,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         List<FormEntity> formEntities = new ArrayList<>();
         for (ProgramStageDataElement stageDataElement : stageDataElements) {
             DataElement dataElement = stageDataElement.getDataElement();
-            FormEntity formEntity = transformDataElement(
-                    username, event, dataValueMap.get(dataElement.getUId()), stageDataElement);
-
-            if (formEntity != null) {
-                formEntities.add(formEntity);
-            }
+            formEntities.add(transformDataElement(
+                    username, event, dataValueMap.get(dataElement.getUId()), stageDataElement));
         }
 
         return formEntities;
@@ -392,7 +389,12 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             }
             default:
                 logger.d(TAG, "Unsupported FormEntity type: " + dataElement.getValueType());
-                return null;
+
+                FormEntityText formEntityText = new FormEntityText(dataElement.getUId(),
+                        getFormEntityLabel(stageDataElement));
+                formEntityText.setValue("Unsupported value type: " + dataElement.getValueType());
+
+                return formEntityText;
         }
     }
 
