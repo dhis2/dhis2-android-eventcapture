@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
@@ -248,6 +249,14 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         linearLayoutCoordinates = (LinearLayout) findViewById(R.id.linearlayout_coordinates);
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
+
+        // set on click listener to text view report date
+        textViewReportDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(FormSectionActivity.this, "Click", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // since coordinates are optional, initially they should be hidden
         linearLayoutCoordinates.setVisibility(View.GONE);
