@@ -30,13 +30,11 @@ public class FormModule {
     @Provides
     @PerActivity
     public FormSectionPresenter providesFormSectionPresenter(
-            @Nullable OrganisationUnitInteractor organisationUnitInteractor,
-            @Nullable ProgramInteractor programInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
             @Nullable EventInteractor eventInteractor,  Logger logger) {
-        return new FormSectionPresenterImpl(organisationUnitInteractor, programInteractor,
-                programStageInteractor, stageSectionInteractor, eventInteractor, logger);
+        return new FormSectionPresenterImpl(programStageInteractor, stageSectionInteractor,
+                eventInteractor, logger);
     }
 
     @Provides

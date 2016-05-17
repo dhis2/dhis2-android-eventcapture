@@ -3,8 +3,6 @@ package org.hisp.dhis.android.eventcapture.presenters;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
-import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -14,6 +12,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
+import org.joda.time.DateTime;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -32,9 +31,8 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 // TODO cache metadata and data in memory
 public class FormSectionPresenterImpl implements FormSectionPresenter {
     private static final String TAG = FormSectionPresenterImpl.class.getSimpleName();
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-    private final OrganisationUnitInteractor organisationUnitInteractor;
-    private final ProgramInteractor programInteractor;
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
 
@@ -45,13 +43,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     private FormSectionView formSectionView;
     private CompositeSubscription subscription;
 
-    public FormSectionPresenterImpl(OrganisationUnitInteractor organisationUnitInteractor,
-                                    ProgramInteractor programInteractor,
-                                    ProgramStageInteractor programStageInteractor,
+    public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
                                     EventInteractor eventInteractor, Logger logger) {
-        this.organisationUnitInteractor = organisationUnitInteractor;
-        this.programInteractor = programInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
         this.eventInteractor = eventInteractor;
@@ -101,6 +95,55 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 }));
     }
 
+    @Override
+    public void saveEventDate(final String eventUid, final DateTime eventDate) {
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+
+        subscription = new CompositeSubscription();
+        subscription.add(eventInteractor.get(eventUid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        isNull(event, String.format("Event with uid %s does not exist", eventUid));
+
+                        event.setEventDate(eventDate);
+
+                        subscription.add(saveEvent(event));
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, null, throwable);
+                    }
+                }));
+    }
+
+    private Subscription saveEvent(final Event event) {
+        return eventInteractor.save(event)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean isSaved) {
+                        if (isSaved) {
+                            logger.d(TAG, "Successfully saved event " + event);
+                        } else {
+                            logger.d(TAG, "Failed to save event " + event);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Failed to save event " + event, throwable);
+                    }
+                });
+    }
+
     private Subscription showFormPickers(final Event event) {
         final Program program = new Program();
         program.setUId(event.getProgram());
@@ -128,7 +171,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     public void call(ProgramStage programStage) {
                         if (formSectionView != null) {
                             String eventDate = event.getEventDate() != null ?
-                                    event.getEventDate().toString() : "";
+                                    event.getEventDate().toString(DATE_FORMAT) : "";
                             formSectionView.showReportDatePicker(
                                     programStage.getReportDateDescription(), eventDate);
 

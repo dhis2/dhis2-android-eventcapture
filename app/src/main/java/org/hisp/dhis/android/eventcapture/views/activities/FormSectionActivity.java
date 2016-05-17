@@ -2,6 +2,7 @@ package org.hisp.dhis.android.eventcapture.views.activities;
 
 
 import android.app.Activity;
+import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,10 +18,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
@@ -28,12 +29,17 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 import org.hisp.dhis.client.sdk.ui.adapters.OnPickerItemClickListener;
+import org.hisp.dhis.client.sdk.ui.fragments.DatePickerDialogFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.FilterableDialogFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.joda.time.DateTime;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -44,6 +50,7 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 // TODO check if configuration changes are handled properly
 public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_EVENT_UID = "arg:eventUid";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Inject
     FormSectionPresenter formSectionPresenter;
@@ -202,7 +209,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
 
         if (!isEmpty(value)) {
-            textViewReportDate.setText(value);
+            textViewReportDate.setText(String.format(Locale.getDefault(), "%s: %s",
+                    getString(R.string.report_date), value));
         }
     }
 
@@ -250,11 +258,33 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
 
+        final OnDateSetListener onDateSetListener = new OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, monthOfYear);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+                String newValue = String.format(Locale.getDefault(), "%s: %s",
+                        getString(R.string.report_date),
+                        simpleDateFormat.format(calendar.getTime()));
+                textViewReportDate.setText(newValue);
+
+                DateTime dateTime = new DateTime(calendar.getTimeInMillis());
+                formSectionPresenter.saveEventDate(getEventUid(), dateTime);
+            }
+        };
+
         // set on click listener to text view report date
         textViewReportDate.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(FormSectionActivity.this, "Click", Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                DatePickerDialogFragment datePickerDialogFragment =
+                        DatePickerDialogFragment.newInstance(false);
+                datePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+                datePickerDialogFragment.show(getSupportFragmentManager());
             }
         });
 
