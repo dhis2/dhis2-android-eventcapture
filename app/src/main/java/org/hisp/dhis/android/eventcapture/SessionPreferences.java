@@ -30,9 +30,9 @@ package org.hisp.dhis.android.eventcapture;
 
 public interface SessionPreferences {
 
-    public void clearSelectedPickers();
+    boolean clearSelectedPickers();
 
-    public String getSelectedPickerUid(int index);
+    String getSelectedPickerUid(int index);
 
-    public void setSelectedPickerUid(int index, String pickerUid);
+    boolean setSelectedPickerUid(int index, String pickerUid);
 }

@@ -36,9 +36,9 @@ import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 public class SessionPreferencesImpl implements SessionPreferences {
     public final static String PREFS_NAME = "preferences:selectorSession";
 
-    public static final String SELECTED_PICKER_UID = "selectedPickerUid";
+    public static final String SELECTED_PICKER_UID = "key:selectedPickerUid";
 
-    private SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
 
     public SessionPreferencesImpl(Context context) {
         isNull(context, "context must not be null!");
@@ -46,15 +46,17 @@ public class SessionPreferencesImpl implements SessionPreferences {
     }
 
     @Override
-    public void clearSelectedPickers() {
-        sharedPreferences.edit().clear().commit();
+    public boolean clearSelectedPickers() {
+        return sharedPreferences.edit().clear().commit();
     }
 
+    @Override
     public String getSelectedPickerUid(int index) {
         return sharedPreferences.getString(SELECTED_PICKER_UID + index, null);
     }
 
-    public void setSelectedPickerUid(int index, String pickerUid) {
-        sharedPreferences.edit().putString(SELECTED_PICKER_UID + index, pickerUid).commit();
+    @Override
+    public boolean setSelectedPickerUid(int index, String pickerUid) {
+        return sharedPreferences.edit().putString(SELECTED_PICKER_UID + index, pickerUid).commit();
     }
 }
