@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 /**
- * A stub ContentProvider required by the sync adapter framework.
+ * A stub ContentProvider required by the syncMetaData adapter framework.
  */
 public class StubProvider extends ContentProvider {
 

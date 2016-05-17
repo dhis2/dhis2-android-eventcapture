@@ -48,7 +48,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if (syncWrapper != null) {
             Log.d(TAG, "onPerformSync: syncing");
 
-            syncWrapper.sync()
+            syncWrapper.syncMetaData()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
@@ -63,7 +63,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                                 @Override
                                 public void call(Throwable throwable) {
                                     //??Log.i(TAG, "Problem with synchronization.");
-                                    Log.e(TAG, "sync: Exception while syncing! ");
+                                    Log.e(TAG, "syncMetaData: Exception while syncing! ");
                                     throwable.printStackTrace();
                                 }
                             }

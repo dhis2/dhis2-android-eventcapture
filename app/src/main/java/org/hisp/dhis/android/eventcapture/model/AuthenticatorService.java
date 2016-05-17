@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 
 /**
- * A service for the stub authenticator required by the sync adapter framework.
+ * A service for the stub authenticator required by the syncMetaData adapter framework.
  */
 public class AuthenticatorService extends Service {
 

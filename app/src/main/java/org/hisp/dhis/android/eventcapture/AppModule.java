@@ -79,7 +79,7 @@ public class AppModule {
     public OkHttpClient providesOkHttpClient() {
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             return new OkHttpClient.Builder()
                     .addInterceptor(loggingInterceptor)

@@ -28,12 +28,14 @@
 
 package org.hisp.dhis.android.eventcapture.model;
 
+import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -47,8 +49,10 @@ import java.util.List;
 import java.util.Set;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 
 public class SyncWrapper {
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
@@ -56,20 +60,23 @@ public class SyncWrapper {
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
     private final ProgramStageDataElementInteractor programStageDataElementInteractor;
+    private final EventInteractor eventInteractor;
 
     public SyncWrapper(UserOrganisationUnitInteractor userOrganisationUnitInteractor,
                        UserProgramInteractor userProgramInteractor,
                        ProgramStageInteractor programStageInteractor,
                        ProgramStageSectionInteractor programStageSectionInteractor,
-                       ProgramStageDataElementInteractor programStageDataElementInteractor) {
+                       ProgramStageDataElementInteractor programStageDataElementInteractor,
+                       EventInteractor eventInteractor) {
         this.userOrganisationUnitInteractor = userOrganisationUnitInteractor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = programStageSectionInteractor;
         this.programStageDataElementInteractor = programStageDataElementInteractor;
+        this.eventInteractor = eventInteractor;
     }
 
-    public Observable<List<ProgramStageDataElement>> sync() {
+    public Observable<List<ProgramStageDataElement>> syncMetaData() {
         return Observable.zip(
                 userOrganisationUnitInteractor.pull(),
                 userProgramInteractor.pull(),
@@ -99,6 +106,17 @@ public class SyncWrapper {
                                 loadProgramStageSections(programStages);
 
                         return loadProgramStageDataElements(programStages, programStageSections);
+                    }
+                });
+    }
+
+    public Observable<List<Event>> syncData() {
+        return eventInteractor.list()
+                .switchMap(new Func1<List<Event>, Observable<List<Event>>>() {
+                    @Override
+                    public Observable<List<Event>> call(List<Event> events) {
+                        Set<String> uids = ModelUtils.toUidSet(events);
+                        return eventInteractor.sync(uids);
                     }
                 });
     }

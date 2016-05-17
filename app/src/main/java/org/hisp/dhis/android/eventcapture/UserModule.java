@@ -245,12 +245,13 @@ public class UserModule {
             @Nullable UserProgramInteractor userProgramInteractor,
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
-            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor) {
+            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
+            @Nullable EventInteractor eventInteractor) {
 
         return new SyncWrapper(
                 userOrganisationUnitInteractor, userProgramInteractor,
                 programStageInteractor, programStageSectionInteractor,
-                programStageDataElementInteractor);
+                programStageDataElementInteractor, eventInteractor);
     }
 
     @Provides

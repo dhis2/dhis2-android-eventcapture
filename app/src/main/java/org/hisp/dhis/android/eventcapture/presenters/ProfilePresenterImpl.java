@@ -162,7 +162,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "UserAccount sync() failed", throwable);
+                        logger.e(TAG, "UserAccount syncMetaData() failed", throwable);
 
                         if (profileView != null) {
                             profileView.hideProgressBar();
@@ -173,7 +173,7 @@ public class ProfilePresenterImpl implements ProfilePresenter {
 
     @Override
     public void logout() {
-        //remove the android account: (no sync)
+        //remove the android account: (no syncMetaData)
         appAccountManager.removePeriodicSync();
         appAccountManager.removeAccount();
 

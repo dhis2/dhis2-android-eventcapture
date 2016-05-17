@@ -111,8 +111,8 @@ public class AppAccountManager {
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
 
         /*
-         * Request the sync for the default account, authority, and
-         * manual sync settings
+         * Request the syncMetaData for the default account, authority, and
+         * manual syncMetaData settings
          */
         ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
     }

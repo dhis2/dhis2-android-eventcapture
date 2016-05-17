@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.Bundle;
 
 /**
- * A stub Authenticator, necessary for the sync adapter framework.
+ * A stub Authenticator, necessary for the syncMetaData adapter framework.
  */
 public class Authenticator extends AbstractAccountAuthenticator {
 

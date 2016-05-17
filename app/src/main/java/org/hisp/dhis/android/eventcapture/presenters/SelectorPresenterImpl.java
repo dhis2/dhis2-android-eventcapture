@@ -114,7 +114,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         selectorView = (SelectorView) view;
 
         // check if metadata was synced,
-        // if not, sync it
+        // if not, syncMetaData it
         if (!isSyncedInitially) {
             sync();
         }
@@ -149,7 +149,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void sync() {
         selectorView.showProgressBar();
-        syncWrapper.sync()
+
+        subscription.add(syncWrapper.syncMetaData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<ProgramStageDataElement>>() {
@@ -173,7 +174,22 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                         throwable.printStackTrace();
                     }
-                });
+                }));
+
+        subscription.add(syncWrapper.syncData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<Event>>() {
+                    @Override
+                    public void call(List<Event> events) {
+                        logger.d(TAG, "Synced events successfully");
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Failed to sync events", throwable);
+                    }
+                }));
     }
 
     @Override
@@ -322,6 +338,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             // get state of event from database
             State state = eventInteractor.get(event).toBlocking().first();
 
+            logger.d(TAG, "State action for event " + event + " is " + state.getAction());
             switch (state.getAction()) {
                 case SYNCED: {
                     status = ReportEntity.Status.SENT;
