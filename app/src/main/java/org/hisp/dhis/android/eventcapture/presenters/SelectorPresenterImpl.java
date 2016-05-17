@@ -51,6 +51,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -282,6 +283,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                         Event event = eventInteractor.create(orgUnit, program,
                                 programStage, Event.EventStatus.ACTIVE);
+                        event.setEventDate(DateTime.now());
                         eventInteractor.save(event).toBlocking().first();
 
                         return event;
