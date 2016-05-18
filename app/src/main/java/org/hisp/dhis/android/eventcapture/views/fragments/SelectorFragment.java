@@ -372,7 +372,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             hideCreateEventButton();
 
             // clear out list of existing events
-            reportEntityAdapter.swapData(null);
+            if (reportEntityAdapter != null) {
+                reportEntityAdapter.swapData(null);
+            }
         }
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }

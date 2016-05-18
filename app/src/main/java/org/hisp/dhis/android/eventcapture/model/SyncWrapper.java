@@ -116,7 +116,11 @@ public class SyncWrapper {
                     @Override
                     public Observable<List<Event>> call(List<Event> events) {
                         Set<String> uids = ModelUtils.toUidSet(events);
-                        return eventInteractor.sync(uids);
+                        if (uids != null && !uids.isEmpty()) {
+                            return eventInteractor.sync(uids);
+                        }
+
+                        return Observable.empty();
                     }
                 });
     }
