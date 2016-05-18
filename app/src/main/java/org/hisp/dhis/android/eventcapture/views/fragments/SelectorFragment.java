@@ -55,12 +55,12 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.model.ReportEntity;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
-import org.hisp.dhis.android.eventcapture.views.adapters.ReportEntityAdapter;
-import org.hisp.dhis.android.eventcapture.views.adapters.ReportEntityAdapter.OnReportEntityClickListener;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityClickListener;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;

@@ -29,7 +29,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.SessionPreferences;
-import org.hisp.dhis.android.eventcapture.model.ReportEntity;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
