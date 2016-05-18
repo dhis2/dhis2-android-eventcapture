@@ -118,6 +118,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         if (!isSyncedInitially) {
             sync();
         }
+
+        listPickers();
     }
 
     @Override
