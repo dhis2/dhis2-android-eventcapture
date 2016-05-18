@@ -10,6 +10,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -51,22 +54,20 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             syncWrapper.syncMetaData()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                            new Action1() {
-                                @Override
-                                public void call(Object o) {
-                                    syncDateWrapper.setLastSyncedNow();
-                                    Log.i(TAG, "Synchronization successful.");
-                                }
-                            },
-                            new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable throwable) {
-                                    //??Log.i(TAG, "Problem with synchronization.");
-                                    Log.e(TAG, "syncMetaData: Exception while syncing! ");
-                                    throwable.printStackTrace();
-                                }
-                            }
+                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                                   @Override
+                                   public void call(List<ProgramStageDataElement> o) {
+                                       syncDateWrapper.setLastSyncedNow();
+                                       Log.i(TAG, "Synchronization successful.");
+                                   }
+                               }, new Action1<Throwable>() {
+                                   @Override
+                                   public void call(Throwable throwable) {
+                                       //??Log.i(TAG, "Problem with synchronization.");
+                                       Log.e(TAG, "syncMetaData: Exception while syncing! ");
+                                       throwable.printStackTrace();
+                                   }
+                               }
                     );
 
         } else {

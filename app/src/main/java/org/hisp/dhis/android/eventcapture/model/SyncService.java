@@ -8,16 +8,16 @@ import android.support.annotation.Nullable;
 
 public class SyncService extends Service {
 
-    private static final Object sSyncAdapterLock = new Object();
-    private static SyncAdapter sSyncAdapter;
+    private static final Object syncAdapterLock = new Object();
+    private static SyncAdapter syncAdapter;
 
     @Override
     public void onCreate() {
         super.onCreate();
         /* Create syncAdapter as a singleton. */
-        synchronized (sSyncAdapterLock) {
-            if (sSyncAdapter == null) {
-                sSyncAdapter = new SyncAdapter(getApplicationContext(), true, true);
+        synchronized (syncAdapterLock) {
+            if (syncAdapter == null) {
+                syncAdapter = new SyncAdapter(getApplicationContext(), true, true);
             }
         }
     }
@@ -25,6 +25,6 @@ public class SyncService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return sSyncAdapter.getSyncAdapterBinder();
+        return syncAdapter.getSyncAdapterBinder();
     }
 }
