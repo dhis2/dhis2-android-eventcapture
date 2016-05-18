@@ -433,13 +433,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                     getString(R.string.organisation_unit), getOrganisationUnitLabel(pickers));
         } else {
             orgUnitLabel = String.format(Locale.getDefault(), "%s: %s",
-                    getString(R.string.organisation_unit), "none");
+                    getString(R.string.organisation_unit), getString(R.string.none));
         }
 
         if (!isEmpty(getProgramLabel(pickers))) {
             programLabel = getProgramLabel(pickers);
         } else {
-            programLabel = "None";
+            programLabel = String.format(Locale.getDefault(), "%s: %s",
+                    getString(R.string.program), getString(R.string.none));
         }
 
         selectedOrganisationUnit.setText(orgUnitLabel);

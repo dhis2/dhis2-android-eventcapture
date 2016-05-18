@@ -3,6 +3,8 @@
     <string name="organisation_unit">Organisation unit</string>
     <string name="program">Program</string>
 
+    <string name="none">none</string>
+
     <string name="choose_report_date">Choose report date</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
