@@ -42,6 +42,7 @@ import javax.inject.Inject;
 
 public class LoginActivity extends AbsLoginActivity implements LoginView {
 
+    private AlertDialog alertDialog;
     @Inject
     LoginPresenter loginPresenter;
 
@@ -65,6 +66,10 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
     @Override
     protected void onPause() {
         super.onPause();
+        //To avoid leaks on configuration changes:
+        if (alertDialog != null) {
+            alertDialog.dismiss();
+        }
         loginPresenter.detachView();
     }
 
@@ -100,18 +105,18 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Override
     public void showServerError(String message) {
-        showError(message);
+        showErrorDialog(message);
     }
 
     @Override
     public void showInvalidCredentialsError() {
         //TODO: Evaluate removing this, it is unused.
-        showError(getString(R.string.error_unauthorized));
+        showErrorDialog(getString(R.string.error_unauthorized));
     }
 
     @Override
     public void showUnexpectedError(String message) {
-        showError(message);
+        showErrorDialog(message);
     }
 
     @Override
@@ -119,11 +124,12 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
         navigateTo(HomeActivity.class);
     }
 
-    private void showError(String message) {
-        //TODO: fix window leaked here:
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.error))
-                .setMessage(message)
-                .show();
+    private void showErrorDialog(String message) {
+        if (alertDialog == null) {
+            alertDialog = new AlertDialog.Builder(this).create();
+        }
+        alertDialog.setTitle(getString(R.string.error));
+        alertDialog.setMessage(message);
+        alertDialog.show();
     }
 }

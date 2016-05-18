@@ -45,11 +45,11 @@ public class ApiExceptionHandler {
 
     public ApiError handleException(final Throwable apiException) {
         String title = context.getText(R.string.error).toString();
-        String message = "";
+        String message;
         ApiException.Kind kind;
 
         if (apiException instanceof ApiException) {
-            int status = 0;
+            int status = -1;
             kind = ((ApiException) apiException).getKind();
             Response response = ((ApiException) apiException).getResponse();
 
