@@ -33,8 +33,7 @@
     <!-- Navigation drawer strings -->
     <string name="drawer_item_events">Events</string>
 
-    <string name="error">Error</string>
-    <string name="invalid_credentials_error">Unable to log in due to invalid credentials.</string>
+
     <string name="filter_title">Filter</string>
     <string name="filter_sections">Filter sections</string>
 
@@ -47,4 +46,12 @@
     <string name="warning_logout_confirm">Log out</string>
     <string name="warning_logout_dismiss">close</string>
 
+    <!-- Error/warning messages -->
+    <string name="error">Error</string>
+    <string name="error_not_found">Server not found.</string>
+    <string name="error_unauthorized">Unable to log in due to invalid credentials.</string>
+    <string name="error_unexpected">Unexpected error:</string>
+    <string name="error_internal">500 Internal server error.</string>
+    <string name="error_unavailable">503 Unavailable</string>
+    <string name="error_bad_request">400 Bad request</string>
 </resources>

@@ -30,6 +30,7 @@ package org.hisp.dhis.android.eventcapture;
 
 import android.content.Context;
 
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
@@ -57,6 +58,7 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
+import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
@@ -104,6 +106,13 @@ public class UserModule {
                                                        AppPreferences appPreferences) {
         return new AppAccountManager(context, appPreferences);
     }
+
+    @Provides
+    @PerUser
+    public ApiExceptionHandler providesApiExceptionHandler(Context context) {
+        return new ApiExceptionHandler(context);
+    }
+
 
     @Provides
     @Nullable
@@ -226,8 +235,9 @@ public class UserModule {
     @Provides
     @PerUser
     public LoginPresenter providesLoginPresenter(
-            @Nullable CurrentUserInteractor accountInteractor, Logger logger) {
-        return new LoginPresenterImpl(accountInteractor, logger);
+            @Nullable CurrentUserInteractor accountInteractor,
+            ApiExceptionHandler apiExceptionHandler,Logger logger) {
+        return new LoginPresenterImpl(accountInteractor, apiExceptionHandler, logger);
     }
 
     @Provides

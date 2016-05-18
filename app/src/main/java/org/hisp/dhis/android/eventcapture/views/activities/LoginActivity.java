@@ -40,7 +40,6 @@ import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 import javax.inject.Inject;
 
-
 public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Inject
@@ -106,7 +105,8 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Override
     public void showInvalidCredentialsError() {
-        showError(getString(R.string.invalid_credentials_error));
+        //TODO: Evaluate removing this, it is unused.
+        showError(getString(R.string.error_unauthorized));
     }
 
     @Override
@@ -120,6 +120,7 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
     }
 
     private void showError(String message) {
+        //TODO: fix window leaked here:
         new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.error))
                 .setMessage(message)

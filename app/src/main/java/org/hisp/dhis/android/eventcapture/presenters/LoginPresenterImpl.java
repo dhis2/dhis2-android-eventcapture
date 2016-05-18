@@ -28,15 +28,14 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.ApiError;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.OnLoginFinishedListener;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
-import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.utils.Logger;
-
-import java.net.HttpURLConnection;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -50,11 +49,13 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     private final CompositeSubscription subscription;
     private final Logger logger;
 
+    private final ApiExceptionHandler apiExceptionHandler;
     private LoginView loginView;
 
-    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, Logger logger) {
+    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, ApiExceptionHandler apiExceptionHandler, Logger logger) {
         this.userAccountInteractor = userAccountInteractor;
         this.subscription = new CompositeSubscription();
+        this.apiExceptionHandler = apiExceptionHandler;
         this.logger = logger;
     }
 
@@ -131,38 +132,23 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     }
 
     private void handleError(final Throwable throwable) {
-        if (throwable instanceof ApiException) {
-            ApiException apiException = (ApiException) throwable;
-            switch (apiException.getKind()) {
-                case CONVERSION:
-                    onUnexpectedError(apiException.getMessage());
-                    break;
-                case HTTP: {
-                    if (apiException.getResponse() != null) {
-                        System.out.println("STATUS: " + apiException.getResponse().getStatus());
-                        switch (apiException.getResponse().getStatus()) {
-                            case HttpURLConnection.HTTP_UNAUTHORIZED: {
-                                onInvalidCredentialsError();
-                                break;
-                            }
-                            default: {
-                                onUnexpectedError(throwable.getMessage());
-                            }
-                        }
-                    }
-                    break;
-                }
-                case NETWORK: {
-                    onServerError(apiException.getMessage());
-                    break;
-                }
-                case UNEXPECTED: {
-                    onUnexpectedError(throwable.getMessage());
-                    break;
-                }
+        ApiError error = apiExceptionHandler.handleException(throwable);
+
+        switch (error.getKind()) {
+            case CONVERSION:
+                onUnexpectedError(error.getDescription());
+                break;
+            case HTTP: {
+                //same as NETWORK, below.
             }
-        } else {
-            onUnexpectedError(throwable.getMessage());
+            case NETWORK: {
+                onServerError(error.getDescription());
+                break;
+            }
+            case UNEXPECTED: {
+                onUnexpectedError(error.getDescription());
+                break;
+            }
         }
     }
 }
