@@ -370,6 +370,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             selectorPresenter.listEvents(getOrganisationUnitUid(pickers), getProgramUid(pickers));
         } else {
             hideCreateEventButton();
+
+            // clear out list of existing events
+            reportEntityAdapter.swapData(null);
         }
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }
