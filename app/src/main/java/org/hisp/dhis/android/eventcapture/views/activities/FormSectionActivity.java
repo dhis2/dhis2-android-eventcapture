@@ -266,13 +266,13 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+                String stringDate = (new SimpleDateFormat(DATE_FORMAT, Locale.US))
+                        .format(calendar.getTime());
                 String newValue = String.format(Locale.getDefault(), "%s: %s",
-                        getString(R.string.report_date),
-                        simpleDateFormat.format(calendar.getTime()));
+                        getString(R.string.report_date), stringDate);
                 textViewReportDate.setText(newValue);
 
-                DateTime dateTime = new DateTime(calendar.getTimeInMillis());
+                DateTime dateTime = DateTime.parse(stringDate);
                 formSectionPresenter.saveEventDate(getEventUid(), dateTime);
             }
         };
