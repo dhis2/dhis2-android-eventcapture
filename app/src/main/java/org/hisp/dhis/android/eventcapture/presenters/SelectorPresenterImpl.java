@@ -29,7 +29,6 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.SessionPreferences;
-import org.hisp.dhis.android.eventcapture.model.ReportEntity;
 import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
@@ -50,6 +49,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.utils.Logger;
 import org.joda.time.DateTime;
 
@@ -118,6 +118,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         if (!isSyncedInitially) {
             sync();
         }
+
+        listPickers();
     }
 
     @Override
@@ -359,10 +361,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }
             }
 
-            System.out.println("Values: " + event.getDataValues());
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
-            System.out.println("ValueMap: " + dataElementToValueMap);
 
             String lineOne = null;
             String lineTwo = null;
@@ -375,10 +375,13 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 if (stageDataElement != null) {
                     DataElement dataElement = stageDataElement.getDataElement();
 
+                    // TODO put 'none' string into resources
+                    String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
+                            dataElementToValueMap.get(dataElement.getUId()) : "none";
                     String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
                             dataElement.getDisplayFormName() : dataElement.getDisplayName();
                     String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
-                            dataElementName, dataElementToValueMap.get(dataElement.getUId()));
+                            dataElementName, value);
 
                     switch (index) {
                         case 0: {
@@ -424,7 +427,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
         if (dataValues != null && !dataValues.isEmpty()) {
             for (TrackedEntityDataValue dataValue : dataValues) {
-                dataElementToValueMap.put(dataValue.getDataElement(), dataValue.getValue());
+                String value = !isEmpty(dataValue.getValue()) ? dataValue.getValue() : "";
+                dataElementToValueMap.put(dataValue.getDataElement(), value);
             }
         }
 

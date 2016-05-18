@@ -55,12 +55,12 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.model.ReportEntity;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
-import org.hisp.dhis.android.eventcapture.views.adapters.ReportEntityAdapter;
-import org.hisp.dhis.android.eventcapture.views.adapters.ReportEntityAdapter.OnReportEntityClickListener;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityClickListener;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
@@ -370,6 +370,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             selectorPresenter.listEvents(getOrganisationUnitUid(pickers), getProgramUid(pickers));
         } else {
             hideCreateEventButton();
+
+            // clear out list of existing events
+            reportEntityAdapter.swapData(null);
         }
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }
@@ -433,13 +436,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                     getString(R.string.organisation_unit), getOrganisationUnitLabel(pickers));
         } else {
             orgUnitLabel = String.format(Locale.getDefault(), "%s: %s",
-                    getString(R.string.organisation_unit), "none");
+                    getString(R.string.organisation_unit), getString(R.string.none));
         }
 
         if (!isEmpty(getProgramLabel(pickers))) {
             programLabel = getProgramLabel(pickers);
         } else {
-            programLabel = "None";
+            programLabel = String.format(Locale.getDefault(), "%s: %s",
+                    getString(R.string.program), getString(R.string.none));
         }
 
         selectedOrganisationUnit.setText(orgUnitLabel);
@@ -464,7 +468,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
-    // TODO IndexOutOfBoundException
     private static String getOrganisationUnitUid(List<Picker> pickers) {
         if (pickers != null && !pickers.isEmpty() &&
                 pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
@@ -474,7 +477,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
-    // TODO IndexOutOfBoundException
     private static String getOrganisationUnitLabel(List<Picker> pickers) {
         if (pickers != null && !pickers.isEmpty() &&
                 pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
@@ -484,7 +486,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
-    // TODO IndexOutOfBoundException
     private static String getProgramUid(List<Picker> pickers) {
         if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
@@ -494,7 +495,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
-    // TODO IndexOutOfBoundException
     private static String getProgramLabel(List<Picker> pickers) {
         if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {

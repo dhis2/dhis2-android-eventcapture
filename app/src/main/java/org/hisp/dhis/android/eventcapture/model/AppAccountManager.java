@@ -13,9 +13,6 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
  * A singleton class to abstract/wrap and simplify interactions with Account in relation to synchronizing.
  */
 public class AppAccountManager {
-    private static final String TAG = AppAccountManager.class.getSimpleName();
-
-    //private static AppAccountManager instance;
     public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
     public static final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
     public static String accountName = "default dhis2 account";
