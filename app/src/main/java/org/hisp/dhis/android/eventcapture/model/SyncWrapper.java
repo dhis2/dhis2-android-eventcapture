@@ -43,6 +43,7 @@ import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramRule;
 import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
@@ -126,6 +127,8 @@ public class SyncWrapper {
                                 loadProgramRules(programsWithoutRegistration);
                         List<ProgramRuleAction> programRuleActions =
                                 loadProgramRuleActions(programRules);
+                        List<ProgramRuleVariable> programRuleVariables =
+                                loadProgramRuleVariables(programsWithoutRegistration);
 
                         return loadProgramStageDataElements(programStages, programStageSections);
                     }
@@ -197,11 +200,15 @@ public class SyncWrapper {
 
         if (programRules != null && !programRules.isEmpty()) {
             for (ProgramRule programRule : programRules) {
-                programRuleActionUids.addAll(ModelUtils.toUidSet(
-                        programRule.getProgramRuleActions()));
+                programRuleActionUids.addAll(
+                        ModelUtils.toUidSet(programRule.getProgramRuleActions()));
             }
         }
 
         return programRuleActionInteractor.pull(programRuleActionUids).toBlocking().first();
+    }
+
+    private List<ProgramRuleVariable> loadProgramRuleVariables(List<Program> programs) {
+        return programRuleVariableInteractor.pull(programs).toBlocking().first();
     }
 }
