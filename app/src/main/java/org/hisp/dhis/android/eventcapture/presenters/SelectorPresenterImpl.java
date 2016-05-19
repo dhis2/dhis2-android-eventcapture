@@ -184,6 +184,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .subscribe(new Action1<List<Event>>() {
                     @Override
                     public void call(List<Event> events) {
+                        listPickers();
+
                         logger.d(TAG, "Synced events successfully");
                     }
                 }, new Action1<Throwable>() {

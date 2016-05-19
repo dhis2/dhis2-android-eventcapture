@@ -123,12 +123,12 @@ public class SyncWrapper {
                                 loadProgramStages(programsWithoutRegistration);
                         List<ProgramStageSection> programStageSections =
                                 loadProgramStageSections(programStages);
-                        List<ProgramRule> programRules =
-                                loadProgramRules(programsWithoutRegistration);
-                        List<ProgramRuleAction> programRuleActions =
-                                loadProgramRuleActions(programRules);
-                        List<ProgramRuleVariable> programRuleVariables =
-                                loadProgramRuleVariables(programsWithoutRegistration);
+//                        List<ProgramRule> programRules =
+//                                loadProgramRules(programsWithoutRegistration);
+//                        List<ProgramRuleAction> programRuleActions =
+//                                loadProgramRuleActions(programRules);
+//                        List<ProgramRuleVariable> programRuleVariables =
+//                                loadProgramRuleVariables(programsWithoutRegistration);
 
                         return loadProgramStageDataElements(programStages, programStageSections);
                     }
@@ -188,6 +188,8 @@ public class SyncWrapper {
                     programStageSection.getProgramStageDataElements());
             dataElementUids.addAll(stageSectionElements);
         }
+
+        System.out.println("StageDataElements: " + dataElementUids);
         return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
     }
 

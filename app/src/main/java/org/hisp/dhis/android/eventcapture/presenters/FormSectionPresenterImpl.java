@@ -2,13 +2,21 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
+import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
+import org.hisp.dhis.client.sdk.models.common.base.IdentifiableObject;
+import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.models.optionset.Option;
+import org.hisp.dhis.client.sdk.models.optionset.OptionSet;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramRule;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
+import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
+import org.hisp.dhis.client.sdk.rules.RuleEngine;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -205,6 +213,8 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         final Program program = new Program();
         program.setUId(event.getProgram());
 
+        // createRulesEngine(event.getProgram(), event.getProgramStage());
+
         return programStageInteractor.list(program)
                 .map(new Func1<List<ProgramStage>, SimpleEntry<Picker, List<FormSection>>>() {
 
@@ -261,5 +271,72 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         logger.e(TAG, "Form construction failed", throwable);
                     }
                 });
+    }
+
+    private void createRulesEngine(String programUid, String programStageUid) {
+        Program program = new Program();
+        program.setUId(programUid);
+
+
+        List<ProgramRule> programRules = D2.programRules()
+                .list(program).toBlocking().first();
+        print("RULES", programRules);
+        List<DataElement> dataElements = getDataElements(programStageUid);
+        print("DATA_ELEMENTS", dataElements);
+        List<OptionSet> optionSets = getOptionSets(dataElements);
+        print("OPTION_SETS", optionSets);
+
+        RuleEngine ruleEngine = new RuleEngine.Builder()
+                .programRules(programRules)
+                .dataElements(dataElements)
+                .optionSets(optionSets)
+                .build();
+    }
+
+    private static List<DataElement> getDataElements(String programStageUid) {
+        ProgramStage programStage = new ProgramStage();
+        programStage.setUId(programStageUid);
+
+        List<ProgramStageDataElement> programStageDataElements = D2.programStageDataElements()
+                .list(programStage).toBlocking().first();
+        List<DataElement> dataElements = new ArrayList<>();
+
+        if (programStageDataElements != null && !programStageDataElements.isEmpty()) {
+            for (ProgramStageDataElement stageDataElement : programStageDataElements) {
+                if (stageDataElement.getDataElement() != null) {
+                    dataElements.add(stageDataElement.getDataElement());
+                }
+            }
+        }
+
+        return dataElements;
+    }
+
+    private static List<OptionSet> getOptionSets(List<DataElement> dataElements) {
+        List<OptionSet> optionSets = new ArrayList<>();
+
+        if (dataElements != null && !dataElements.isEmpty()) {
+            for (DataElement dataElement : dataElements) {
+                if (dataElement.getOptionSet() != null) {
+                    OptionSet optionSet = dataElement.getOptionSet();
+
+                    List<Option> options = D2.optionSets().list(optionSet)
+                            .toBlocking().first();
+                    optionSet.setOptions(options);
+
+                    optionSets.add(optionSet);
+                }
+            }
+        }
+
+        return optionSets;
+    }
+
+    private static void print(String type, List<? extends IdentifiableObject> models) {
+        System.out.println("===== TYPE: ==== " + type) ;
+
+        if (models != null) {
+            System.out.println("===== MODELS: ====: " + models.size());
+        }
     }
 }

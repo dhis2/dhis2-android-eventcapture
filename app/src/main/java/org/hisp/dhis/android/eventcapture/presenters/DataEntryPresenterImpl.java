@@ -229,7 +229,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             DataElement dataElement = stageDataElement.getDataElement();
             if (dataElement == null) {
                 throw new RuntimeException("Malformed metadata: Program" +
-                        "StageDataElement does not have reference to DataElement");
+                        "StageDataElement " + stageDataElement.getUId() +
+                        " does not have reference to DataElement");
             }
 
             OptionSet optionSet = dataElement.getOptionSet();
