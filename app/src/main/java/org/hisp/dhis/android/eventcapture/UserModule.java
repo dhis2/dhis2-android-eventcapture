@@ -51,6 +51,9 @@ import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
@@ -217,6 +220,39 @@ public class UserModule {
     }
 
     @Provides
+    @Nullable
+    @PerUser
+    public ProgramRuleInteractor providesProgramRuleInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programRules();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramRuleActionInteractor providesProgramRuleActionInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programRuleActions();
+        }
+
+        return null;
+    }
+
+    @Provides
+    @Nullable
+    @PerUser
+    public ProgramRuleVariableInteractor providesProgramRuleVariableInteractor() {
+        if (D2.isConfigured()) {
+            return D2.programRuleVariables();
+        }
+
+        return null;
+    }
+
+    @Provides
     @PerUser
     public LauncherPresenter providesLauncherPresenter(
             @Nullable CurrentUserInteractor accountInteractor) {
@@ -246,12 +282,16 @@ public class UserModule {
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
+            @Nullable ProgramRuleInteractor programRuleInteractor,
+            @Nullable ProgramRuleActionInteractor programRuleActionInteractor,
+            @Nullable ProgramRuleVariableInteractor programRuleVariableInteractor,
             @Nullable EventInteractor eventInteractor) {
 
         return new SyncWrapper(
                 userOrganisationUnitInteractor, userProgramInteractor,
                 programStageInteractor, programStageSectionInteractor,
-                programStageDataElementInteractor, eventInteractor);
+                programStageDataElementInteractor, programRuleInteractor,
+                programRuleActionInteractor, programRuleVariableInteractor, eventInteractor);
     }
 
     @Provides
