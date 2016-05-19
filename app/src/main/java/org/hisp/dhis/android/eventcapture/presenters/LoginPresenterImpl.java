@@ -117,7 +117,12 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
 
     @Override
     public void onInvalidCredentialsError() {
-        loginView.showInvalidCredentialsError();
+        loginView.hideProgress(new LoginView.OnProgressFinishedListener() {
+            @Override
+            public void onProgressFinished() {
+                loginView.showInvalidCredentialsError();
+            }
+        });
     }
 
     @Override
