@@ -189,7 +189,6 @@ public class SyncWrapper {
             dataElementUids.addAll(stageSectionElements);
         }
 
-        System.out.println("StageDataElements: " + dataElementUids);
         return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
     }
 

@@ -32,6 +32,7 @@ import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,6 +170,13 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                                                  UserCredentials userCredentials) {
                         List<ProgramStageDataElement> dataElements = dataElementInteractor
                                 .list(stageSection).toBlocking().first();
+
+                        // sort ProgramStageDataElements by sortOrder
+                        if (dataElements != null) {
+                            Collections.sort(dataElements,
+                                    ProgramStageDataElement.SORT_ORDER_COMPARATOR);
+                        }
+
                         String username = userCredentials.getUsername();
                         return transformProgramStageDataElements(username, event, dataElements);
                     }

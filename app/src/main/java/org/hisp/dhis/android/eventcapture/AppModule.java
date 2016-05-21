@@ -81,7 +81,7 @@ public class AppModule {
     public OkHttpClient providesOkHttpClient() {
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
             return new OkHttpClient.Builder()
                     .addNetworkInterceptor(new StethoInterceptor())

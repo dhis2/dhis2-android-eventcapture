@@ -6,8 +6,10 @@ import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenterImpl;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
-import org.hisp.dhis.client.sdk.android.organisationunit.OrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
@@ -32,8 +34,13 @@ public class FormModule {
     public FormSectionPresenter providesFormSectionPresenter(
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
+            @Nullable ProgramRuleInteractor programRuleInteractor,
+            @Nullable ProgramRuleActionInteractor programRuleActionInteractor,
+            @Nullable ProgramRuleVariableInteractor programRuleVariableInteractor,
             @Nullable EventInteractor eventInteractor,  Logger logger) {
-        return new FormSectionPresenterImpl(programStageInteractor, stageSectionInteractor,
+        return new FormSectionPresenterImpl(programStageInteractor,
+                stageSectionInteractor, programRuleVariableInteractor,
+                programRuleInteractor, programRuleActionInteractor,
                 eventInteractor, logger);
     }
 

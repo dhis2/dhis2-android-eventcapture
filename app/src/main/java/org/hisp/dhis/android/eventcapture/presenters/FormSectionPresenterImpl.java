@@ -2,20 +2,20 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
-import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
-import org.hisp.dhis.client.sdk.models.common.base.IdentifiableObject;
-import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.models.optionset.Option;
-import org.hisp.dhis.client.sdk.models.optionset.OptionSet;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramRule;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
+import org.hisp.dhis.client.sdk.rules.RuleEffect;
 import org.hisp.dhis.client.sdk.rules.RuleEngine;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
@@ -24,12 +24,16 @@ import org.joda.time.DateTime;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -43,21 +47,35 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
 
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
+    private final ProgramRuleVariableInteractor programRuleVariableInteractor;
+
+    private final ProgramRuleInteractor programRuleInteractor;
+    private final ProgramRuleActionInteractor programRuleActionInteractor;
 
     private final EventInteractor eventInteractor;
-
     private final Logger logger;
+
+    // caching RuleEffects in presenter (in order to avoid redundant work)
+    private final List<RuleEffect> ruleEffects;
+    private RuleEngine ruleEngine;
 
     private FormSectionView formSectionView;
     private CompositeSubscription subscription;
 
     public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
+                                    ProgramRuleVariableInteractor programRuleVariableInteractor,
+                                    ProgramRuleInteractor programRuleInteractor,
+                                    ProgramRuleActionInteractor programRuleActionInteractor,
                                     EventInteractor eventInteractor, Logger logger) {
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
+        this.programRuleVariableInteractor = programRuleVariableInteractor;
+        this.programRuleInteractor = programRuleInteractor;
+        this.programRuleActionInteractor = programRuleActionInteractor;
         this.eventInteractor = eventInteractor;
         this.logger = logger;
+        this.ruleEffects = new ArrayList<>();
     }
 
     @Override
@@ -156,22 +174,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         final Program program = new Program();
         program.setUId(event.getProgram());
 
-        return programStageInteractor.list(program)
-                .map(new Func1<List<ProgramStage>, ProgramStage>() {
-                    @Override
-                    public ProgramStage call(List<ProgramStage> stages) {
-                        // since this form is intended to be used in event capture
-                        // and programs for event capture apps consist only from one
-                        // and only one program stage, we can just retrieve it from the list
-                        if (stages == null || stages.isEmpty()) {
-                            logger.e(TAG, "Form construction failed. No program " +
-                                    "stages are assigned to given program: " + program.getUId());
-                            return null;
-                        }
-
-                        return stages.get(0);
-                    }
-                })
+        return loadProgramStage(program)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<ProgramStage>() {
@@ -213,26 +216,24 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         final Program program = new Program();
         program.setUId(event.getProgram());
 
-        // createRulesEngine(event.getProgram(), event.getProgramStage());
+        // experimental
+        startRuleEngine(program, event);
 
-        return programStageInteractor.list(program)
-                .map(new Func1<List<ProgramStage>, SimpleEntry<Picker, List<FormSection>>>() {
+        return Observable.zip(loadProgramStage(program), loadRulesEngine(program),
+                new Func2<ProgramStage, RuleEngine, SimpleEntry<Picker, List<FormSection>>>() {
 
                     @Override
-                    public SimpleEntry<Picker, List<FormSection>> call(List<ProgramStage> stages) {
-                        // since this form is intended to be used in event capture
-                        // and programs for event capture apps consist only from one
-                        // and only one program stage, we can just retrieve it from the list
-                        if (stages == null || stages.isEmpty()) {
-                            logger.e(TAG, "Form construction failed. No program " +
-                                    "stages are assigned to given program: " + program.getUId());
-                            return null;
-                        }
-
-                        ProgramStage programStage = stages.get(0);
+                    public SimpleEntry<Picker, List<FormSection>> call(ProgramStage programStage,
+                                                                       RuleEngine ruleEngine) {
                         List<ProgramStageSection> stageSections = programStageSectionInteractor
                                 .list(programStage).toBlocking().first();
 
+                        // we need to execute RulesEngine here
+                        // TODO read all events from database) (including current one)
+                        // TODO wrap rulesEngine in Observable
+                        // TODO calculate effects based on available data (and cache them)
+                        // TODO zip with section creation (since we need to apply effects to sections)
+                        ruleEngine.execute(event, Arrays.asList(event));
 
                         // TODO remove hardcoded prompt
                         Picker picker = Picker.create(programStage.getUId(), "Choose section");
@@ -240,11 +241,16 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
                         if (stageSections != null && !stageSections.isEmpty()) {
+
+                            // sort sections
+                            Collections.sort(stageSections,
+                                    ProgramStageSection.SORT_ORDER_COMPARATOR);
+
                             for (ProgramStageSection section : stageSections) {
                                 formSections.add(new FormSection(
                                         section.getUId(), section.getDisplayName()));
-                                picker.addChild(Picker.create(section.getUId(),
-                                        section.getDisplayName(), picker));
+                                picker.addChild(Picker.create(
+                                        section.getUId(), section.getDisplayName(), picker));
                             }
                         }
 
@@ -273,70 +279,92 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 });
     }
 
-    private void createRulesEngine(String programUid, String programStageUid) {
-        Program program = new Program();
-        program.setUId(programUid);
+    private Observable<ProgramStage> loadProgramStage(final Program program) {
+        return programStageInteractor.list(program)
+                .map(new Func1<List<ProgramStage>, ProgramStage>() {
+                    @Override
+                    public ProgramStage call(List<ProgramStage> stages) {
+                        // since this form is intended to be used in event capture
+                        // and programs for event capture apps consist only from one
+                        // and only one program stage, we can just retrieve it from the list
+                        if (stages == null || stages.isEmpty()) {
+                            logger.e(TAG, "Form construction failed. No program " +
+                                    "stages are assigned to given program: " + program.getUId());
+                            return null;
+                        }
 
-
-        List<ProgramRule> programRules = D2.programRules()
-                .list(program).toBlocking().first();
-        print("RULES", programRules);
-        List<DataElement> dataElements = getDataElements(programStageUid);
-        print("DATA_ELEMENTS", dataElements);
-        List<OptionSet> optionSets = getOptionSets(dataElements);
-        print("OPTION_SETS", optionSets);
-
-        RuleEngine ruleEngine = new RuleEngine.Builder()
-                .programRules(programRules)
-                .dataElements(dataElements)
-                .optionSets(optionSets)
-                .build();
+                        return stages.get(0);
+                    }
+                });
     }
 
-    private static List<DataElement> getDataElements(String programStageUid) {
-        ProgramStage programStage = new ProgramStage();
-        programStage.setUId(programStageUid);
+    private void startRuleEngine(Program program, Event event) {
+        RuleEngine ruleEngine = loadRulesEngine(program).toBlocking().first();
 
-        List<ProgramStageDataElement> programStageDataElements = D2.programStageDataElements()
-                .list(programStage).toBlocking().first();
-        List<DataElement> dataElements = new ArrayList<>();
+        List<RuleEffect> ruleEffects = null;
 
-        if (programStageDataElements != null && !programStageDataElements.isEmpty()) {
-            for (ProgramStageDataElement stageDataElement : programStageDataElements) {
-                if (stageDataElement.getDataElement() != null) {
-                    dataElements.add(stageDataElement.getDataElement());
-                }
+        try {
+            ruleEffects = ruleEngine.execute(event, Arrays.asList(event));
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+
+        if (ruleEffects == null) {
+            ruleEffects = new ArrayList<>();
+        }
+
+        if (!ruleEffects.isEmpty()) {
+            for (RuleEffect ruleEffect : ruleEffects) {
+                System.out.println("RuleEffect: " + ruleEffect);
             }
         }
-
-        return dataElements;
     }
 
-    private static List<OptionSet> getOptionSets(List<DataElement> dataElements) {
-        List<OptionSet> optionSets = new ArrayList<>();
-
-        if (dataElements != null && !dataElements.isEmpty()) {
-            for (DataElement dataElement : dataElements) {
-                if (dataElement.getOptionSet() != null) {
-                    OptionSet optionSet = dataElement.getOptionSet();
-
-                    List<Option> options = D2.optionSets().list(optionSet)
-                            .toBlocking().first();
-                    optionSet.setOptions(options);
-
-                    optionSets.add(optionSet);
-                }
-            }
-        }
-
-        return optionSets;
+    private Observable<RuleEngine> loadRulesEngine(Program program) {
+        return Observable.zip(loadProgramRules(program), loadProgramRuleVariables(program),
+                new Func2<List<ProgramRule>, List<ProgramRuleVariable>, RuleEngine>() {
+                    @Override
+                    public RuleEngine call(List<ProgramRule> programRules,
+                                           List<ProgramRuleVariable> programRuleVariables) {
+                        return new RuleEngine.Builder()
+                                .programRuleVariables(programRuleVariables)
+                                .programRules(programRules)
+                                .build();
+                    }
+                });
     }
 
-    private static void print(String type, List<? extends IdentifiableObject> models) {
-        System.out.println("===== TYPE: ==== " + type) ;
+    private Observable<List<ProgramRule>> loadProgramRules(Program program) {
+        return programRuleInteractor.list(program)
+                .map(new Func1<List<ProgramRule>, List<ProgramRule>>() {
+                    @Override
+                    public List<ProgramRule> call(List<ProgramRule> programRules) {
+                        if (programRules == null) {
+                            programRules = new ArrayList<>();
+                        }
 
-        if (models != null) {
-            System.out.println("===== MODELS: ====: " + models.size());
-        }
+                        for (ProgramRule programRule : programRules) {
+                            List<ProgramRuleAction> programRuleActions = programRuleActionInteractor
+                                    .list(programRule).toBlocking().first();
+                            programRule.setProgramRuleActions(programRuleActions);
+                        }
+
+                        return programRules;
+                    }
+                });
+    }
+
+    private Observable<List<ProgramRuleVariable>> loadProgramRuleVariables(Program program) {
+        return programRuleVariableInteractor.list(program)
+                .map(new Func1<List<ProgramRuleVariable>, List<ProgramRuleVariable>>() {
+                    @Override
+                    public List<ProgramRuleVariable> call(List<ProgramRuleVariable> variables) {
+                        if (variables == null) {
+                            variables = new ArrayList<>();
+                        }
+
+                        return variables;
+                    }
+                });
     }
 }
