@@ -89,6 +89,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         // TODO consider refactoring rules-engine logic out of map function)
                         // synchronously initializing rule engine
                         rxRuleEngine.init(eventUid).toBlocking().first();
+
+                        // compute initial RuleEffects
+                        rxRuleEngine.notifyDataSetChanged();
                         return event;
                     }
                 })

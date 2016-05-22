@@ -28,6 +28,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subjects.ReplaySubject;
+import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
 
 public class RxRulesEngine {
@@ -43,7 +44,7 @@ public class RxRulesEngine {
 
     // engine
     private RuleEngine ruleEngine;
-    private ReplaySubject<List<RuleEffect>> ruleEffectSubject;
+    private Subject<List<RuleEffect>, List<RuleEffect>> ruleEffectSubject;
 
     // utilities
     private final Logger logger;
@@ -100,7 +101,7 @@ public class RxRulesEngine {
                 });
     }
 
-    public void notifyEventChanged() {
+    public void notifyDataSetChanged() {
         if (currentEvent == null) {
             throw new IllegalArgumentException("No events are associated with RxRulesEngine");
         }
@@ -147,6 +148,10 @@ public class RxRulesEngine {
 
     public Subscription subscribe(Action1<List<RuleEffect>> onNext, Action1<Throwable> onError) {
         return ruleEffectSubject.subscribe(onNext, onError);
+    }
+
+    public Observable<List<RuleEffect>> observable() {
+        return ruleEffectSubject;
     }
 
     private Observable<RuleEngine> loadRulesEngine(Program program) {
