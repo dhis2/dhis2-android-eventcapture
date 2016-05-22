@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.RxRulesEngine;
 import org.hisp.dhis.android.eventcapture.views.RxOnValueChangedListener;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
@@ -19,6 +20,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
+import org.hisp.dhis.client.sdk.rules.RuleEffect;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityCharSequence;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityCheckBox;
@@ -64,6 +66,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     private final EventInteractor eventInteractor;
     private final TrackedEntityDataValueInteractor dataValueInteractor;
 
+    private final RxRulesEngine rxRulesEngine;
+
     private final Logger logger;
     private final RxOnValueChangedListener onValueChangedListener;
 
@@ -78,7 +82,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                                   OptionSetInteractor optionSetInteractor,
                                   EventInteractor eventInteractor,
                                   TrackedEntityDataValueInteractor dataValueInteractor,
-                                  Logger logger) {
+                                  RxRulesEngine rxRulesEngine, Logger logger) {
         this.currentUserInteractor = currentUserInteractor;
         this.stageInteractor = stageInteractor;
         this.sectionInteractor = sectionInteractor;
@@ -87,9 +91,22 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
         this.eventInteractor = eventInteractor;
         this.dataValueInteractor = dataValueInteractor;
+        this.rxRulesEngine = rxRulesEngine;
 
         this.logger = logger;
         this.onValueChangedListener = new RxOnValueChangedListener();
+
+        this.rxRulesEngine.subscribe(new Action1<List<RuleEffect>>() {
+            @Override
+            public void call(List<RuleEffect> ruleEffects) {
+                System.out.println("RuleEffects: " + ruleEffects);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        });
     }
 
     @Override
@@ -214,6 +231,9 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     public void call(Boolean isSaved) {
                         if (isSaved) {
                             logger.d(TAG, "data value is saved successfully");
+
+                            // fire rule engine execution
+                            rxRulesEngine.notifyEventChanged();
                         } else {
                             logger.d(TAG, "Failed to save value");
                         }
@@ -271,8 +291,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                                             ProgramStageDataElement stageDataElement) {
         DataElement dataElement = stageDataElement.getDataElement();
 
-        logger.d(TAG, "DataElement: " + dataElement.getDisplayName());
-        logger.d(TAG, "ValueType: " + dataElement.getValueType());
+        // logger.d(TAG, "DataElement: " + dataElement.getDisplayName());
+        // logger.d(TAG, "ValueType: " + dataElement.getValueType());
 
         // create TrackedEntityDataValue upfront
         if (dataValue == null) {
@@ -282,8 +302,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             dataValue.setStoredBy(username);
         }
 
-        logger.d(TAG, "transformDataElement() -> TrackedEntityDataValue: " +
-                dataValue + " localId: " + dataValue.getId());
+        // logger.d(TAG, "transformDataElement() -> TrackedEntityDataValue: " +
+        //        dataValue + " localId: " + dataValue.getId());
 
         // in case if we have option set linked to data-element, we
         // need to process it regardless of data-element value type

@@ -1,22 +1,15 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.RxRulesEngine;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.models.program.ProgramRule;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
-import org.hisp.dhis.client.sdk.rules.RuleEffect;
-import org.hisp.dhis.client.sdk.rules.RuleEngine;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -24,7 +17,6 @@ import org.joda.time.DateTime;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,7 +25,6 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -47,35 +38,24 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
 
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
-    private final ProgramRuleVariableInteractor programRuleVariableInteractor;
-
-    private final ProgramRuleInteractor programRuleInteractor;
-    private final ProgramRuleActionInteractor programRuleActionInteractor;
 
     private final EventInteractor eventInteractor;
-    private final Logger logger;
+    private final RxRulesEngine rxRuleEngine;
 
-    // caching RuleEffects in presenter (in order to avoid redundant work)
-    private final List<RuleEffect> ruleEffects;
-    private RuleEngine ruleEngine;
+    private final Logger logger;
 
     private FormSectionView formSectionView;
     private CompositeSubscription subscription;
 
     public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
-                                    ProgramRuleVariableInteractor programRuleVariableInteractor,
-                                    ProgramRuleInteractor programRuleInteractor,
-                                    ProgramRuleActionInteractor programRuleActionInteractor,
-                                    EventInteractor eventInteractor, Logger logger) {
+                                    EventInteractor eventInteractor, RxRulesEngine rxRuleEngine,
+                                    Logger logger) {
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
-        this.programRuleVariableInteractor = programRuleVariableInteractor;
-        this.programRuleInteractor = programRuleInteractor;
-        this.programRuleActionInteractor = programRuleActionInteractor;
         this.eventInteractor = eventInteractor;
+        this.rxRuleEngine = rxRuleEngine;
         this.logger = logger;
-        this.ruleEffects = new ArrayList<>();
     }
 
     @Override
@@ -102,6 +82,16 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
 
         subscription = new CompositeSubscription();
         subscription.add(eventInteractor.get(eventUid)
+                .map(new Func1<Event, Event>() {
+                    @Override
+                    public Event call(Event event) {
+
+                        // TODO consider refactoring rules-engine logic out of map function)
+                        // synchronously initializing rule engine
+                        rxRuleEngine.init(eventUid).toBlocking().first();
+                        return event;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Event>() {
@@ -212,28 +202,16 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 });
     }
 
-    private Subscription showFormSections(final Event event) {
+    private Subscription showFormSections(final Event currentEvent) {
         final Program program = new Program();
-        program.setUId(event.getProgram());
+        program.setUId(currentEvent.getProgram());
 
-        // experimental
-        startRuleEngine(program, event);
-
-        return Observable.zip(loadProgramStage(program), loadRulesEngine(program),
-                new Func2<ProgramStage, RuleEngine, SimpleEntry<Picker, List<FormSection>>>() {
-
+        return loadProgramStage(program)
+                .map(new Func1<ProgramStage, SimpleEntry<Picker, List<FormSection>>>() {
                     @Override
-                    public SimpleEntry<Picker, List<FormSection>> call(ProgramStage programStage,
-                                                                       RuleEngine ruleEngine) {
+                    public SimpleEntry<Picker, List<FormSection>> call(ProgramStage programStage) {
                         List<ProgramStageSection> stageSections = programStageSectionInteractor
                                 .list(programStage).toBlocking().first();
-
-                        // we need to execute RulesEngine here
-                        // TODO read all events from database) (including current one)
-                        // TODO wrap rulesEngine in Observable
-                        // TODO calculate effects based on available data (and cache them)
-                        // TODO zip with section creation (since we need to apply effects to sections)
-                        ruleEngine.execute(event, Arrays.asList(event));
 
                         // TODO remove hardcoded prompt
                         Picker picker = Picker.create(programStage.getUId(), "Choose section");
@@ -297,74 +275,35 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     }
                 });
     }
-
-    private void startRuleEngine(Program program, Event event) {
-        RuleEngine ruleEngine = loadRulesEngine(program).toBlocking().first();
-
-        List<RuleEffect> ruleEffects = null;
-
-        try {
-            ruleEffects = ruleEngine.execute(event, Arrays.asList(event));
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-
-        if (ruleEffects == null) {
-            ruleEffects = new ArrayList<>();
-        }
-
-        if (!ruleEffects.isEmpty()) {
-            for (RuleEffect ruleEffect : ruleEffects) {
-                System.out.println("RuleEffect: " + ruleEffect);
-            }
-        }
-    }
-
-    private Observable<RuleEngine> loadRulesEngine(Program program) {
-        return Observable.zip(loadProgramRules(program), loadProgramRuleVariables(program),
-                new Func2<List<ProgramRule>, List<ProgramRuleVariable>, RuleEngine>() {
-                    @Override
-                    public RuleEngine call(List<ProgramRule> programRules,
-                                           List<ProgramRuleVariable> programRuleVariables) {
-                        return new RuleEngine.Builder()
-                                .programRuleVariables(programRuleVariables)
-                                .programRules(programRules)
-                                .build();
-                    }
-                });
-    }
-
-    private Observable<List<ProgramRule>> loadProgramRules(Program program) {
-        return programRuleInteractor.list(program)
-                .map(new Func1<List<ProgramRule>, List<ProgramRule>>() {
-                    @Override
-                    public List<ProgramRule> call(List<ProgramRule> programRules) {
-                        if (programRules == null) {
-                            programRules = new ArrayList<>();
-                        }
-
-                        for (ProgramRule programRule : programRules) {
-                            List<ProgramRuleAction> programRuleActions = programRuleActionInteractor
-                                    .list(programRule).toBlocking().first();
-                            programRule.setProgramRuleActions(programRuleActions);
-                        }
-
-                        return programRules;
-                    }
-                });
-    }
-
-    private Observable<List<ProgramRuleVariable>> loadProgramRuleVariables(Program program) {
-        return programRuleVariableInteractor.list(program)
-                .map(new Func1<List<ProgramRuleVariable>, List<ProgramRuleVariable>>() {
-                    @Override
-                    public List<ProgramRuleVariable> call(List<ProgramRuleVariable> variables) {
-                        if (variables == null) {
-                            variables = new ArrayList<>();
-                        }
-
-                        return variables;
-                    }
-                });
-    }
+//
+//    private void startRuleEngine(Program program, Event event) {
+//        RuleEngine ruleEngine = loadRulesEngine(program).toBlocking().first();
+//
+//        List<RuleEffect> ruleEffects = null;
+//
+//        OrganisationUnit organisationUnit = new OrganisationUnit();
+//        organisationUnit.setUId(event.getOrgUnit());
+//
+//        try {
+//            List<Event> events = eventInteractor.list(organisationUnit,
+//                    program).toBlocking().first();
+//            System.out.println("Events: " + events.size());
+//
+//            ruleEffects = ruleEngine.execute(event, events);
+//        } catch (Throwable throwable) {
+//            throwable.printStackTrace();
+//        }
+//
+//        if (ruleEffects == null) {
+//            ruleEffects = new ArrayList<>();
+//        }
+//
+//        if (!ruleEffects.isEmpty()) {
+//            for (RuleEffect ruleEffect : ruleEffects) {
+//                System.out.println("RuleEffect: " + ruleEffect.getLocation() + " " +
+//                        ruleEffect.getContent() + " " + ruleEffect.getData() + " " +
+//                        ruleEffect.getProgramRuleActionType() + " " + ruleEffect.getDataElement());
+//            }
+//        }
+//    }
 }
