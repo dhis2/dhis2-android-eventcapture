@@ -55,17 +55,17 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
-import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter;
-import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityClickListener;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityClickListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -102,9 +102,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     CoordinatorLayout coordinatorLayout;
     CardView bottomSheetView;
 
-    // selected organisation unit and program
+    // selected organisation unit, program and entity count
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
+    private TextView entityCount;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -196,6 +197,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     public void showReportEntities(List<ReportEntity> reportEntities) {
         logger.d(TAG, "amount of report entities: " + reportEntities.size());
         reportEntityAdapter.swapData(reportEntities);
+        updateEntityCount(reportEntities.size());
+    }
+
+    private void updateEntityCount(int count) {
+        entityCount.setText(String.format(Locale.getDefault(), "(%s)", count));
     }
 
     @Override
@@ -332,6 +338,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         selectedOrganisationUnit = (TextView) view.findViewById(R.id.textview_organisation_unit);
         selectedProgram = (TextView) view.findViewById(R.id.textview_program);
+        entityCount = (TextView) view.findViewById(R.id.textview_entity_count);
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView);
         bottomSheetBehavior.setPeekHeight(getResources()
