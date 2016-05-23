@@ -15,6 +15,7 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityAction;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
@@ -127,7 +128,13 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
     }
 
     @Override
-    public void showDataEntryForm(List<FormEntity> formEntities) {
-        rowViewAdapter.swap(formEntities);
+    public void showDataEntryForm(List<FormEntity> formEntities, List<FormEntityAction> actions) {
+        rowViewAdapter.swap(formEntities, actions);
+    }
+
+    @Override
+    public void updateDataEntryForm(List<FormEntityAction> formEntityActions) {
+        System.out.println("FormEntityActions: " + formEntityActions);
+        rowViewAdapter.update(formEntityActions);
     }
 }

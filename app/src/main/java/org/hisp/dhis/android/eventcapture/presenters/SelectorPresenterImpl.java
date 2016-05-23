@@ -348,9 +348,12 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     status = ReportEntity.Status.SENT;
                     break;
                 }
-                case TO_POST:
+                case TO_POST: {
+                    status = ReportEntity.Status.TO_POST;
+                    break;
+                }
                 case TO_UPDATE: {
-                    status = ReportEntity.Status.OFFLINE;
+                    status = ReportEntity.Status.TO_UPDATE;
                     break;
                 }
                 case ERROR: {

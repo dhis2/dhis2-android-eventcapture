@@ -16,13 +16,14 @@ import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.optionset.Option;
 import org.hisp.dhis.client.sdk.models.optionset.OptionSet;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleActionType;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.rules.RuleEffect;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityAction;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityAction.FormEntityActionType;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityCharSequence;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityCheckBox;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityDate;
@@ -34,6 +35,7 @@ import org.hisp.dhis.client.sdk.ui.models.FormEntityText;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -136,8 +138,10 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         List<ProgramStageDataElement> dataElements =
                                 dataElementInteractor.list(stage).toBlocking().first();
                         String username = userCredentials.getUsername();
-                        return transformProgramStageDataElements(username, event,
-                                dataElements, null);
+
+                        List<FormEntity> formEntities = transformDataElements(
+                                username, event, dataElements);
+                        return formEntities;
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -146,7 +150,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     @Override
                     public void call(List<FormEntity> formEntities) {
                         if (dataEntryView != null) {
-                            dataEntryView.showDataEntryForm(formEntities);
+                            dataEntryView.showDataEntryForm(formEntities, null);
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -166,17 +170,43 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             subscription = null;
         }
 
-
         subscription = new CompositeSubscription();
         subscription.add(saveTrackedEntityDataValues());
-        subscription.add(Observable.combineLatest(
+        subscription.add(rxRulesEngine.observable()
+                .map(new Func1<List<RuleEffect>, List<FormEntityAction>>() {
+                    @Override
+                    public List<FormEntityAction> call(List<RuleEffect> ruleEffects) {
+                        logger.d(TAG, "successfully finished calculating rules");
+                        return transformRuleEffects(ruleEffects);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<FormEntityAction>>() {
+                    @Override
+                    public void call(List<FormEntityAction> actions) {
+                        if (dataEntryView != null) {
+                            dataEntryView.updateDataEntryForm(actions);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Failed to calculate rules", throwable);
+                    }
+                }));
+
+        subscription.add(Observable.zip(
                 eventInteractor.get(eventId), sectionInteractor.get(programStageSectionId),
                 currentUserInteractor.userCredentials(), rxRulesEngine.observable(),
-                new Func4<Event, ProgramStageSection, UserCredentials, List<RuleEffect>, List<FormEntity>>() {
+                new Func4<Event, ProgramStageSection, UserCredentials, List<RuleEffect>,
+                        SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
+
                     @Override
-                    public List<FormEntity> call(Event event, ProgramStageSection stageSection,
-                                                 UserCredentials creds, List<RuleEffect> effects) {
-                        System.out.println("Effects: " + effects);
+                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
+                            Event event, ProgramStageSection stageSection, UserCredentials creds,
+                            List<RuleEffect> effects) {
+                        System.out.println("Effects which are applied initially: " + effects);
 
                         List<ProgramStageDataElement> dataElements = dataElementInteractor
                                 .list(stageSection).toBlocking().first();
@@ -188,17 +218,21 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         }
 
                         String username = creds.getUsername();
-                        return transformProgramStageDataElements(username, event,
-                                dataElements, effects);
+
+                        List<FormEntity> formEntities = transformDataElements(
+                                username, event, dataElements);
+                        List<FormEntityAction> formEntityActions = transformRuleEffects(effects);
+
+                        return new SimpleEntry<>(formEntities, formEntityActions);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<FormEntity>>() {
+                .subscribe(new Action1<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
                     @Override
-                    public void call(List<FormEntity> formEntities) {
+                    public void call(SimpleEntry<List<FormEntity>, List<FormEntityAction>> entry) {
                         if (dataEntryView != null) {
-                            dataEntryView.showDataEntryForm(formEntities);
+                            dataEntryView.showDataEntryForm(entry.getKey(), entry.getValue());
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -240,9 +274,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 });
     }
 
-    private List<FormEntity> transformProgramStageDataElements(String username, Event event,
-               List<ProgramStageDataElement> stageDataElements, List<RuleEffect> ruleEffects) {
-
+    private List<FormEntity> transformDataElements(
+            String username, Event event, List<ProgramStageDataElement> stageDataElements) {
         if (stageDataElements == null || stageDataElements.isEmpty()) {
             return new ArrayList<>();
         }
@@ -271,32 +304,9 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             }
         }
 
-        Map<String, RuleEffect> dataElementToEffectMap = new HashMap<>();
-        if (ruleEffects != null && !ruleEffects.isEmpty()) {
-            for (RuleEffect ruleEffect : ruleEffects) {
-                if (ruleEffect.getDataElement() == null) {
-                    continue;
-                }
-
-                dataElementToEffectMap.put(ruleEffect.getDataElement().getUId(), ruleEffect);
-            }
-        }
-
-        System.out.println("DataElementToValueMap: " + dataElementToEffectMap);
-
         List<FormEntity> formEntities = new ArrayList<>();
         for (ProgramStageDataElement stageDataElement : stageDataElements) {
             DataElement dataElement = stageDataElement.getDataElement();
-
-            if (dataElementToEffectMap.get(dataElement.getUId()) != null) {
-                RuleEffect ruleEffect = dataElementToEffectMap.get(dataElement.getUId());
-
-                if (ProgramRuleActionType.HIDEFIELD.equals(ruleEffect.getProgramRuleActionType())) {
-                    System.out.println("Hiding field: " + dataElement.getDisplayName());
-                    continue;
-                }
-            }
-
             formEntities.add(transformDataElement(
                     username, event, dataValueMap.get(dataElement.getUId()), stageDataElement));
         }
@@ -443,6 +453,37 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
                 return formEntityText;
         }
+    }
+
+    private List<FormEntityAction> transformRuleEffects(List<RuleEffect> ruleEffects) {
+        List<FormEntityAction> entityActions = new ArrayList<>();
+        if (ruleEffects == null || ruleEffects.isEmpty()) {
+            return entityActions;
+        }
+
+        for (RuleEffect ruleEffect : ruleEffects) {
+            if (ruleEffect == null || ruleEffect.getProgramRuleActionType() == null) {
+                logger.d(TAG, "failed processing broken RuleEffect");
+                continue;
+            }
+
+            switch (ruleEffect.getProgramRuleActionType()) {
+                case HIDEFIELD: {
+                    if (ruleEffect.getDataElement() != null) {
+                        String dataElementUid = ruleEffect.getDataElement().getUId();
+                        FormEntityAction formEntityAction = new FormEntityAction(
+                                dataElementUid, null, FormEntityActionType.HIDE);
+                        entityActions.add(formEntityAction);
+                    }
+                    break;
+                }
+                case ASSIGN: {
+                    break;
+                }
+            }
+        }
+
+        return entityActions;
     }
 
     private String getFormEntityLabel(ProgramStageDataElement stageDataElement) {
