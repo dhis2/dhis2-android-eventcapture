@@ -123,30 +123,38 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
         subscription = new CompositeSubscription();
         subscription.add(saveTrackedEntityDataValues());
+        subscription.add(initRulesEngine());
+
         subscription.add(Observable.zip(
                 eventInteractor.get(eventId),
                 stageInteractor.get(programStageId),
                 currentUserInteractor.userCredentials(),
-                new Func3<Event, ProgramStage, UserCredentials, List<FormEntity>>() {
+                rxRulesEngine.observable(),
+                new Func4<Event, ProgramStage, UserCredentials, List<RuleEffect>,
+                        SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
+
                     @Override
-                    public List<FormEntity> call(Event event, ProgramStage stage,
-                                                 UserCredentials userCredentials) {
+                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
+                            Event event, ProgramStage stage, UserCredentials creds, List<RuleEffect> effects) {
+
                         List<ProgramStageDataElement> dataElements =
                                 dataElementInteractor.list(stage).toBlocking().first();
-                        String username = userCredentials.getUsername();
+                        String username = creds.getUsername();
 
                         List<FormEntity> formEntities = transformDataElements(
                                 username, event, dataElements);
-                        return formEntities;
+                        List<FormEntityAction> formEntityActions = transformRuleEffects(effects);
+
+                        return new SimpleEntry<>(formEntities, formEntityActions);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<FormEntity>>() {
+                .subscribe(new Action1<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
                     @Override
-                    public void call(List<FormEntity> formEntities) {
+                    public void call(SimpleEntry<List<FormEntity>, List<FormEntityAction>> result) {
                         if (dataEntryView != null) {
-                            dataEntryView.showDataEntryForm(formEntities, null);
+                            dataEntryView.showDataEntryForm(result.getKey(), result.getValue());
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -168,29 +176,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
         subscription = new CompositeSubscription();
         subscription.add(saveTrackedEntityDataValues());
-        subscription.add(rxRulesEngine.observable()
-                .map(new Func1<List<RuleEffect>, List<FormEntityAction>>() {
-                    @Override
-                    public List<FormEntityAction> call(List<RuleEffect> ruleEffects) {
-                        logger.d(TAG, "successfully finished calculating rules");
-                        return transformRuleEffects(ruleEffects);
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<FormEntityAction>>() {
-                    @Override
-                    public void call(List<FormEntityAction> actions) {
-                        if (dataEntryView != null) {
-                            dataEntryView.updateDataEntryForm(actions);
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        logger.e(TAG, "Failed to calculate rules", throwable);
-                    }
-                }));
+        subscription.add(initRulesEngine());
 
         subscription.add(Observable.zip(
                 eventInteractor.get(eventId), sectionInteractor.get(programStageSectionId),
@@ -237,6 +223,32 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
                 }));
+    }
+
+    private Subscription initRulesEngine() {
+        return rxRulesEngine.observable()
+                .map(new Func1<List<RuleEffect>, List<FormEntityAction>>() {
+                    @Override
+                    public List<FormEntityAction> call(List<RuleEffect> ruleEffects) {
+                        logger.d(TAG, "successfully finished calculating rules");
+                        return transformRuleEffects(ruleEffects);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<FormEntityAction>>() {
+                    @Override
+                    public void call(List<FormEntityAction> actions) {
+                        if (dataEntryView != null) {
+                            dataEntryView.updateDataEntryForm(actions);
+                        }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Failed to calculate rules", throwable);
+                    }
+                });
     }
 
     private Subscription saveTrackedEntityDataValues() {
