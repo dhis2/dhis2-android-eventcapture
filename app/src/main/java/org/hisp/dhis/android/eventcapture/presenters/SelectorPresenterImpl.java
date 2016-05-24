@@ -327,6 +327,34 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         );
     }
 
+    @Override
+    public void deleteEvent(final ReportEntity reportEntity) {
+
+        subscription.add(eventInteractor.get(reportEntity.getId())
+                .switchMap(new Func1<Event, Observable<Boolean>>() {
+                    @Override
+                    public Observable<Boolean> call(Event event) {
+                        return eventInteractor.remove(event);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        logger.d(TAG, "Event deleted");
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, "Error deleting event: " + reportEntity.getLineOne(), throwable);
+                        if (selectorView != null) {
+                            selectorView.onReportEntityDeletionError(reportEntity);
+                        }
+                    }
+                }));
+    }
+
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
         List<ProgramStageDataElement> filteredElements =

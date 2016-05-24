@@ -52,6 +52,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
@@ -62,7 +63,7 @@ import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
 import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter;
-import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityClickListener;
+import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityInteractionListener;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
@@ -197,16 +198,22 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     public void showReportEntities(List<ReportEntity> reportEntities) {
         logger.d(TAG, "amount of report entities: " + reportEntities.size());
         reportEntityAdapter.swapData(reportEntities);
-        updateEntityCount(reportEntities.size());
+        updateEntityCount();
     }
 
-    private void updateEntityCount(int count) {
-        entityCount.setText(String.format(Locale.getDefault(), "(%s)", count));
+    private void updateEntityCount() {
+        entityCount.setText(String.format(Locale.getDefault(), "(%s)", reportEntityAdapter.getItemCount()));
     }
 
     @Override
     public void showNoOrganisationUnitsError() {
         pickerAdapter.swapData(null);
+    }
+
+    @Override
+    public void onReportEntityDeletionError(ReportEntity reportEntity) {
+        Toast.makeText(getContext(), R.string.report_entity_deletion_error, Toast.LENGTH_SHORT).show();
+        reportEntityAdapter.addItem(reportEntity);
     }
 
     @Override
@@ -317,10 +324,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
 
         reportEntityAdapter = new ReportEntityAdapter(getActivity());
-        reportEntityAdapter.setOnReportEntityClickListener(new OnReportEntityClickListener() {
+        reportEntityAdapter.setOnReportEntityInteractionListener(new OnReportEntityInteractionListener() {
             @Override
             public void onReportEntityClicked(ReportEntity reportEntity) {
                 SelectorFragment.this.onReportEntityClicked(reportEntity);
+            }
+
+            @Override
+            public void onDeleteReportEntity(ReportEntity reportEntity) {
+                logger.d(TAG, "ReportEntity id to be deleted: " + reportEntity.getId());
+                selectorPresenter.deleteEvent(reportEntity);
+                updateEntityCount();
             }
         });
 
