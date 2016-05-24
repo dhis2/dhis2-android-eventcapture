@@ -21,13 +21,12 @@ import java.util.List;
 import java.util.Map;
 
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
-import rx.subjects.ReplaySubject;
+import rx.subjects.BehaviorSubject;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
 
@@ -90,7 +89,7 @@ public class RxRulesEngine {
                                         eventsMap.putAll(ModelUtils.toMap(eventInteractor.list(
                                                 organisationUnit, program).toBlocking().first()));
 
-                                        ruleEffectSubject = ReplaySubject.create(1);
+                                        ruleEffectSubject = BehaviorSubject.create();
                                         ruleEffectSubject.subscribeOn(Schedulers.computation());
                                         ruleEffectSubject.observeOn(AndroidSchedulers.mainThread());
 
@@ -144,10 +143,6 @@ public class RxRulesEngine {
                         ruleEffectSubject.onError(throwable);
                     }
                 }));
-    }
-
-    public Subscription subscribe(Action1<List<RuleEffect>> onNext, Action1<Throwable> onError) {
-        return ruleEffectSubject.subscribe(onNext, onError);
     }
 
     public Observable<List<RuleEffect>> observable() {

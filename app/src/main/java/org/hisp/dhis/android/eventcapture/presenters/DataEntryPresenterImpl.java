@@ -48,7 +48,6 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func3;
 import rx.functions.Func4;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -110,6 +109,11 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     @Override
     public void detachView() {
         dataEntryView = null;
+
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
     }
 
     @Override
@@ -188,8 +192,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
                             Event event, ProgramStageSection stageSection, UserCredentials creds,
                             List<RuleEffect> effects) {
-                        System.out.println("Effects which are applied initially: " + effects);
-
                         List<ProgramStageDataElement> dataElements = dataElementInteractor
                                 .list(stageSection).toBlocking().first();
 
@@ -230,7 +232,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 .map(new Func1<List<RuleEffect>, List<FormEntityAction>>() {
                     @Override
                     public List<FormEntityAction> call(List<RuleEffect> ruleEffects) {
-                        logger.d(TAG, "successfully finished calculating rules");
+                        logger.d(TAG, "RuleEffects are emitted: " +
+                                System.identityHashCode(ruleEffects));
                         return transformRuleEffects(ruleEffects);
                     }
                 })
