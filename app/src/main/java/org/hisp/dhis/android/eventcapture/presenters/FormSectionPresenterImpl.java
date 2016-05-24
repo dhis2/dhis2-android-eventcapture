@@ -177,7 +177,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                             String eventDate = event.getEventDate() != null ?
                                     event.getEventDate().toString(DATE_FORMAT) : "";
                             formSectionView.showReportDatePicker(
-                                    programStage.getReportDateDescription(), eventDate);
+                                    programStage.getExecutionDateLabel(), eventDate);
 
                             if (programStage.isCaptureCoordinates()) {
                                 String latitude = null;
@@ -278,35 +278,4 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     }
                 });
     }
-//
-//    private void startRuleEngine(Program program, Event event) {
-//        RuleEngine ruleEngine = loadRulesEngine(program).toBlocking().first();
-//
-//        List<RuleEffect> ruleEffects = null;
-//
-//        OrganisationUnit organisationUnit = new OrganisationUnit();
-//        organisationUnit.setUId(event.getOrgUnit());
-//
-//        try {
-//            List<Event> events = eventInteractor.list(organisationUnit,
-//                    program).toBlocking().first();
-//            System.out.println("Events: " + events.size());
-//
-//            ruleEffects = ruleEngine.execute(event, events);
-//        } catch (Throwable throwable) {
-//            throwable.printStackTrace();
-//        }
-//
-//        if (ruleEffects == null) {
-//            ruleEffects = new ArrayList<>();
-//        }
-//
-//        if (!ruleEffects.isEmpty()) {
-//            for (RuleEffect ruleEffect : ruleEffects) {
-//                System.out.println("RuleEffect: " + ruleEffect.getLocation() + " " +
-//                        ruleEffect.getContent() + " " + ruleEffect.getData() + " " +
-//                        ruleEffect.getProgramRuleActionType() + " " + ruleEffect.getDataElement());
-//            }
-//        }
-//    }
 }

@@ -204,13 +204,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     @Override
     public void showReportDatePicker(String hint, String value) {
-        if (!isEmpty(hint)) {
-            textViewReportDate.setHint(hint);
-        }
+        String dateLabel = isEmpty(hint) ? getString(R.string.report_date) : hint;
+        textViewReportDate.setHint(dateLabel);
 
         if (!isEmpty(value)) {
-            textViewReportDate.setText(String.format(Locale.getDefault(), "%s: %s",
-                    getString(R.string.report_date), value));
+            textViewReportDate.setText(String.format(Locale.getDefault(),
+                    "%s: %s", dateLabel, value));
         }
     }
 
