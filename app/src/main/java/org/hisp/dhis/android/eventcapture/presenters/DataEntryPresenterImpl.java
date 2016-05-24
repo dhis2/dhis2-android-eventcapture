@@ -110,10 +110,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     @Override
     public void detachView() {
         dataEntryView = null;
-        if (subscription != null && !subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-            subscription = null;
-        }
     }
 
     @Override
@@ -478,6 +474,12 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     break;
                 }
                 case ASSIGN: {
+                    if (ruleEffect.getDataElement() != null) {
+                        String dataElementUid = ruleEffect.getDataElement().getUId();
+                        FormEntityAction formEntityAction = new FormEntityAction(
+                                dataElementUid, ruleEffect.getData(), FormEntityActionType.ASSIGN);
+                        entityActions.add(formEntityAction);
+                    }
                     break;
                 }
             }
