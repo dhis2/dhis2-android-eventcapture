@@ -63,7 +63,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/bottomsheet_peek_height"
                 android:gravity="center_vertical"
@@ -72,9 +72,21 @@
 
                 <org.hisp.dhis.client.sdk.ui.views.FontTextView
                     android:id="@+id/textview_program"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="4dp"
+                    android:textSize="@dimen/text_size_large"
+                    app:font="@string/font_name_regular" />
+
+                <org.hisp.dhis.client.sdk.ui.views.FontTextView
+                    android:id="@+id/textview_entity_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_toEndOf="@id/textview_program"
+                    android:layout_toRightOf="@id/textview_program"
                     android:textSize="@dimen/text_size_large"
                     app:font="@string/font_name_regular" />
 
@@ -82,9 +94,10 @@
                     android:id="@+id/textview_organisation_unit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/textview_program"
                     android:textSize="@dimen/text_size_medium"
                     app:font="@string/font_name_light" />
-            </LinearLayout>
+            </RelativeLayout>
 
             <View
                 android:layout_width="match_parent"

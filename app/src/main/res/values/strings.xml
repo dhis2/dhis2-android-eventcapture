@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 ~ Copyright (c) 2016, University of Oslo
 ~
 ~ All rights reserved.
@@ -54,4 +53,11 @@
     <string name="error_internal">500 Internal server error.</string>
     <string name="error_unavailable">503 Unavailable</string>
     <string name="error_bad_request">400 Bad request</string>
+
+    <!-- Delete Event confirmation dialog -->
+    <string name="delete">Delete</string>
+    <string name="delete_report_entity_dialog_title">Delete this event?</string>
+    <string name="delete_report_entity_dialog_message">The event will be lost forever. You will have to create a new event and re-enter any information.</string>
+    <string name="report_entity_deletion_error">Unable to delete Event</string>
+
 </resources>

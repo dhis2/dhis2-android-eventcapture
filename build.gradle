@@ -37,8 +37,11 @@ ext {
             versionName      : "0.4"
     ]
     libraries = [
+            // dhis libs
+            dhisCommonsVersion : "1.1",
+
             // android libs
-            supportVersion          : "23.3.0",
+            supportVersion          : "23.4.0",
             rxAndroidVersion        : "1.1.0",
             dbFlowVersion           : "3.0.0-beta5",
             progressBarVersion      : "1.2.0",
@@ -51,7 +54,7 @@ ext {
             timberVersion           : "4.1.0",
             okhttpVersion           : "3.2.0",
             retrofitVersion         : "2.0.0",
-            jacksonVersion          : "2.7.3",
+            jacksonVersion          : "2.7.4",
             jodaTimeVersion         : "2.9.2",
             jexlVersion             : "2.1.1",
             commonsLang3Version     : "3.3.2",

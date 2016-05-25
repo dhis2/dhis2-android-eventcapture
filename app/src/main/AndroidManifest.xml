@@ -25,45 +25,47 @@
   ~ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
-<manifest package="org.hisp.dhis.android.eventcapture"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.hisp.dhis.android.eventcapture">
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
 
     <application
         android:name=".EventCaptureApp"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme.Base">
 
         <activity android:name=".views.activities.LauncherActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".views.activities.LoginActivity"/>
+        <activity android:name=".views.activities.LoginActivity" />
         <activity
             android:name=".views.activities.HomeActivity"
-            android:theme="@style/AppTheme.Main"/>
-        <activity android:name=".views.activities.FormSectionActivity" />
+            android:theme="@style/AppTheme.Main" />
+        <activity
+            android:name=".views.activities.FormSectionActivity"
+            android:windowSoftInputMode="adjustPan" />
 
         <!-- stub Authenticator service -->
         <service android:name=".model.AuthenticatorService">
 
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
+                <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
 
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator"/>
+                android:resource="@xml/authenticator" />
         </service>
 
         <!-- stub provider: -->
@@ -72,7 +74,7 @@
             android:authorities="org.hisp.dhis.android.eventcapture.model.provider"
             android:exported="false"
             android:label="provider"
-            android:syncable="true"/>
+            android:syncable="true" />
 
         <!-- Sync service : -->
         <service
@@ -80,12 +82,12 @@
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.content.SyncAdapter"/>
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
 
             <meta-data
                 android:name="android.content.SyncAdapter"
-                android:resource="@xml/syncadapter"/>
+                android:resource="@xml/syncadapter" />
         </service>
     </application>
 

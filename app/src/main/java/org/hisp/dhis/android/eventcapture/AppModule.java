@@ -32,6 +32,8 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -79,9 +81,10 @@ public class AppModule {
     public OkHttpClient providesOkHttpClient() {
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
             return new OkHttpClient.Builder()
+                    .addNetworkInterceptor(new StethoInterceptor())
                     .addInterceptor(loggingInterceptor)
                     .build();
         }

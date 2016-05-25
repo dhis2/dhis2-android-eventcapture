@@ -30,6 +30,9 @@ package org.hisp.dhis.android.eventcapture.model;
 
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
+import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
@@ -38,6 +41,9 @@ import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
+import org.hisp.dhis.client.sdk.models.program.ProgramRule;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
@@ -49,17 +55,24 @@ import java.util.List;
 import java.util.Set;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.functions.Func2;
-import rx.schedulers.Schedulers;
 
 public class SyncWrapper {
+
+    // metadata
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
     private final ProgramStageInteractor programStageInteractor;
     private final ProgramStageSectionInteractor programStageSectionInteractor;
     private final ProgramStageDataElementInteractor programStageDataElementInteractor;
+
+    // program rules
+    private final ProgramRuleInteractor programRuleInteractor;
+    private final ProgramRuleActionInteractor programRuleActionInteractor;
+    private final ProgramRuleVariableInteractor programRuleVariableInteractor;
+
+    // data
     private final EventInteractor eventInteractor;
 
     public SyncWrapper(UserOrganisationUnitInteractor userOrganisationUnitInteractor,
@@ -67,12 +80,18 @@ public class SyncWrapper {
                        ProgramStageInteractor programStageInteractor,
                        ProgramStageSectionInteractor programStageSectionInteractor,
                        ProgramStageDataElementInteractor programStageDataElementInteractor,
+                       ProgramRuleInteractor programRuleInteractor,
+                       ProgramRuleActionInteractor programRuleActionInteractor,
+                       ProgramRuleVariableInteractor programRuleVariableInteractor,
                        EventInteractor eventInteractor) {
         this.userOrganisationUnitInteractor = userOrganisationUnitInteractor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = programStageSectionInteractor;
         this.programStageDataElementInteractor = programStageDataElementInteractor;
+        this.programRuleInteractor = programRuleInteractor;
+        this.programRuleActionInteractor = programRuleActionInteractor;
+        this.programRuleVariableInteractor = programRuleVariableInteractor;
         this.eventInteractor = eventInteractor;
     }
 
@@ -104,6 +123,12 @@ public class SyncWrapper {
                                 loadProgramStages(programsWithoutRegistration);
                         List<ProgramStageSection> programStageSections =
                                 loadProgramStageSections(programStages);
+                        List<ProgramRule> programRules =
+                                loadProgramRules(programsWithoutRegistration);
+                        List<ProgramRuleAction> programRuleActions =
+                                loadProgramRuleActions(programRules);
+                        List<ProgramRuleVariable> programRuleVariables =
+                                loadProgramRuleVariables(programsWithoutRegistration);
 
                         return loadProgramStageDataElements(programStages, programStageSections);
                     }
@@ -116,7 +141,11 @@ public class SyncWrapper {
                     @Override
                     public Observable<List<Event>> call(List<Event> events) {
                         Set<String> uids = ModelUtils.toUidSet(events);
-                        return eventInteractor.sync(uids);
+                        if (uids != null && !uids.isEmpty()) {
+                            return eventInteractor.sync(uids);
+                        }
+
+                        return Observable.empty();
                     }
                 });
     }
@@ -159,6 +188,28 @@ public class SyncWrapper {
                     programStageSection.getProgramStageDataElements());
             dataElementUids.addAll(stageSectionElements);
         }
+
         return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
+    }
+
+    private List<ProgramRule> loadProgramRules(List<Program> programs) {
+        return programRuleInteractor.pull(programs).toBlocking().first();
+    }
+
+    private List<ProgramRuleAction> loadProgramRuleActions(List<ProgramRule> programRules) {
+        Set<String> programRuleActionUids = new HashSet<>();
+
+        if (programRules != null && !programRules.isEmpty()) {
+            for (ProgramRule programRule : programRules) {
+                programRuleActionUids.addAll(
+                        ModelUtils.toUidSet(programRule.getProgramRuleActions()));
+            }
+        }
+
+        return programRuleActionInteractor.pull(programRuleActionUids).toBlocking().first();
+    }
+
+    private List<ProgramRuleVariable> loadProgramRuleVariables(List<Program> programs) {
+        return programRuleVariableInteractor.pull(programs).toBlocking().first();
     }
 }

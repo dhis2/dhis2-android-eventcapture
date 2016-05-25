@@ -30,10 +30,10 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.support.annotation.StringDef;
 
-import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -60,6 +60,8 @@ public interface SelectorView extends View {
     void showReportEntities(List<ReportEntity> reportEntities);
 
     void showNoOrganisationUnitsError();
+
+    void onReportEntityDeletionError(ReportEntity failedEntity);
 
     void navigateToFormSectionActivity(Event event);
 

@@ -15,6 +15,7 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.DataEntryPresenter;
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
+import org.hisp.dhis.client.sdk.ui.models.FormEntityAction;
 import org.hisp.dhis.client.sdk.ui.rows.RowViewAdapter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 
@@ -72,6 +73,19 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
         return getArguments().getString(ARG_PROGRAM_STAGE_SECTION_ID, null);
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ((EventCaptureApp) getActivity().getApplication())
+                .getFormComponent().inject(this);
+
+        // attach view is called in this case from onCreate(),
+        // in order to prevent unnecessary work which should be done
+        // if case it will be i onResume()
+        dataEntryPresenter.attachView(this);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -100,7 +114,7 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
 
         // injection point was changed from onCreate() to onActivityCreated()
         // because od stupid fragment lifecycle
-        ((EventCaptureApp) getActivity().getApplication()).getFormComponent().inject(this);
+        // ((EventCaptureApp) getActivity().getApplication()).getFormComponent().inject(this);
 
         if (!isEmpty(getProgramStageId())) {
             // Pass event id into presenter
@@ -115,19 +129,18 @@ public class DataEntryFragment extends BaseFragment implements DataEntryView {
     }
 
     @Override
-    public void onResume() {
-        dataEntryPresenter.attachView(this);
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
+    public void onDestroy() {
+        super.onDestroy();
         dataEntryPresenter.detachView();
-        super.onPause();
     }
 
     @Override
-    public void showDataEntryForm(List<FormEntity> formEntities) {
-        rowViewAdapter.swap(formEntities);
+    public void showDataEntryForm(List<FormEntity> formEntities, List<FormEntityAction> actions) {
+        rowViewAdapter.swap(formEntities, actions);
+    }
+
+    @Override
+    public void updateDataEntryForm(List<FormEntityAction> formEntityActions) {
+        rowViewAdapter.update(formEntityActions);
     }
 }

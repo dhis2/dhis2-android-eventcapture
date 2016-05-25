@@ -27,6 +27,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Inject
     SyncWrapper syncWrapper;
+
     @Inject
     SyncDateWrapper syncDateWrapper;
 
@@ -51,24 +52,24 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         if (syncWrapper != null) {
             Log.d(TAG, "onPerformSync: syncing");
 
-            syncWrapper.syncMetaData()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
-                                   @Override
-                                   public void call(List<ProgramStageDataElement> o) {
-                                       syncDateWrapper.setLastSyncedNow();
-                                       Log.i(TAG, "Synchronization successful.");
-                                   }
-                               }, new Action1<Throwable>() {
-                                   @Override
-                                   public void call(Throwable throwable) {
-                                       //??Log.i(TAG, "Problem with synchronization.");
-                                       Log.e(TAG, "syncMetaData: Exception while syncing! ");
-                                       throwable.printStackTrace();
-                                   }
-                               }
-                    );
+//            syncWrapper.syncMetaData()
+//                    .subscribeOn(Schedulers.io())
+//                    .observeOn(AndroidSchedulers.mainThread())
+//                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
+//                                   @Override
+//                                   public void call(List<ProgramStageDataElement> o) {
+//                                       syncDateWrapper.setLastSyncedNow();
+//                                       Log.i(TAG, "Synchronization successful.");
+//                                   }
+//                               }, new Action1<Throwable>() {
+//                                   @Override
+//                                   public void call(Throwable throwable) {
+//                                       //??Log.i(TAG, "Problem with synchronization.");
+//                                       Log.e(TAG, "syncMetaData: Exception while syncing! ");
+//                                       throwable.printStackTrace();
+//                                   }
+//                               }
+//                    );
 
         } else {
             Log.d(TAG, "onPerformSync: syncWrapper is null !");

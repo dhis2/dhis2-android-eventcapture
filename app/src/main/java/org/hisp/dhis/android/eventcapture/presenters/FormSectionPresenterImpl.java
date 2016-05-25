@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.android.eventcapture.model.RxRulesEngine;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.FormSectionView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
@@ -16,8 +17,10 @@ import org.joda.time.DateTime;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -37,6 +40,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     private final ProgramStageSectionInteractor programStageSectionInteractor;
 
     private final EventInteractor eventInteractor;
+    private final RxRulesEngine rxRuleEngine;
 
     private final Logger logger;
 
@@ -45,10 +49,12 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
 
     public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
-                                    EventInteractor eventInteractor, Logger logger) {
+                                    EventInteractor eventInteractor, RxRulesEngine rxRuleEngine,
+                                    Logger logger) {
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
         this.eventInteractor = eventInteractor;
+        this.rxRuleEngine = rxRuleEngine;
         this.logger = logger;
     }
 
@@ -76,6 +82,19 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
 
         subscription = new CompositeSubscription();
         subscription.add(eventInteractor.get(eventUid)
+                .map(new Func1<Event, Event>() {
+                    @Override
+                    public Event call(Event event) {
+
+                        // TODO consider refactoring rules-engine logic out of map function)
+                        // synchronously initializing rule engine
+                        rxRuleEngine.init(eventUid).toBlocking().first();
+
+                        // compute initial RuleEffects
+                        rxRuleEngine.notifyDataSetChanged();
+                        return event;
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Event>() {
@@ -148,22 +167,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         final Program program = new Program();
         program.setUId(event.getProgram());
 
-        return programStageInteractor.list(program)
-                .map(new Func1<List<ProgramStage>, ProgramStage>() {
-                    @Override
-                    public ProgramStage call(List<ProgramStage> stages) {
-                        // since this form is intended to be used in event capture
-                        // and programs for event capture apps consist only from one
-                        // and only one program stage, we can just retrieve it from the list
-                        if (stages == null || stages.isEmpty()) {
-                            logger.e(TAG, "Form construction failed. No program " +
-                                    "stages are assigned to given program: " + program.getUId());
-                            return null;
-                        }
-
-                        return stages.get(0);
-                    }
-                })
+        return loadProgramStage(program)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<ProgramStage>() {
@@ -173,7 +177,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                             String eventDate = event.getEventDate() != null ?
                                     event.getEventDate().toString(DATE_FORMAT) : "";
                             formSectionView.showReportDatePicker(
-                                    programStage.getReportDateDescription(), eventDate);
+                                    programStage.getExecutionDateLabel(), eventDate);
 
                             if (programStage.isCaptureCoordinates()) {
                                 String latitude = null;
@@ -201,28 +205,16 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 });
     }
 
-    private Subscription showFormSections(final Event event) {
+    private Subscription showFormSections(final Event currentEvent) {
         final Program program = new Program();
-        program.setUId(event.getProgram());
+        program.setUId(currentEvent.getProgram());
 
-        return programStageInteractor.list(program)
-                .map(new Func1<List<ProgramStage>, SimpleEntry<Picker, List<FormSection>>>() {
-
+        return loadProgramStage(program)
+                .map(new Func1<ProgramStage, SimpleEntry<Picker, List<FormSection>>>() {
                     @Override
-                    public SimpleEntry<Picker, List<FormSection>> call(List<ProgramStage> stages) {
-                        // since this form is intended to be used in event capture
-                        // and programs for event capture apps consist only from one
-                        // and only one program stage, we can just retrieve it from the list
-                        if (stages == null || stages.isEmpty()) {
-                            logger.e(TAG, "Form construction failed. No program " +
-                                    "stages are assigned to given program: " + program.getUId());
-                            return null;
-                        }
-
-                        ProgramStage programStage = stages.get(0);
+                    public SimpleEntry<Picker, List<FormSection>> call(ProgramStage programStage) {
                         List<ProgramStageSection> stageSections = programStageSectionInteractor
                                 .list(programStage).toBlocking().first();
-
 
                         // TODO remove hardcoded prompt
                         Picker picker = Picker.create(programStage.getUId(), "Choose section");
@@ -230,11 +222,16 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
                         if (stageSections != null && !stageSections.isEmpty()) {
+
+                            // sort sections
+                            Collections.sort(stageSections,
+                                    ProgramStageSection.SORT_ORDER_COMPARATOR);
+
                             for (ProgramStageSection section : stageSections) {
                                 formSections.add(new FormSection(
                                         section.getUId(), section.getDisplayName()));
-                                picker.addChild(Picker.create(section.getUId(),
-                                        section.getDisplayName(), picker));
+                                picker.addChild(Picker.create(
+                                        section.getUId(), section.getDisplayName(), picker));
                             }
                         }
 
@@ -259,6 +256,25 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     @Override
                     public void call(Throwable throwable) {
                         logger.e(TAG, "Form construction failed", throwable);
+                    }
+                });
+    }
+
+    private Observable<ProgramStage> loadProgramStage(final Program program) {
+        return programStageInteractor.list(program)
+                .map(new Func1<List<ProgramStage>, ProgramStage>() {
+                    @Override
+                    public ProgramStage call(List<ProgramStage> stages) {
+                        // since this form is intended to be used in event capture
+                        // and programs for event capture apps consist only from one
+                        // and only one program stage, we can just retrieve it from the list
+                        if (stages == null || stages.isEmpty()) {
+                            logger.e(TAG, "Form construction failed. No program " +
+                                    "stages are assigned to given program: " + program.getUId());
+                            return null;
+                        }
+
+                        return stages.get(0);
                     }
                 });
     }
