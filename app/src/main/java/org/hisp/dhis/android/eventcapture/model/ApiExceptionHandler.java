@@ -43,7 +43,7 @@ public class ApiExceptionHandler {
         this.context = context;
     }
 
-    public ApiError handleException(final Throwable apiException) {
+    public AppError handleException(final Throwable apiException) {
         String title = context.getText(R.string.error).toString();
         String message;
         ApiException.Kind kind;
@@ -87,6 +87,6 @@ public class ApiExceptionHandler {
                     + apiException.getMessage();
             apiException.printStackTrace();
         }
-        return new ApiError(title, message, kind);
+        return new AppError(title, message, kind, apiException);
     }
 }

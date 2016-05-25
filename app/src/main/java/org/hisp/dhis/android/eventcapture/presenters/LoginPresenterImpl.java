@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.ApiError;
+import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
@@ -132,7 +132,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     }
 
     private void handleError(final Throwable throwable) {
-        ApiError error = apiExceptionHandler.handleException(throwable);
+        AppError error = apiExceptionHandler.handleException(throwable);
 
         switch (error.getKind()) {
             case CONVERSION:

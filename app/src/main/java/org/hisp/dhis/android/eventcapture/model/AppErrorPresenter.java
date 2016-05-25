@@ -28,28 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.model;
 
-import org.hisp.dhis.client.sdk.core.common.network.ApiException;
+public class AppErrorPresenter {
 
-public class ApiError {
-    private final String title;
-    private final String description;
-    private final ApiException.Kind kind;
-
-    public ApiError(String title, String description, ApiException.Kind kind) {
-        this.title = title;
-        this.description = description;
-        this.kind = kind;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public ApiException.Kind getKind() {
-        return kind;
-    }
 }
