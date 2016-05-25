@@ -31,7 +31,7 @@ package org.hisp.dhis.android.eventcapture;
 import android.content.Context;
 
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
-import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
