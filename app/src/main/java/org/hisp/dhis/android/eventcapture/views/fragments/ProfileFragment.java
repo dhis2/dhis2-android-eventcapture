@@ -130,7 +130,6 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         alertDialog.dismiss();
         profilePresenter.detachView();
         super.onPause();
-
     }
 
     @Override
@@ -220,14 +219,7 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
                     }
                 }
         );
-        alertDialogBuilder.setNegativeButton(R.string.warning_logout_dismiss,
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //stub... just dismiss
-                    }
-                }
-        );
+        alertDialogBuilder.setNegativeButton(R.string.warning_logout_dismiss, null);
         return alertDialogBuilder.create();
     }
 }

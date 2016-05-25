@@ -31,6 +31,7 @@ package org.hisp.dhis.android.eventcapture.views.activities;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.Editable;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
@@ -105,14 +106,15 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Override
     public void showServerError(String message) {
-        //TODO: Highlight url field and show a toast instead of dialog.
-        showErrorDialog(message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        getServerUrl().setError(message);
     }
 
     @Override
     public void showInvalidCredentialsError(String message) {
-        //TODO: Highlight credentials in red ? and show a toast instead.
-        showErrorDialog(message);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        getUsername().setError(message);
+        getPassword().setError(message);
     }
 
     @Override

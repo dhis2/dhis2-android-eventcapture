@@ -144,8 +144,8 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
                     onInvalidCredentialsError(error);
                     break;
                 case HttpURLConnection.HTTP_NOT_FOUND: {
-
                     onServerError(error);
+                    break;
                 }
                 default : {
                     onUnexpectedError(error);
