@@ -97,8 +97,8 @@ public class UserModule {
 
     @Provides
     @PerUser
-    public SyncDateWrapper provideSyncManager(AppPreferences appPreferences) {
-        return new SyncDateWrapper(appPreferences);
+    public SyncDateWrapper provideSyncManager(Context context, AppPreferences appPreferences) {
+        return new SyncDateWrapper(context, appPreferences);
     }
 
     @Provides
