@@ -242,7 +242,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
 
-        return false;
+        return true;
     }
 
     private void setupToolbar() {
