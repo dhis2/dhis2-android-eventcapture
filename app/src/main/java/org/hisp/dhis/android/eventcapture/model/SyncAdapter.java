@@ -10,15 +10,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
-
-import java.util.List;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 
 import javax.inject.Inject;
-
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = SyncAdapter.class.getSimpleName();

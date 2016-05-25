@@ -32,7 +32,7 @@ import android.content.Context;
 
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
-import org.hisp.dhis.android.eventcapture.model.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
@@ -99,8 +99,8 @@ public class UserModule {
 
     @Provides
     @PerUser
-    public SyncDateWrapper provideSyncManager(AppPreferences appPreferences) {
-        return new SyncDateWrapper(appPreferences);
+    public SyncDateWrapper provideSyncManager(Context context, AppPreferences appPreferences) {
+        return new SyncDateWrapper(context, appPreferences);
     }
 
     @Provides
