@@ -28,14 +28,17 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
+import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
 import org.hisp.dhis.android.eventcapture.views.activities.OnLoginFinishedListener;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
+import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.utils.Logger;
+
+import java.net.HttpURLConnection;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -97,31 +100,31 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     }
 
     @Override
-    public void onServerError(final String message) {
+    public void onServerError(final AppError error) {
         loginView.hideProgress(new LoginView.OnProgressFinishedListener() {
             @Override
             public void onProgressFinished() {
-                loginView.showServerError(message);
+                loginView.showServerError(error.getDescription());
             }
         });
     }
 
     @Override
-    public void onUnexpectedError(final String message) {
+    public void onUnexpectedError(final AppError error) {
         loginView.hideProgress(new LoginView.OnProgressFinishedListener() {
             @Override
             public void onProgressFinished() {
-                loginView.showUnexpectedError(message);
+                loginView.showUnexpectedError(error.getDescription());
             }
         });
     }
 
     @Override
-    public void onInvalidCredentialsError() {
+    public void onInvalidCredentialsError(final AppError error) {
         loginView.hideProgress(new LoginView.OnProgressFinishedListener() {
             @Override
             public void onProgressFinished() {
-                loginView.showInvalidCredentialsError();
+                loginView.showInvalidCredentialsError(error.getDescription());
             }
         });
     }
@@ -134,20 +137,20 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     private void handleError(final Throwable throwable) {
         AppError error = apiExceptionHandler.handleException(throwable);
 
-        switch (error.getKind()) {
-            case CONVERSION:
-                onUnexpectedError(error.getDescription());
-                break;
-            case HTTP: {
-                //same as NETWORK, below.
-            }
-            case NETWORK: {
-                onServerError(error.getDescription());
-                break;
-            }
-            case UNEXPECTED: {
-                onUnexpectedError(error.getDescription());
-                break;
+        if (throwable instanceof ApiException) {
+            ApiException exception = (ApiException) throwable;
+            switch (exception.getResponse().getStatus()) {
+                case HttpURLConnection.HTTP_UNAUTHORIZED:
+                    onInvalidCredentialsError(error);
+                    break;
+                case HttpURLConnection.HTTP_NOT_FOUND: {
+
+                    onServerError(error);
+                }
+                default : {
+                    onUnexpectedError(error);
+                    break;
+                }
             }
         }
     }

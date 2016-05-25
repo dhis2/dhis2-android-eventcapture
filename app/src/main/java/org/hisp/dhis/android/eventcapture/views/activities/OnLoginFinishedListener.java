@@ -28,13 +28,14 @@
 
 package org.hisp.dhis.android.eventcapture.views.activities;
 
+import org.hisp.dhis.android.eventcapture.model.AppError;
 
 public interface OnLoginFinishedListener {
-    void onServerError(String message);
+    void onServerError(AppError error);
 
-    void onUnexpectedError(String message);
+    void onUnexpectedError(AppError error);
 
-    void onInvalidCredentialsError();
+    void onInvalidCredentialsError(AppError appError);
 
     void onSuccess();
 }

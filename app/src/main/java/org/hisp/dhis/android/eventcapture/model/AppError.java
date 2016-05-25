@@ -33,14 +33,10 @@ import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 public class AppError {
     private final String title;
     private final String description;
-    private final ApiException.Kind kind;
-    private final Throwable throwable;
 
-    public AppError(String title, String description, ApiException.Kind kind, Throwable throwable) {
+    public AppError(String title, String description) {
         this.title = title;
         this.description = description;
-        this.kind = kind;
-        this.throwable = throwable;
     }
 
     public String getTitle() {
@@ -51,11 +47,4 @@ public class AppError {
         return description;
     }
 
-    public ApiException.Kind getKind() {
-        return kind;
-    }
-
-    public Throwable getThrowable() {
-        return throwable;
-    }
 }

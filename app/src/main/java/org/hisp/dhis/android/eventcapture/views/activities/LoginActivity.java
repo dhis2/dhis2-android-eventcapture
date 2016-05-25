@@ -105,13 +105,14 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Override
     public void showServerError(String message) {
+        //TODO: Highlight url field and show a toast instead of dialog.
         showErrorDialog(message);
     }
 
     @Override
-    public void showInvalidCredentialsError() {
-        //TODO: Evaluate removing this, it is unused.
-        showErrorDialog(getString(R.string.error_unauthorized));
+    public void showInvalidCredentialsError(String message) {
+        //TODO: Highlight credentials in red ? and show a toast instead.
+        showErrorDialog(message);
     }
 
     @Override
@@ -126,7 +127,9 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     private void showErrorDialog(String message) {
         if (alertDialog == null) {
-            alertDialog = new AlertDialog.Builder(this).create();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setPositiveButton(R.string.option_confirm, null);
+            alertDialog = builder.create();
         }
         alertDialog.setTitle(getString(R.string.error));
         alertDialog.setMessage(message);

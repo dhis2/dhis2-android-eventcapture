@@ -46,11 +46,9 @@ public class ApiExceptionHandler {
     public AppError handleException(final Throwable apiException) {
         String title = context.getText(R.string.error).toString();
         String message;
-        ApiException.Kind kind;
 
         if (apiException instanceof ApiException) {
             int status = -1;
-            kind = ((ApiException) apiException).getKind();
             Response response = ((ApiException) apiException).getResponse();
 
             if (response != null) {
@@ -82,11 +80,10 @@ public class ApiExceptionHandler {
                     apiException.printStackTrace();
             }
         } else {
-            kind = ApiException.Kind.UNEXPECTED;
             message = context.getText(R.string.error_unexpected).toString()
                     + apiException.getMessage();
             apiException.printStackTrace();
         }
-        return new AppError(title, message, kind, apiException);
+        return new AppError(title, message);
     }
 }

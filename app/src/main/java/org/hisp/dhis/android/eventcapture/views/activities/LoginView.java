@@ -37,7 +37,7 @@ public interface LoginView extends View {
 
     void showServerError(String message);
 
-    void showInvalidCredentialsError();
+    void showInvalidCredentialsError(String message);
 
     void showUnexpectedError(String message);
 

@@ -35,6 +35,7 @@
 
     <string name="filter_title">Filter</string>
     <string name="filter_sections">Filter sections</string>
+    <string name="option_confirm">Ok</string>
 
     <!-- Logout warning dialog: -->
     <string name="warning_logout_body">
