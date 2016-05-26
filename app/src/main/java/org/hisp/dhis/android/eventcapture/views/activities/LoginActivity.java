@@ -38,6 +38,7 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
+import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
 import javax.inject.Inject;
@@ -78,9 +79,13 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Override
     protected void onLoginButtonClicked(Editable server, Editable username, Editable password) {
-        ((EventCaptureApp) getApplication())
-                .createUserComponent(server.toString()).inject(this);
-
+        try {
+            ((EventCaptureApp) getApplication())
+                    .createUserComponent(server.toString()).inject(this);
+        } catch (ApiException e) {
+            loginPresenter.handleError(e);
+            return;
+        }
         // since we have re-instantiated LoginPresenter, we
         // also have to re-attach view to it
         loginPresenter.attachView(this);

@@ -35,6 +35,7 @@ import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Response;
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 
 public class ApiExceptionHandler {
     Context context;
@@ -70,6 +71,11 @@ public class ApiExceptionHandler {
                     break;
                 }
                 default: {
+                    if (apiException.getCause() instanceof MalformedURLException) {
+                        message = context.getText(R.string.error_not_found).toString();
+                        break;
+                    }
+
                     title = context.getString(R.string.title_error_unexpected);
                     message = apiException.getMessage();
                     apiException.printStackTrace();

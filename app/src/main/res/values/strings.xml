@@ -32,7 +32,6 @@
     <!-- Navigation drawer strings -->
     <string name="drawer_item_events">Events</string>
 
-
     <string name="filter_title">Filter</string>
     <string name="filter_sections">Filter sections</string>
     <string name="option_confirm">Ok</string>
@@ -50,8 +49,7 @@
     <string name="title_error">Error</string>
     <string name="title_error_unexpected">Unexpected error</string>
     <string name="error_not_found">Server not found.</string>
-    <string name="error_unauthorized">Unable to log in due to invalid credentials.</string>
-
+    <string name="error_unauthorized">Wrong username or password.</string>
 
     <!-- Delete Event confirmation dialog -->
     <string name="delete">Delete</string>

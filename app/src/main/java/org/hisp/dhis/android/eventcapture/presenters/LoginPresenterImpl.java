@@ -39,6 +39,7 @@ import org.hisp.dhis.client.sdk.models.user.UserAccount;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -134,23 +135,30 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
         loginView.navigateToHome();
     }
 
-    private void handleError(final Throwable throwable) {
+    public void handleError(final Throwable throwable) {
         AppError error = apiExceptionHandler.handleException(throwable);
 
         if (throwable instanceof ApiException) {
             ApiException exception = (ApiException) throwable;
-            switch (exception.getResponse().getStatus()) {
-                case HttpURLConnection.HTTP_UNAUTHORIZED:
-                    onInvalidCredentialsError(error);
-                    break;
-                case HttpURLConnection.HTTP_NOT_FOUND: {
-                    onServerError(error);
-                    break;
+
+            if (exception.getResponse() != null) {
+                switch (exception.getResponse().getStatus()) {
+                    case HttpURLConnection.HTTP_UNAUTHORIZED: {
+                        onInvalidCredentialsError(error);
+                        break;
+                    }
+                    case HttpURLConnection.HTTP_NOT_FOUND: {
+                        onServerError(error);
+                        break;
+                    }
+                    default: {
+                        onUnexpectedError(error);
+                        break;
+                    }
                 }
-                default : {
-                    onUnexpectedError(error);
-                    break;
-                }
+            } else if (throwable.getCause() instanceof MalformedURLException) {
+                //handle the case where the url was malformed and
+                onServerError(error);
             }
         } else {
             throwable.printStackTrace();

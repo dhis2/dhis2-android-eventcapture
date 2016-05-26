@@ -28,7 +28,9 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-
 public interface LoginPresenter extends Presenter {
+    
     void validateCredentials(String serverUrl, String username, String password);
+
+    void handleError(final Throwable throwable);
 }
