@@ -31,7 +31,6 @@ package org.hisp.dhis.android.eventcapture;
 import android.content.Context;
 
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
@@ -63,6 +62,7 @@ import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.annotation.Nullable;
@@ -307,7 +307,7 @@ public class UserModule {
         return new SelectorPresenterImpl(
                 userOrganisationUnitInteractor, userProgramInteractor,
                 programStageInteractor, programStageDataElementInteractor,
-                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper, logger);
+                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper, logger, null);
     }
 
     @Provides

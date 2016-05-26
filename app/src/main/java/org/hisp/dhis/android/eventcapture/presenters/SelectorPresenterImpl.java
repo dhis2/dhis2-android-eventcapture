@@ -29,7 +29,6 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.SessionPreferences;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
@@ -39,6 +38,7 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteracto
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.core.systeminfo.SystemInfoPreferences;
 import org.hisp.dhis.client.sdk.models.common.state.State;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -48,6 +48,7 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -83,6 +84,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final SyncWrapper syncWrapper;
     private final Logger logger;
 
+    private final SystemInfoPreferences systemInfoPreferences;
+
     private CompositeSubscription subscription;
     private boolean isSyncedInitially;
     private SelectorView selectorView;
@@ -95,7 +98,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  SessionPreferences sessionPreferences,
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
-                                 Logger logger) {
+                                 Logger logger, SystemInfoPreferences systemInfoPreferences) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
@@ -105,6 +108,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.syncDateWrapper = syncDateWrapper;
         this.syncWrapper = syncWrapper;
         this.logger = logger;
+        this.systemInfoPreferences = systemInfoPreferences;
+
         this.subscription = new CompositeSubscription();
         this.isSyncedInitially = false;
     }

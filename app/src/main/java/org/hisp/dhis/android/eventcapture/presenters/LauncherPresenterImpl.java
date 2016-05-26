@@ -33,10 +33,8 @@ import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 
 public class LauncherPresenterImpl implements LauncherPresenter {
-
-    CurrentUserInteractor userAccountInteractor;
-
-    LauncherView launcherView;
+    private final CurrentUserInteractor userAccountInteractor;
+    private LauncherView launcherView;
 
     public LauncherPresenterImpl(CurrentUserInteractor userAccountInteractor) {
         this.userAccountInteractor = userAccountInteractor;
