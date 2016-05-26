@@ -372,6 +372,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
 
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetCallback());
+        bottomSheetHeaderView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+            }
+        });
 
     }
 
