@@ -119,7 +119,7 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     @Override
     public void showUnexpectedError(String message) {
-        showErrorDialog(message);
+        showErrorDialog(getString(R.string.title_error_unexpected), message);
     }
 
     @Override
@@ -127,13 +127,13 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
         navigateTo(HomeActivity.class);
     }
 
-    private void showErrorDialog(String message) {
+    private void showErrorDialog(String title, String message) {
         if (alertDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setPositiveButton(R.string.option_confirm, null);
             alertDialog = builder.create();
         }
-        alertDialog.setTitle(getString(R.string.error));
+        alertDialog.setTitle(title);
         alertDialog.setMessage(message);
         alertDialog.show();
     }

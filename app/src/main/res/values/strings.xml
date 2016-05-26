@@ -47,13 +47,11 @@
     <string name="warning_logout_dismiss">close</string>
 
     <!-- Error/warning messages -->
-    <string name="error">Error</string>
+    <string name="title_error">Error</string>
+    <string name="title_error_unexpected">Unexpected error</string>
     <string name="error_not_found">Server not found.</string>
     <string name="error_unauthorized">Unable to log in due to invalid credentials.</string>
-    <string name="error_unexpected">Unexpected error:</string>
-    <string name="error_internal">500 Internal server error.</string>
-    <string name="error_unavailable">503 Unavailable</string>
-    <string name="error_bad_request">400 Bad request</string>
+
 
     <!-- Delete Event confirmation dialog -->
     <string name="delete">Delete</string>

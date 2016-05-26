@@ -44,7 +44,7 @@ public class ApiExceptionHandler {
     }
 
     public AppError handleException(final Throwable apiException) {
-        String title = context.getText(R.string.error).toString();
+        String title = context.getText(R.string.title_error).toString();
         String message;
 
         if (apiException instanceof ApiException) {
@@ -55,33 +55,29 @@ public class ApiExceptionHandler {
                 status = response.getStatus();
             }
 
-            switch (status) {
-                case (HttpURLConnection.HTTP_BAD_REQUEST):
+            switch (status) { //Custom error messages :
+                case (HttpURLConnection.HTTP_UNAUTHORIZED): {
                     message = context.getText(R.string.error_unauthorized).toString();
                     break;
-                case (HttpURLConnection.HTTP_UNAUTHORIZED):
-                    message = context.getText(R.string.error_unauthorized).toString();
-                    break;
-                case (HttpURLConnection.HTTP_FORBIDDEN):
-                    message = context.getText(R.string.error_unauthorized).toString();
-                    break;
-                case (HttpURLConnection.HTTP_NOT_FOUND):
+                }
+                case (HttpURLConnection.HTTP_NOT_FOUND): {
                     message = context.getText(R.string.error_not_found).toString();
                     break;
-                case (HttpURLConnection.HTTP_INTERNAL_ERROR):
-                    message = context.getText(R.string.error_internal).toString();
+                }
+                case (HttpURLConnection.HTTP_BAD_GATEWAY): {
+                    title = context.getString(R.string.title_error_unexpected);
+                    message = apiException.getMessage();
                     break;
-                case (HttpURLConnection.HTTP_UNAVAILABLE):
-                    message = context.getText(R.string.error_unavailable).toString();
-                    break;
-                default:
-                    message = context.getText(R.string.error_unexpected).toString()
-                            + "\n" + apiException.getMessage();
+                }
+                default: {
+                    title = context.getString(R.string.title_error_unexpected);
+                    message = apiException.getMessage();
                     apiException.printStackTrace();
+                }
             }
-        } else {
-            message = context.getText(R.string.error_unexpected).toString()
-                    + apiException.getMessage();
+        } else { //Unexpected error/exception: Thus just default:
+            title = context.getString(R.string.title_error_unexpected);
+            message = apiException.getMessage();
             apiException.printStackTrace();
         }
         return new AppError(title, message);

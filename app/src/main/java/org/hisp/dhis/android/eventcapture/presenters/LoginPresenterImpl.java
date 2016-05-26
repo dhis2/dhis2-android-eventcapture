@@ -93,7 +93,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        throwable.printStackTrace();
+                        //throwable.printStackTrace();
                         handleError(throwable);
                     }
                 }));
@@ -152,6 +152,8 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
                     break;
                 }
             }
+        } else {
+            throwable.printStackTrace();
         }
     }
 }
