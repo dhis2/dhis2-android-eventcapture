@@ -33,6 +33,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
@@ -115,6 +116,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // list of events
     RecyclerView reportEntityRecyclerView;
     ReportEntityAdapter reportEntityAdapter;
+    private View bottomSheetHeaderView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -202,7 +204,13 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void updateEntityCount() {
-        entityCount.setText(String.format(Locale.getDefault(), "(%s)", reportEntityAdapter.getItemCount()));
+        int reportEntityCount = reportEntityAdapter.getItemCount();
+        if (reportEntityCount == 0) {
+            entityCount.setVisibility(View.GONE);
+        } else {
+            entityCount.setVisibility(View.VISIBLE);
+            entityCount.setText(String.format(Locale.getDefault(), "(%s)", reportEntityAdapter.getItemCount()));
+        }
     }
 
     @Override
@@ -242,7 +250,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         }
 
-        return false;
+        return true;
     }
 
     private void setupToolbar() {
@@ -350,6 +358,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         coordinatorLayout = (CoordinatorLayout) view.findViewById(R.id.coordinatorlayout_selector);
         bottomSheetView = (CardView) view.findViewById(R.id.card_view_bottom_sheet);
 
+        bottomSheetHeaderView = view.findViewById(R.id.bottom_sheet_header_container);
         selectedOrganisationUnit = (TextView) view.findViewById(R.id.textview_organisation_unit);
         selectedProgram = (TextView) view.findViewById(R.id.textview_program);
         entityCount = (TextView) view.findViewById(R.id.textview_entity_count);
@@ -360,6 +369,43 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         if (savedInstanceState == null) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetCallback());
+
+    }
+
+    private class BottomSheetCallback extends BottomSheetBehavior.BottomSheetCallback {
+
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            amendForOverlappingFab(newState);
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            //amendForOverlappingFab(bottomSheetBehavior.getState());
+        }
+
+        private void amendForOverlappingFab(int newState) {
+            int rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
+
+            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                // state is expanded. move header out from below the FAB
+                rightPadding = rightPadding + getFabSize() + rightPadding;
+                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
+            } else {
+                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
+            }
+
+            bottomSheetHeaderView.setPadding(bottomSheetHeaderView.getPaddingLeft(),
+                    bottomSheetHeaderView.getPaddingTop(),
+                    rightPadding,
+                    bottomSheetHeaderView.getPaddingBottom());
+        }
+
+        private int getFabSize() {
+            return createEventButton.getWidth();
         }
     }
 
