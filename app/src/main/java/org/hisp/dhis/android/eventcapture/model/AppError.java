@@ -28,8 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture.model;
 
-import org.hisp.dhis.client.sdk.core.common.network.ApiException;
-
 public class AppError {
     private final String title;
     private final String description;
@@ -46,5 +44,4 @@ public class AppError {
     public String getDescription() {
         return description;
     }
-
 }

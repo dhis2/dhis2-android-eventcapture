@@ -33,15 +33,18 @@ import android.content.Context;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Response;
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 
 public class ApiExceptionHandler {
     Context context;
+    Logger logger;
 
-    public ApiExceptionHandler(Context context) {
+    public ApiExceptionHandler(Context context, Logger logger) {
         this.context = context;
+        this.logger = logger;
     }
 
     public AppError handleException(final Throwable apiException) {
@@ -75,16 +78,15 @@ public class ApiExceptionHandler {
                         message = context.getText(R.string.error_not_found).toString();
                         break;
                     }
-
                     title = context.getString(R.string.title_error_unexpected);
                     message = apiException.getMessage();
-                    apiException.printStackTrace();
+                    logger.e("ApiExceptionHandler", "unexpected error:", apiException);
                 }
             }
         } else { //Unexpected error/exception: Thus just default:
             title = context.getString(R.string.title_error_unexpected);
             message = apiException.getMessage();
-            apiException.printStackTrace();
+            logger.e("ApiExceptionHandler", "unexpected error:", apiException);
         }
         return new AppError(title, message);
     }

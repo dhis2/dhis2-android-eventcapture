@@ -139,7 +139,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public ApiExceptionHandler providesApiExceptionHandler(Context context) {
-        return new ApiExceptionHandler(context);
+    public ApiExceptionHandler providesApiExceptionHandler(Context context, Logger logger) {
+        return new ApiExceptionHandler(context, logger);
     }
 }
