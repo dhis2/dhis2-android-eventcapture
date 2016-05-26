@@ -28,8 +28,6 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.content.Context;
-
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
@@ -60,10 +58,8 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
-import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
-import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -84,38 +80,6 @@ public class UserModule {
         Configuration configuration = new Configuration(serverUrl);
         D2.configure(configuration).toBlocking().first();
     }
-
-    @Provides
-    @PerUser
-    public SessionPreferences provideSessionPreferences(Context context) {
-        return new SessionPreferencesImpl(context);
-    }
-
-    @Provides
-    @PerUser
-    public AppPreferences providesAppPreferences(Context context) {
-        return new AppPreferencesImpl(context);
-    }
-
-    @Provides
-    @PerUser
-    public SyncDateWrapper provideSyncManager(Context context, AppPreferences appPreferences) {
-        return new SyncDateWrapper(context, appPreferences);
-    }
-
-    @Provides
-    @PerUser
-    public AppAccountManager providesAppAccountManager(Context context,
-                                                       AppPreferences appPreferences) {
-        return new AppAccountManager(context, appPreferences);
-    }
-
-    @Provides
-    @PerUser
-    public ApiExceptionHandler providesApiExceptionHandler(Context context) {
-        return new ApiExceptionHandler(context);
-    }
-
 
     @Provides
     @Nullable
@@ -272,7 +236,7 @@ public class UserModule {
     @PerUser
     public LoginPresenter providesLoginPresenter(
             @Nullable CurrentUserInteractor accountInteractor,
-            ApiExceptionHandler apiExceptionHandler,Logger logger) {
+            ApiExceptionHandler apiExceptionHandler, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, apiExceptionHandler, logger);
     }
 

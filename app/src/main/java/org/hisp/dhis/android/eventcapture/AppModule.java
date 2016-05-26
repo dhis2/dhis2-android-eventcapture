@@ -34,7 +34,12 @@ import android.util.Log;
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
+import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.client.sdk.ui.AppPreferences;
+import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.inject.Inject;
@@ -105,5 +110,36 @@ public class AppModule {
     public void initD2(Context context, D2.Flavor flavor) {
         Log.e("MODULE", "INSTANTIATING D2");
         D2.init(context, flavor);
+    }
+
+    @Provides
+    @Singleton
+    public SessionPreferences provideSessionPreferences(Context context) {
+        return new SessionPreferencesImpl(context);
+    }
+
+    @Provides
+    @Singleton
+    public AppPreferences providesAppPreferences(Context context) {
+        return new AppPreferencesImpl(context);
+    }
+
+    @Provides
+    @Singleton
+    public SyncDateWrapper provideSyncManager(Context context, AppPreferences appPreferences) {
+        return new SyncDateWrapper(context, appPreferences);
+    }
+
+    @Provides
+    @Singleton
+    public AppAccountManager providesAppAccountManager(Context context,
+                                                       AppPreferences appPreferences) {
+        return new AppAccountManager(context, appPreferences);
+    }
+
+    @Provides
+    @Singleton
+    public ApiExceptionHandler providesApiExceptionHandler(Context context) {
+        return new ApiExceptionHandler(context);
     }
 }

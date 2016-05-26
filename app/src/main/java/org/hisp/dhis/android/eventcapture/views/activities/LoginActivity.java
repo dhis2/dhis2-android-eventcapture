@@ -36,6 +36,7 @@ import android.widget.Toast;
 import org.hisp.dhis.android.eventcapture.BuildConfig;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
 import org.hisp.dhis.client.sdk.ui.activities.AbsLoginActivity;
 
@@ -45,12 +46,13 @@ public class LoginActivity extends AbsLoginActivity implements LoginView {
 
     private AlertDialog alertDialog;
     @Inject
+    ApiExceptionHandler apiExceptionHandler;
+    @Inject
     LoginPresenter loginPresenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         ((EventCaptureApp) getApplication()).getUserComponent().inject(this);
 
         getServerUrl().setText(BuildConfig.SERVER_URL);
