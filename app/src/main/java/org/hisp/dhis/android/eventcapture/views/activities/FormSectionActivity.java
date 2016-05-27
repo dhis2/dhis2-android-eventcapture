@@ -50,6 +50,7 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 // TODO check if configuration changes are handled properly
 public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_EVENT_UID = "arg:eventUid";
+    private static final String ARG_IS_EVENT_NEW = "arg:isEventNew";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     @Inject
@@ -67,11 +68,20 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     FilterableDialogFragment sectionDialogFragment;
 
-    public static void navigateTo(Activity activity, String eventUid) {
+    public static void navigateToNewEvent(Activity activity, String eventUid) {
+        navigateTo(activity, eventUid, true);
+    }
+
+    public static void navigateToExistingEvent(Activity activity, String eventUid) {
+        navigateTo(activity, eventUid, false);
+    }
+
+    private static void navigateTo(Activity activity, String eventUid, boolean isEventNew) {
         isNull(activity, "activity must not be null");
 
         Intent intent = new Intent(activity, FormSectionActivity.class);
         intent.putExtra(ARG_EVENT_UID, eventUid);
+        intent.putExtra(ARG_IS_EVENT_NEW, isEventNew);
         activity.startActivity(intent);
     }
 
@@ -82,6 +92,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
 
         return getIntent().getExtras().getString(ARG_EVENT_UID, null);
+    }
+
+    private boolean isEventNew() {
+        return getIntent().getExtras().getBoolean(ARG_IS_EVENT_NEW, false);
     }
 
     @Override
@@ -109,6 +123,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             formComponent = ((EventCaptureApp) getApplication()).createFormComponent();
         } else {
             formComponent = ((EventCaptureApp) getApplication()).getFormComponent();
+        }
+
+        // if it is first time when FormSectionsActivity is
+        // instantiated, we need to show DatePickerDialog
+        if (savedInstanceState == null && isEventNew()) {
+            showDatePickerDialog();
         }
 
         // inject dependencies
@@ -257,33 +277,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
 
-        final OnDateSetListener onDateSetListener = new OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, monthOfYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                String stringDate = (new SimpleDateFormat(DATE_FORMAT, Locale.US))
-                        .format(calendar.getTime());
-                String newValue = String.format(Locale.getDefault(), "%s: %s",
-                        getString(R.string.report_date), stringDate);
-                textViewReportDate.setText(newValue);
-
-                DateTime dateTime = DateTime.parse(stringDate);
-                formSectionPresenter.saveEventDate(getEventUid(), dateTime);
-            }
-        };
 
         // set on click listener to text view report date
         textViewReportDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DatePickerDialogFragment datePickerDialogFragment =
-                        DatePickerDialogFragment.newInstance(false);
-                datePickerDialogFragment.setOnDateSetListener(onDateSetListener);
-                datePickerDialogFragment.show(getSupportFragmentManager());
+                showDatePickerDialog();
             }
         });
 
@@ -319,6 +318,32 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 }
             }
         }
+    }
+
+    private void showDatePickerDialog() {
+        final OnDateSetListener onDateSetListener = new OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, monthOfYear);
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                String stringDate = (new SimpleDateFormat(DATE_FORMAT, Locale.US))
+                        .format(calendar.getTime());
+                String newValue = String.format(Locale.getDefault(), "%s: %s",
+                        getString(R.string.report_date), stringDate);
+                textViewReportDate.setText(newValue);
+
+                DateTime dateTime = DateTime.parse(stringDate);
+                formSectionPresenter.saveEventDate(getEventUid(), dateTime);
+            }
+        };
+
+        DatePickerDialogFragment datePickerDialogFragment =
+                DatePickerDialogFragment.newInstance(false);
+        datePickerDialogFragment.setOnDateSetListener(onDateSetListener);
+        datePickerDialogFragment.show(getSupportFragmentManager());
     }
 
     /*

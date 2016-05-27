@@ -107,7 +107,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // selected organisation unit, program and entity count
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
-    private TextView entityCount;
+    TextView entityCount;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -116,7 +116,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // list of events
     RecyclerView reportEntityRecyclerView;
     ReportEntityAdapter reportEntityAdapter;
-    private View bottomSheetHeaderView;
+    View bottomSheetHeaderView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -212,13 +212,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void updateEntityCount() {
-        int reportEntityCount = reportEntityAdapter.getItemCount();
-        if (reportEntityCount == 0) {
-            entityCount.setVisibility(View.GONE);
+        if (reportEntitiesIsEmpty()) {
+            entityCount.setText("");
         } else {
-            entityCount.setVisibility(View.VISIBLE);
-            entityCount.setText(String.format(Locale.getDefault(), "(%s)", reportEntityAdapter.getItemCount()));
+            entityCount.setText(String.format(Locale.getDefault(), "(%s)",
+                    reportEntityAdapter.getItemCount()));
         }
+    }
+
+    private boolean reportEntitiesIsEmpty() {
+        return reportEntityAdapter == null || reportEntityAdapter.getItemCount() == 0;
     }
 
     @Override
@@ -239,7 +242,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void navigateToFormSectionActivity(Event event) {
         logger.d(TAG, String.format("Event with uid=%s is created", event.getUId()));
-        FormSectionActivity.navigateTo(getActivity(), event.getUId());
+        FormSectionActivity.navigateToNewEvent(getActivity(), event.getUId());
     }
 
     @Override
@@ -263,6 +266,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     public boolean onBackPressed() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            return false;
         }
 
         return true;
@@ -432,7 +436,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void onReportEntityClicked(ReportEntity reportEntity) {
-        FormSectionActivity.navigateTo(getActivity(), reportEntity.getId());
+        FormSectionActivity.navigateToExistingEvent(getActivity(), reportEntity.getId());
     }
 
     private boolean onMenuItemClick(MenuItem item) {
@@ -464,6 +468,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             if (reportEntityAdapter != null) {
                 reportEntityAdapter.swapData(null);
             }
+            updateEntityCount();
         }
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }
@@ -545,7 +550,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         private List<Picker> pickers;
 
         @Override
-        public void onClick(View v) {
+        public void onClick(View view) {
             String orgUnitUid = getOrganisationUnitUid(pickers);
             String programUid = getProgramUid(pickers);
 
