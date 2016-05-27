@@ -30,5 +30,5 @@ package org.hisp.dhis.android.eventcapture.model;
 
 public interface ApiExceptionHandler {
 
-    public AppError handleException(final Throwable apiException);
+    AppError handleException(String TAG, final Throwable apiException);
 }

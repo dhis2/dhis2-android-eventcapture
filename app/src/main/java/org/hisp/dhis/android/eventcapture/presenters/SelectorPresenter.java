@@ -45,4 +45,6 @@ public interface SelectorPresenter extends Presenter {
     void deleteEvent(ReportEntity reportEntity);
 
     void onPickersSelectionsChanged(List<Picker> pickerList);
+
+    void handleError(final Throwable throwable);
 }

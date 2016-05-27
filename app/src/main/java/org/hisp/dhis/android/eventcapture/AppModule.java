@@ -34,6 +34,7 @@ import android.util.Log;
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -139,7 +140,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public ApiExceptionHandlerImpl providesApiExceptionHandler(Context context, Logger logger) {
+    public ApiExceptionHandler providesApiExceptionHandler(Context context, Logger logger) {
         return new ApiExceptionHandlerImpl(context, logger);
     }
 }

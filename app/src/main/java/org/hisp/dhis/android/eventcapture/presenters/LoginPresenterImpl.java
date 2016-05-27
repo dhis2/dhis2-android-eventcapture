@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
@@ -49,17 +49,18 @@ import rx.subscriptions.CompositeSubscription;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListener {
+    private static final String TAG = LoginPresenter.class.getSimpleName();
     private final CurrentUserInteractor userAccountInteractor;
     private final CompositeSubscription subscription;
     private final Logger logger;
 
-    private final ApiExceptionHandlerImpl apiExceptionHandlerImpl;
+    private final ApiExceptionHandler apiExceptionHandler;
     private LoginView loginView;
 
-    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, ApiExceptionHandlerImpl apiExceptionHandlerImpl, Logger logger) {
+    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, ApiExceptionHandler apiExceptionHandler, Logger logger) {
         this.userAccountInteractor = userAccountInteractor;
         this.subscription = new CompositeSubscription();
-        this.apiExceptionHandlerImpl = apiExceptionHandlerImpl;
+        this.apiExceptionHandler = apiExceptionHandler;
         this.logger = logger;
     }
 
@@ -94,7 +95,6 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        //throwable.printStackTrace();
                         handleError(throwable);
                     }
                 }));
@@ -136,7 +136,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     }
 
     public void handleError(final Throwable throwable) {
-        AppError error = apiExceptionHandlerImpl.handleException(throwable);
+        AppError error = apiExceptionHandler.handleException(TAG, throwable);
 
         if (throwable instanceof ApiException) {
             ApiException exception = (ApiException) throwable;
@@ -161,7 +161,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
                 onServerError(error);
             }
         } else {
-            throwable.printStackTrace();
+            logger.e(TAG, "handleError", throwable);
         }
     }
 }

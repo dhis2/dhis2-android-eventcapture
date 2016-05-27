@@ -29,6 +29,8 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.SessionPreferences;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
+import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
@@ -37,6 +39,7 @@ import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInt
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
+import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.core.systeminfo.SystemInfoPreferences;
 import org.hisp.dhis.client.sdk.models.common.state.State;
@@ -54,6 +57,7 @@ import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.utils.Logger;
 import org.joda.time.DateTime;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +85,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private final SessionPreferences sessionPreferences;
     private final SyncDateWrapper syncDateWrapper;
+    private final ApiExceptionHandler apiExceptionHandler;
     private final SyncWrapper syncWrapper;
     private final Logger logger;
 
@@ -98,6 +103,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  SessionPreferences sessionPreferences,
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
+                                 ApiExceptionHandler apiExceptionHandler,
                                  Logger logger, SystemInfoPreferences systemInfoPreferences) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
@@ -107,11 +113,26 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.sessionPreferences = sessionPreferences;
         this.syncDateWrapper = syncDateWrapper;
         this.syncWrapper = syncWrapper;
+        this.apiExceptionHandler = apiExceptionHandler;
         this.logger = logger;
         this.systemInfoPreferences = systemInfoPreferences;
 
         this.subscription = new CompositeSubscription();
         this.isSyncedInitially = false;
+    }
+
+    private static void traverseAndSetDefaultSelection(Picker tree) {
+        if (tree != null) {
+
+            Picker node = tree;
+            do {
+                if (node.getChildren().size() == 1) {
+                    // get the only child node and set it as selected
+                    Picker singleChild = node.getChildren().get(0);
+                    node.setSelectedChild(singleChild);
+                }
+            } while ((node = node.getSelectedChild()) != null);
+        }
     }
 
     public void attachView(View view) {
@@ -172,17 +193,14 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         listPickers();
                     }
                 }, new Action1<Throwable>() {
-
                     @Override
                     public void call(Throwable throwable) {
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
                         }
-
-                        throwable.printStackTrace();
+                        handleError(throwable);
                     }
                 }));
-
         subscription.add(syncWrapper.syncData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -225,7 +243,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        throwable.printStackTrace();
+                        logger.e(TAG, "Failed listing pickers.", throwable);
                     }
                 }));
     }
@@ -283,7 +301,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     public void createEvent(final String orgUnitId, final String programId) {
         final OrganisationUnit orgUnit = new OrganisationUnit();
         final Program program = new Program();
-
         orgUnit.setUId(orgUnitId);
         program.setUId(programId);
 
@@ -294,7 +311,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         if (stages != null && !stages.isEmpty()) {
                             return stages.get(0);
                         }
-
                         return null;
                     }
                 })
@@ -305,12 +321,10 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                             throw new IllegalArgumentException("In order to create event, " +
                                     "we need program stage to be in place");
                         }
-
                         Event event = eventInteractor.create(orgUnit, program,
                                 programStage, Event.EventStatus.ACTIVE);
                         event.setEventDate(DateTime.now());
                         eventInteractor.save(event).toBlocking().first();
-
                         return event;
                     }
                 })
@@ -334,7 +348,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void deleteEvent(final ReportEntity reportEntity) {
-
         subscription.add(eventInteractor.get(reportEntity.getId())
                 .switchMap(new Func1<Event, Observable<Boolean>>() {
                     @Override
@@ -360,17 +373,43 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }));
     }
 
+    @Override
+    public void handleError(final Throwable throwable) {
+        AppError error = apiExceptionHandler.handleException(TAG, throwable);
+
+        if (throwable instanceof ApiException) {
+            ApiException exception = (ApiException) throwable;
+
+            if (exception.getResponse() != null) {
+                switch (exception.getResponse().getStatus()) {
+                    case HttpURLConnection.HTTP_UNAUTHORIZED: {
+                        selectorView.showError(error.getDescription());
+                        break;
+                    }
+                    case HttpURLConnection.HTTP_NOT_FOUND: {
+                        selectorView.showError(error.getDescription());
+                        break;
+                    }
+                    default: {
+                        selectorView.showUnexpectedError(error.getDescription());
+                        break;
+                    }
+                }
+            }
+        } else {
+            logger.e(TAG, "handleError", throwable);
+        }
+    }
+
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
         List<ProgramStageDataElement> filteredElements =
                 filterProgramStageDataElements(dataElements);
-
         List<ReportEntity> reportEntities = new ArrayList<>();
         for (Event event : events) {
 
             // status of event
             ReportEntity.Status status;
-
             // TODO remove hack
             // get state of event from database
             State state = eventInteractor.get(event).toBlocking().first();
@@ -412,7 +451,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                 if (stageDataElement != null) {
                     DataElement dataElement = stageDataElement.getDataElement();
-
                     // TODO put 'none' string into resources
                     String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
                             dataElementToValueMap.get(dataElement.getUId()) : "none";
@@ -437,11 +475,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     }
                 }
             }
-
             reportEntities.add(new ReportEntity(event.getUId(),
                     status, lineOne, lineTwo, lineThree));
         }
-
         return reportEntities;
     }
 
@@ -456,7 +492,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }
             }
         }
-
         return filteredElements;
     }
 
@@ -469,7 +504,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 dataElementToValueMap.put(dataValue.getDataElement(), value);
             }
         }
-
         return dataElementToValueMap;
     }
 
@@ -523,20 +557,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             traverseAndSetDefaultSelection(rootPicker);
         }
         return rootPicker;
-    }
-
-    private static void traverseAndSetDefaultSelection(Picker tree) {
-        if (tree != null) {
-
-            Picker node = tree;
-            do {
-                if (node.getChildren().size() == 1) {
-                    // get the only child node and set it as selected
-                    Picker singleChild = node.getChildren().get(0);
-                    node.setSelectedChild(singleChild);
-                }
-            } while ((node = node.getSelectedChild()) != null);
-        }
     }
 
     private void traverseAndSetSavedSelection(Picker node) {

@@ -41,6 +41,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -85,37 +86,57 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
-
     @Inject
     SelectorPresenter selectorPresenter;
-
     @Inject
     Logger logger;
-
     // button which is shown only in case when all pickers are set
     FloatingActionButton createEventButton;
     OnCreateEventButtonClickListener onCreateEventButtonClickListener;
-
     // pull-to-refresh
     SwipeRefreshLayout swipeRefreshLayout;
     BottomSheetBehavior<CardView> bottomSheetBehavior;
-
     // bottom sheet layout
     CoordinatorLayout coordinatorLayout;
     CardView bottomSheetView;
-
     // selected organisation unit, program and entity count
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
-
     // list of pickers
     RecyclerView pickerRecyclerView;
     PickerAdapter pickerAdapter;
-
     // list of events
     RecyclerView reportEntityRecyclerView;
     ReportEntityAdapter reportEntityAdapter;
     View bottomSheetHeaderView;
+    private AlertDialog alertDialog;
+
+    private static String getOrganisationUnitUid(List<Picker> pickers) {
+        if (pickers != null && !pickers.isEmpty() &&
+                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getId();
+        }
+
+        return null;
+    }
+
+    private static String getOrganisationUnitLabel(List<Picker> pickers) {
+        if (pickers != null && !pickers.isEmpty() &&
+                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getName();
+        }
+
+        return null;
+    }
+
+    private static String getProgramUid(List<Picker> pickers) {
+        if (pickers != null && pickers.size() > 1 &&
+                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
+            return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
+        }
+
+        return null;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -165,6 +186,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         super.onPause();
 
         logger.d(TAG, "onPause()");
+        if (alertDialog != null) {
+            alertDialog.dismiss();
+        }
         selectorPresenter.detachView();
     }
 
@@ -224,6 +248,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 .findViewById(R.id.textview_error_no_org_units);
         textView.setVisibility(View.VISIBLE);
         textView.setText(getString(R.string.no_organisation_units));
+    }
+
+    @Override
+    public void showError(String message) {
+        showErrorDialog(getString(R.string.title_error), message);
+    }
+
+    @Override
+    public void showUnexpectedError(String message) {
+        showErrorDialog(getString(R.string.title_error_unexpected), message);
     }
 
     @Override
@@ -396,41 +430,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         });
     }
 
-    private class BottomSheetCallback extends BottomSheetBehavior.BottomSheetCallback {
-
-        @Override
-        public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            int rightPadding;
-
-            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                // state is expanded. move header out from below the FAB
-                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default) + getFabSize() + getResources().getDimensionPixelSize(R.dimen.keyline_default);
-                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
-                setBottomSheetHeaderPadding(rightPadding);
-            } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
-                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
-                setBottomSheetHeaderPadding(rightPadding);
-            }
-        }
-
-        @Override
-        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            // not interesting
-        }
-
-        private void setBottomSheetHeaderPadding(int rightPadding) {
-            bottomSheetHeaderView.setPadding(bottomSheetHeaderView.getPaddingLeft(),
-                    bottomSheetHeaderView.getPaddingTop(),
-                    rightPadding,
-                    bottomSheetHeaderView.getPaddingBottom());
-        }
-
-        private int getFabSize() {
-            return createEventButton.getWidth();
-        }
-    }
-
     private void onReportEntityClicked(ReportEntity reportEntity) {
         FormSectionActivity.navigateToExistingEvent(getActivity(), reportEntity.getId());
     }
@@ -543,6 +542,68 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         selectedProgram.setText(programLabel);
     }
 
+    private String getProgramLabel(List<Picker> pickers) {
+        if (pickers != null && pickers.size() > 1 &&
+                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
+
+            String programLabel = pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getName();
+
+            if (!reportEntitiesIsEmpty()) {
+                programLabel = String.format(Locale.getDefault(), "%s (%s)", programLabel, reportEntityAdapter.getItemCount());
+            }
+
+            return programLabel;
+        }
+
+        return null;
+    }
+
+    private void showErrorDialog(String title, String message) {
+        if (alertDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setPositiveButton(R.string.option_confirm, null);
+            alertDialog = builder.create();
+        }
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.show();
+    }
+
+    private class BottomSheetCallback extends BottomSheetBehavior.BottomSheetCallback {
+
+        @Override
+        public void onStateChanged(@NonNull View bottomSheet, int newState) {
+            int rightPadding;
+
+            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                // state is expanded. move header out from below the FAB
+                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default) + getFabSize() + getResources().getDimensionPixelSize(R.dimen.keyline_default);
+                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
+                setBottomSheetHeaderPadding(rightPadding);
+            } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
+                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
+                setBottomSheetHeaderPadding(rightPadding);
+            }
+        }
+
+        @Override
+        public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+            // not interesting
+        }
+
+        private void setBottomSheetHeaderPadding(int rightPadding) {
+            bottomSheetHeaderView.setPadding(bottomSheetHeaderView.getPaddingLeft(),
+                    bottomSheetHeaderView.getPaddingTop(),
+                    rightPadding,
+                    bottomSheetHeaderView.getPaddingBottom());
+        }
+
+        private int getFabSize() {
+            return createEventButton.getWidth();
+        }
+    }
+
     private class OnCreateEventButtonClickListener implements View.OnClickListener {
         private List<Picker> pickers;
 
@@ -559,48 +620,5 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         public void setPickers(List<Picker> pickers) {
             this.pickers = pickers;
         }
-    }
-
-    private static String getOrganisationUnitUid(List<Picker> pickers) {
-        if (pickers != null && !pickers.isEmpty() &&
-                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
-            return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getId();
-        }
-
-        return null;
-    }
-
-    private static String getOrganisationUnitLabel(List<Picker> pickers) {
-        if (pickers != null && !pickers.isEmpty() &&
-                pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild() != null) {
-            return pickers.get(ORG_UNIT_PICKER_ID).getSelectedChild().getName();
-        }
-
-        return null;
-    }
-
-    private static String getProgramUid(List<Picker> pickers) {
-        if (pickers != null && pickers.size() > 1 &&
-                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
-            return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getId();
-        }
-
-        return null;
-    }
-
-    private String getProgramLabel(List<Picker> pickers) {
-        if (pickers != null && pickers.size() > 1 &&
-                pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
-
-            String programLabel = pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getName();
-
-            if (!reportEntitiesIsEmpty()) {
-                programLabel = String.format(Locale.getDefault(), "%s (%s)", programLabel, reportEntityAdapter.getItemCount());
-            }
-
-            return programLabel;
-        }
-
-        return null;
     }
 }
