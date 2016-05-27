@@ -57,4 +57,9 @@
     <string name="delete_report_entity_dialog_message">The event will be lost forever. You will have to create a new event and re-enter any information.</string>
     <string name="report_entity_deletion_error">Unable to delete Event</string>
 
+    <!-- Data entry screen prompts -->
+    <string name="undo">Undo</string>
+    <string name="complete">Complete</string>
+    <string name="incomplete">Incomplete</string>
+
 </resources>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinatorlayout_form"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -108,4 +109,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_complete_event"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/keyline_default"
+        android:src="@drawable/ic_complete"
+        app:backgroundTint="@color/statelist_complete_button"
+        app:elevation="8dp"
+        app:layout_anchor="@id/viewpager_dataentry"
+        app:layout_anchorGravity="bottom|right|end"
+        app:pressedTranslationZ="8dp" />
 </android.support.design.widget.CoordinatorLayout>

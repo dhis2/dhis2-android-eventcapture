@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.eventcapture.views.activities;
 
 import org.hisp.dhis.android.eventcapture.views.View;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 
@@ -26,6 +27,5 @@ public interface FormSectionView extends View {
 
     void showCoordinatesPicker(String latitude, String longitude);
 
-    // void showTitle(String title);
-    // void showSubtitle(String subtitle);
+    void showEventStatus(Event.EventStatus eventStatus);
 }
