@@ -333,11 +333,13 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
                 if (isCompleted) {
                     incompleteEvent();
+
                     Snackbar.make(coordinatorLayout, getString(R.string.incomplete), Snackbar.LENGTH_LONG)
                             .setAction(getString(R.string.undo), new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     completeEvent();
+                                    fabComplete.setActivated(true);
                                 }
                             })
                             .show();
@@ -349,6 +351,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                                 @Override
                                 public void onClick(View v) {
                                     incompleteEvent();
+                                    fabComplete.setActivated(false);
                                 }
                             })
                             .show();
