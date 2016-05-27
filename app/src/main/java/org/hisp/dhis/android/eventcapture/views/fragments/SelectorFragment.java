@@ -107,7 +107,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // selected organisation unit, program and entity count
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
-    private TextView entityCount;
+    TextView entityCount;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -116,7 +116,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // list of events
     RecyclerView reportEntityRecyclerView;
     ReportEntityAdapter reportEntityAdapter;
-    private View bottomSheetHeaderView;
+    View bottomSheetHeaderView;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -205,10 +205,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     private void updateEntityCount() {
         if (reportEntitiesIsEmpty()) {
-            entityCount.setVisibility(View.GONE);
+            entityCount.setText("");
         } else {
-            entityCount.setVisibility(View.VISIBLE);
-            entityCount.setText(String.format(Locale.getDefault(), "(%s)", reportEntityAdapter.getItemCount()));
+            entityCount.setText(String.format(Locale.getDefault(), "(%s)",
+                    reportEntityAdapter.getItemCount()));
         }
     }
 
