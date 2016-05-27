@@ -107,7 +107,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     // selected organisation unit, program and entity count
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
-    TextView entityCount;
 
     // list of pickers
     RecyclerView pickerRecyclerView;
@@ -208,15 +207,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     public void showReportEntities(List<ReportEntity> reportEntities) {
         logger.d(TAG, "amount of report entities: " + reportEntities.size());
         reportEntityAdapter.swapData(reportEntities);
-        updateEntityCount();
-    }
 
-    private void updateEntityCount() {
-        if (reportEntitiesIsEmpty()) {
-            entityCount.setText("");
-        } else {
-            entityCount.setText(String.format(Locale.getDefault(), "(%s)",
-                    reportEntityAdapter.getItemCount()));
+        if (pickerAdapter != null) {
+            updateLabels(pickerAdapter.getData());
         }
     }
 
@@ -361,7 +354,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             public void onDeleteReportEntity(ReportEntity reportEntity) {
                 logger.d(TAG, "ReportEntity id to be deleted: " + reportEntity.getId());
                 selectorPresenter.deleteEvent(reportEntity);
-                updateEntityCount();
+
+                if (pickerAdapter != null) {
+                    updateLabels(pickerAdapter.getData());
+                }
             }
         });
 
@@ -380,7 +376,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         bottomSheetHeaderView = view.findViewById(R.id.bottom_sheet_header_container);
         selectedOrganisationUnit = (TextView) view.findViewById(R.id.textview_organisation_unit);
         selectedProgram = (TextView) view.findViewById(R.id.textview_program);
-        entityCount = (TextView) view.findViewById(R.id.textview_entity_count);
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetView);
         bottomSheetBehavior.setPeekHeight(getResources()
@@ -405,25 +400,26 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            amendForOverlappingFab(newState);
+            int rightPadding;
+
+            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                // state is expanded. move header out from below the FAB
+                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default) + getFabSize() + getResources().getDimensionPixelSize(R.dimen.keyline_default);
+                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
+                setBottomSheetHeaderPadding(rightPadding);
+            } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
+                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
+                setBottomSheetHeaderPadding(rightPadding);
+            }
         }
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-            //amendForOverlappingFab(bottomSheetBehavior.getState());
+            // not interesting
         }
 
-        private void amendForOverlappingFab(int newState) {
-            int rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
-
-            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                // state is expanded. move header out from below the FAB
-                rightPadding = rightPadding + getFabSize() + rightPadding;
-                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
-            } else {
-                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
-            }
-
+        private void setBottomSheetHeaderPadding(int rightPadding) {
             bottomSheetHeaderView.setPadding(bottomSheetHeaderView.getPaddingLeft(),
                     bottomSheetHeaderView.getPaddingTop(),
                     rightPadding,
@@ -453,7 +449,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     /* change visibility of floating action button*/
     private void onPickerListChanged(List<Picker> pickers) {
-        updateLabels(pickers);
 
         onCreateEventButtonClickListener.setPickers(pickers);
         if (areAllPickersPresent(pickers)) {
@@ -468,8 +463,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             if (reportEntityAdapter != null) {
                 reportEntityAdapter.swapData(null);
             }
-            updateEntityCount();
         }
+
+        updateLabels(pickers);
+
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }
 
@@ -591,10 +588,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         return null;
     }
 
-    private static String getProgramLabel(List<Picker> pickers) {
+    private String getProgramLabel(List<Picker> pickers) {
         if (pickers != null && pickers.size() > 1 &&
                 pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild() != null) {
-            return pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getName();
+
+            String programLabel = pickers.get(PROGRAM_UNIT_PICKER_ID).getSelectedChild().getName();
+
+            if (!reportEntitiesIsEmpty()) {
+                programLabel = String.format(Locale.getDefault(), "%s (%s)", programLabel, reportEntityAdapter.getItemCount());
+            }
+
+            return programLabel;
         }
 
         return null;
