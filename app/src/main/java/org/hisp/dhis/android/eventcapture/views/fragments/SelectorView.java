@@ -43,13 +43,15 @@ public interface SelectorView extends View {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             ID_CHOOSE_ORGANISATION_UNIT,
-            ID_CHOOSE_PROGRAM
+            ID_CHOOSE_PROGRAM,
+            ID_NO_PROGRAMS
     })
     @interface PickerLabelId {
     }
 
     String ID_CHOOSE_ORGANISATION_UNIT = "chooseOrganisationUnit";
     String ID_CHOOSE_PROGRAM = "chooseProgram";
+    String ID_NO_PROGRAMS = "noPrograms";
 
     void showProgressBar();
 

@@ -193,6 +193,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void showPickers(Picker pickerTree) {
+        if (!pickerTree.getChildren().isEmpty()) {
+            TextView textView = (TextView) getActivity()
+                    .findViewById(R.id.textview_error_no_org_units);
+            //in the case that error was shown and the user was assigned organisation units,
+            //hide the error message :
+            textView.setVisibility(View.GONE);
+        }
+        //and try toshow the pickers:
         pickerAdapter.swapData(pickerTree);
     }
 
@@ -215,7 +223,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void showNoOrganisationUnitsError() {
-        pickerAdapter.swapData(null);
+        //pickerAdapter.swapData(null);
+        TextView textView = (TextView) getActivity()
+                .findViewById(R.id.textview_error_no_org_units);
+        textView.setVisibility(View.VISIBLE);
+        textView.setText(getString(R.string.no_organisation_units));
     }
 
     @Override
@@ -239,6 +251,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 return getString(R.string.choose_organisation_unit);
             case ID_CHOOSE_PROGRAM:
                 return getString(R.string.choose_program);
+            case ID_NO_PROGRAMS:
+                return getString(R.string.no_programs);
+
             default:
                 throw new IllegalArgumentException("Unsupported PickerLabelId");
         }
@@ -375,12 +390,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         bottomSheetHeaderView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
             }
         });
-
     }
 
     private class BottomSheetCallback extends BottomSheetBehavior.BottomSheetCallback {

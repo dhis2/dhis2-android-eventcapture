@@ -485,6 +485,10 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         String chooseProgram = selectorView != null ? selectorView
                 .getPickerLabel(SelectorView.ID_CHOOSE_PROGRAM) : "";
 
+        if (organisationUnitMap == null || organisationUnitMap.isEmpty()) {
+            selectorView.showNoOrganisationUnitsError();
+        }
+
         Picker rootPicker = Picker.create(chooseOrganisationUnit);
         for (String unitKey : organisationUnitMap.keySet()) {
 
@@ -494,14 +498,16 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     organisationUnit.getUId(), organisationUnit.getDisplayName(),
                     chooseProgram, rootPicker);
 
-            for (Program program : organisationUnit.getPrograms()) {
-                Program assignedProgram = assignedProgramsMap.get(program.getUId());
+            if (organisationUnit.getPrograms() != null && !organisationUnit.getPrograms().isEmpty()) {
+                for (Program program : organisationUnit.getPrograms()) {
+                    Program assignedProgram = assignedProgramsMap.get(program.getUId());
 
-                if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
-                        .equals(assignedProgram.getProgramType())) {
-                    Picker programPicker = Picker.create(assignedProgram.getUId(),
-                            assignedProgram.getDisplayName(), organisationUnitPicker);
-                    organisationUnitPicker.addChild(programPicker);
+                    if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
+                            .equals(assignedProgram.getProgramType())) {
+                        Picker programPicker = Picker.create(assignedProgram.getUId(),
+                                assignedProgram.getDisplayName(), organisationUnitPicker);
+                        organisationUnitPicker.addChild(programPicker);
+                    }
                 }
             }
             rootPicker.addChild(organisationUnitPicker);

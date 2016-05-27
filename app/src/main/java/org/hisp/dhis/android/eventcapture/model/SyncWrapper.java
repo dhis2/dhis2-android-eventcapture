@@ -163,11 +163,12 @@ public class SyncWrapper {
 
     private List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
         Set<String> sectionUids = new HashSet<>();
-
-        for (ProgramStage programStage : stages) {
-            Set<String> stageSectionUids = ModelUtils.toUidSet(
-                    programStage.getProgramStageSections());
-            sectionUids.addAll(stageSectionUids);
+        if (stages != null) {
+            for (ProgramStage programStage : stages) {
+                Set<String> stageSectionUids = ModelUtils.toUidSet(
+                        programStage.getProgramStageSections());
+                sectionUids.addAll(stageSectionUids);
+            }
         }
         return programStageSectionInteractor.pull(sectionUids).toBlocking().first();
     }
@@ -177,16 +178,19 @@ public class SyncWrapper {
 
         Set<String> dataElementUids = new HashSet<>();
 
-        for (ProgramStage programStage : stages) {
-            Set<String> stageDataElementUids = ModelUtils.toUidSet(
-                    programStage.getProgramStageDataElements());
-            dataElementUids.addAll(stageDataElementUids);
+        if (stages != null) {
+            for (ProgramStage programStage : stages) {
+                Set<String> stageDataElementUids = ModelUtils.toUidSet(
+                        programStage.getProgramStageDataElements());
+                dataElementUids.addAll(stageDataElementUids);
+            }
         }
-
-        for (ProgramStageSection programStageSection : programStageSections) {
-            Set<String> stageSectionElements = ModelUtils.toUidSet(
-                    programStageSection.getProgramStageDataElements());
-            dataElementUids.addAll(stageSectionElements);
+        if (programStageSections != null) {
+            for (ProgramStageSection programStageSection : programStageSections) {
+                Set<String> stageSectionElements = ModelUtils.toUidSet(
+                        programStageSection.getProgramStageDataElements());
+                dataElementUids.addAll(stageSectionElements);
+            }
         }
 
         return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
