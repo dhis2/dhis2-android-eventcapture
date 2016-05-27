@@ -230,7 +230,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void navigateToFormSectionActivity(Event event) {
         logger.d(TAG, String.format("Event with uid=%s is created", event.getUId()));
-        FormSectionActivity.navigateTo(getActivity(), event.getUId());
+        FormSectionActivity.navigateToNewEvent(getActivity(), event.getUId());
     }
 
     @Override
@@ -422,7 +422,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void onReportEntityClicked(ReportEntity reportEntity) {
-        FormSectionActivity.navigateTo(getActivity(), reportEntity.getId());
+        FormSectionActivity.navigateToExistingEvent(getActivity(), reportEntity.getId());
     }
 
     private boolean onMenuItemClick(MenuItem item) {
@@ -536,7 +536,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         private List<Picker> pickers;
 
         @Override
-        public void onClick(View v) {
+        public void onClick(View view) {
             String orgUnitUid = getOrganisationUnitUid(pickers);
             String programUid = getProgramUid(pickers);
 
