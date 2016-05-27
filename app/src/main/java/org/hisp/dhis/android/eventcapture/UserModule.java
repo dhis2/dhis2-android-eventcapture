@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
@@ -236,8 +236,8 @@ public class UserModule {
     @PerUser
     public LoginPresenter providesLoginPresenter(
             @Nullable CurrentUserInteractor accountInteractor,
-            ApiExceptionHandlerImpl apiExceptionHandlerImpl, Logger logger) {
-        return new LoginPresenterImpl(accountInteractor, apiExceptionHandlerImpl, logger);
+            ApiExceptionHandler apiExceptionHandler, Logger logger) {
+        return new LoginPresenterImpl(accountInteractor, apiExceptionHandler, logger);
     }
 
     @Provides
@@ -277,11 +277,13 @@ public class UserModule {
             @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
             @Nullable EventInteractor eventInteractor,
             SessionPreferences sessionPreferences,
-            SyncDateWrapper syncDateWrapper, SyncWrapper syncWrapper, Logger logger) {
+            SyncDateWrapper syncDateWrapper, SyncWrapper syncWrapper,
+            ApiExceptionHandler apiExceptionHandler, Logger logger) {
         return new SelectorPresenterImpl(
                 userOrganisationUnitInteractor, userProgramInteractor,
                 programStageInteractor, programStageDataElementInteractor,
-                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper, logger, null);
+                eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
+                apiExceptionHandler, logger, null);
     }
 
     @Provides

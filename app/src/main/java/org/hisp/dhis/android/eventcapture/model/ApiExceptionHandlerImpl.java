@@ -47,7 +47,7 @@ public class ApiExceptionHandlerImpl implements ApiExceptionHandler {
         this.logger = logger;
     }
 
-    public AppError handleException(final Throwable apiException) {
+    public AppError handleException(final String TAG, final Throwable apiException) {
         String title = context.getText(R.string.title_error).toString();
         String message;
 
@@ -80,13 +80,13 @@ public class ApiExceptionHandlerImpl implements ApiExceptionHandler {
                     }
                     title = context.getString(R.string.title_error_unexpected);
                     message = apiException.getMessage();
-                    logger.e("ApiExceptionHandlerImpl", "unexpected error:", apiException);
+                    logger.e(TAG, "unexpected error:", apiException);
                 }
             }
         } else { //Unexpected error/exception: Thus just default:
             title = context.getString(R.string.title_error_unexpected);
             message = apiException.getMessage();
-            logger.e("ApiExceptionHandlerImpl", "unexpected error:", apiException);
+            logger.e(TAG, "unexpected error:", apiException);
         }
         return new AppError(title, message);
     }
