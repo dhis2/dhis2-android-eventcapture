@@ -204,13 +204,16 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void updateEntityCount() {
-        int reportEntityCount = reportEntityAdapter.getItemCount();
-        if (reportEntityCount == 0) {
+        if (reportEntitiesIsEmpty()) {
             entityCount.setVisibility(View.GONE);
         } else {
             entityCount.setVisibility(View.VISIBLE);
             entityCount.setText(String.format(Locale.getDefault(), "(%s)", reportEntityAdapter.getItemCount()));
         }
+    }
+
+    private boolean reportEntitiesIsEmpty() {
+        return reportEntityAdapter == null || reportEntityAdapter.getItemCount() == 0;
     }
 
     @Override
@@ -450,6 +453,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
             if (reportEntityAdapter != null) {
                 reportEntityAdapter.swapData(null);
             }
+            updateEntityCount();
         }
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }
