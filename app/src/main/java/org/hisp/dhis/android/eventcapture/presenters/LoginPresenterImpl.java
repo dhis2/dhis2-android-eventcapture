@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
 import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.android.eventcapture.views.activities.LoginView;
@@ -53,13 +53,13 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     private final CompositeSubscription subscription;
     private final Logger logger;
 
-    private final ApiExceptionHandler apiExceptionHandler;
+    private final ApiExceptionHandlerImpl apiExceptionHandlerImpl;
     private LoginView loginView;
 
-    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, ApiExceptionHandler apiExceptionHandler, Logger logger) {
+    public LoginPresenterImpl(CurrentUserInteractor userAccountInteractor, ApiExceptionHandlerImpl apiExceptionHandlerImpl, Logger logger) {
         this.userAccountInteractor = userAccountInteractor;
         this.subscription = new CompositeSubscription();
-        this.apiExceptionHandler = apiExceptionHandler;
+        this.apiExceptionHandlerImpl = apiExceptionHandlerImpl;
         this.logger = logger;
     }
 
@@ -136,7 +136,7 @@ public class LoginPresenterImpl implements LoginPresenter, OnLoginFinishedListen
     }
 
     public void handleError(final Throwable throwable) {
-        AppError error = apiExceptionHandler.handleException(throwable);
+        AppError error = apiExceptionHandlerImpl.handleException(throwable);
 
         if (throwable instanceof ApiException) {
             ApiException exception = (ApiException) throwable;
