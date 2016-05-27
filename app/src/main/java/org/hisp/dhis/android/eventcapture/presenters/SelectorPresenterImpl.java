@@ -338,7 +338,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void deleteEvent(final ReportEntity reportEntity) {
-
         subscription.add(eventInteractor.get(reportEntity.getId())
                 .switchMap(new Func1<Event, Observable<Boolean>>() {
                     @Override

@@ -32,8 +32,6 @@ import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
-import com.facebook.stetho.okhttp3.StethoInterceptor;
-
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.client.sdk.android.api.D2;
@@ -89,7 +87,7 @@ public class AppModule {
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
             return new OkHttpClient.Builder()
-                    .addNetworkInterceptor(new StethoInterceptor())
+                    // .addNetworkInterceptor(new StethoInterceptor())
                     .addInterceptor(loggingInterceptor)
                     .build();
         }
@@ -108,7 +106,7 @@ public class AppModule {
 
     @Inject
     public void initD2(Context context, D2.Flavor flavor) {
-        Log.e("MODULE", "INSTANTIATING D2");
+        Log.e("Module", "Instantiating D2");
         D2.init(context, flavor);
     }
 

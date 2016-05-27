@@ -126,6 +126,6 @@ dependencies {
     compile "com.android.support:multidex:${libs.multidex}"
 
     // Stetho
-    debugCompile "com.facebook.stetho:stetho:${libs.stethoVeirsion}"
-    debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stethoVersion}"
+    // debugCompile "com.facebook.stetho:stetho:${libs.stethoVeirsion}"
+    // debugCompile "com.facebook.stetho:stetho-okhttp3:${libs.stethoVersion}"
 }

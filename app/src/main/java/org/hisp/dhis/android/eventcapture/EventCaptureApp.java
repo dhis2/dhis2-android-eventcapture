@@ -32,8 +32,6 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
-import com.facebook.stetho.Stetho;
-
 import org.hisp.dhis.client.sdk.android.api.D2;
 
 import javax.inject.Inject;
@@ -65,7 +63,7 @@ public final class EventCaptureApp extends Application {
         appComponent.inject(this);
 
         // initializing stetho
-        Stetho.initializeWithDefaults(this);
+        // Stetho.initializeWithDefaults(this);
         D2.init(this, flavor);
 
         // adding UserComponent to global dependency graph
