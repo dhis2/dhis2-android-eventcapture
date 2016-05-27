@@ -67,6 +67,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     @Override
     public void detachView() {
         formSectionView = null;
+
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
             subscription = null;
@@ -102,6 +103,10 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     public void call(Event event) {
                         isNull(event, String.format("Event with uid %s does not exist", eventUid));
 
+                        if (formSectionView != null) {
+                            formSectionView.showEventStatus(event.getStatus());
+                        }
+
                         // fire next operations
                         subscription.add(showFormPickers(event));
                         subscription.add(showFormSections(event));
@@ -131,6 +136,34 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         isNull(event, String.format("Event with uid %s does not exist", eventUid));
 
                         event.setEventDate(eventDate);
+
+                        subscription.add(saveEvent(event));
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, null, throwable);
+                    }
+                }));
+    }
+
+    @Override
+    public void saveEventStatus(final String eventUid, final Event.EventStatus eventStatus) {
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+
+        subscription = new CompositeSubscription();
+        subscription.add(eventInteractor.get(eventUid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        isNull(event, String.format("Event with uid %s does not exist", eventUid));
+
+                        event.setStatus(eventStatus);
 
                         subscription.add(saveEvent(event));
                     }

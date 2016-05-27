@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -28,6 +31,7 @@ import org.hisp.dhis.android.eventcapture.FormComponent;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
+import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.OnPickerItemClickListener;
 import org.hisp.dhis.client.sdk.ui.fragments.DatePickerDialogFragment;
 import org.hisp.dhis.client.sdk.ui.fragments.FilterableDialogFragment;
@@ -56,6 +60,9 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     @Inject
     FormSectionPresenter formSectionPresenter;
 
+    // root layout
+    CoordinatorLayout coordinatorLayout;
+
     // collapsing toolbar views
     TextView textViewReportDate;
     LinearLayout linearLayoutCoordinates;
@@ -65,6 +72,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     // section tabs and view pager
     TabLayout tabLayout;
     ViewPager viewPager;
+    FloatingActionButton fabComplete;
 
     FilterableDialogFragment sectionDialogFragment;
 
@@ -103,9 +111,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_form_sections);
 
+        setupCoordinatorLayout();
         setupToolbar();
         setupPickers();
         setupViewPager();
+        setupFloatingActionButton();
 
         // attach listener if dialog opened (post-configuration change)
         attachListenerToExistingFragment();
@@ -249,6 +259,14 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
+    @Override
+    public void showEventStatus(Event.EventStatus eventStatus) {
+        if (fabComplete != null && eventStatus != null) {
+            fabComplete.setVisibility(View.VISIBLE);
+            fabComplete.setActivated(Event.EventStatus.COMPLETED.equals(eventStatus));
+        }
+    }
+
     private void attachListenerToExistingFragment() {
         FilterableDialogFragment dialogFragment = (FilterableDialogFragment)
                 getSupportFragmentManager().findFragmentByTag(FilterableDialogFragment.TAG);
@@ -258,6 +276,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         if (dialogFragment != null) {
             dialogFragment.setOnPickerItemClickListener(new OnSearchSectionsClickListener());
         }
+    }
+
+    private void setupCoordinatorLayout() {
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorlayout_form);
     }
 
     private void setupToolbar() {
@@ -297,6 +319,50 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         // hide tab layout initially in order to prevent UI
         // jumps in cases when we don't have sections
         tabLayout.setVisibility(View.GONE);
+    }
+
+    private void setupFloatingActionButton() {
+        fabComplete = (FloatingActionButton) findViewById(R.id.fab_complete_event);
+        fabComplete.setVisibility(View.GONE);
+
+        fabComplete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean isCompleted = fabComplete.isActivated();
+                fabComplete.setActivated(!isCompleted);
+
+                if (isCompleted) {
+                    incompleteEvent();
+                    Snackbar.make(coordinatorLayout, getString(R.string.incomplete), Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.undo), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    completeEvent();
+                                }
+                            })
+                            .show();
+
+                } else {
+                    completeEvent();
+                    Snackbar.make(coordinatorLayout, getString(R.string.complete), Snackbar.LENGTH_LONG)
+                            .setAction(getString(R.string.undo), new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    incompleteEvent();
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+    }
+
+    private void incompleteEvent() {
+        formSectionPresenter.saveEventStatus(getEventUid(), Event.EventStatus.ACTIVE);
+    }
+
+    private void completeEvent() {
+        formSectionPresenter.saveEventStatus(getEventUid(), Event.EventStatus.COMPLETED);
     }
 
     private class OnSearchSectionsClickListener implements OnPickerItemClickListener {
