@@ -28,7 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
+import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
@@ -236,8 +236,8 @@ public class UserModule {
     @PerUser
     public LoginPresenter providesLoginPresenter(
             @Nullable CurrentUserInteractor accountInteractor,
-            ApiExceptionHandler apiExceptionHandler, Logger logger) {
-        return new LoginPresenterImpl(accountInteractor, apiExceptionHandler, logger);
+            ApiExceptionHandlerImpl apiExceptionHandlerImpl, Logger logger) {
+        return new LoginPresenterImpl(accountInteractor, apiExceptionHandlerImpl, logger);
     }
 
     @Provides

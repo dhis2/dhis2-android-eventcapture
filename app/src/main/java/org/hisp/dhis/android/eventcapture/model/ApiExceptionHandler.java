@@ -28,66 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.model;
 
-import android.content.Context;
+public interface ApiExceptionHandler {
 
-import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.client.sdk.core.common.network.ApiException;
-import org.hisp.dhis.client.sdk.core.common.network.Response;
-import org.hisp.dhis.client.sdk.utils.Logger;
-
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-
-public class ApiExceptionHandler {
-    Context context;
-    Logger logger;
-
-    public ApiExceptionHandler(Context context, Logger logger) {
-        this.context = context;
-        this.logger = logger;
-    }
-
-    public AppError handleException(final Throwable apiException) {
-        String title = context.getText(R.string.title_error).toString();
-        String message;
-
-        if (apiException instanceof ApiException) {
-            int status = -1;
-            Response response = ((ApiException) apiException).getResponse();
-
-            if (response != null) {
-                status = response.getStatus();
-            }
-
-            switch (status) { //Custom error messages :
-                case (HttpURLConnection.HTTP_UNAUTHORIZED): {
-                    message = context.getText(R.string.error_unauthorized).toString();
-                    break;
-                }
-                case (HttpURLConnection.HTTP_NOT_FOUND): {
-                    message = context.getText(R.string.error_not_found).toString();
-                    break;
-                }
-                case (HttpURLConnection.HTTP_BAD_GATEWAY): {
-                    title = context.getString(R.string.title_error_unexpected);
-                    message = apiException.getMessage();
-                    break;
-                }
-                default: {
-                    if (apiException.getCause() instanceof MalformedURLException) {
-                        message = context.getText(R.string.error_not_found).toString();
-                        break;
-                    }
-                    title = context.getString(R.string.title_error_unexpected);
-                    message = apiException.getMessage();
-                    logger.e("ApiExceptionHandler", "unexpected error:", apiException);
-                }
-            }
-        } else { //Unexpected error/exception: Thus just default:
-            title = context.getString(R.string.title_error_unexpected);
-            message = apiException.getMessage();
-            logger.e("ApiExceptionHandler", "unexpected error:", apiException);
-        }
-        return new AppError(title, message);
-    }
+    public AppError handleException(final Throwable apiException);
 }
