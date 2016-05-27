@@ -485,7 +485,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         String chooseProgram = selectorView != null ? selectorView
                 .getPickerLabel(SelectorView.ID_CHOOSE_PROGRAM) : "";
 
-        if (organisationUnitMap == null || organisationUnitMap.isEmpty()) {
+        if (selectorView != null &&
+                (organisationUnitMap == null || organisationUnitMap.isEmpty())) {
             selectorView.showNoOrganisationUnitsError();
         }
 
