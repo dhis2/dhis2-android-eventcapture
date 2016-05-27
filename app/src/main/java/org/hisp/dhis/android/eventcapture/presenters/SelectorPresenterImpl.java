@@ -87,8 +87,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final SystemInfoPreferences systemInfoPreferences;
 
     private CompositeSubscription subscription;
-    private boolean isSyncedInitially;
+    private boolean attemptedToSync;
     private SelectorView selectorView;
+    private boolean isSyncing;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
@@ -111,7 +112,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.systemInfoPreferences = systemInfoPreferences;
 
         this.subscription = new CompositeSubscription();
-        this.isSyncedInitially = false;
+        this.attemptedToSync = false;
     }
 
     public void attachView(View view) {
@@ -120,7 +121,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
         // check if metadata was synced,
         // if not, syncMetaData it
-        if (!isSyncedInitially) {
+        if (!isSyncing && !attemptedToSync) {
             sync();
         }
 
@@ -156,14 +157,15 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     @Override
     public void sync() {
         selectorView.showProgressBar();
-
+        isSyncing = true;
         subscription.add(syncWrapper.syncMetaData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<ProgramStageDataElement>>() {
                     @Override
                     public void call(List<ProgramStageDataElement> stageDataElements) {
-                        isSyncedInitially = true;
+                        isSyncing = false;
+                        attemptedToSync = true;
                         syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
@@ -175,6 +177,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     @Override
                     public void call(Throwable throwable) {
+                        isSyncing = false;
+                        attemptedToSync = true;
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
                         }
