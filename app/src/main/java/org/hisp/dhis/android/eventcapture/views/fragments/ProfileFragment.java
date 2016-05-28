@@ -36,8 +36,10 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
 
     @Inject
     ProfilePresenter profilePresenter;
+
     @Inject
     Logger logger;
+
     // pull-to-refresh:
     SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView recyclerView;
@@ -49,7 +51,8 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         super.onCreate(savedInstanceState);
 
         // injection of profile presenter
-        ((EventCaptureApp) getActivity().getApplication()).getUserComponent().inject(this);
+        ((EventCaptureApp) getActivity().getApplication())
+                .getUserComponent().inject(this);
         alertDialog = createAlertDialog();
     }
 
@@ -62,55 +65,9 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
 
     @Override
     public void onViewCreated(final View view, @Nullable final Bundle savedInstanceState) {
-        if (getParentToolbar() != null) {
-            getParentToolbar().inflateMenu(R.menu.menu_profile);
-            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    return ProfileFragment.this.onMenuItemClick(item);
-                }
-            });
-        }
-
-        swipeRefreshLayout = (SwipeRefreshLayout) view
-                .findViewById(R.id.swiperefreshlayout_profile);
-        swipeRefreshLayout.setColorSchemeResources(
-                R.color.color_primary_default);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                profilePresenter.sync();
-            }
-        });
-        recyclerView = (RecyclerView) view
-                .findViewById(R.id.recyclerview_profile);
-
-        // we want RecyclerView to behave like ListView
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-        // Using ItemDecoration in order to implement divider
-        DividerDecoration itemDecoration = new DividerDecoration(
-                ContextCompat.getDrawable(getActivity(), R.drawable.divider));
-
-        rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addItemDecoration(itemDecoration);
-        recyclerView.setAdapter(rowViewAdapter);
-
-        if (savedInstanceState != null) {
-            // this workaround is necessary because of the message queue
-            // implementation in android. If you will try to setRefreshing(true) right away,
-            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
-            // message to hide progress bar which probably is created by layout
-            swipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    swipeRefreshLayout.setRefreshing(savedInstanceState
-                            .getBoolean(STATE_IS_REFRESHING, false));
-                }
-            });
-        }
+        setupToolbar();
+        setupSwipeRefreshLayout(view, savedInstanceState);
+        setupRecyclerView(view);
     }
 
     @Override
@@ -187,6 +144,63 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         }
     }
 
+    private void setupToolbar() {
+        if (getParentToolbar() != null) {
+            getParentToolbar().inflateMenu(R.menu.menu_profile);
+            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return ProfileFragment.this.onMenuItemClick(item);
+                }
+            });
+        }
+    }
+
+    private void setupSwipeRefreshLayout(final View view, final Bundle savedInstanceState) {
+        swipeRefreshLayout = (SwipeRefreshLayout) view
+                .findViewById(R.id.swiperefreshlayout_profile);
+        swipeRefreshLayout.setColorSchemeResources(
+                R.color.color_primary_default);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                profilePresenter.sync();
+            }
+        });
+
+        if (savedInstanceState != null) {
+            // this workaround is necessary because of the message queue
+            // implementation in android. If you will try to setRefreshing(true) right away,
+            // this call will be placed in UI message queue by SwipeRefreshLayout BEFORE
+            // message to hide progress bar which probably is created by layout
+            swipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    swipeRefreshLayout.setRefreshing(savedInstanceState
+                            .getBoolean(STATE_IS_REFRESHING, false));
+                }
+            });
+        }
+    }
+
+    private void setupRecyclerView(View view) {
+        recyclerView = (RecyclerView) view
+                .findViewById(R.id.recyclerview_profile);
+
+        // we want RecyclerView to behave like ListView
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        // Using ItemDecoration in order to implement divider
+        DividerDecoration itemDecoration = new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider));
+
+        rowViewAdapter = new RowViewAdapter(getChildFragmentManager());
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addItemDecoration(itemDecoration);
+        recyclerView.setAdapter(rowViewAdapter);
+    }
+
     private boolean onMenuItemClick(MenuItem item) {
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
@@ -208,6 +222,7 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
         alertDialogBuilder.setIcon(R.drawable.ic_warning);
         alertDialogBuilder.setTitle(R.string.warning_logout_header);
         alertDialogBuilder.setMessage(R.string.warning_logout_body);
+        alertDialogBuilder.setNegativeButton(R.string.warning_logout_dismiss, null);
         alertDialogBuilder.setPositiveButton(R.string.warning_logout_confirm,
                 new DialogInterface.OnClickListener() {
                     @Override
@@ -219,7 +234,7 @@ public class ProfileFragment extends BaseFragment implements ProfileView {
                     }
                 }
         );
-        alertDialogBuilder.setNegativeButton(R.string.warning_logout_dismiss, null);
+
         return alertDialogBuilder.create();
     }
 }
