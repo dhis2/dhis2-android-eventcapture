@@ -93,11 +93,12 @@ android {
 }
 
 dependencies {
-
     // Local
-    compile project(':core-android')
-    compile project(':core-rules')
-    compile project(':ui')
+    compile project(":core-rules")
+    compile project(":ui-bindings")
+
+    // compile project(':core-android')
+    // compile project(':ui')
 
     // Dependencies for testing
     testCompile "junit:junit:${libs.jUnitVersion}"

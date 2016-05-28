@@ -17,7 +17,7 @@ public class AppAccountManager {
     public static final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
     public static String accountName = "default dhis2 account";
 
-    private Account mAccount;
+    private Account account;
     private Context appContext;
     private AppPreferences appPreferences;
 
@@ -34,7 +34,7 @@ public class AppAccountManager {
 
     public void createAccount(Context context) {
         appContext = context;
-        mAccount = createAccount();
+        account = createAccount();
         initSyncAccount();
     }
 
@@ -43,10 +43,10 @@ public class AppAccountManager {
     * Requires api 22.
     * */
     public void removeAccount() {
-        if (mAccount != null && appContext != null) {
+        if (account != null && appContext != null) {
             AccountManager accountManager =
                     (AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE);
-            accountManager.removeAccountExplicitly(mAccount);
+            accountManager.removeAccountExplicitly(account);
         }
     }
 
@@ -58,14 +58,14 @@ public class AppAccountManager {
 
         Boolean doesntExist = accountManager.addAccountExplicitly(newAccount, null, null);
         if (doesntExist) {
-            mAccount = newAccount;
+            account = newAccount;
             return newAccount;
         } else {
             /* The account exists or some other error occurred. Find the account: */
             Account all[] = accountManager.getAccountsByType(ACCOUNT_TYPE);
             for (Account found : all) {
                 if (found.equals(newAccount)) {
-                    mAccount = newAccount;
+                    account = newAccount;
                     return found;
                 }
             }
@@ -74,14 +74,14 @@ public class AppAccountManager {
     }
 
     public void initSyncAccount() {
-        ContentResolver.setIsSyncable(mAccount, AUTHORITY, 1);
-        ContentResolver.setSyncAutomatically(mAccount, AUTHORITY, true);
+        ContentResolver.setIsSyncable(account, AUTHORITY, 1);
+        ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
 
         if (appPreferences.getBackgroundSyncState()) {
             long minutes = (long) appPreferences.getBackgroundSyncFrequency();
             long seconds = minutes * 60;
             ContentResolver.addPeriodicSync(
-                    mAccount,
+                    account,
                     AUTHORITY,
                     Bundle.EMPTY,
                     seconds);
@@ -89,13 +89,13 @@ public class AppAccountManager {
     }
 
     public void removePeriodicSync() {
-        ContentResolver.removePeriodicSync(mAccount, AUTHORITY, Bundle.EMPTY);
+        ContentResolver.removePeriodicSync(account, AUTHORITY, Bundle.EMPTY);
     }
 
     public void setPeriodicSync(int minutes) {
         Long seconds = ((long) minutes) * 60;
         ContentResolver.addPeriodicSync(
-                mAccount,
+                account,
                 AUTHORITY,
                 Bundle.EMPTY,
                 seconds);
@@ -111,6 +111,6 @@ public class AppAccountManager {
          * Request the syncMetaData for the default account, authority, and
          * manual syncMetaData settings
          */
-        ContentResolver.requestSync(mAccount, AUTHORITY, settingsBundle);
+        ContentResolver.requestSync(account, AUTHORITY, settingsBundle);
     }
 }
