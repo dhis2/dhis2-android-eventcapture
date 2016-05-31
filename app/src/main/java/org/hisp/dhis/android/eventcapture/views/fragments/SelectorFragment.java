@@ -86,6 +86,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
+    public static final String LAYOUT_MANAGER_KEY = "LAYOUT_MANAGER_KEY";
     @Inject
     SelectorPresenter selectorPresenter;
     @Inject
@@ -170,6 +171,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
 
         outState.putBoolean(STATE_IS_REFRESHING, swipeRefreshLayout.isRefreshing());
+
+        outState.putParcelable(ReportEntityAdapter.REPORT_ENTITY_LIST_KEY, reportEntityAdapter.onSaveInstanceState());
+        outState.putParcelable(LAYOUT_MANAGER_KEY, reportEntityRecyclerView.getLayoutManager().onSaveInstanceState());
+
         super.onSaveInstanceState(outState);
     }
 
@@ -374,9 +379,30 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void setupReportEntityRecyclerView(View view, Bundle savedInstanceState) {
+
+        reportEntityRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_events);
+
+        setupAdapter();
+        reportEntityRecyclerView.setAdapter(reportEntityAdapter);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        reportEntityRecyclerView.setLayoutManager(layoutManager);
+        if (savedInstanceState != null) {
+            layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(LAYOUT_MANAGER_KEY));
+        }
 
+        if (savedInstanceState != null) {
+            reportEntityAdapter.onRestoreInstanceState(
+                    savedInstanceState.getBundle(ReportEntityAdapter.REPORT_ENTITY_LIST_KEY));
+        }
+
+        reportEntityRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        reportEntityRecyclerView.addItemDecoration(new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
+    }
+
+    private void setupAdapter() {
         reportEntityAdapter = new ReportEntityAdapter(getActivity());
         reportEntityAdapter.setOnReportEntityInteractionListener(new OnReportEntityInteractionListener() {
             @Override
@@ -394,13 +420,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 }
             }
         });
-
-        reportEntityRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_events);
-        reportEntityRecyclerView.setLayoutManager(layoutManager);
-        reportEntityRecyclerView.setAdapter(reportEntityAdapter);
-        reportEntityRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        reportEntityRecyclerView.addItemDecoration(new DividerDecoration(
-                ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
     }
 
     private void setupBottomSheet(View view, Bundle savedInstanceState) {
