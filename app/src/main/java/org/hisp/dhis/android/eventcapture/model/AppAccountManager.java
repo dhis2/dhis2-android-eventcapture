@@ -2,9 +2,14 @@ package org.hisp.dhis.android.eventcapture.model;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
@@ -38,15 +43,30 @@ public class AppAccountManager {
         initSyncAccount();
     }
 
-    /*
-    * Account removal stub functionality.
-    * Requires api 22.
-    * */
     public void removeAccount() {
         if (account != null && appContext != null) {
             AccountManager accountManager =
                     (AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE);
-            accountManager.removeAccountExplicitly(account);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                accountManager.removeAccountExplicitly(account);
+            } else {
+                accountManager.removeAccount(account, new AccountManagerCallback<Boolean>() {
+                    @Override
+                    public void run(AccountManagerFuture<Boolean> future) {
+
+                        try {
+                            if (!future.getResult()) {
+                                throw new Exception("Unable to remove SyncAdapter Stub account. User must delete the account in Android system settings.");
+                            }
+                        } catch (Exception e) {
+                            Log.e("SYNC ADAPTER", "Unable to remove SyncAdapter Stub account", e);
+                        }
+                    }
+                }, new AsyncQueryHandler(new ContentResolver(appContext) {
+                }) {
+                });
+            }
+
         }
     }
 
