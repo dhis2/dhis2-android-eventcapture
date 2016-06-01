@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.+'
+    }
+}
 /*
  * Copyright (c) 2016, University of Oslo
  *
@@ -27,6 +36,11 @@
  */
 
 apply plugin: 'com.android.application'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+}
+
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'io.fabric'
 
@@ -66,6 +80,13 @@ android {
             buildConfigField "String", "USERNAME", '"erling_all"'
             buildConfigField "String", "PASSWORD", '"Erling123"'
 
+            // reading fabric.properties file from current directory
+            Properties properties = new Properties()
+            properties.load(file("fabric.properties").newDataInputStream())
+
+            // merging api key into manifest
+            manifestPlaceholders = [fabric_api_key: properties.getProperty('apiKey')]
+
             // disabling crashlytics for debug builds
             ext.enableCrashlytics = false
         }
@@ -74,13 +95,19 @@ android {
             buildConfigField "String", "USERNAME", '""'
             buildConfigField "String", "PASSWORD", '""'
 
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            shrinkResources true
+
+            // reading fabric.properties file from current directory
+            Properties properties = new Properties()
+            properties.load(file("fabric.properties").newDataInputStream())
+
+            // merging api key into manifest
+            manifestPlaceholders = [fabric_api_key: properties.getProperty('apiKey')]
+
             // enabling crashlytics for debug builds
             ext.enableCrashlytics = true
-
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'),
-                    'proguard-rules.pro'
-            shrinkResources true
         }
     }
 
@@ -101,9 +128,6 @@ dependencies {
     // Local
     compile project(":core-rules")
     compile project(":ui-bindings")
-
-    // compile project(':core-android')
-    // compile project(':ui')
 
     // Dependencies for testing
     testCompile "junit:junit:${libs.jUnitVersion}"
