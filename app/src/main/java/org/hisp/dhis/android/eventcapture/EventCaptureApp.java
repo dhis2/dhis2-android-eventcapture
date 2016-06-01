@@ -32,9 +32,14 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
+
 import org.hisp.dhis.client.sdk.android.api.D2;
 
 import javax.inject.Inject;
+
+import io.fabric.sdk.android.Fabric;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
@@ -53,6 +58,14 @@ public final class EventCaptureApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // enabling crashlytics only for release builds
+        Crashlytics crashlytics = new Crashlytics.Builder()
+                .core(new CrashlyticsCore.Builder()
+                        .disabled(BuildConfig.DEBUG)
+                        .build())
+                .build();
+        Fabric.with(this, crashlytics);
 
         // Global dependency graph
         appComponent = DaggerAppComponent.builder()
