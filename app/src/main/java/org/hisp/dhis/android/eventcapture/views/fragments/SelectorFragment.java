@@ -82,10 +82,10 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 public class SelectorFragment extends BaseFragment implements SelectorView {
     private static final String TAG = SelectorFragment.class.getSimpleName();
-
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
+    public static final String LAYOUT_MANAGER_KEY = "LAYOUT_MANAGER_KEY";
     @Inject
     SelectorPresenter selectorPresenter;
     @Inject
@@ -170,6 +170,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
 
         outState.putBoolean(STATE_IS_REFRESHING, swipeRefreshLayout.isRefreshing());
+
+        outState.putParcelable(ReportEntityAdapter.REPORT_ENTITY_LIST_KEY, reportEntityAdapter.onSaveInstanceState());
+        outState.putParcelable(LAYOUT_MANAGER_KEY, reportEntityRecyclerView.getLayoutManager().onSaveInstanceState());
+
         super.onSaveInstanceState(outState);
     }
 
@@ -216,7 +220,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
     @Override
     public void showPickers(Picker pickerTree) {
-        if (!pickerTree.getChildren().isEmpty()) {
+        if (pickerTree.getChildren().isEmpty()) {
             TextView textView = (TextView) getActivity()
                     .findViewById(R.id.textview_error_no_org_units);
             //in the case that error was shown and the user was assigned organisation units,
@@ -374,9 +378,30 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     private void setupReportEntityRecyclerView(View view, Bundle savedInstanceState) {
+
+        reportEntityRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_events);
+
+        setupAdapter();
+        reportEntityRecyclerView.setAdapter(reportEntityAdapter);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        reportEntityRecyclerView.setLayoutManager(layoutManager);
+        if (savedInstanceState != null) {
+            layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(LAYOUT_MANAGER_KEY));
+        }
 
+        if (savedInstanceState != null) {
+            reportEntityAdapter.onRestoreInstanceState(
+                    savedInstanceState.getBundle(ReportEntityAdapter.REPORT_ENTITY_LIST_KEY));
+        }
+
+        reportEntityRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        reportEntityRecyclerView.addItemDecoration(new DividerDecoration(
+                ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
+    }
+
+    private void setupAdapter() {
         reportEntityAdapter = new ReportEntityAdapter(getActivity());
         reportEntityAdapter.setOnReportEntityInteractionListener(new OnReportEntityInteractionListener() {
             @Override
@@ -394,13 +419,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 }
             }
         });
-
-        reportEntityRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_events);
-        reportEntityRecyclerView.setLayoutManager(layoutManager);
-        reportEntityRecyclerView.setAdapter(reportEntityAdapter);
-        reportEntityRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        reportEntityRecyclerView.addItemDecoration(new DividerDecoration(
-                ContextCompat.getDrawable(getActivity(), R.drawable.divider)));
     }
 
     private void setupBottomSheet(View view, Bundle savedInstanceState) {
@@ -453,10 +471,13 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         if (areAllPickersPresent(pickers)) {
             showCreateEventButton();
 
-            // load existing events
+            // load existing eventsz
             selectorPresenter.listEvents(getOrganisationUnitUid(pickers), getProgramUid(pickers));
         } else {
             hideCreateEventButton();
+            //This is uncommented, because it introduces buggy behaviour to the bottomSheet.
+            //The bottom sheet is opened, but the pickers don't show unless the user clicks on the position where they should be shown.
+            //showBottomSheet();
 
             // clear out list of existing events
             if (reportEntityAdapter != null) {
@@ -516,6 +537,18 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
                 }
             });
             animSetXY.start();
+        }
+    }
+
+    private void hideBottomSheet() {
+        if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
+    private void showBottomSheet() {
+        if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         }
     }
 
