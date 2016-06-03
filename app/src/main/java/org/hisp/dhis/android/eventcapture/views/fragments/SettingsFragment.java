@@ -30,7 +30,6 @@ package org.hisp.dhis.android.eventcapture.views.fragments;
 
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
@@ -69,6 +68,12 @@ public class SettingsFragment extends AbsSettingsFragment implements SettingsVie
     @Override
     public boolean onSynchronizationPeriodClick() {
         return false;
+    }
+
+    @Override
+    public boolean onSyncNotificationsChanged(boolean isEnabled) {
+        settingsPresenter.setSyncNotifications(isEnabled);
+        return true;
     }
 
     @Override

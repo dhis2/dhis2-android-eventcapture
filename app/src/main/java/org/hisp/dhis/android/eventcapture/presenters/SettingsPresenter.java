@@ -50,4 +50,6 @@ public interface SettingsPresenter {
     void setCrashReports(Boolean enabled);
 
     public void setSettingsView(SettingsView settingsView);
+
+    void setSyncNotifications(boolean isEnabled);
 }

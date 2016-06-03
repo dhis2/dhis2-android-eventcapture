@@ -19,14 +19,17 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
+import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
@@ -40,6 +43,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Inject
     SyncDateWrapper syncDateWrapper;
 
+    @Inject
+    AppPreferences appPreferences;
+
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mContentResolver = context.getContentResolver();
@@ -51,7 +57,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
         mContentResolver = context.getContentResolver();
-
         //inject the syncWrapper:
         ((EventCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
     }
@@ -64,39 +69,38 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
         if (syncIsNeeded()) {
-            showIsSyncingNotification();
+            if (appPreferences.getSyncNotifications()) {
+                showIsSyncingNotification();
+            }
             syncWrapper.syncMetaData()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                    .switchMap(new Func1<List<ProgramStageDataElement>, Observable<List<Event>>>() {
+                        @Override
+                        public Observable<List<Event>> call(List<ProgramStageDataElement> programStageDataElements) {
+                            return syncWrapper.syncData();
+                        }
+                    })
+                    .subscribe(new Action1<List<Event>>() {
                                    @Override
-                                   public void call(List<ProgramStageDataElement> o) {
-                                       //TODO: do this "reactively" instead of nested calls
-                                       syncWrapper.syncData().
-                                               subscribeOn(AndroidSchedulers.mainThread()).
-                                               subscribe(new Action1<List<Event>>() {
-                                                   @Override
-                                                   public void call(List<Event> events) {
-                                                       syncDateWrapper.setLastSyncedNow();
-                                                       showSyncCompletedNotification(true);
-                                                   }
-                                               }, new Action1<Throwable>() {
-                                                   @Override
-                                                   public void call(Throwable throwable) {
-                                                       Log.e(TAG, "Background synchronization failed", throwable);
-                                                       showSyncCompletedNotification(false);
-                                                   }
-                                               });
+                                   public void call(List<Event> events) {
+                                       syncDateWrapper.setLastSyncedNow();
+                                       if (appPreferences.getSyncNotifications()) {
+                                           showSyncCompletedNotification(true);
+                                       }
                                    }
                                }, new Action1<Throwable>() {
                                    @Override
                                    public void call(Throwable throwable) {
-                                       Log.e(TAG, "Background synchronization of metadata failed.", throwable);
-                                       showSyncCompletedNotification(false);
+                                       Log.e(TAG, "Background synchronization failed.", throwable);
+                                       if (appPreferences.getSyncNotifications()) {
+                                           showSyncCompletedNotification(false);
+                                       }
                                    }
                                }
                     );
         }
+
     }
 
     private boolean syncIsNeeded() {
@@ -105,53 +109,56 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void showIsSyncingNotification() {
-        String title = getContext().getString(R.string.sync_in_progress_notification_title);
-        String contentText = getContext().getString(R.string.sync_in_progress_notification_content);
-        boolean showProgressBarInNotification = true;
-        showSyncNotification(title, contentText, showProgressBarInNotification);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
+        builder.setContentTitle(getContext().getString(R.string.sync_in_progress_notification_title))
+                .setContentText(getContext().getString(R.string.sync_in_progress_notification_content))
+                .setProgress(0, 0, true)
+                .setCategory(NotificationCompat.CATEGORY_PROGRESS);
+
+        showSyncNotification(builder);
     }
 
     private void showSyncCompletedNotification(boolean successful) {
 
-        String title;
-        String contentText;
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext());
 
         if (successful) {
-            title = getContext().getString(R.string.sync_complete_notification_title);
-            contentText = getContext().getString(R.string.sync_complete_notification_content);
+            builder.setContentTitle(getContext().getString(R.string.sync_complete_notification_title))
+                    .setContentText(getContext().getString(R.string.sync_complete_notification_content))
+                    .setCategory(NotificationCompat.CATEGORY_STATUS);
         } else {
-            title = getContext().getString(R.string.sync_failed_notification_title);
-            contentText = getContext().getString(R.string.sync_failed_notification_content);
+            builder.setContentTitle(getContext().getString(R.string.sync_failed_notification_title))
+                    .setContentText(getContext().getString(R.string.sync_failed_notification_content))
+                    .setCategory(NotificationCompat.CATEGORY_ERROR);
         }
-        boolean showProgressBarInNotification = false;
-        showSyncNotification(title, contentText, showProgressBarInNotification);
+
+        // remove progressbar
+        builder.setProgress(0, 0, false);
+
+        showSyncNotification(builder);
     }
 
-    private void showSyncNotification(String title, String contentText, boolean showProgressBar) {
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getContext());
-        notificationBuilder.setSmallIcon(R.drawable.ic_notification).
-                setContentTitle(title).
-                setContentText(contentText).
-                setCategory(NotificationCompat.CATEGORY_STATUS);
+    private void showSyncNotification(NotificationCompat.Builder builder) {
+
+        builder.setSmallIcon(R.drawable.ic_notification);
 
         Intent resultIntent = new Intent(getContext(), HomeActivity.class);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(getContext());
-        // Adds the back stack for the Intent (but not the Intent itself)
+
         stackBuilder.addParentStack(HomeActivity.class);
-        // Adds the Intent that starts the Activity to the top of the stack
+
         stackBuilder.addNextIntent(resultIntent);
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
-        notificationBuilder.setContentIntent(resultPendingIntent);
-        notificationBuilder.setProgress(0, 0, showProgressBar);
+        builder.setContentIntent(resultPendingIntent);
 
         NotificationManager notificationManager =
                 (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(007, notificationBuilder.build());
+        notificationManager.notify(007, builder.build());
     }
 }

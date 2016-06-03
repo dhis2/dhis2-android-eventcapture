@@ -103,4 +103,11 @@ public class SettingsPresenterImpl implements SettingsPresenter {
     public void setSettingsView(SettingsView settingsView) {
         this.settingsView = settingsView;
     }
+
+    @Override
+    public void setSyncNotifications(boolean isEnabled) {
+        appPreferences.setSyncNotifications(isEnabled);
+    }
+
+
 }
