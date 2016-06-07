@@ -33,7 +33,7 @@ import android.content.Context;
 
 public interface AppAccountManager {
 
-    void createAccount(Context context);
+    void init(Context context);
 
     void removeAccount();
 
