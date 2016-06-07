@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncAdapter;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
@@ -73,5 +74,7 @@ public interface UserComponent {
     void inject(ProfileFragment profileFragment);
 
     void inject(SyncAdapter syncAdapter);
+
+    void inject(AppAccountManager appAccountManager);
 }
 

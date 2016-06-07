@@ -4,27 +4,33 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.hisp.dhis.client.sdk.android.api.D2;
+import org.hisp.dhis.android.eventcapture.EventCaptureApp;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
+
+import javax.inject.Inject;
 
 /**
  * A singleton class to abstract/wrap and simplify interactions with Account in relation to synchronizing.
  */
 // TODO should be refactored:
-// - Pulling out accountName through D2 directly without null checks can blow the whole app
-// - Using D2 singleton directly without injection (not-testable)
-// - Static accountName variable will be preserving state during the whole application run
-// - AppAccountManager should implement interface (in order to make it mock-able)
+// - Pulling out accountName through D2 directly without null checks can blow the whole app - OK?
+// - Using D2 singleton directly without injection (not-testable) - OK
+// - Static accountName variable will be preserving state during the whole application run - OK (removed Static)
+// - AppAccountManager should implement interface (in order to make it mock-able) - OK
 // - Abstract AppAccountManager behind SyncWrapper
 
 public class AppAccountManagerImpl implements AppAccountManager {
+
+    @Inject
+    CurrentUserInteractor currentUserInteractor;
+
     // TODO These properties should be injected (not hardcoded)
     public final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
     public final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
@@ -35,6 +41,9 @@ public class AppAccountManagerImpl implements AppAccountManager {
     private AppPreferences appPreferences;
 
     public AppAccountManagerImpl(Context context, AppPreferences appPreferences) {
+        ((EventCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
+        //((EventCaptureApp) context.getApplicationContext()).getAppComponent().inject(this);
+
         this.appPreferences = appPreferences;
         this.appContext = context;
         init(context);
@@ -42,6 +51,8 @@ public class AppAccountManagerImpl implements AppAccountManager {
 
     public void init(Context context) {
 
+        accountName = currentUserInteractor.userCredentials().toBlocking().first().getUsername();
+        //accountName = D2.me().userCredentials().toBlocking().first().getUsername();
         appContext = context;
         account = createAccount();
         initSyncAccount();
