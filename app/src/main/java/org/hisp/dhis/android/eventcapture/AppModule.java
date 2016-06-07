@@ -35,6 +35,7 @@ import android.util.Log;
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandlerImpl;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
+import org.hisp.dhis.android.eventcapture.model.AppAccountManagerImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
@@ -133,7 +134,7 @@ public class AppModule {
     @Singleton
     public AppAccountManager providesAppAccountManager(Context context,
                                                        AppPreferences appPreferences) {
-        return new AppAccountManager(context, appPreferences);
+        return new AppAccountManagerImpl(context, appPreferences);
     }
 
     @Provides
