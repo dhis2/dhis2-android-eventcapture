@@ -1,9 +1,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.model.RxRulesEngine;
-import org.hisp.dhis.android.eventcapture.views.RxOnValueChangedListener;
-import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryView;
+import org.hisp.dhis.android.eventcapture.views.DataEntryView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
@@ -21,6 +19,8 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.rules.RuleEffect;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.RxOnValueChangedListener;
+import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityAction;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityAction.FormEntityActionType;

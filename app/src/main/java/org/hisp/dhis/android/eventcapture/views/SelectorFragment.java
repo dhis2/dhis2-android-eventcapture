@@ -26,7 +26,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -59,8 +59,6 @@ import android.widget.Toast;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
-import org.hisp.dhis.android.eventcapture.views.AbsAnimationListener;
-import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;

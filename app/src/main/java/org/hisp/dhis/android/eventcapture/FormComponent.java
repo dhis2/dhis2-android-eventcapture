@@ -1,7 +1,7 @@
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.views.activities.FormSectionActivity;
-import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
+import org.hisp.dhis.android.eventcapture.views.FormSectionActivity;
+import org.hisp.dhis.android.eventcapture.views.DataEntryFragment;
 
 import dagger.Subcomponent;
 
