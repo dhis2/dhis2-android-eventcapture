@@ -66,10 +66,8 @@ public class AppAccountManagerImpl implements AppAccountManager {
                             Log.e("SYNC ADAPTER", "Unable to remove SyncAdapter Stub account", e);
                         }
                     }
-                    // TODO remove magic callback implementation
-                }, new AsyncQueryHandler(new ContentResolver(appContext) {
-                }) {
-                });
+                    // TODO remove magic callback implementation - OK
+                }, null);
 
             }
 
