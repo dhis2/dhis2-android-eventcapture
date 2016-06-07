@@ -37,11 +37,11 @@ public class AppAccountManagerImpl implements AppAccountManager {
     public AppAccountManagerImpl(Context context, AppPreferences appPreferences) {
         this.appPreferences = appPreferences;
         this.appContext = context;
-        createAccount(context);
+        init(context);
     }
 
-    public void createAccount(Context context) {
-        accountName = D2.me().userCredentials().toBlocking().first().getUsername();
+    public void init(Context context) {
+
         appContext = context;
         account = createAccount();
         initSyncAccount();
