@@ -34,7 +34,6 @@ import android.support.annotation.NonNull;
 import android.view.MenuItem;
 
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.views.SelectorFragment;
 import org.hisp.dhis.client.sdk.ui.bindings.views.DefaultHomeActivity;
 import org.hisp.dhis.client.sdk.ui.fragments.WrapperFragment;
 
