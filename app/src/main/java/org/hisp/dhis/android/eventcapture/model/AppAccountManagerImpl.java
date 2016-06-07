@@ -26,9 +26,9 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
 
 public class AppAccountManagerImpl implements AppAccountManager {
     // TODO These properties should be injected (not hardcoded)
-    public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
-    public static final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
-    public static String accountName = "default dhis2 account";
+    public final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
+    public final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
+    public String accountName = "default dhis2 account";
 
     private Account account;
     private Context appContext;
