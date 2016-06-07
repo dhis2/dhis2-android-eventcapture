@@ -10,15 +10,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
 import org.hisp.dhis.client.sdk.models.event.Event;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 
@@ -34,6 +33,7 @@ import rx.schedulers.Schedulers;
 
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = SyncAdapter.class.getSimpleName();
+    final int notificationId = 007;
 
     ContentResolver mContentResolver;
 
@@ -45,6 +45,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Inject
     AppPreferences appPreferences;
+
 
     public SyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -68,44 +69,43 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             return;
         }
 
-        if (syncIsNeeded()) {
-            if (appPreferences.getSyncNotifications()) {
-                showIsSyncingNotification();
-            }
-            syncWrapper.syncMetaData()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .switchMap(new Func1<List<ProgramStageDataElement>, Observable<List<Event>>>() {
-                        @Override
-                        public Observable<List<Event>> call(List<ProgramStageDataElement> programStageDataElements) {
-                            return syncWrapper.syncData();
+        syncWrapper.checkIfSyncIsNeeded()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .switchMap(new Func1<Boolean, Observable<List<Event>>>() {
+                    @Override
+                    public Observable<List<Event>> call(Boolean syncIsNeeded) {
+                        if (syncIsNeeded) {
+                            if (appPreferences.getSyncNotifications()) {
+                                showIsSyncingNotification();
+                            }
+                            return syncWrapper.backgroundSync();
                         }
-                    })
-                    .subscribe(new Action1<List<Event>>() {
-                                   @Override
-                                   public void call(List<Event> events) {
+                        return Observable.empty();
+                    }
+                })
+                .subscribe(new Action1<List<Event>>() {
+                               @Override
+                               public void call(List<Event> events) {
+                                   if (events != Observable.empty()) {
                                        syncDateWrapper.setLastSyncedNow();
+
                                        if (appPreferences.getSyncNotifications()) {
                                            showSyncCompletedNotification(true);
                                        }
                                    }
-                               }, new Action1<Throwable>() {
-                                   @Override
-                                   public void call(Throwable throwable) {
-                                       Log.e(TAG, "Background synchronization failed.", throwable);
-                                       if (appPreferences.getSyncNotifications()) {
-                                           showSyncCompletedNotification(false);
-                                       }
+                               }
+                           }, new Action1<Throwable>() {
+                               @Override
+                               public void call(Throwable throwable) {
+                                   Log.e(TAG, "Background synchronization failed.", throwable);
+                                   if (appPreferences.getSyncNotifications()) {
+                                       showSyncCompletedNotification(false);
                                    }
                                }
-                    );
-        }
+                           }
+                );
 
-    }
-
-    private boolean syncIsNeeded() {
-        // TODO: Use convenience method from SDK when available
-        return true;
     }
 
     private void showIsSyncingNotification() {
@@ -159,6 +159,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         NotificationManager notificationManager =
                 (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(007, builder.build());
+        notificationManager.notify(notificationId, builder.build());
     }
 }
