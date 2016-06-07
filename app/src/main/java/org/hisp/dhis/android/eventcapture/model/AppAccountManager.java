@@ -17,7 +17,15 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
 /**
  * A singleton class to abstract/wrap and simplify interactions with Account in relation to synchronizing.
  */
+// TODO should be refactored:
+// - Pulling out accountName through D2 directly without null checks can blow the whole app
+// - Using D2 singleton directly without injection (not-testable)
+// - Static accountName variable will be preserving state during the whole application run
+// - AppAccountManager should implement interface (in order to make it mock-able)
+// - Abstract AppAccountManager behind SyncWrapper
+
 public class AppAccountManager {
+    // TODO These properties should be injected (not hardcoded)
     public static final String AUTHORITY = "org.hisp.dhis.android.eventcapture.model.provider";
     public static final String ACCOUNT_TYPE = "org.hisp.dhis.android.eventcapture";
     public static String accountName = "default dhis2 account";
@@ -29,15 +37,11 @@ public class AppAccountManager {
     public AppAccountManager(Context context, AppPreferences appPreferences) {
         this.appPreferences = appPreferences;
         this.appContext = context;
-        accountName = D2.me().userCredentials().toBlocking().first().getUsername();
-        initialize(context);
-    }
-
-    public void initialize(Context context) {
         createAccount(context);
     }
 
     public void createAccount(Context context) {
+        accountName = D2.me().userCredentials().toBlocking().first().getUsername();
         appContext = context;
         account = createAccount();
         initSyncAccount();
@@ -62,9 +66,11 @@ public class AppAccountManager {
                             Log.e("SYNC ADAPTER", "Unable to remove SyncAdapter Stub account", e);
                         }
                     }
+                    // TODO remove magic callback implementation
                 }, new AsyncQueryHandler(new ContentResolver(appContext) {
                 }) {
                 });
+
             }
 
         }
