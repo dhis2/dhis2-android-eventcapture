@@ -28,19 +28,10 @@
 
 package org.hisp.dhis.android.eventcapture.model;
 
-import android.accounts.Account;
-import android.content.Context;
-
 public interface AppAccountManager {
 
-    void init(Context context);
-
     void removeAccount();
-
-    Account createAccount();
-
-    void initSyncAccount();
-
+    
     void removePeriodicSync();
 
     void setPeriodicSync(int minutes);
