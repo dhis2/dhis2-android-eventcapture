@@ -80,7 +80,7 @@
         <!-- Sync service : -->
         <service
             android:name=".model.SyncService"
-            android:exported="true">
+            android:exported="false">
 
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
