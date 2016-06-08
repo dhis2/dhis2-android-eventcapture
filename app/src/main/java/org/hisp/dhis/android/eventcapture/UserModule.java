@@ -70,17 +70,21 @@ import javax.annotation.Nullable;
 import dagger.Module;
 import dagger.Provides;
 
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
+
 @Module
 public class UserModule implements DefaultUserModule {
 
     public UserModule() {
-        // in cases when we already configured D2
+        this(null);
     }
 
     public UserModule(String serverUrl) {
-        // it can throw exception in case if configuration has failed
-        Configuration configuration = new Configuration(serverUrl);
-        D2.configure(configuration).toBlocking().first();
+        if (!isEmpty(serverUrl)) {
+            // it can throw exception in case if configuration has failed
+            Configuration configuration = new Configuration(serverUrl);
+            D2.configure(configuration).toBlocking().first();
+        }
     }
 
     @Provides

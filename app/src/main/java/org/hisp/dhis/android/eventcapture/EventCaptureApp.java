@@ -38,6 +38,9 @@ import com.crashlytics.android.core.CrashlyticsCore;
 import org.hisp.dhis.android.eventcapture.views.HomeActivity;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppModule;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.Inject;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.NavigationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.views.DefaultLoginActivity;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -48,13 +51,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
-
 // TODO Add LeakCanary support
-// TODO implement debug navigation drawer
-
-// initializing stetho
-// Stetho.initializeWithDefaults(this);
-// D2.init(this, flavor);
 public final class EventCaptureApp extends Application {
     private AppComponent appComponent;
     private UserComponent userComponent;
@@ -74,8 +71,8 @@ public final class EventCaptureApp extends Application {
                 .build();
         Fabric.with(this, crashlytics);
 
-        AppModule appModule = new AppModule(this, "", "");
-        UserModule userModule = new UserModule();
+        final AppModule appModule = new AppModule(this, "", "");
+        final UserModule userModule = new UserModule();
 
         // Global dependency graph
         appComponent = DaggerAppComponent.builder()
@@ -85,7 +82,25 @@ public final class EventCaptureApp extends Application {
         // adding UserComponent to global dependency graph
         userComponent = appComponent.plus(userModule);
 
-        org.hisp.dhis.client.sdk.ui.bindings.commons.Inject.init(appModule, userModule);
+        Inject.init(new Inject.ModuleProvider() {
+
+            @Override
+            public DefaultAppModule provideAppModule() {
+                return appModule;
+            }
+
+            @Override
+            public DefaultUserModule provideUserModule(String serverUrl) {
+                UserModule userModule = new UserModule(serverUrl);
+
+                // creating new component
+                userComponent = appComponent.plus(userModule);
+
+                // return user module
+                return userModule;
+            }
+        });
+
         NavigationHandler.loginActivity(DefaultLoginActivity.class);
         NavigationHandler.homeActivity(HomeActivity.class);
     }
@@ -103,7 +118,7 @@ public final class EventCaptureApp extends Application {
         D2.init(context, flavor);
     }
 
-    public OkHttpClient providesOkHttpClient() {
+    private OkHttpClient providesOkHttpClient() {
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -117,23 +132,16 @@ public final class EventCaptureApp extends Application {
         return new OkHttpClient();
     }
 
-    public D2.Flavor providesFlavor(OkHttpClient okHttpClient, Logger logger) {
+    private D2.Flavor providesFlavor(OkHttpClient okHttpClient, Logger logger) {
         return new D2.Builder()
                 .okHttp(okHttpClient)
                 .logger(logger)
                 .build();
     }
 
-    public UserComponent createUserComponent(String serverUrl) {
-        UserModule userModule = new UserModule(serverUrl);
-        org.hisp.dhis.client.sdk.ui.bindings.commons.Inject.createUserComponent(serverUrl);
-
-        userComponent = appComponent.plus(userModule);
-        return userComponent;
-    }
-
     public FormComponent createFormComponent() {
         isNull(userComponent, "UserComponent must not be null");
+
         formComponent = userComponent.plus(new FormModule());
         return formComponent;
     }
