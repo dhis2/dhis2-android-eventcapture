@@ -28,8 +28,11 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import android.content.Context;
+
 import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
+import org.hisp.dhis.android.eventcapture.model.AppAccountManagerImpl;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
 import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
@@ -300,5 +303,13 @@ public class UserModule {
                                                      SyncDateWrapper syncDateWrapper,
                                                      Logger logger) {
         return new ProfilePresenterImpl(userAccountInteractor, appAccountManager, syncDateWrapper, logger);
+    }
+
+    @Provides
+    @PerUser
+    public AppAccountManager providesAppAccountManager(Context context,
+                                                       AppPreferences appPreferences,
+                                                       @Nullable CurrentUserInteractor currentUserInteractor, Logger logger) {
+        return new AppAccountManagerImpl(context, appPreferences, currentUserInteractor, logger);
     }
 }

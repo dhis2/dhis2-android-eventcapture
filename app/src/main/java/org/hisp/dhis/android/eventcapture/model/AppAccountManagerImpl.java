@@ -40,7 +40,7 @@ public class AppAccountManagerImpl implements AppAccountManager {
     private Context appContext;
     private AppPreferences appPreferences;
 
-    public AppAccountManagerImpl(Context context, AppPreferences appPreferences) {
+    public AppAccountManagerImpl(Context context, AppPreferences appPreferences, CurrentUserInteractor currentUserInteractor, Logger logger) {
         ((EventCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
         //((EventCaptureApp) context.getApplicationContext()).getAppComponent().inject(this);
 
