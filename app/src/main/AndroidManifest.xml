@@ -72,7 +72,7 @@
         <!-- stub provider: -->
         <provider
             android:name=".model.StubProvider"
-            android:authorities="org.hisp.dhis.android.eventcapture.model.provider"
+            android:authorities="@string/authority"
             android:exported="false"
             android:label="provider"
             android:syncable="true" />
