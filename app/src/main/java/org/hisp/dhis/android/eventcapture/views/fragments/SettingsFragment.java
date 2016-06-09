@@ -26,14 +26,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+<<<<<<< Updated upstream
 package org.hisp.dhis.android.eventcapture.views.fragments;
+=======
+/*package org.hisp.dhis.android.eventcapture.views.fragments;
+>>>>>>> Stashed changes
 
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 
+<<<<<<< Updated upstream
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
+=======
+import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
+import org.hisp.dhis.client.sdk.ui.bindings.views.SettingsView;
+>>>>>>> Stashed changes
 import org.hisp.dhis.client.sdk.ui.fragments.AbsSettingsFragment;
 
 import javax.inject.Inject;
@@ -48,10 +57,17 @@ public class SettingsFragment extends AbsSettingsFragment implements SettingsVie
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+<<<<<<< Updated upstream
         androidSyncWarning = getResources().getString(R.string.sys_sync_disabled_warning);
 
         ((EventCaptureApp) getActivity().getApplication()).getUserComponent().inject(this);
         settingsPresenter.setSettingsView(this);
+=======
+        //androidSyncWarning = getResources().getString(R.string.sys_sync_disabled_warning);
+
+        //((EventCaptureApp) getActivity().getApplication()).getUserComponent().inject(this);
+        //settingsPresenter.setSettingsView(this);
+>>>>>>> Stashed changes
     }
 
     @Override
@@ -98,3 +114,7 @@ public class SettingsFragment extends AbsSettingsFragment implements SettingsVie
         Snackbar.make(getView(), msg, Snackbar.LENGTH_LONG).show();
     }
 }
+<<<<<<< Updated upstream
+=======
+*/
+>>>>>>> Stashed changes

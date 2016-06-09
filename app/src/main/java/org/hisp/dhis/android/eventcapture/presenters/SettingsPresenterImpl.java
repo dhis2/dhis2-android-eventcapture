@@ -25,7 +25,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+<<<<<<< Updated upstream
 
+=======
+/*
+>>>>>>> Stashed changes
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import android.content.ContentResolver;
@@ -40,6 +44,10 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
  * <p/>
  * Created by Vladislav Georgiev Alfredov on 1/15/16.
  */
+<<<<<<< Updated upstream
+=======
+/*
+>>>>>>> Stashed changes
 public class SettingsPresenterImpl implements SettingsPresenter {
     public static final String TAG = SettingsPresenterImpl.class.getSimpleName();
 
@@ -111,3 +119,7 @@ public class SettingsPresenterImpl implements SettingsPresenter {
 
 
 }
+<<<<<<< Updated upstream
+=======
+*/
+>>>>>>> Stashed changes

@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.views.activities;
+package org.hisp.dhis.android.eventcapture.views;
 
 
 import android.app.Activity;
@@ -30,7 +30,6 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
-import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.OnPickerItemClickListener;
 import org.hisp.dhis.client.sdk.ui.fragments.DatePickerDialogFragment;

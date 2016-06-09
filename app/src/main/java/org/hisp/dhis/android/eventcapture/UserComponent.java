@@ -30,12 +30,7 @@ package org.hisp.dhis.android.eventcapture;
 
 import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncAdapter;
-import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LauncherActivity;
-import org.hisp.dhis.android.eventcapture.views.activities.LoginActivity;
-import org.hisp.dhis.android.eventcapture.views.fragments.ProfileFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorFragment;
-import org.hisp.dhis.android.eventcapture.views.fragments.SettingsFragment;
+import org.hisp.dhis.android.eventcapture.views.SelectorFragment;
 
 import dagger.Subcomponent;
 
@@ -58,20 +53,8 @@ public interface UserComponent {
     // Injection targets
     //------------------------------------------------------------------------
 
-    // activities
-    void inject(LauncherActivity launcherActivity);
-
-    void inject(LoginActivity loginActivity);
-
-    void inject(HomeActivity homeActivity);
-
-
     // fragments
     void inject(SelectorFragment selectorFragment);
-
-    void inject(SettingsFragment settingsFragment);
-
-    void inject(ProfileFragment profileFragment);
 
     void inject(SyncAdapter syncAdapter);
 

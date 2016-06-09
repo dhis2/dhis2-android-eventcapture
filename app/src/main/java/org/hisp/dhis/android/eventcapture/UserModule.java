@@ -28,24 +28,9 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.content.Context;
-
-import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
-import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
-import org.hisp.dhis.android.eventcapture.model.AppAccountManagerImpl;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
-import org.hisp.dhis.android.eventcapture.presenters.HomePresenter;
-import org.hisp.dhis.android.eventcapture.presenters.HomePresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.LauncherPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.LoginPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.LoginPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenter;
-import org.hisp.dhis.android.eventcapture.presenters.ProfilePresenterImpl;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
-import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenter;
-import org.hisp.dhis.android.eventcapture.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.android.api.D2;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.optionset.OptionSetInteractor;
@@ -64,6 +49,20 @@ import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenter;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenterImpl;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.LauncherPresenter;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.LauncherPresenterImpl;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.LoginPresenter;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.LoginPresenterImpl;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.ProfilePresenter;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.ProfilePresenterImpl;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.SettingsPresenter;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.SettingsPresenterImpl;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import javax.annotation.Nullable;
@@ -71,26 +70,32 @@ import javax.annotation.Nullable;
 import dagger.Module;
 import dagger.Provides;
 
+import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
+
 @Module
-public class UserModule {
+public class UserModule implements DefaultUserModule {
 
     public UserModule() {
-        // in cases when we already configured D2
+        this(null);
     }
 
     public UserModule(String serverUrl) {
-        // it can throw exception in case if configuration has failed
-        Configuration configuration = new Configuration(serverUrl);
-        D2.configure(configuration).toBlocking().first();
+        if (!isEmpty(serverUrl)) {
+            // it can throw exception in case if configuration has failed
+            Configuration configuration = new Configuration(serverUrl);
+            D2.configure(configuration).toBlocking().first();
+        }
     }
 
     @Provides
     @Nullable
     @PerUser
-    public CurrentUserInteractor providesUserAccountInteractor() {
+    @Override
+    public CurrentUserInteractor providesCurrentUserInteractor() {
         if (D2.isConfigured()) {
             return D2.me();
         }
+
         return null;
     }
 
@@ -243,12 +248,27 @@ public class UserModule {
         return new LoginPresenterImpl(accountInteractor, apiExceptionHandler, logger);
     }
 
+
     @Provides
     @PerUser
-    public HomePresenter providesHomerPresenter(
-            @Nullable CurrentUserInteractor accountInteractor, AppPreferences appPreferences,
-            SyncDateWrapper syncDateWrapper, Logger logger) {
-        return new HomePresenterImpl(accountInteractor, appPreferences, syncDateWrapper, logger);
+    @Override
+    public ProfilePresenter providesProfilePresenter(
+            CurrentUserInteractor userInteractor, SyncDateWrapper dateWrapper, Logger logger) {
+        return new ProfilePresenterImpl(userInteractor, dateWrapper, logger);
+    }
+
+    @Override
+    public SettingsPresenter providesSettingsPresenter(AppPreferences appPreferences,
+                                                       AppAccountManager appAccountManager) {
+        return new SettingsPresenterImpl(appPreferences, appAccountManager);
+    }
+
+    @Provides
+    @PerUser
+    @Override
+    public HomePresenter providesHomePresenter(
+            CurrentUserInteractor currentUserInteractor, SyncDateWrapper syncDateWrapper, Logger logger) {
+        return new HomePresenterImpl(currentUserInteractor, syncDateWrapper, logger);
     }
 
     @Provides
@@ -296,20 +316,4 @@ public class UserModule {
         return new SettingsPresenterImpl(appPreferences, appAccountManager);
     }
 
-    @Provides
-    @PerUser
-    public ProfilePresenter providesProfilePresenter(@Nullable CurrentUserInteractor userAccountInteractor,
-                                                     AppAccountManager appAccountManager,
-                                                     SyncDateWrapper syncDateWrapper,
-                                                     Logger logger) {
-        return new ProfilePresenterImpl(userAccountInteractor, appAccountManager, syncDateWrapper, logger);
-    }
-
-    @Provides
-    @PerUser
-    public AppAccountManager providesAppAccountManager(Context context,
-                                                       AppPreferences appPreferences,
-                                                       @Nullable CurrentUserInteractor currentUserInteractor, Logger logger) {
-        return new AppAccountManagerImpl(context, appPreferences, currentUserInteractor, logger);
-    }
 }

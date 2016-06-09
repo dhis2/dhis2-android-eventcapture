@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;

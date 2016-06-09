@@ -16,7 +16,11 @@ import android.util.Log;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+<<<<<<< Updated upstream
 import org.hisp.dhis.android.eventcapture.views.activities.HomeActivity;
+=======
+import org.hisp.dhis.android.eventcapture.views.HomeActivity;
+>>>>>>> Stashed changes
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
