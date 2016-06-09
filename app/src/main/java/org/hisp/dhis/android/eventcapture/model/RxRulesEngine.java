@@ -27,6 +27,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
+import rx.subjects.ReplaySubject;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
 
@@ -89,7 +90,8 @@ public class RxRulesEngine {
                                         eventsMap.putAll(ModelUtils.toMap(eventInteractor.list(
                                                 organisationUnit, program).toBlocking().first()));
 
-                                        ruleEffectSubject = BehaviorSubject.create();
+                                        // ruleEffectSubject = BehaviorSubject.create();
+                                        ruleEffectSubject = ReplaySubject.createWithSize(1);
                                         ruleEffectSubject.subscribeOn(Schedulers.computation());
                                         ruleEffectSubject.observeOn(AndroidSchedulers.mainThread());
 
