@@ -119,11 +119,12 @@ public class RxRulesEngine {
                 .map(new Func1<Event, List<RuleEffect>>() {
                     @Override
                     public List<RuleEffect> call(Event event) {
-                        logger.d(TAG, "Reloaded event: " + event);
+                        logger.d(TAG, "Reloaded event: " + currentEvent.getUId());
 
                         currentEvent = event;
                         eventsMap.put(event.getUId(), event);
 
+                        logger.d(TAG, "calculating rule effects");
                         return ruleEngine.execute(currentEvent,
                                 new ArrayList<>(eventsMap.values()));
                     }
@@ -139,7 +140,7 @@ public class RxRulesEngine {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.d(TAG, "Failed to process event", throwable);
+                        logger.e(TAG, "Failed to process event", throwable);
                         ruleEffectSubject.onError(throwable);
                     }
                 }));
