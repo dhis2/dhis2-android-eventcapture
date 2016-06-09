@@ -26,22 +26,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-<<<<<<< Updated upstream
-package org.hisp.dhis.android.eventcapture.presenters;
-=======
 /*package org.hisp.dhis.android.eventcapture.presenters;
->>>>>>> Stashed changes
 
 import org.hisp.dhis.android.eventcapture.views.fragments.SettingsView;
 
 /**
  * Created by Vladislav Georgiev Alfredov on 1/18/16.
  */
-<<<<<<< Updated upstream
-=======
 
 /*
->>>>>>> Stashed changes
 public interface SettingsPresenter {
 
     void synchronize();
@@ -62,7 +55,4 @@ public interface SettingsPresenter {
 
     void setSyncNotifications(boolean isEnabled);
 }
-<<<<<<< Updated upstream
-=======
 */
->>>>>>> Stashed changes
