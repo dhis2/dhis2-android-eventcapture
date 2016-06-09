@@ -28,6 +28,9 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import android.content.Context;
+
+import org.hisp.dhis.android.eventcapture.model.AppAccountManagerImpl;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
@@ -75,11 +78,16 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 @Module
 public class UserModule implements DefaultUserModule {
 
-    public UserModule() {
-        this(null);
+    private final String authority;
+    private final String accountType;
+
+    public UserModule(String authority, String accountType) {
+        this(null, authority, accountType);
     }
 
-    public UserModule(String serverUrl) {
+    public UserModule(String serverUrl, String authority, String accountType) {
+        this.authority = authority;
+        this.accountType = accountType;
         if (!isEmpty(serverUrl)) {
             // it can throw exception in case if configuration has failed
             Configuration configuration = new Configuration(serverUrl);
@@ -261,6 +269,11 @@ public class UserModule implements DefaultUserModule {
     public SettingsPresenter providesSettingsPresenter(AppPreferences appPreferences,
                                                        AppAccountManager appAccountManager) {
         return new SettingsPresenterImpl(appPreferences, appAccountManager);
+    }
+
+    @Override
+    public AppAccountManager providesAppAccountManager(Context context, AppPreferences appPreferences, CurrentUserInteractor currentUserInteractor, Logger logger) {
+        return new AppAccountManagerImpl(context, appPreferences, currentUserInteractor, authority, accountType, logger);
     }
 
     @Provides

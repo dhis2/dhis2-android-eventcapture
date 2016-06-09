@@ -28,9 +28,9 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import org.hisp.dhis.android.eventcapture.model.AppAccountManager;
 import org.hisp.dhis.android.eventcapture.model.SyncAdapter;
 import org.hisp.dhis.android.eventcapture.views.SelectorFragment;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
 
 import dagger.Subcomponent;
 

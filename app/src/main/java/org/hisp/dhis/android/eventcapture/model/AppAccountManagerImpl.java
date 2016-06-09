@@ -10,10 +10,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.hisp.dhis.android.eventcapture.EventCaptureApp;
-import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 /**
@@ -21,69 +20,81 @@ import org.hisp.dhis.client.sdk.utils.Logger;
  */
 
 public class AppAccountManagerImpl implements AppAccountManager {
-
     private final String TAG = AppAccountManagerImpl.class.getSimpleName();
 
     private final Logger logger;
     private final Context appContext;
     private final AppPreferences appPreferences;
     private final CurrentUserInteractor currentUserInteractor;
+    private final String authority;
+    private final String accountType;
 
-    private String authority;
     private Account account;
 
-    public AppAccountManagerImpl(Context context, AppPreferences appPreferences, CurrentUserInteractor currentUserInteractor, Logger logger) {
-        ((EventCaptureApp) context.getApplicationContext()).getUserComponent().inject(this);
+    public AppAccountManagerImpl(Context context,
+                                 AppPreferences appPreferences,
+                                 CurrentUserInteractor currentUserInteractor,
+                                 String authority,
+                                 String accountType,
+                                 Logger logger) {
         this.appContext = context;
         this.appPreferences = appPreferences;
         this.currentUserInteractor = currentUserInteractor;
+        this.authority = authority;
+        this.accountType = accountType;
         this.logger = logger;
-        init(context);
+        init();
     }
 
-    private void init(Context context) {
+    private void init() {
 
-        if (currentUserInteractor == null || !currentUserInteractor.isSignedIn().toBlocking().first()) {
+        if (!userIsSignedIn()) {
             logger.i(TAG, "No syncing performed: User is not signed in. CurrentUserInteractor is null or CurrentUserInteractor.isSignedIn() returned false");
             return;
         }
 
-        String accountType = context.getString(R.string.account_type);
+        account = fetchOrCreateAccount();
 
-        try {
-            account = fetchOrCreateAccount(accountType);
-            authority = context.getString(R.string.authority);
-            initPeriodicSync();
-        } catch (Exception e) {
-            logger.i(TAG, "Init error", e);
-        }
+        initPeriodicSync();
 
     }
 
-    private Account fetchOrCreateAccount(String accountType) throws Exception {
-        String accountName = currentUserInteractor.userCredentials().toBlocking().first().getUsername();
+    private boolean userIsSignedIn() {
+        return currentUserInteractor != null && currentUserInteractor.isSignedIn().toBlocking().first();
+    }
 
-        Account fetchedAccount = fetchAccount(accountName, accountType);
+    private Account fetchOrCreateAccount() {
+        String accountName = getUsername();
+
+        Account fetchedAccount = fetchAccount(accountName);
         if (fetchedAccount == null) {
-            fetchedAccount = createAccount(accountName, accountType);
+            fetchedAccount = createAccount(accountName);
         }
 
         return fetchedAccount;
     }
 
-    private Account fetchAccount(String accountName, String accountType) {
-        Account accounts[] = ((AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE)).getAccountsByType(accountType);
+    private String getUsername() {
+        return currentUserInteractor.userCredentials().toBlocking().first().getUsername();
+    }
+
+    private Account fetchAccount(String accountName) {
+
+        Account accounts[] = ((AccountManager) appContext
+                .getSystemService(Context.ACCOUNT_SERVICE))
+                .getAccountsByType(accountType);
 
         for (Account existingAccount : accounts) {
             if (existingAccount.name.equals(accountName)) {
                 return existingAccount;
             }
         }
+
         // no account with this name exists
         return null;
     }
 
-    private Account createAccount(String accountName, String accountType) throws Exception {
+    private Account createAccount(String accountName) {
         Account account = new Account(accountName, accountType);
         AccountManager accountManager = (AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE);
 
@@ -91,13 +102,14 @@ public class AppAccountManagerImpl implements AppAccountManager {
         if (accountAddedSuccessfully) {
             return account;
         } else {
-            throw new Exception("Unable to create Account: AccountManager.addAccountExplicitly returned false");
+            return null;
         }
     }
 
     private void initPeriodicSync() {
 
         if (appPreferences.getBackgroundSyncState()) {
+
             ContentResolver.setIsSyncable(account, authority, 1);
             ContentResolver.setSyncAutomatically(account, authority, true);
             long minutes = (long) appPreferences.getBackgroundSyncFrequency();
@@ -110,7 +122,48 @@ public class AppAccountManagerImpl implements AppAccountManager {
         }
     }
 
+    private boolean errorWithAccount() {
+
+        if (accountExists()) {
+            return false;
+        } else {
+            createAccount(getUsername());
+            if (account == null) {
+                // no account exists on the system, and we are unable to create it.
+                // user might have denied permissions GET_ACCOUNTS and/or MANAGE_ACCOUNT at runtime
+                return true;
+            }
+            return false;
+        }
+    }
+
+    private boolean accountExists() {
+
+        if (account != null) {
+            return true;
+        } else {
+            if (userIsSignedIn()) {
+                account = fetchAccount(getUsername());
+                if (account != null) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    private boolean accountIsActive() {
+        return currentUserInteractor != null && account != null || fetchAccount(getUsername()) != null;
+    }
+
     public void setPeriodicSync(int minutes) {
+
+        if (errorWithAccount()) {
+            Log.i(TAG, "Unable to set periodic sync. No Account exists in the AccountManager.");
+            return;
+        }
+
         Long seconds = ((long) minutes) * 60;
         ContentResolver.addPeriodicSync(
                 account,
@@ -121,6 +174,11 @@ public class AppAccountManagerImpl implements AppAccountManager {
 
     public void syncNow() {
 
+        if (errorWithAccount()) {
+            Log.i(TAG, "Unable to set periodic sync. No Account exists in the AccountManager.");
+            return;
+        }
+
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -130,7 +188,9 @@ public class AppAccountManagerImpl implements AppAccountManager {
 
 
     public void removeAccount() {
-        if (account != null && appContext != null) {
+
+        if (userIsSignedIn() && accountIsActive()) {
+
             AccountManager accountManager =
                     (AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -142,10 +202,11 @@ public class AppAccountManagerImpl implements AppAccountManager {
 
                         try {
                             if (!future.getResult()) {
-                                throw new Exception("Unable to remove SyncAdapter stub account. User must delete the account in Android system settings.");
+                                throw new Exception("Unable to remove SyncAdapter stub account. " +
+                                        "User must delete the account in Android system settings.");
                             }
                         } catch (Exception e) {
-                            Log.e("SYNC ADAPTER", "Unable to remove SyncAdapter stub account", e);
+                            Log.e(TAG, "Unable to remove SyncAdapter stub account", e);
                         }
                     }
                     // TODO remove magic callback implementation - OK
@@ -157,6 +218,12 @@ public class AppAccountManagerImpl implements AppAccountManager {
     }
 
     public void removePeriodicSync() {
+
+        if (errorWithAccount()) {
+            Log.i(TAG, "Unable to remove periodic sync. No Account exists in the AccountManager.");
+            return;
+        }
+
         ContentResolver.removePeriodicSync(account, authority, Bundle.EMPTY);
     }
 

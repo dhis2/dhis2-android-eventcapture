@@ -32,14 +32,11 @@ import android.app.Application;
 import android.content.Context;
 
 import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
-import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandlerImpl;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManagerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppModule;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferencesImpl;
@@ -53,13 +50,9 @@ import dagger.Provides;
 @Module
 public class AppModule implements DefaultAppModule {
     private final Application application;
-    private final String authority;
-    private final String accountType;
 
-    public AppModule(Application application, String authority, String accountType) {
+    public AppModule(Application application) {
         this.application = application;
-        this.authority = authority;
-        this.accountType = accountType;
     }
 
     @Provides
@@ -101,13 +94,5 @@ public class AppModule implements DefaultAppModule {
     @Override
     public SyncDateWrapper providesSyncDateWrapper(Context context, AppPreferences preferences, Logger logger) {
         return new SyncDateWrapper(context, preferences);
-    }
-
-    @Override
-    public AppAccountManager providesAppAccountManager(Context context,
-                                                       AppPreferences appPreferences,
-                                                       CurrentUserInteractor currentUserInteractor,
-                                                       Logger logger) {
-        return new DefaultAppAccountManagerImpl(context, appPreferences, currentUserInteractor, authority, accountType, logger);
     }
 }
