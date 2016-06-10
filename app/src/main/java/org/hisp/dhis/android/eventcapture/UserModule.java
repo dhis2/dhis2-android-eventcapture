@@ -54,7 +54,9 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandlerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenter;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenterImpl;
@@ -270,6 +272,13 @@ public class UserModule implements DefaultUserModule {
                                                               Logger logger) {
         return new AppAccountManagerImpl(
                 context, appPreferences, currentUserInteractor, authority, accountType, logger);
+    }
+
+    @Provides
+    @PerUser
+    @Override
+    public DefaultNotificationHandler providesNotificationHandler(Context context) {
+        return new DefaultNotificationHandlerImpl(context);
     }
 
     @Provides
