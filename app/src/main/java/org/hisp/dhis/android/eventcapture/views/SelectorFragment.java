@@ -213,7 +213,12 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     @Override
     public void hideProgressBar() {
         logger.d(SelectorFragment.class.getSimpleName(), "hideProgressBar()");
-        swipeRefreshLayout.setRefreshing(false);
+        swipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
     }
 
     @Override
