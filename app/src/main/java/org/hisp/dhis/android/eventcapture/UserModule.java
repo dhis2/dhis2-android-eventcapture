@@ -53,7 +53,7 @@ import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenter;
@@ -257,23 +257,19 @@ public class UserModule implements DefaultUserModule {
     }
 
 
-    @Provides
-    @PerUser
-    @Override
-    public ProfilePresenter providesProfilePresenter(
-            CurrentUserInteractor userInteractor, SyncDateWrapper dateWrapper, Logger logger) {
-        return new ProfilePresenterImpl(userInteractor, dateWrapper, logger);
-    }
-
     @Override
     public SettingsPresenter providesSettingsPresenter(AppPreferences appPreferences,
-                                                       AppAccountManager appAccountManager) {
+                                                       DefaultAppAccountManager appAccountManager) {
         return new SettingsPresenterImpl(appPreferences, appAccountManager);
     }
 
     @Override
-    public AppAccountManager providesAppAccountManager(Context context, AppPreferences appPreferences, CurrentUserInteractor currentUserInteractor, Logger logger) {
-        return new AppAccountManagerImpl(context, appPreferences, currentUserInteractor, authority, accountType, logger);
+    public DefaultAppAccountManager providesAppAccountManager(Context context,
+                                                              AppPreferences appPreferences,
+                                                              CurrentUserInteractor currentUserInteractor,
+                                                              Logger logger) {
+        return new AppAccountManagerImpl(
+                context, appPreferences, currentUserInteractor, authority, accountType, logger);
     }
 
     @Provides
@@ -282,6 +278,12 @@ public class UserModule implements DefaultUserModule {
     public HomePresenter providesHomePresenter(
             CurrentUserInteractor currentUserInteractor, SyncDateWrapper syncDateWrapper, Logger logger) {
         return new HomePresenterImpl(currentUserInteractor, syncDateWrapper, logger);
+    }
+
+    @PerUser
+    @Override
+    public ProfilePresenter providesProfilePresenter(CurrentUserInteractor currentUserInteractor, SyncDateWrapper syncDateWrapper, DefaultAppAccountManager appAccountManager, Logger logger) {
+        return new ProfilePresenterImpl(currentUserInteractor, syncDateWrapper, appAccountManager, logger);
     }
 
     @Provides
@@ -325,7 +327,7 @@ public class UserModule implements DefaultUserModule {
     @Provides
     @PerUser
     public SettingsPresenter provideSettingsPresenter(
-            AppPreferences appPreferences, AppAccountManager appAccountManager) {
+            AppPreferences appPreferences, DefaultAppAccountManager appAccountManager) {
         return new SettingsPresenterImpl(appPreferences, appAccountManager);
     }
 

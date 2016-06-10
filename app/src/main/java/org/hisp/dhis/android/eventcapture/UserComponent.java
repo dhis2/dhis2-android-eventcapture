@@ -30,7 +30,7 @@ package org.hisp.dhis.android.eventcapture;
 
 import org.hisp.dhis.android.eventcapture.model.SyncAdapter;
 import org.hisp.dhis.android.eventcapture.views.SelectorFragment;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 
 import dagger.Subcomponent;
 
@@ -58,6 +58,6 @@ public interface UserComponent {
 
     void inject(SyncAdapter syncAdapter);
 
-    void inject(AppAccountManager appAccountManager);
+    void inject(DefaultAppAccountManager appAccountManager);
 }
 

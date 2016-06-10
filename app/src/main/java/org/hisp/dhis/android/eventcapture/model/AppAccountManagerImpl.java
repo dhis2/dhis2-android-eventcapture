@@ -12,14 +12,14 @@ import android.util.Log;
 
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.AppAccountManager;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 /**
  * A singleton class to abstract/wrap and simplify interactions with Account in relation to synchronizing.
  */
 
-public class AppAccountManagerImpl implements AppAccountManager {
+public class AppAccountManagerImpl implements DefaultAppAccountManager {
     private final String TAG = AppAccountManagerImpl.class.getSimpleName();
 
     private final Logger logger;
@@ -48,7 +48,7 @@ public class AppAccountManagerImpl implements AppAccountManager {
 
     private void init() {
 
-        if (!userIsSignedIn()) {
+        if (!appPreferences.getBackgroundSyncState() || !userIsSignedIn()) {
             logger.i(TAG, "No syncing performed: User is not signed in. CurrentUserInteractor is null or CurrentUserInteractor.isSignedIn() returned false");
             return;
         }
@@ -163,6 +163,10 @@ public class AppAccountManagerImpl implements AppAccountManager {
             Log.i(TAG, "Unable to set periodic sync. No Account exists in the AccountManager.");
             return;
         }
+
+
+        ContentResolver.setIsSyncable(account, authority, 1);
+        ContentResolver.setSyncAutomatically(account, authority, true);
 
         Long seconds = ((long) minutes) * 60;
         ContentResolver.addPeriodicSync(
