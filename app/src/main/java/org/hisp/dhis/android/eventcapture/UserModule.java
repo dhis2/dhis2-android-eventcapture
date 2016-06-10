@@ -30,7 +30,6 @@ package org.hisp.dhis.android.eventcapture;
 
 import android.content.Context;
 
-import org.hisp.dhis.android.eventcapture.model.AppAccountManagerImpl;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenterImpl;
@@ -54,9 +53,10 @@ import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManagerImpl;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandlerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenter;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenterImpl;
@@ -270,7 +270,7 @@ public class UserModule implements DefaultUserModule {
                                                               AppPreferences appPreferences,
                                                               CurrentUserInteractor currentUserInteractor,
                                                               Logger logger) {
-        return new AppAccountManagerImpl(
+        return new DefaultAppAccountManagerImpl(
                 context, appPreferences, currentUserInteractor, authority, accountType, logger);
     }
 
