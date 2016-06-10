@@ -306,7 +306,7 @@ public class UserModule implements DefaultUserModule {
                 userOrganisationUnitInteractor, userProgramInteractor,
                 programStageInteractor, programStageDataElementInteractor,
                 eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
-                apiExceptionHandler, logger, null);
+                apiExceptionHandler, logger);
     }
 
     @Provides

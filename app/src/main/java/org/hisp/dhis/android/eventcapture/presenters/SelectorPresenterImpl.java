@@ -37,7 +37,6 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
-import org.hisp.dhis.client.sdk.core.systeminfo.SystemInfoPreferences;
 import org.hisp.dhis.client.sdk.models.common.state.State;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -89,10 +88,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final SyncWrapper syncWrapper;
     private final Logger logger;
 
-    private final SystemInfoPreferences systemInfoPreferences;
-
     private CompositeSubscription subscription;
-    private boolean attemptedToSync;
+    private boolean hasSyncedBefore;
     private SelectorView selectorView;
     private boolean isSyncing;
 
@@ -105,7 +102,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
                                  ApiExceptionHandler apiExceptionHandler,
-                                 Logger logger, SystemInfoPreferences systemInfoPreferences) {
+                                 Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
@@ -116,10 +113,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.syncWrapper = syncWrapper;
         this.apiExceptionHandler = apiExceptionHandler;
         this.logger = logger;
-        this.systemInfoPreferences = systemInfoPreferences;
 
         this.subscription = new CompositeSubscription();
-        this.attemptedToSync = false;
+        this.hasSyncedBefore = false;
     }
 
     private static void traverseAndSetDefaultSelection(Picker tree) {
@@ -138,11 +134,18 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     public void attachView(View view) {
         isNull(view, "SelectorView must not be null");
+
         selectorView = (SelectorView) view;
+
+        if (isSyncing) {
+            selectorView.showProgressBar();
+        } else {
+            selectorView.hideProgressBar();
+        }
 
         // check if metadata was synced,
         // if not, syncMetaData it
-        if (!isSyncing && !attemptedToSync) {
+        if (!isSyncing && !hasSyncedBefore) {
             sync();
         }
 
@@ -151,12 +154,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void detachView() {
+        selectorView.hideProgressBar();
         selectorView = null;
-
-        if (!subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-            subscription = new CompositeSubscription();
-        }
     }
 
     @Override
@@ -186,7 +185,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(List<ProgramStageDataElement> stageDataElements) {
                         isSyncing = false;
-                        attemptedToSync = true;
+                        hasSyncedBefore = true;
                         syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
@@ -198,7 +197,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(Throwable throwable) {
                         isSyncing = false;
-                        attemptedToSync = true;
+                        hasSyncedBefore = true;
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
                         }
