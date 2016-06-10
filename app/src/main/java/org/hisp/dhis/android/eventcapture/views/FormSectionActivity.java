@@ -1,9 +1,11 @@
 package org.hisp.dhis.android.eventcapture.views;
 
-
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,6 +13,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -18,6 +21,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,6 +32,7 @@ import android.widget.TextView;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
+import org.hisp.dhis.android.eventcapture.LocationProvider;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -38,10 +43,10 @@ import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
-import org.joda.time.LocalDate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -51,12 +56,13 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
-
 // TODO check if configuration changes are handled properly
 public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_EVENT_UID = "arg:eventUid";
     private static final String ARG_IS_EVENT_NEW = "arg:isEventNew";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final int LOCATION_REQUEST_CODE = 42;
+    private static final String TAG = FormSectionActivity.class.getSimpleName();
 
     @Inject
     FormSectionPresenter formSectionPresenter;
@@ -147,18 +153,20 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
         // start building the form
         formSectionPresenter.createDataEntryForm(getEventUid());
+
+        setupLocation();
     }
 
     @Override
-    protected void onResume() {
+    protected void onStart() {
         formSectionPresenter.attachView(this);
-        super.onResume();
+        super.onStart();
     }
 
     @Override
-    protected void onPause() {
+    protected void onStop() {
         formSectionPresenter.detachView();
-        super.onPause();
+        super.onStop();
     }
 
     @Override
@@ -184,6 +192,42 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @SuppressWarnings("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        //TODO: implement location stuff...
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            List<String> permissionsList = Arrays.asList(permissions);
+            int at = permissionsList.indexOf(Manifest.permission.ACCESS_FINE_LOCATION);
+            if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "onRequestPermissionsResult: permission is granged");
+
+                LocationProvider locationProvider = new LocationProvider(this);
+                locationProvider.requestLocation();
+            }
+        }
+    }
+
+    /**
+     * Initialize the location permissions.
+     */
+    public void setupLocation() {
+        System.out.println("Setting up location");
+        if (Build.VERSION.SDK_INT > 22 &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+
+            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE);
         }
     }
 
@@ -300,7 +344,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
 
-
         // set on click listener to text view report date
         textViewReportDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -344,7 +387,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                                 }
                             })
                             .show();
-
                 } else {
                     completeEvent();
                     Snackbar.make(coordinatorLayout, getString(R.string.complete), Snackbar.LENGTH_LONG)

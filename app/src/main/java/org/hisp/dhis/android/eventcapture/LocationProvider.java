@@ -99,24 +99,7 @@ public class LocationProvider {
             }
         };
 
-        /*//Register the listener in the manager:
-        if (Build.VERSION.SDK_INT < 23 &&
-                ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            Log.d("Location", "onCreate: "  + "Location permissions unavailable !");
-            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-
-            ///call to show request permission ?
-            // Must be done from activity.
-
-            ActivityCompat.requestPermissions(activity, permissions, PackageManager.PERMISSION_GRANTED );
-        }*/
-
+        //TODO: evaluate location ?
         //Location lastKnown = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
         ///if(lastKnown.getTime() + 5000 > DateTime.now().getMillis()) {
