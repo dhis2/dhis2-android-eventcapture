@@ -29,7 +29,7 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
     private final String authority;
     private final String accountType;
 
-    private Account account;
+    //private Account account;
 
     public AppAccountManagerImpl(Context context,
                                  AppPreferences appPreferences,
@@ -52,8 +52,6 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
             logger.i(TAG, "No syncing performed: User is not signed in. CurrentUserInteractor is null or CurrentUserInteractor.isSignedIn() returned false");
             return;
         }
-
-        account = fetchOrCreateAccount();
 
         initPeriodicSync();
 
@@ -109,7 +107,7 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
     private void initPeriodicSync() {
 
         if (appPreferences.getBackgroundSyncState()) {
-
+            Account account = fetchOrCreateAccount();
             ContentResolver.setIsSyncable(account, authority, 1);
             ContentResolver.setSyncAutomatically(account, authority, true);
             long minutes = (long) appPreferences.getBackgroundSyncFrequency();
@@ -123,38 +121,11 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
     }
 
     private boolean errorWithAccount() {
-
-        if (accountExists()) {
-            return false;
-        } else {
-            createAccount(getUsername());
-            if (account == null) {
-                // no account exists on the system, and we are unable to create it.
-                // user might have denied permissions GET_ACCOUNTS and/or MANAGE_ACCOUNT at runtime
-                return true;
-            }
-            return false;
-        }
+        return !accountExists() && createAccount(getUsername()) == null;
     }
 
     private boolean accountExists() {
-
-        if (account != null) {
-            return true;
-        } else {
-            if (userIsSignedIn()) {
-                account = fetchAccount(getUsername());
-                if (account != null) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
-
-    private boolean accountIsActive() {
-        return currentUserInteractor != null && account != null || fetchAccount(getUsername()) != null;
+        return currentUserInteractor != null && fetchAccount(getUsername()) != null;
     }
 
     public void setPeriodicSync(int minutes) {
@@ -164,6 +135,7 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
             return;
         }
 
+        Account account = fetchOrCreateAccount();
 
         ContentResolver.setIsSyncable(account, authority, 1);
         ContentResolver.setSyncAutomatically(account, authority, true);
@@ -183,6 +155,8 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
             return;
         }
 
+        Account account = fetchOrCreateAccount();
+
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         settingsBundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
@@ -193,8 +167,8 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
 
     public void removeAccount() {
 
-        if (userIsSignedIn() && accountIsActive()) {
-
+        if (userIsSignedIn() && accountExists()) {
+            Account account = fetchAccount(getUsername());
             AccountManager accountManager =
                     (AccountManager) appContext.getSystemService(Context.ACCOUNT_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -227,6 +201,8 @@ public class AppAccountManagerImpl implements DefaultAppAccountManager {
             Log.i(TAG, "Unable to remove periodic sync. No Account exists in the AccountManager.");
             return;
         }
+
+        Account account = fetchAccount(getUsername());
 
         ContentResolver.removePeriodicSync(account, authority, Bundle.EMPTY);
     }
