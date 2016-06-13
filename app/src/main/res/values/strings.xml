@@ -62,4 +62,16 @@
     <string name="complete">Complete</string>
     <string name="incomplete">Incomplete</string>
 
+    <!-- Syncing -->
+    <string name="sync_complete_notification_title">Sync complete</string>
+    <string name="sync_complete_notification_content">Your DHIS2 data has been synchronized</string>
+    <string name="sync_failed_notification_title">Sync failed</string>
+    <string name="sync_failed_notification_content">Your DHIS2 data has not been synchronized</string>
+    <string name="sync_in_progress_notification_title">Syncing</string>
+    <string name="sync_in_progress_notification_content">Your DHIS2 data is synchronizing</string>
+
+    <!-- Account and Authority strings used by Android system Account Manager-->
+    <string name="authority">org.hisp.dhis.android.eventcapture.model.provider</string>
+    <string name="account_type">org.hisp.dhis.android.eventcapture</string>
+
 </resources>

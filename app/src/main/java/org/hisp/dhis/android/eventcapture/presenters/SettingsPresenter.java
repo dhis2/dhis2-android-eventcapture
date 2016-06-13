@@ -26,38 +26,33 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.android.eventcapture;
+/*package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.model.SyncAdapter;
-import org.hisp.dhis.android.eventcapture.views.SelectorFragment;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
+import org.hisp.dhis.android.eventcapture.views.fragments.SettingsView;
 
-import dagger.Subcomponent;
+/**
+ * Created by Vladislav Georgiev Alfredov on 1/18/16.
+ */
 
-@PerUser
-@Subcomponent(
-        modules = {
-                UserModule.class
-        }
-)
-public interface UserComponent {
+/*
+public interface SettingsPresenter {
 
-    //------------------------------------------------------------------------
-    // Sub-modules
-    //------------------------------------------------------------------------
+    void synchronize();
 
-    FormComponent plus(FormModule formModule);
+    void setUpdateFrequency(int frequency);
 
+    int getUpdateFrequency();
 
-    //------------------------------------------------------------------------
-    // Injection targets
-    //------------------------------------------------------------------------
+    void setBackgroundSynchronisation(Boolean enabled, String warning);
 
-    // fragments
-    void inject(SelectorFragment selectorFragment);
+    Boolean getBackgroundSynchronisation();
 
-    void inject(SyncAdapter syncAdapter);
+    Boolean getCrashReports();
 
-    void inject(DefaultAppAccountManager appAccountManager);
+    void setCrashReports(Boolean enabled);
+
+    public void setSettingsView(SettingsView settingsView);
+
+    void setSyncNotifications(boolean isEnabled);
 }
-
+*/

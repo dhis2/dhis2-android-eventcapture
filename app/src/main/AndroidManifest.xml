@@ -74,7 +74,7 @@
         <!-- stub provider: -->
         <provider
             android:name=".model.StubProvider"
-            android:authorities="org.hisp.dhis.android.eventcapture.model.provider"
+            android:authorities="@string/authority"
             android:exported="false"
             android:label="provider"
             android:syncable="true" />
@@ -82,7 +82,7 @@
         <!-- Sync service : -->
         <service
             android:name=".model.SyncService"
-            android:exported="true">
+            android:exported="false">
 
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />
