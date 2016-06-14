@@ -123,10 +123,11 @@ public class SyncWrapper {
                             }
                         }
 
-                        List<ProgramStage> programStages =
-                                loadProgramStages(programsWithoutRegistration);
-                        List<ProgramStageSection> programStageSections =
-                                loadProgramStageSections(programStages);
+                        // List<ProgramStage> programStages =
+                        //        loadProgramStages(programsWithoutRegistration);
+                        // List<ProgramStageSection> programStageSections =
+                        //        loadProgramStageSections(programStages);
+
                         List<ProgramRule> programRules =
                                 loadProgramRules(programsWithoutRegistration);
                         List<ProgramRuleAction> programRuleActions =
@@ -134,7 +135,8 @@ public class SyncWrapper {
                         List<ProgramRuleVariable> programRuleVariables =
                                 loadProgramRuleVariables(programsWithoutRegistration);
 
-                        return loadProgramStageDataElements(programStages, programStageSections);
+                        // return loadProgramStageDataElements(programStages, programStageSections);
+                        return new ArrayList<>();
                     }
                 });
     }
