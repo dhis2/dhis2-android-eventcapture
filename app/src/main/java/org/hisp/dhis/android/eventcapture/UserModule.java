@@ -289,10 +289,16 @@ public class UserModule implements DefaultUserModule {
         return new HomePresenterImpl(currentUserInteractor, syncDateWrapper, logger);
     }
 
-    @PerUser
+    @Provides
     @Override
-    public ProfilePresenter providesProfilePresenter(CurrentUserInteractor currentUserInteractor, SyncDateWrapper syncDateWrapper, DefaultAppAccountManager appAccountManager, Logger logger) {
-        return new ProfilePresenterImpl(currentUserInteractor, syncDateWrapper, appAccountManager, logger);
+    @PerUser
+    public ProfilePresenter providesProfilePresenter(CurrentUserInteractor currentUserInteractor,
+                                                     SyncDateWrapper syncDateWrapper,
+                                                     DefaultAppAccountManager appAccountManager,
+                                                     DefaultNotificationHandler defaultNotificationHandler,
+                                                     Logger logger) {
+        return new ProfilePresenterImpl(currentUserInteractor, syncDateWrapper, appAccountManager,
+                defaultNotificationHandler, logger);
     }
 
     @Provides
