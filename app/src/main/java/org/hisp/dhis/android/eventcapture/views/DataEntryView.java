@@ -1,7 +1,6 @@
-package org.hisp.dhis.android.eventcapture.views.fragments;
+package org.hisp.dhis.android.eventcapture.views;
 
-import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.client.sdk.rules.RuleEffect;
+import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.FormEntity;
 import org.hisp.dhis.client.sdk.ui.models.FormEntityAction;
 

@@ -28,12 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import org.hisp.dhis.android.eventcapture.SessionPreferences;
-import org.hisp.dhis.android.eventcapture.model.ApiExceptionHandler;
-import org.hisp.dhis.android.eventcapture.model.AppError;
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
-import org.hisp.dhis.android.eventcapture.views.View;
-import org.hisp.dhis.android.eventcapture.views.fragments.SelectorView;
+import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
@@ -41,7 +37,6 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
-import org.hisp.dhis.client.sdk.core.systeminfo.SystemInfoPreferences;
 import org.hisp.dhis.client.sdk.models.common.state.State;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -52,6 +47,10 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.AppError;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
+import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -89,10 +88,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private final SyncWrapper syncWrapper;
     private final Logger logger;
 
-    private final SystemInfoPreferences systemInfoPreferences;
-
     private CompositeSubscription subscription;
-    private boolean attemptedToSync;
+    private boolean hasSyncedBefore;
     private SelectorView selectorView;
     private boolean isSyncing;
 
@@ -105,7 +102,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                  SyncDateWrapper syncDateWrapper,
                                  SyncWrapper syncWrapper,
                                  ApiExceptionHandler apiExceptionHandler,
-                                 Logger logger, SystemInfoPreferences systemInfoPreferences) {
+                                 Logger logger) {
         this.userOrganisationUnitInteractor = interactor;
         this.userProgramInteractor = userProgramInteractor;
         this.programStageInteractor = programStageInteractor;
@@ -116,10 +113,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         this.syncWrapper = syncWrapper;
         this.apiExceptionHandler = apiExceptionHandler;
         this.logger = logger;
-        this.systemInfoPreferences = systemInfoPreferences;
 
         this.subscription = new CompositeSubscription();
-        this.attemptedToSync = false;
+        this.hasSyncedBefore = false;
     }
 
     private static void traverseAndSetDefaultSelection(Picker tree) {
@@ -138,11 +134,18 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     public void attachView(View view) {
         isNull(view, "SelectorView must not be null");
+
         selectorView = (SelectorView) view;
+
+        if (isSyncing) {
+            selectorView.showProgressBar();
+        } else {
+            selectorView.hideProgressBar();
+        }
 
         // check if metadata was synced,
         // if not, syncMetaData it
-        if (!isSyncing && !attemptedToSync) {
+        if (!isSyncing && !hasSyncedBefore) {
             sync();
         }
 
@@ -151,12 +154,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     @Override
     public void detachView() {
+        selectorView.hideProgressBar();
         selectorView = null;
-
-        if (!subscription.isUnsubscribed()) {
-            subscription.unsubscribe();
-            subscription = new CompositeSubscription();
-        }
     }
 
     @Override
@@ -186,7 +185,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(List<ProgramStageDataElement> stageDataElements) {
                         isSyncing = false;
-                        attemptedToSync = true;
+                        hasSyncedBefore = true;
                         syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
@@ -198,7 +197,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(Throwable throwable) {
                         isSyncing = false;
-                        attemptedToSync = true;
+                        hasSyncedBefore = true;
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
                         }
@@ -369,7 +368,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "Error deleting event: " + reportEntity.getLineOne(), throwable);
+                        logger.e(TAG, "Error deleting event: " + reportEntity, throwable);
                         if (selectorView != null) {
                             selectorView.onReportEntityDeletionError(reportEntity);
                         }
@@ -445,42 +444,25 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
-            String lineOne = null;
-            String lineTwo = null;
-            String lineThree = null;
+            ArrayList<String> dataElementLabels = new ArrayList<>();
 
-            for (int index = 0; index < 3; index++) {
-                ProgramStageDataElement stageDataElement = filteredElements.size() > index ?
-                        filteredElements.get(index) : null;
+            for (ProgramStageDataElement filteredElement : filteredElements) {
 
-                if (stageDataElement != null) {
-                    DataElement dataElement = stageDataElement.getDataElement();
-                    // TODO put 'none' string into resources
-                    String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
-                            dataElementToValueMap.get(dataElement.getUId()) : "none";
-                    String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
-                            dataElement.getDisplayFormName() : dataElement.getDisplayName();
-                    String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
-                            dataElementName, value);
+                DataElement dataElement = filteredElement.getDataElement();
 
-                    switch (index) {
-                        case 0: {
-                            lineOne = dataElementLabel;
-                            break;
-                        }
-                        case 1: {
-                            lineTwo = dataElementLabel;
-                            break;
-                        }
-                        case 2: {
-                            lineThree = dataElementLabel;
-                            break;
-                        }
-                    }
-                }
+                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
+                        dataElementToValueMap.get(dataElement.getUId()) : "none";
+                String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
+                        dataElement.getDisplayFormName() : dataElement.getDisplayName();
+                String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
+                        dataElementName, value);
+
+                dataElementLabels.add(dataElementLabel);
+
             }
-            reportEntities.add(new ReportEntity(event.getUId(),
-                    status, lineOne, lineTwo, lineThree));
+
+            reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));
+
         }
         return reportEntities;
     }

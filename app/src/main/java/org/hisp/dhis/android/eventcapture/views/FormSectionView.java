@@ -1,7 +1,7 @@
-package org.hisp.dhis.android.eventcapture.views.activities;
+package org.hisp.dhis.android.eventcapture.views;
 
-import org.hisp.dhis.android.eventcapture.views.View;
 import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 

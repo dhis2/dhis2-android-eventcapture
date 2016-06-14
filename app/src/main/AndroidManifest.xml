@@ -42,19 +42,21 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme.Base">
 
-        <activity android:name=".views.activities.LauncherActivity">
+        <activity android:name="org.hisp.dhis.client.sdk.ui.bindings.views.DefaultLauncherActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".views.activities.LoginActivity" />
+        <activity android:name="org.hisp.dhis.client.sdk.ui.bindings.views.DefaultLoginActivity" />
+
         <activity
-            android:name=".views.activities.HomeActivity"
+            android:name=".views.HomeActivity"
             android:theme="@style/AppTheme.Main" />
+
         <activity
-            android:name=".views.activities.FormSectionActivity"
+            android:name=".views.FormSectionActivity"
             android:windowSoftInputMode="adjustPan" />
 
         <!-- stub Authenticator service -->
@@ -72,7 +74,7 @@
         <!-- stub provider: -->
         <provider
             android:name=".model.StubProvider"
-            android:authorities="org.hisp.dhis.android.eventcapture.model.provider"
+            android:authorities="@string/authority"
             android:exported="false"
             android:label="provider"
             android:syncable="true" />
@@ -80,7 +82,7 @@
         <!-- Sync service : -->
         <service
             android:name=".model.SyncService"
-            android:exported="true">
+            android:exported="false">
 
             <intent-filter>
                 <action android:name="android.content.SyncAdapter" />

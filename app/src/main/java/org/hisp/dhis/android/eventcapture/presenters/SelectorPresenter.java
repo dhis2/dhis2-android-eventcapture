@@ -28,6 +28,7 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.Presenter;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 

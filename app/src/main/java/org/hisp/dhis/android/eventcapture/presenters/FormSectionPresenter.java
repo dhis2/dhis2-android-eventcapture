@@ -1,6 +1,7 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.client.sdk.models.event.Event;
+import org.hisp.dhis.client.sdk.ui.bindings.presenters.Presenter;
 import org.joda.time.DateTime;
 
 public interface FormSectionPresenter extends Presenter {

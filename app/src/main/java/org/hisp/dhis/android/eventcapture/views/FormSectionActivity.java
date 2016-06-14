@@ -1,4 +1,4 @@
-package org.hisp.dhis.android.eventcapture.views.activities;
+package org.hisp.dhis.android.eventcapture.views;
 
 
 import android.app.Activity;
@@ -30,7 +30,6 @@ import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
-import org.hisp.dhis.android.eventcapture.views.fragments.DataEntryFragment;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.OnPickerItemClickListener;
 import org.hisp.dhis.client.sdk.ui.fragments.DatePickerDialogFragment;
@@ -38,6 +37,8 @@ import org.hisp.dhis.client.sdk.ui.fragments.FilterableDialogFragment;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeComparator;
+import org.joda.time.LocalDate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -404,7 +405,22 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                         getString(R.string.report_date), stringDate);
                 textViewReportDate.setText(newValue);
 
-                DateTime dateTime = DateTime.parse(stringDate);
+                DateTime currentDateTime = DateTime.now();
+                DateTime selectedDateTime = DateTime.parse(stringDate);
+
+                /*
+                * in case when user selected today's date, we need to know about time as well.
+                * selectedDateTime does not contain time information (only date), that's why we
+                * need to create a new DateTime object by calling DateTime.now()
+                */
+                DateTime dateTime;
+                if (DateTimeComparator.getDateOnlyInstance()
+                        .compare(currentDateTime, selectedDateTime) == 0) {
+                    dateTime = currentDateTime;
+                } else {
+                    dateTime = selectedDateTime;
+                }
+
                 formSectionPresenter.saveEventDate(getEventUid(), dateTime);
             }
         };
