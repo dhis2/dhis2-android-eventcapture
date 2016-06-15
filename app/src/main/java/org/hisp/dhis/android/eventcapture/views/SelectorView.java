@@ -37,6 +37,7 @@ import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface SelectorView extends View {
@@ -51,6 +52,8 @@ public interface SelectorView extends View {
     void showPickers(Picker picker);
 
     void showReportEntities(List<ReportEntity> reportEntities);
+
+    void showFilterOptionItem(ArrayList<String> dataElementsToFilter);
 
     void showNoOrganisationUnitsError();
 

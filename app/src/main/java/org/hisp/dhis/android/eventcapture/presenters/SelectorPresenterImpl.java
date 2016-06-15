@@ -60,7 +60,6 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import rx.Observable;
@@ -289,6 +288,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     @Override
                     public void call(List<ReportEntity> reportEntities) {
                         if (selectorView != null) {
+                            selectorView.showFilterOptionItem(getFilterOptionItems(reportEntities));
                             selectorView.showReportEntities(reportEntities);
                         }
                     }
@@ -298,6 +298,13 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         logger.e(TAG, "Failed loading events", throwable);
                     }
                 }));
+    }
+
+    private ArrayList<String> getFilterOptionItems(List<ReportEntity> reportEntities) {
+        if (reportEntities != null && reportEntities.get(0) != null) {
+            return reportEntities.get(0).getDataElementLabels();
+        }
+        return null;
     }
 
     @Override
@@ -444,26 +451,29 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
-            ArrayList<String> dataElementLabels = new ArrayList<>();
+            ArrayList<String> reportDataElementLabels = new ArrayList<>();
+            ArrayList<String> reportDataElementValues = new ArrayList<>();
 
             for (ProgramStageDataElement filteredElement : filteredElements) {
 
                 DataElement dataElement = filteredElement.getDataElement();
 
-                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
-                        dataElementToValueMap.get(dataElement.getUId()) : "none";
                 String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
                         dataElement.getDisplayFormName() : dataElement.getDisplayName();
-                String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
-                        dataElementName, value);
 
-                dataElementLabels.add(dataElementLabel);
+                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
+                        dataElementToValueMap.get(dataElement.getUId()) : "none";
+
+                reportDataElementLabels.add(dataElementName);
+                reportDataElementValues.add(value);
 
             }
 
-            reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));
+            reportEntities.add(new ReportEntity(event.getUId(), status,
+                    reportDataElementLabels, reportDataElementValues));
 
         }
+
         return reportEntities;
     }
 

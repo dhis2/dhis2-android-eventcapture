@@ -31,6 +31,8 @@ package org.hisp.dhis.android.eventcapture.views;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -42,6 +44,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -70,6 +73,7 @@ import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -78,7 +82,8 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
-public class SelectorFragment extends BaseFragment implements SelectorView {
+public class SelectorFragment extends BaseFragment implements SelectorView,
+        Toolbar.OnMenuItemClickListener {
     private static final String TAG = SelectorFragment.class.getSimpleName();
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
@@ -108,6 +113,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     ReportEntityAdapter reportEntityAdapter;
     View bottomSheetHeaderView;
     private AlertDialog alertDialog;
+    private ArrayList<String> dataElementLabels;
 
     private static String getOrganisationUnitUid(List<Picker> pickers) {
         if (pickers != null && !pickers.isEmpty() &&
@@ -244,6 +250,37 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
+    @Override
+    public void showFilterOptionItem(ArrayList<String> dataElementsToFilter) {
+        if (dataElementsAreFilterable(dataElementsToFilter)) {
+            reportEntityAdapter.setDataElementLabelsToFilter(dataElementsToFilter);
+            showFilterOptionInToolBar(true);
+        } else {
+            showFilterOptionInToolBar(false);
+        }
+    }
+
+    private boolean dataElementsAreFilterable(List<String> dataElementsToFilter) {
+        return dataElementsToFilter != null && dataElementsToFilter.size() > 1;
+    }
+
+    private void showFilterOptionInToolBar(boolean showFilterOption) {
+
+        if (getParentToolbar() == null) {
+            // no toolbar to alter
+            return;
+        }
+
+        if (showFilterOption) {
+            getParentToolbar().getMenu().clear();
+            getParentToolbar().inflateMenu(R.menu.menu_refresh_filter);
+        } else {
+            getParentToolbar().getMenu().clear();
+            getParentToolbar().inflateMenu(R.menu.menu_refresh);
+
+        }
+    }
+
     private boolean reportEntitiesIsEmpty() {
         return reportEntityAdapter == null || reportEntityAdapter.getItemCount() == 0;
     }
@@ -315,12 +352,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         if (getParentToolbar() != null) {
             getParentToolbar().inflateMenu(R.menu.menu_refresh);
             getParentToolbar().setNavigationIcon(buttonDrawable);
-            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    return SelectorFragment.this.onMenuItemClick(item);
-                }
-            });
+            getParentToolbar().setOnMenuItemClickListener(this);
         }
     }
 
@@ -455,16 +487,90 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         FormSectionActivity.navigateToExistingEvent(getActivity(), reportEntity.getId());
     }
 
-    private boolean onMenuItemClick(MenuItem item) {
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
         switch (item.getItemId()) {
-            case R.id.action_refresh: {
+            case R.id.action_refresh:
                 selectorPresenter.sync();
                 return true;
-            }
+            case R.id.action_filter:
+                showFilterDialog();
+                break;
+
         }
         return false;
+    }
+
+    private void showFilterDialog() {
+
+        final String[] dataElementsToFilter = reportEntityAdapter.getDataElementLabelsToFilter().toArray(new String[0]);
+        final boolean[] dataElementCheckedState = new boolean[dataElementsToFilter.length];
+        final ArrayList<String> chosenDataElements = new ArrayList<>();
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        if (preferences.contains(getProgramUid(pickerAdapter.getData()))) {
+
+            String boolArrayAsString = preferences.getString(getProgramUid(pickerAdapter.getData()), "");
+            String[] parts =
+                    boolArrayAsString.replace("[", "").replace("]", "").split(",");
+
+            if (parts.length != dataElementCheckedState.length) {
+                // data elements to show have changed on the backend. remove preference and set to default (true)
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.remove(getProgramUid(pickerAdapter.getData()));
+                editor.apply();
+                setToDefault(dataElementCheckedState);
+            }
+
+            for (int i = 0; i > parts.length; i++) {
+                dataElementCheckedState[i] = Boolean.parseBoolean(parts[i]);
+            }
+        } else {
+            setToDefault(dataElementCheckedState);
+        }
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setMultiChoiceItems(
+                dataElementsToFilter,
+                dataElementCheckedState,
+                new DialogInterface.OnMultiChoiceClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+
+                    }
+                }).
+                setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        for (int i = 0; i < dataElementCheckedState.length; i++) {
+
+                            if (dataElementCheckedState[i]) {
+                                chosenDataElements.add(dataElementsToFilter[i]);
+                            }
+                        }
+
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
+                        editor.putString(getProgramUid(pickerAdapter.getData()), dataElementCheckedState.toString());
+                        editor.apply();
+
+                        reportEntityAdapter.setDataElementLabelsToShow(chosenDataElements);
+                    }
+                });
+
+
+        AlertDialog dialog = builder.create();
+
+        dialog.setTitle(R.string.filter_title);
+        dialog.show();
+    }
+
+    private void setToDefault(boolean[] dataElementCheckedState) {
+        for (int i = 0; i < dataElementCheckedState.length; i++) {
+            dataElementCheckedState[i] = true;
+        }
     }
 
     /* change visibility of floating action button*/
@@ -489,6 +595,10 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
 
         updateLabels(pickers);
+
+        if (reportEntitiesIsEmpty()) {
+            showFilterOptionInToolBar(false);
+        }
 
         selectorPresenter.onPickersSelectionsChanged(pickers);
     }
