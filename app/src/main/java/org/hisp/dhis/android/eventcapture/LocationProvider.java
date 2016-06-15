@@ -29,7 +29,6 @@
 package org.hisp.dhis.android.eventcapture;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -43,13 +42,14 @@ import rx.subjects.ReplaySubject;
 import rx.subjects.Subject;
 
 public class LocationProvider {
-    private Activity activity;
-
+    private static final String TAG = LocationProvider.class.getName();
+    private Context context;
+    private LocationListener locationListener;
     // temporary code
     private Subject<Location, Location> locationSubject = ReplaySubject.createWithSize(1);
 
-    public LocationProvider(Activity activity) {
-        this.activity = activity;
+    public LocationProvider(Context context) {
+        this.context = context;
     }
 
     public Observable<Location> locations() {
@@ -66,38 +66,42 @@ public class LocationProvider {
         // the gps coordinates test:
 
         //acquire a ref to the system LocationManager
-        LocationManager locationManager = (LocationManager) activity.getSystemService(
+        LocationManager locationManager = (LocationManager) context.getSystemService(
                 Context.LOCATION_SERVICE);
 
         //Define a listener that responds to location changes:
         //will be a listener:
-        LocationListener locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                Log.d("HomeActivity", "onLocationChanged: " + location);
-                System.out.println("Location updated: " + location);
+        if (locationListener == null) {
+            locationListener = new LocationListener() {
+                public final String TAG = LocationListener.class.getName();
 
-                locationSubject.onNext(location);
-            }
+                @Override
+                public void onLocationChanged(Location location) {
+                    //Log.d(", "onLocationChanged: " + location);
+                    Log.d(TAG, "onLocationChanged: new location: " + location);
+                    //System.out.println("Location updated: " + location);
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-                System.out.println("Location Status changed");
-            }
+                    locationSubject.onNext(location);
+                }
 
-            @Override
-            public void onProviderEnabled(String provider) {
-                System.out.println("Location provider enabled");
-                //reinit subject ??
-            }
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+                    System.out.println("Location Status changed");
+                }
 
-            @Override
-            public void onProviderDisabled(String provider) {
-                System.out.println("Location provider disabled");
+                @Override
+                public void onProviderEnabled(String provider) {
+                    System.out.println("Location provider enabled");
+                }
 
-                locationSubject.onCompleted();
-            }
-        };
+                @Override
+                public void onProviderDisabled(String provider) {
+                    System.out.println("Location provider disabled");
+                    locationSubject.onCompleted();
+                    // re-init the subject to a new one ?
+                }
+            };
+        }
 
         //TODO: evaluate location ?
         //Location lastKnown = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -108,5 +112,19 @@ public class LocationProvider {
         //see if this or just use old location:
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         //}
+    }
+
+    @SuppressWarnings("MissingPermission")
+    public void stopUpdates() {
+        Log.d(TAG, "stopUpdates() called with: " + "");
+        //if(locationListener != null) {
+        ((LocationManager) context
+                .getSystemService(Context.LOCATION_SERVICE))
+                .removeUpdates(locationListener);
+        //}
+        locationSubject.onCompleted();
+
+        //re-init subject to a new one ?
+        //TODO: test not re-initializing it...
     }
 }

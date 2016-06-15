@@ -216,7 +216,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
      * Initialize the location permissions.
      */
     public void setupLocation() {
-        System.out.println("Setting up location");
+        Log.d(TAG, "setupLocation() called with: " + "");
         if (Build.VERSION.SDK_INT > 22 &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //    ActivityCompat#requestPermissions
