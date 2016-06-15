@@ -368,7 +368,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        logger.e(TAG, "Error deleting event: " + reportEntity.getLineOne(), throwable);
+                        logger.e(TAG, "Error deleting event: " + reportEntity, throwable);
                         if (selectorView != null) {
                             selectorView.onReportEntityDeletionError(reportEntity);
                         }
@@ -444,42 +444,25 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
-            String lineOne = null;
-            String lineTwo = null;
-            String lineThree = null;
+            ArrayList<String> dataElementLabels = new ArrayList<>();
 
-            for (int index = 0; index < 3; index++) {
-                ProgramStageDataElement stageDataElement = filteredElements.size() > index ?
-                        filteredElements.get(index) : null;
+            for (ProgramStageDataElement filteredElement : filteredElements) {
 
-                if (stageDataElement != null) {
-                    DataElement dataElement = stageDataElement.getDataElement();
-                    // TODO put 'none' string into resources
-                    String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
-                            dataElementToValueMap.get(dataElement.getUId()) : "none";
-                    String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
-                            dataElement.getDisplayFormName() : dataElement.getDisplayName();
-                    String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
-                            dataElementName, value);
+                DataElement dataElement = filteredElement.getDataElement();
 
-                    switch (index) {
-                        case 0: {
-                            lineOne = dataElementLabel;
-                            break;
-                        }
-                        case 1: {
-                            lineTwo = dataElementLabel;
-                            break;
-                        }
-                        case 2: {
-                            lineThree = dataElementLabel;
-                            break;
-                        }
-                    }
-                }
+                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
+                        dataElementToValueMap.get(dataElement.getUId()) : "none";
+                String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
+                        dataElement.getDisplayFormName() : dataElement.getDisplayName();
+                String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
+                        dataElementName, value);
+
+                dataElementLabels.add(dataElementLabel);
+
             }
-            reportEntities.add(new ReportEntity(event.getUId(),
-                    status, lineOne, lineTwo, lineThree));
+
+            reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));
+
         }
         return reportEntities;
     }
