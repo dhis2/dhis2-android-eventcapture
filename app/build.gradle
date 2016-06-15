@@ -68,7 +68,7 @@ android {
     buildTypes {
         debug {
             buildConfigField "String", "SERVER_URL", '"https://bid.dhis2.org/epireg"'
-            buildConfigField "String", "USERNAME", '"erling_all"'
+            buildConfigField "String", "USERNAME", '"erling_zim"'
             buildConfigField "String", "PASSWORD", '"Erling123"'
 
             // reading fabric.properties file from current directory
