@@ -228,6 +228,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
             String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
             ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE);
+        } else {
+            // Older version, permissions granted on app install thus get location now.
+            // Or > 22 but permissions already granted:
+            LocationProvider locationProvider = new LocationProvider(this);
+            locationProvider.requestLocation();
         }
     }
 
