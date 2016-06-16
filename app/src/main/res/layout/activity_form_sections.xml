@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/coordinatorlayout_form"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<android.support.design.widget.CoordinatorLayout android:id="@+id/coordinatorlayout_form"
+                                                 xmlns:android="http://schemas.android.com/apk/res/android"
+                                                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                                                 android:layout_width="match_parent"
+                                                 android:layout_height="match_parent">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbarlayout_data_entry"
@@ -32,6 +32,7 @@
                     android:layout_marginRight="8dp"
                     android:orientation="vertical">
 
+
                     <org.hisp.dhis.client.sdk.ui.views.FontTextView
                         android:id="@+id/textview_report_date"
                         android:layout_width="match_parent"
@@ -43,7 +44,7 @@
                         android:hint="@string/choose_report_date"
                         android:padding="8dp"
                         android:textSize="@dimen/text_size_medium"
-                        app:font="@string/font_name_light" />
+                        app:font="@string/font_name_light"/>
 
                     <LinearLayout
                         android:id="@+id/linearlayout_coordinates"
@@ -52,18 +53,30 @@
                         android:orientation="horizontal"
                         android:weightSum="1">
 
+                        <android.support.v7.widget.AppCompatImageButton
+                            android:id="@+id/button_location"
+                            android:layout_width="42dp"
+                            android:layout_height="match_parent"
+                            android:background="@color/color_primary_light"
+                            android:src="@drawable/ic_my_location"
+                            android:layout_marginEnd="2dp"
+                            android:layout_marginRight="2dp"
+                            />
+
                         <org.hisp.dhis.client.sdk.ui.views.FontEditText
                             android:id="@+id/edittext_latitude"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_marginEnd="2dp"
                             android:layout_marginRight="2dp"
+                            android:layout_marginStart="2dp"
+                            android:layout_marginLeft="2dp"
                             android:layout_weight="0.5"
                             android:background="@color/color_primary_light"
                             android:hint="@string/latitude"
                             android:padding="8dp"
                             android:textSize="@dimen/text_size_medium"
-                            app:font="@string/font_name_light" />
+                            app:font="@string/font_name_light"/>
 
                         <org.hisp.dhis.client.sdk.ui.views.FontEditText
                             android:id="@+id/edittext_longitude"
@@ -76,7 +89,7 @@
                             android:hint="@string/longitude"
                             android:padding="8dp"
                             android:textSize="@dimen/text_size_medium"
-                            app:font="@string/font_name_light" />
+                            app:font="@string/font_name_light"/>
 
                     </LinearLayout>
 
@@ -92,7 +105,7 @@
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:titleTextColor="@android:color/white" />
+                app:titleTextColor="@android:color/white"/>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
@@ -100,7 +113,7 @@
             android:id="@+id/tablayout_data_entry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="scrollable" />
+            app:tabMode="scrollable"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -108,7 +121,7 @@
         android:id="@+id/viewpager_dataentry"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_complete_event"
@@ -120,5 +133,5 @@
         app:elevation="8dp"
         app:layout_anchor="@id/viewpager_dataentry"
         app:layout_anchorGravity="bottom|right|end"
-        app:pressedTranslationZ="8dp" />
+        app:pressedTranslationZ="8dp"/>
 </android.support.design.widget.CoordinatorLayout>

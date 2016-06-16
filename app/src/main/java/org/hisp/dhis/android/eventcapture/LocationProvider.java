@@ -60,7 +60,6 @@ public class LocationProvider {
      * This method expects the client to have checked weather or not the app has
      * the following permission: Manifest.permission.ACCES_FINE_LOCATION.
      */
-    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     @SuppressWarnings("MissingPermission")
     public void requestLocation() {
         // the gps coordinates test:

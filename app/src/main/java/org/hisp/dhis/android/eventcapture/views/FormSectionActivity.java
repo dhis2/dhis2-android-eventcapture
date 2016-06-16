@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,6 +21,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageButton;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -75,6 +77,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     LinearLayout linearLayoutCoordinates;
     EditText editTextLatitude;
     EditText editTextLongitude;
+    AppCompatImageButton locationButton;
 
     // section tabs and view pager
     TabLayout tabLayout;
@@ -154,7 +157,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         // start building the form
         formSectionPresenter.createDataEntryForm(getEventUid());
 
-        setupLocation();
+        setupLocationPermissions();
     }
 
     @Override
@@ -195,19 +198,43 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
-    @SuppressWarnings("MissingPermission")
+    public void hideLocationPickers() {
+        linearLayoutCoordinates.setVisibility(View.GONE);
+    }
+
+    public void showLocationPickers() {
+        linearLayoutCoordinates.setVisibility(View.VISIBLE);
+    }
+
+    public void setLocation(Location location) {
+        double longitude = location.getLongitude();
+        double latitude = location.getLatitude();
+
+        if (longitude != 0.0 && latitude != 0.0) {
+            editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
+            editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
+        }
+    }
+
+    private void subscribeToLocations() {
+        if( ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationProvider locationProvider = new LocationProvider(this);
+            locationProvider.requestLocation();
+            formSectionPresenter.subscribeToLocations(locationProvider);
+        } else {
+            //notify that not authorized ? ask again ?
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //TODO: implement location stuff...
         if (requestCode == LOCATION_REQUEST_CODE) {
             List<String> permissionsList = Arrays.asList(permissions);
             int at = permissionsList.indexOf(Manifest.permission.ACCESS_FINE_LOCATION);
             if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "onRequestPermissionsResult: permission is granged");
-
-                LocationProvider locationProvider = new LocationProvider(this);
-                locationProvider.requestLocation();
+                // don't do anything
             }
         }
     }
@@ -215,24 +242,17 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     /**
      * Initialize the location permissions.
      */
-    public void setupLocation() {
-        Log.d(TAG, "setupLocation() called with: " + "");
+    public void setupLocationPermissions() {
+        Log.d(TAG, "setupLocationPermissions() called with: " + "");
         if (Build.VERSION.SDK_INT > 22 &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
 
             String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
             ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE);
         } else {
             // Older version, permissions granted on app install thus get location now.
             // Or > 22 but permissions already granted:
-            LocationProvider locationProvider = new LocationProvider(this);
-            locationProvider.requestLocation();
+            //subscribeToLocations();
         }
     }
 
@@ -348,6 +368,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         linearLayoutCoordinates = (LinearLayout) findViewById(R.id.linearlayout_coordinates);
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
+        locationButton = (AppCompatImageButton) findViewById(R.id.button_location);
 
         // set on click listener to text view report date
         textViewReportDate.setOnClickListener(new View.OnClickListener() {
@@ -358,7 +379,13 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         });
 
         // since coordinates are optional, initially they should be hidden
-        linearLayoutCoordinates.setVisibility(View.GONE);
+        //linearLayoutCoordinates.setVisibility(View.GONE);
+        locationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                subscribeToLocations();
+            }
+        });
     }
 
     private void setupViewPager() {

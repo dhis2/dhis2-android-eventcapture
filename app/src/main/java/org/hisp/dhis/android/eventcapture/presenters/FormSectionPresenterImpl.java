@@ -1,5 +1,8 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import android.location.Location;
+
+import org.hisp.dhis.android.eventcapture.LocationProvider;
 import org.hisp.dhis.android.eventcapture.model.RxRulesEngine;
 import org.hisp.dhis.android.eventcapture.views.FormSectionView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
@@ -173,6 +176,28 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         logger.e(TAG, null, throwable);
                     }
                 }));
+    }
+
+    @Override
+    public void subscribeToLocations(final LocationProvider locationProvider) {
+        locationProvider.locations()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Location>() {
+                    @Override
+                    public void call(Location location) {
+                        System.out.println("Got location: " + location);
+                        if(formSectionView != null) {
+                            formSectionView.setLocation(location);
+                        }
+                        locationProvider.stopUpdates();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                });
     }
 
     private Subscription saveEvent(final Event event) {
