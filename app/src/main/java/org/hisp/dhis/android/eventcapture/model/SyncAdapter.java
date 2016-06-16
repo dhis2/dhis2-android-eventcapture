@@ -13,7 +13,6 @@ import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncWrapper;
 
 import java.util.List;
 
