@@ -60,7 +60,7 @@
             android:windowSoftInputMode="adjustPan" />
 
         <!-- stub Authenticator service -->
-        <service android:name=".model.AuthenticatorService">
+        <service android:name="org.hisp.dhis.client.sdk.ui.bindings.commons.AuthenticatorService">
 
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
@@ -73,7 +73,7 @@
 
         <!-- stub provider: -->
         <provider
-            android:name=".model.StubProvider"
+            android:name="org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultStubProviderImpl"
             android:authorities="@string/authority"
             android:exported="false"
             android:label="provider"
