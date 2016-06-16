@@ -58,6 +58,7 @@ import org.joda.time.DateTime;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -271,8 +272,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         Observable<List<ProgramStageDataElement>> stageDataElements =
                                 programStageDataElementInteractor.list(stages.get(0));
 
-                        return Observable.zip(
-                                stageDataElements, eventInteractor.list(orgUnit, program),
+                        return Observable.zip(stageDataElements, eventInteractor.list(orgUnit, program),
                                 new Func2<List<ProgramStageDataElement>, List<Event>, List<ReportEntity>>() {
 
                                     @Override
@@ -406,6 +406,10 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
+        // sort events by eventDate
+        Collections.sort(events, Event.DATE_COMPARATOR);
+        Collections.reverse(events);
+
         List<ProgramStageDataElement> filteredElements =
                 filterProgramStageDataElements(dataElements);
         List<ReportEntity> reportEntities = new ArrayList<>();
