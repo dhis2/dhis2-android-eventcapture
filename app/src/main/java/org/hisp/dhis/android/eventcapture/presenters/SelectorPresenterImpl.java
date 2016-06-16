@@ -181,9 +181,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         subscription.add(syncWrapper.syncMetaData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                .subscribe(new Action1<List<Program>>() {
                     @Override
-                    public void call(List<ProgramStageDataElement> stageDataElements) {
+                    public void call(List<Program> programs) {
                         isSyncing = false;
                         hasSyncedBefore = true;
                         syncDateWrapper.setLastSyncedNow();

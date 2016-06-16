@@ -31,22 +31,14 @@ package org.hisp.dhis.android.eventcapture.model;
 import org.hisp.dhis.client.sdk.android.api.utils.DefaultOnSubscribe;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.common.state.Action;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.models.program.ProgramRule;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -63,51 +55,26 @@ public class SyncWrapper {
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
 
-    // program rules
-    private final ProgramRuleInteractor programRuleInteractor;
-    private final ProgramRuleActionInteractor programRuleActionInteractor;
-    private final ProgramRuleVariableInteractor programRuleVariableInteractor;
-
     // data
     private final EventInteractor eventInteractor;
 
     public SyncWrapper(UserOrganisationUnitInteractor userOrganisationUnitInteractor,
                        UserProgramInteractor userProgramInteractor,
-                       ProgramRuleInteractor programRuleInteractor,
-                       ProgramRuleActionInteractor programRuleActionInteractor,
-                       ProgramRuleVariableInteractor programRuleVariableInteractor,
                        EventInteractor eventInteractor) {
         this.userOrganisationUnitInteractor = userOrganisationUnitInteractor;
         this.userProgramInteractor = userProgramInteractor;
-        this.programRuleInteractor = programRuleInteractor;
-        this.programRuleActionInteractor = programRuleActionInteractor;
-        this.programRuleVariableInteractor = programRuleVariableInteractor;
         this.eventInteractor = eventInteractor;
     }
 
-    public Observable<List<ProgramStageDataElement>> syncMetaData() {
+    public Observable<List<Program>> syncMetaData() {
         Set<ProgramType> programTypes = new HashSet<>();
         programTypes.add(ProgramType.WITHOUT_REGISTRATION);
 
-        return Observable.zip(
-                userOrganisationUnitInteractor.pull(), userProgramInteractor.pull(programTypes),
+        return Observable.zip(userOrganisationUnitInteractor.pull(), userProgramInteractor.pull(programTypes),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
                         return programs;
-                    }
-                })
-                .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
-                    @Override
-                    public List<ProgramStageDataElement> call(List<Program> programs) {
-//                        List<ProgramRule> programRules =
-//                                loadProgramRules(programs);
-//                        List<ProgramRuleAction> programRuleActions =
-//                                loadProgramRuleActions(programRules);
-//                        List<ProgramRuleVariable> programRuleVariables =
-//                                loadProgramRuleVariables(programs);
-
-                        return new ArrayList<>();
                     }
                 });
     }
@@ -146,36 +113,15 @@ public class SyncWrapper {
     public Observable<List<Event>> backgroundSync() {
         return syncMetaData()
                 .subscribeOn(Schedulers.io())
-                .switchMap(new Func1<List<ProgramStageDataElement>, Observable<List<Event>>>() {
+                .switchMap(new Func1<List<Program>, Observable<List<Event>>>() {
                     @Override
-                    public Observable<List<Event>> call(List<ProgramStageDataElement> programStageDataElements) {
-                        if (programStageDataElements != null) {
+                    public Observable<List<Event>> call(List<Program> programs) {
+                        if (programs != null) {
                             return syncData();
                         }
+
                         return Observable.empty();
                     }
                 });
     }
-
-    private List<ProgramRule> loadProgramRules(List<Program> programs) {
-        return programRuleInteractor.pull(programs).toBlocking().first();
-    }
-
-    private List<ProgramRuleAction> loadProgramRuleActions(List<ProgramRule> programRules) {
-        Set<String> programRuleActionUids = new HashSet<>();
-
-        if (programRules != null && !programRules.isEmpty()) {
-            for (ProgramRule programRule : programRules) {
-                programRuleActionUids.addAll(
-                        ModelUtils.toUidSet(programRule.getProgramRuleActions()));
-            }
-        }
-
-        return programRuleActionInteractor.pull(programRuleActionUids).toBlocking().first();
-    }
-
-    private List<ProgramRuleVariable> loadProgramRuleVariables(List<Program> programs) {
-        return programRuleVariableInteractor.pull(programs).toBlocking().first();
-    }
-
 }
