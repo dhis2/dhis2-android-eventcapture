@@ -3,9 +3,11 @@ package org.hisp.dhis.android.eventcapture.views;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,6 +33,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
@@ -217,13 +220,9 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     private void subscribeToLocations() {
-        if( ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationProvider locationProvider = new LocationProvider(this);
-            locationProvider.requestLocation();
-            formSectionPresenter.subscribeToLocations(locationProvider);
-        } else {
-            //notify that not authorized ? ask again ?
-        }
+        LocationProvider locationProvider = new LocationProvider(this);
+        locationProvider.requestLocation();
+        formSectionPresenter.subscribeToLocations(locationProvider);
     }
 
     @Override
@@ -235,6 +234,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "onRequestPermissionsResult: permission is granged");
                 // don't do anything
+            } else if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_DENIED) {
+                Toast.makeText(FormSectionActivity.this, R.string.gps_permission_denied, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -249,10 +250,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
             String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
             ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE);
-        } else {
-            // Older version, permissions granted on app install thus get location now.
-            // Or > 22 but permissions already granted:
-            //subscribeToLocations();
         }
     }
 
@@ -383,7 +380,19 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                subscribeToLocations();
+                LocationManager locationManager = (LocationManager) getSystemService(
+                        Context.LOCATION_SERVICE);
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    if (ActivityCompat.checkSelfPermission(v.getContext(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        //check if gps off & if not notify user.
+                        subscribeToLocations();
+                    } else {
+                        setupLocationPermissions();
+                    }
+                } else {
+                    Toast.makeText(FormSectionActivity.this, R.string.gps_disabled, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

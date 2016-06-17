@@ -28,13 +28,11 @@
 
 package org.hisp.dhis.android.eventcapture;
 
-import android.Manifest;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.annotation.RequiresPermission;
 import android.util.Log;
 
 import rx.Observable;
@@ -62,14 +60,10 @@ public class LocationProvider {
      */
     @SuppressWarnings("MissingPermission")
     public void requestLocation() {
-        // the gps coordinates test:
 
-        //acquire a ref to the system LocationManager
         LocationManager locationManager = (LocationManager) context.getSystemService(
                 Context.LOCATION_SERVICE);
 
-        //Define a listener that responds to location changes:
-        //will be a listener:
         if (locationListener == null) {
             locationListener = new LocationListener() {
                 public final String TAG = LocationListener.class.getName();
@@ -97,20 +91,10 @@ public class LocationProvider {
                 public void onProviderDisabled(String provider) {
                     System.out.println("Location provider disabled");
                     locationSubject.onCompleted();
-                    // re-init the subject to a new one ?
                 }
             };
         }
-
-        //TODO: evaluate location ?
-        //Location lastKnown = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        ///if(lastKnown.getTime() + 5000 > DateTime.now().getMillis()) {
-        // use the cahced location ?
-        //} else {
-        //see if this or just use old location:
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-        //}
     }
 
     @SuppressWarnings("MissingPermission")

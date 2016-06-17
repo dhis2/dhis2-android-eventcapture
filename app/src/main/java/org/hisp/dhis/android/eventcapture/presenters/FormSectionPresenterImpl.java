@@ -33,7 +33,6 @@ import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
-
 // TODO cache metadata and data in memory
 public class FormSectionPresenterImpl implements FormSectionPresenter {
     private static final String TAG = FormSectionPresenterImpl.class.getSimpleName();
@@ -187,7 +186,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     @Override
                     public void call(Location location) {
                         System.out.println("Got location: " + location);
-                        if(formSectionView != null) {
+                        //TODO: evaluate location before picking one.
+                        // See the wiki on
+                        if (formSectionView != null) {
                             formSectionView.setLocation(location);
                         }
                         locationProvider.stopUpdates();
