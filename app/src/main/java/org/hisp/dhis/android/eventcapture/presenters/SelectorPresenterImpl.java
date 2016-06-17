@@ -406,20 +406,30 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
+
+        // preventing additional work
+        if (events == null || events.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         // sort events by eventDate
         Collections.sort(events, Event.DATE_COMPARATOR);
         Collections.reverse(events);
 
+        // retrieve state map for given events
+        // it is done synchronously
+        Map<Long, State> stateMap = eventInteractor.map(events)
+                .toBlocking().first();
         List<ProgramStageDataElement> filteredElements =
                 filterProgramStageDataElements(dataElements);
         List<ReportEntity> reportEntities = new ArrayList<>();
-        for (Event event : events) {
 
+        for (Event event : events) {
             // status of event
             ReportEntity.Status status;
-            // TODO remove hack
             // get state of event from database
-            State state = eventInteractor.get(event).toBlocking().first();
+            State state = stateMap.get(event.getId());
+            // State state = eventInteractor.get(event).toBlocking().first();
 
             logger.d(TAG, "State action for event " + event + " is " + state.getAction());
             switch (state.getAction()) {
@@ -451,7 +461,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             ArrayList<String> dataElementLabels = new ArrayList<>();
 
             for (ProgramStageDataElement filteredElement : filteredElements) {
-
                 DataElement dataElement = filteredElement.getDataElement();
 
                 String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
@@ -466,8 +475,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             }
 
             reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));
-
         }
+
         return reportEntities;
     }
 
