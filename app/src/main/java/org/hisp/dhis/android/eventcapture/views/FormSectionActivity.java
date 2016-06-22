@@ -83,7 +83,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     LinearLayout linearLayoutCoordinates;
     EditText editTextLatitude;
     EditText editTextLongitude;
-    AppCompatImageView locationButton;
+    AppCompatImageView locationIcon;
     CircularProgressBar locationProgressBar;
     FrameLayout locationButtonLayout;
 
@@ -219,12 +219,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         double latitude = location.getLatitude();
 
         //re-enable the location fields and location button if disabled
-        locationButton.setEnabled(true);
-        locationButton.setVisibility(View.VISIBLE);
+        locationIcon.setVisibility(View.VISIBLE);
         locationProgressBar.setVisibility(View.GONE);
         editTextLatitude.setEnabled(true);
         editTextLongitude.setEnabled(true);
-        locationButtonLayout.setEnabled(true);
+        locationButtonLayout.setClickable(true);
 
         if (longitude != 0.0 && latitude != 0.0) {
             editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
@@ -378,7 +377,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         linearLayoutCoordinates = (LinearLayout) findViewById(R.id.linearlayout_coordinates);
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
-        locationButton = (AppCompatImageView) findViewById(R.id.imagevew_location);
+        locationIcon = (AppCompatImageView) findViewById(R.id.imagevew_location);
         locationProgressBar = (CircularProgressBar) findViewById(R.id.progress_bar_circular_location);
         locationButtonLayout = (FrameLayout) findViewById(R.id.button_location_layout);
 
@@ -403,12 +402,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                         //check if gps off & if not notify user.
                         subscribeToLocations();
                         //disable the button and the location fields.
+                        locationIcon.setVisibility(View.GONE);
+                        locationProgressBar.setVisibility(View.VISIBLE);
                         editTextLatitude.setEnabled(false);
                         editTextLongitude.setEnabled(false);
-                        locationButton.setEnabled(false);
-                        locationButton.setVisibility(View.GONE);
-                        locationButtonLayout.setEnabled(false);
-                        locationProgressBar.setVisibility(View.VISIBLE);
+                        locationButtonLayout.setClickable(false);
                     } else {
                         setupLocationPermissions();
                     }
