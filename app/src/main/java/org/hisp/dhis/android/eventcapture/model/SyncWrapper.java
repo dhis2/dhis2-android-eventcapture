@@ -33,6 +33,7 @@ import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.core.program.ProgramFields;
 import org.hisp.dhis.client.sdk.models.common.state.Action;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
@@ -70,7 +71,8 @@ public class SyncWrapper {
         Set<ProgramType> programTypes = new HashSet<>();
         programTypes.add(ProgramType.WITHOUT_REGISTRATION);
 
-        return Observable.zip(userOrganisationUnitInteractor.pull(), userProgramInteractor.pull(programTypes),
+        return Observable.zip(userOrganisationUnitInteractor.pull(),
+                userProgramInteractor.pull(ProgramFields.DESCENDANTS, programTypes),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
