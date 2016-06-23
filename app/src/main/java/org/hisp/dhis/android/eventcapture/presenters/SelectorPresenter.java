@@ -32,6 +32,7 @@ import org.hisp.dhis.client.sdk.ui.bindings.presenters.Presenter;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface SelectorPresenter extends Presenter {
@@ -48,4 +49,6 @@ public interface SelectorPresenter extends Presenter {
     void onPickersSelectionsChanged(List<Picker> pickerList);
 
     void handleError(final Throwable throwable);
+
+    void setReportEntityDataElementFilters(String programId, HashMap<String, Boolean> filters);
 }

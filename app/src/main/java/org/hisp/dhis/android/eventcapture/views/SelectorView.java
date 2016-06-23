@@ -37,7 +37,7 @@ import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public interface SelectorView extends View {
@@ -53,7 +53,7 @@ public interface SelectorView extends View {
 
     void showReportEntities(List<ReportEntity> reportEntities);
 
-    void showFilterOptionItem(ArrayList<String> dataElementsToFilter);
+    void showFilterOptionItem(boolean showItem);
 
     void showNoOrganisationUnitsError();
 
@@ -66,6 +66,8 @@ public interface SelectorView extends View {
     void navigateToFormSectionActivity(Event event);
 
     String getPickerLabel(@PickerLabelId String pickerLabelId);
+
+    void setReportEntityLabelFilters(HashMap<String, Boolean> filters);
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

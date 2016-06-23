@@ -74,4 +74,6 @@
     <string name="authority">org.hisp.dhis.android.eventcapture.model.provider</string>
     <string name="account_type">org.hisp.dhis.android.eventcapture</string>
 
+    <string name="filter_data_elements">Select elements to show</string>
+
 </resources>

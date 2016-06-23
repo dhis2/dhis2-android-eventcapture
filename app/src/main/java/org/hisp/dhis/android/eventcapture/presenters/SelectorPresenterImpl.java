@@ -38,7 +38,6 @@ import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.common.state.State;
-import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -91,6 +90,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private boolean hasSyncedBefore;
     private SelectorView selectorView;
     private boolean isSyncing;
+    private HashMap reportEntityDataElementFilter;
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
@@ -143,7 +143,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         }
 
         // check if metadata was synced,
-        // if not, syncMetaData it
+        // if not, sync it
         if (!isSyncing && !hasSyncedBefore) {
             sync();
         }
@@ -251,7 +251,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     }
 
     @Override
-    public void listEvents(String organisationUnitId, String programId) {
+    public void listEvents(String organisationUnitId, final String programId) {
         final OrganisationUnit orgUnit = new OrganisationUnit();
         final Program program = new Program();
 
@@ -277,6 +277,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                                     @Override
                                     public List<ReportEntity> call(List<ProgramStageDataElement> stageDataElements,
                                                                    List<Event> events) {
+                                        reportEntityDataElementFilter = sessionPreferences.getReportEntityDataModelFilters(
+                                                programId,
+                                                mapDataElementNameToDefaultViewSetting(stageDataElements));
                                         return transformEvents(stageDataElements, events);
                                     }
                                 });
@@ -287,24 +290,22 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .subscribe(new Action1<List<ReportEntity>>() {
                     @Override
                     public void call(List<ReportEntity> reportEntities) {
+
                         if (selectorView != null) {
-                            selectorView.showFilterOptionItem(getFilterOptionItems(reportEntities));
+                            selectorView.setReportEntityLabelFilters(reportEntityDataElementFilter);
+                            selectorView.showFilterOptionItem(true);
                             selectorView.showReportEntities(reportEntities);
                         }
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        if (selectorView != null) {
+                            selectorView.showFilterOptionItem(false);
+                        }
                         logger.e(TAG, "Failed loading events", throwable);
                     }
                 }));
-    }
-
-    private ArrayList<String> getFilterOptionItems(List<ReportEntity> reportEntities) {
-        if (reportEntities != null && reportEntities.get(0) != null) {
-            return reportEntities.get(0).getDataElementLabels();
-        }
-        return null;
     }
 
     @Override
@@ -411,11 +412,15 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         }
     }
 
+    @Override
+    public void setReportEntityDataElementFilters(String programId, HashMap<String, Boolean> filters) {
+        sessionPreferences.setReportEntityDataModelFilters(programId, filters);
+    }
+
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
-        List<ProgramStageDataElement> filteredElements =
-                filterProgramStageDataElements(dataElements);
         List<ReportEntity> reportEntities = new ArrayList<>();
+
         for (Event event : events) {
 
             // status of event
@@ -448,54 +453,44 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }
             }
 
-            Map<String, String> dataElementToValueMap =
+            Map<String, String> dataElementNameToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
-            ArrayList<String> reportDataElementLabels = new ArrayList<>();
-            ArrayList<String> reportDataElementValues = new ArrayList<>();
-
-            for (ProgramStageDataElement filteredElement : filteredElements) {
-
-                DataElement dataElement = filteredElement.getDataElement();
-
-                String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
-                        dataElement.getDisplayFormName() : dataElement.getDisplayName();
-
-                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
-                        dataElementToValueMap.get(dataElement.getUId()) : "none";
-
-                reportDataElementLabels.add(dataElementName);
-                reportDataElementValues.add(value);
-
-            }
-
-            reportEntities.add(new ReportEntity(event.getUId(), status,
-                    reportDataElementLabels, reportDataElementValues));
+            reportEntities.add(
+                    new ReportEntity(
+                            event.getUId(),
+                            status,
+                            dataElementNameToValueMap));
 
         }
 
         return reportEntities;
     }
 
-    private List<ProgramStageDataElement> filterProgramStageDataElements(
-            List<ProgramStageDataElement> dataElements) {
+    private HashMap<String, Boolean> mapDataElementNameToDefaultViewSetting(List<ProgramStageDataElement> dataElements) {
 
-        List<ProgramStageDataElement> filteredElements = new ArrayList<>();
+        HashMap<String, Boolean> map = new HashMap<>();
         if (dataElements != null && !dataElements.isEmpty()) {
             for (ProgramStageDataElement dataElement : dataElements) {
-                if (dataElement.isDisplayInReports()) {
-                    filteredElements.add(dataElement);
+                String label = dataElement.getDataElement().getFormName();
+                if (label == null) {
+                    label = dataElement.getDataElement().getDisplayName();
                 }
+                map.put(label, dataElement.isDisplayInReports());
             }
         }
-        return filteredElements;
+
+        return map;
     }
 
     private Map<String, String> mapDataElementToValue(List<TrackedEntityDataValue> dataValues) {
+
+
         Map<String, String> dataElementToValueMap = new HashMap<>();
 
         if (dataValues != null && !dataValues.isEmpty()) {
             for (TrackedEntityDataValue dataValue : dataValues) {
+
                 String value = !isEmpty(dataValue.getValue()) ? dataValue.getValue() : "";
                 dataElementToValueMap.put(dataValue.getDataElement(), value);
             }
