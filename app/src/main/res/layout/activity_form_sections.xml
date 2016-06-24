@@ -54,37 +54,46 @@
                         android:weightSum="1">
 
                         <FrameLayout
+                            android:id="@+id/button_location_layout"
                             android:layout_width="42dp"
                             android:layout_height="match_parent"
-                            android:background="@drawable/button_selector_blue"
-                            android:padding="4dp"
                             android:layout_marginEnd="2dp"
                             android:layout_marginRight="2dp"
+                            android:background="@drawable/button_selector_blue"
                             android:clickable="true"
-                            android:id="@+id/button_location_layout"
+                            android:padding="4dp"
                             >
 
                             <android.support.v7.widget.AppCompatImageView
                                 android:id="@+id/imagevew_location"
                                 android:layout_width="24dp"
-                                android:layout_gravity="center"
                                 android:layout_height="match_parent"
+                                android:layout_gravity="center"
                                 android:src="@drawable/ic_my_location"
+                                />
 
+                            <android.support.v7.widget.AppCompatImageView
+                                android:id="@+id/imagevew_location_cancel"
+                                android:layout_width="24dp"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:padding="5dp"
+                                android:src="@drawable/ic_cancel_white"
+                                android:visibility="gone"
                                 />
 
                             <fr.castorflex.android.circularprogressbar.CircularProgressBar
                                 android:id="@+id/progress_bar_circular_location"
-                                android:layout_gravity="center"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
+                                android:layout_gravity="center"
                                 android:indeterminate="true"
                                 android:visibility="gone"
                                 app:cpb_color="@android:color/white"
-                                app:cpb_rotation_speed="0.66"
-                                app:cpb_sweep_speed="0.66"
                                 app:cpb_max_sweep_angle="333"
+                                app:cpb_rotation_speed="0.66"
                                 app:cpb_stroke_width="2dp"
+                                app:cpb_sweep_speed="0.66"
                                 />
                         </FrameLayout>
 
@@ -93,9 +102,9 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_marginEnd="2dp"
+                            android:layout_marginLeft="2dp"
                             android:layout_marginRight="2dp"
                             android:layout_marginStart="2dp"
-                            android:layout_marginLeft="2dp"
                             android:layout_weight="0.5"
                             android:background="@color/color_primary_light"
                             android:hint="@string/latitude"

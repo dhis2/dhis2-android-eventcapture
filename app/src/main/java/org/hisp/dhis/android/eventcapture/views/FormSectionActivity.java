@@ -87,6 +87,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     EditText editTextLatitude;
     EditText editTextLongitude;
     AppCompatImageView locationIcon;
+    AppCompatImageView locationIconCancel;
     CircularProgressBar locationProgressBar;
     FrameLayout locationButtonLayout;
 
@@ -97,6 +98,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     FilterableDialogFragment sectionDialogFragment;
     AlertDialog alertDialog;
+
+    LocationProvider locationProvider;
 
     public static void navigateToNewEvent(Activity activity, String eventUid) {
         navigateTo(activity, eventUid, true);
@@ -228,6 +231,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
         //re-enable the location fields and location button if disabled
         locationIcon.setVisibility(View.VISIBLE);
+        locationIconCancel.setVisibility(View.GONE);
         locationProgressBar.setVisibility(View.GONE);
         editTextLatitude.setEnabled(true);
         editTextLongitude.setEnabled(true);
@@ -240,7 +244,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     private void subscribeToLocations() {
-        LocationProvider locationProvider = new LocationProvider(this);
+        if (locationProvider != null) {
+            locationProvider.stopUpdates();
+        }
+        locationProvider = new LocationProvider(this);
         locationProvider.requestLocation();
         formSectionPresenter.subscribeToLocations(locationProvider);
     }
@@ -386,6 +393,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
         locationIcon = (AppCompatImageView) findViewById(R.id.imagevew_location);
+        locationIconCancel = (AppCompatImageView) findViewById(R.id.imagevew_location_cancel);
         locationProgressBar = (CircularProgressBar) findViewById(R.id.progress_bar_circular_location);
         locationButtonLayout = (FrameLayout) findViewById(R.id.button_location_layout);
 
@@ -397,6 +405,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             }
         });
 
+        setupLocationButtonLayoutCallback();
+    }
+
+    private void setupLocationButtonLayoutCallback() {
         // since coordinates are optional, initially they should be hidden
         //linearLayoutCoordinates.setVisibility(View.GONE);
         locationButtonLayout.setOnClickListener(new View.OnClickListener() {
@@ -405,17 +417,31 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 LocationManager locationManager = (LocationManager) getSystemService(
                         Context.LOCATION_SERVICE);
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+
+                    //we have permission ?
                     if (Build.VERSION.SDK_INT < 23 || ActivityCompat.checkSelfPermission(v.getContext(),
                             Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        //check if gps off & if not notify user.
-                        subscribeToLocations();
-                        //disable the button and the location fields.
-                        locationIcon.setVisibility(View.GONE);
-                        locationProgressBar.setVisibility(View.VISIBLE);
-                        editTextLatitude.setEnabled(false);
-                        editTextLongitude.setEnabled(false);
-                        locationButtonLayout.setClickable(false);
+                        //either if init or after cancel click:
+                        if (locationIcon.getVisibility() == View.VISIBLE
+                                || locationIconCancel.getVisibility() == View.GONE) {
+                            // request location:
+                            subscribeToLocations();
+                            locationIcon.setVisibility(View.GONE);
+                            locationIconCancel.setVisibility(View.VISIBLE);
+                            locationProgressBar.setVisibility(View.VISIBLE);
+                            editTextLatitude.setEnabled(false);
+                            editTextLongitude.setEnabled(false);
+                        } else {
+                            //cancel the location request:
+                            locationProvider.stopUpdates();
+                            locationIconCancel.setVisibility(View.GONE);
+                            locationProgressBar.setVisibility(View.GONE);
+                            locationIcon.setVisibility(View.VISIBLE);
+                            editTextLatitude.setEnabled(true);
+                            editTextLongitude.setEnabled(true);
+                        }
                     } else {
+                        //don't have permissions, set them up !
                         setupLocationPermissions();
                     }
                 } else {
