@@ -49,14 +49,17 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     private FormSectionView formSectionView;
     private CompositeSubscription subscription;
 
+    private LocationProvider locationProvider;
+
     public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
                                     EventInteractor eventInteractor, RxRulesEngine rxRuleEngine,
-                                    Logger logger) {
+                                    LocationProvider locationProvider, Logger logger) {
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
         this.eventInteractor = eventInteractor;
         this.rxRuleEngine = rxRuleEngine;
+        this.locationProvider = locationProvider;
         this.logger = logger;
     }
 
@@ -178,7 +181,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     }
 
     @Override
-    public void subscribeToLocations(final LocationProvider locationProvider) {
+    public void subscribeToLocations() {
         locationProvider.locations()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -186,19 +189,27 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                     @Override
                     public void call(Location location) {
                         System.out.println("Got location: " + location);
-                        //TODO: evaluate location before picking one.
+
                         // See the wiki on
                         if (formSectionView != null) {
                             formSectionView.setLocation(location);
                         }
+                        //TODO: evaluate location before picking one.
+                        // time for 33 sec untill you can get the stable location.??
                         locationProvider.stopUpdates();
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        throwable.printStackTrace();
+                        logger.e(TAG, "subscribeToLocations() rx call :" + throwable);
                     }
                 });
+        locationProvider.requestLocation(); ///?
+    }
+
+    @Override
+    public void stopLocationUpdates() {
+        locationProvider.stopUpdates();
     }
 
     private Subscription saveEvent(final Event event) {

@@ -41,7 +41,6 @@ import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
-import org.hisp.dhis.android.eventcapture.LocationProvider;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.FormSectionPresenter;
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -98,8 +97,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
     FilterableDialogFragment sectionDialogFragment;
     AlertDialog alertDialog;
-
-    LocationProvider locationProvider;
 
     public static void navigateToNewEvent(Activity activity, String eventUid) {
         navigateTo(activity, eventUid, true);
@@ -217,14 +214,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
-    public void hideLocationPickers() {
-        linearLayoutCoordinates.setVisibility(View.GONE);
-    }
-
-    public void showLocationPickers() {
-        linearLayoutCoordinates.setVisibility(View.VISIBLE);
-    }
-
     public void setLocation(Location location) {
         double longitude = location.getLongitude();
         double latitude = location.getLatitude();
@@ -241,15 +230,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
             editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
         }
-    }
-
-    private void subscribeToLocations() {
-        if (locationProvider != null) {
-            locationProvider.stopUpdates();
-        }
-        locationProvider = new LocationProvider(this);
-        locationProvider.requestLocation();
-        formSectionPresenter.subscribeToLocations(locationProvider);
     }
 
     @Override
@@ -425,7 +405,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                         if (locationIcon.getVisibility() == View.VISIBLE
                                 || locationIconCancel.getVisibility() == View.GONE) {
                             // request location:
-                            subscribeToLocations();
+                            formSectionPresenter.subscribeToLocations();
                             locationIcon.setVisibility(View.GONE);
                             locationIconCancel.setVisibility(View.VISIBLE);
                             locationProgressBar.setVisibility(View.VISIBLE);
@@ -433,7 +413,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                             editTextLongitude.setEnabled(false);
                         } else {
                             //cancel the location request:
-                            locationProvider.stopUpdates();
+                            formSectionPresenter.stopLocationUpdates();
                             locationIconCancel.setVisibility(View.GONE);
                             locationProgressBar.setVisibility(View.GONE);
                             locationIcon.setVisibility(View.VISIBLE);

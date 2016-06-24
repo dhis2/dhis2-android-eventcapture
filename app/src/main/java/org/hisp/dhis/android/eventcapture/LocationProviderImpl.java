@@ -33,23 +33,62 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
+
+import org.hisp.dhis.client.sdk.utils.Logger;
 
 import rx.Observable;
 import rx.subjects.ReplaySubject;
 import rx.subjects.Subject;
 
-public class LocationProvider {
-    private static final String TAG = LocationProvider.class.getName();
-    private Context context;
-    private LocationListener locationListener;
-    // temporary code
-    private Subject<Location, Location> locationSubject = ReplaySubject.createWithSize(1);
+public class LocationProviderImpl implements LocationProvider {
+    private static final String TAG = LocationProviderImpl.class.getName();
+    private static final String TAG_LOCATION = LocationListener.class.getName();
+    private static final int BUFFER_SIZE = 1;
 
-    public LocationProvider(Context context) {
+    private final Context context;
+    private final Logger logger;
+    private final LocationListener locationListener;
+    private Subject<Location, Location> locationSubject;
+
+    public LocationProviderImpl(Context context, Logger log) {
         this.context = context;
+        this.logger = log;
+        this.locationListener = new LocationListener() {
+
+            @Override
+            public void onLocationChanged(Location location) {
+                logger.d(TAG_LOCATION, "onLocationChanged: new location: " + location);
+                //System.out.println("Location updated: " + location);
+
+                locationSubject.onNext(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                logger.d(TAG_LOCATION, "onStatusChanged(): " + status);
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                logger.d(TAG_LOCATION, "onProviderEnabled()");
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                logger.d(TAG_LOCATION, "onProviderEnabled()");
+                locationSubject.onCompleted();
+            }
+        };
+
+        this.locationSubject = ReplaySubject.createWithSize(BUFFER_SIZE);
     }
 
+    /**
+     * Call this method to get the observable.
+     *
+     * @return locationSubject.
+     */
+    @Override
     public Observable<Location> locations() {
         return locationSubject;
     }
@@ -59,55 +98,20 @@ public class LocationProvider {
      * the following permission: Manifest.permission.ACCES_FINE_LOCATION.
      */
     @SuppressWarnings("MissingPermission")
+    @Override
     public void requestLocation() {
-
         LocationManager locationManager = (LocationManager) context.getSystemService(
                 Context.LOCATION_SERVICE);
-
-        if (locationListener == null) {
-            locationListener = new LocationListener() {
-                public final String TAG = LocationListener.class.getName();
-
-                @Override
-                public void onLocationChanged(Location location) {
-                    //Log.d(", "onLocationChanged: " + location);
-                    Log.d(TAG, "onLocationChanged: new location: " + location);
-                    //System.out.println("Location updated: " + location);
-
-                    locationSubject.onNext(location);
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) {
-                    System.out.println("Location Status changed");
-                }
-
-                @Override
-                public void onProviderEnabled(String provider) {
-                    System.out.println("Location provider enabled");
-                }
-
-                @Override
-                public void onProviderDisabled(String provider) {
-                    System.out.println("Location provider disabled");
-                    locationSubject.onCompleted();
-                }
-            };
-        }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
     @SuppressWarnings("MissingPermission")
+    @Override
     public void stopUpdates() {
-        Log.d(TAG, "stopUpdates() called with: " + "");
-        //if(locationListener != null) {
         ((LocationManager) context
                 .getSystemService(Context.LOCATION_SERVICE))
                 .removeUpdates(locationListener);
-        //}
         locationSubject.onCompleted();
-
-        //re-init subject to a new one ?
-        //TODO: test not re-initializing it...
+        locationSubject = ReplaySubject.createWithSize(BUFFER_SIZE);
     }
 }
