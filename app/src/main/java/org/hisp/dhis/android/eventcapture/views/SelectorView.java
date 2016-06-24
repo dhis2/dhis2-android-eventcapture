@@ -29,6 +29,7 @@
 package org.hisp.dhis.android.eventcapture.views;
 
 import android.support.annotation.StringDef;
+import android.support.v4.util.Pair;
 
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
@@ -67,7 +68,7 @@ public interface SelectorView extends View {
 
     String getPickerLabel(@PickerLabelId String pickerLabelId);
 
-    void setReportEntityLabelFilters(HashMap<String, Boolean> filters);
+    void setReportEntityLabelFilters(HashMap<String, Pair<String, Boolean>> filters);
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({

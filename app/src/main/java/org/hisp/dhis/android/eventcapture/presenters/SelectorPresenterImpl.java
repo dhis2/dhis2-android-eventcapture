@@ -28,6 +28,8 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import android.support.v4.util.Pair;
+
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.SelectorView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
@@ -38,6 +40,7 @@ import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.ApiException;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.common.state.State;
+import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
@@ -413,7 +416,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     }
 
     @Override
-    public void setReportEntityDataElementFilters(String programId, HashMap<String, Boolean> filters) {
+    public void setReportEntityDataElementFilters(String programId, HashMap<String, Pair<String, Boolean>> filters) {
         sessionPreferences.setReportEntityDataModelFilters(programId, filters);
     }
 
@@ -453,30 +456,34 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 }
             }
 
-            Map<String, String> dataElementNameToValueMap =
+            Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
             reportEntities.add(
                     new ReportEntity(
                             event.getUId(),
                             status,
-                            dataElementNameToValueMap));
-
+                            dataElementToValueMap));
         }
 
         return reportEntities;
     }
 
-    private HashMap<String, Boolean> mapDataElementNameToDefaultViewSetting(List<ProgramStageDataElement> dataElements) {
+    private HashMap<String, Pair<String, Boolean>> mapDataElementNameToDefaultViewSetting(
+            List<ProgramStageDataElement> dataElements) {
 
-        HashMap<String, Boolean> map = new HashMap<>();
+        HashMap<String, Pair<String, Boolean>> map = new HashMap<>();
         if (dataElements != null && !dataElements.isEmpty()) {
-            for (ProgramStageDataElement dataElement : dataElements) {
-                String label = dataElement.getDataElement().getFormName();
-                if (label == null) {
-                    label = dataElement.getDataElement().getDisplayName();
-                }
-                map.put(label, dataElement.isDisplayInReports());
+            for (ProgramStageDataElement dataElementWrapper : dataElements) {
+
+                DataElement dataElement = dataElementWrapper.getDataElement();
+
+                String name = dataElement.getFormName() != null ?
+                        dataElement.getFormName() : dataElement.getDisplayName();
+
+                boolean defaultViewSetting = dataElementWrapper.isDisplayInReports();
+
+                map.put(dataElement.getUId(), new Pair<String, Boolean>(name, defaultViewSetting));
             }
         }
 
@@ -484,7 +491,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     }
 
     private Map<String, String> mapDataElementToValue(List<TrackedEntityDataValue> dataValues) {
-
 
         Map<String, String> dataElementToValueMap = new HashMap<>();
 

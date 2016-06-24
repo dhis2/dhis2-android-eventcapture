@@ -41,6 +41,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -75,7 +76,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -113,7 +113,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     ReportEntityAdapter reportEntityAdapter;
     View bottomSheetHeaderView;
     private AlertDialog alertDialog;
-    private Map<String, Boolean> reportEntityLabelFilters;
+    private Map<String, Pair<String, Boolean>> reportEntityLabelFilters;
     private AlertDialog filterDialog;
 
     private static String getOrganisationUnitUid(List<Picker> pickers) {
@@ -268,11 +268,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
         }
     }
 
-    private boolean dataElementsAreFilterable(List<String> dataElementsToFilter) {
-        return dataElementsToFilter != null && dataElementsToFilter.size() > 1;
-    }
-
-
     private boolean reportEntitiesIsEmpty() {
         return reportEntityAdapter == null || reportEntityAdapter.getItemCount() == 0;
     }
@@ -326,7 +321,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     }
 
     @Override
-    public void setReportEntityLabelFilters(HashMap<String, Boolean> filters) {
+    public void setReportEntityLabelFilters(HashMap<String, Pair<String, Boolean>> filters) {
         this.reportEntityLabelFilters = filters;
         reportEntityAdapter.notifyFiltersChanged(filters);
     }
@@ -505,17 +500,19 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
         if (filterDialog == null || !filterDialog.isShowing()) {
 
-            final HashMap<String, Boolean> filters = reportEntityAdapter.getReportEntityDataElementFilters();
-            Set<String> filterLabels = filters.keySet();
-            final String[] filterLabelArray = filterLabels.toArray(new String[0]);
+            final HashMap<String, Pair<String, Boolean>> filters = reportEntityAdapter.getReportEntityDataElementFilters();
+            final String[] filterKeys = filters.keySet().toArray(new String[0]);
+            final String[] filterNames = new String[filters.size()];
             final boolean[] dataElementCheckedState = new boolean[filters.size()];
 
-            for (int i = 0; i < filterLabelArray.length; i++) {
-                dataElementCheckedState[i] = filters.get(filterLabelArray[i]);
+            for (int i = 0; i < filterKeys.length; i++) {
+                Pair<String, Boolean> nameValuePair = filters.get(filterKeys[i]);
+                filterNames[i] = nameValuePair.first;
+                dataElementCheckedState[i] = nameValuePair.second;
             }
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setMultiChoiceItems(
-                    filterLabelArray,
+                    filterNames,
                     dataElementCheckedState,
                     new DialogInterface.OnMultiChoiceClickListener() {
                         @Override
@@ -527,7 +524,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             for (int i = 0; i < dataElementCheckedState.length; i++) {
-                                filters.put(filterLabelArray[i], dataElementCheckedState[i]);
+                                filters.put(
+                                        filterKeys[i],
+                                        new Pair<String, Boolean>(filterNames[i], dataElementCheckedState[i]));
                             }
 
                             reportEntityAdapter.notifyFiltersChanged(filters);
@@ -535,7 +534,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
                                     getProgramUid(), filters);
                         }
                     });
-
 
             filterDialog = builder.create();
             filterDialog.setTitle(R.string.filter_data_elements);
@@ -574,11 +572,18 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
         updateLabels(pickers);
 
-        if (reportEntitiesIsEmpty()) {
+        if (!filtersExist()) {
             showFilterOptionItem(false);
         }
 
         selectorPresenter.onPickersSelectionsChanged(pickers);
+    }
+
+    private boolean filtersExist() {
+        return reportEntityAdapter != null &&
+                reportEntityAdapter.getReportEntityDataElementFilters() != null &&
+                !reportEntityAdapter.getReportEntityDataElementFilters().isEmpty();
+
     }
 
     /* check if organisation unit and program are selected */
