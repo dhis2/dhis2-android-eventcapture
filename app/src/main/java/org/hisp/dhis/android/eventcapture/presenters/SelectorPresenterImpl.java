@@ -523,14 +523,18 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             selectorView.showNoOrganisationUnitsError();
         }
 
-        Picker rootPicker = Picker.create(chooseOrganisationUnit);
+        Picker rootPicker = new Picker.Builder()
+                .hint(chooseOrganisationUnit)
+                .build();
         for (String unitKey : organisationUnitMap.keySet()) {
-
             // Creating organisation unit picker items
             OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
-            Picker organisationUnitPicker = Picker.create(
-                    organisationUnit.getUId(), organisationUnit.getDisplayName(),
-                    chooseProgram, rootPicker);
+            Picker organisationUnitPicker = new Picker.Builder()
+                    .id(organisationUnit.getUId())
+                    .name(organisationUnit.getDisplayName())
+                    .hint(chooseProgram)
+                    .parent(rootPicker)
+                    .build();
 
             if (organisationUnit.getPrograms() != null && !organisationUnit.getPrograms().isEmpty()) {
                 for (Program program : organisationUnit.getPrograms()) {
@@ -538,8 +542,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
                             .equals(assignedProgram.getProgramType())) {
-                        Picker programPicker = Picker.create(assignedProgram.getUId(),
-                                assignedProgram.getDisplayName(), organisationUnitPicker);
+                        Picker programPicker = new Picker.Builder()
+                                .id(assignedProgram.getUId())
+                                .name(assignedProgram.getDisplayName())
+                                .parent(organisationUnitPicker)
+                                .build();
                         organisationUnitPicker.addChild(programPicker);
                     }
                 }
