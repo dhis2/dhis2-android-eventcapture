@@ -10,4 +10,8 @@ public interface FormSectionPresenter extends Presenter {
     void saveEventDate(String eventUid, DateTime eventDate);
 
     void saveEventStatus(String eventUid, Event.EventStatus eventStatus);
+
+    void subscribeToLocations();
+
+    void stopLocationUpdates();
 }
