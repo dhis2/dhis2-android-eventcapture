@@ -527,7 +527,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 .hint(chooseOrganisationUnit)
                 .build();
         for (String unitKey : organisationUnitMap.keySet()) {
-            // Creating organisation unit picker items
+            // creating organisation unit picker items
             OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
             Picker organisationUnitPicker = new Picker.Builder()
                     .id(organisationUnit.getUId())
@@ -554,7 +554,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             rootPicker.addChild(organisationUnitPicker);
         }
 
-        //Set saved selections or default ones :
+        // set saved selections or default ones:
         if (sessionPreferences.getSelectedPickerUid(0) != null) {
             traverseAndSetSavedSelection(rootPicker);
         } else {
