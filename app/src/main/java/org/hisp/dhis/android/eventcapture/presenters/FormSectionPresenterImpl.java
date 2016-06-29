@@ -250,7 +250,10 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                 .list(programStage).toBlocking().first();
 
                         // TODO remove hardcoded prompt
-                        Picker picker = Picker.create(programStage.getUId(), "Choose section");
+                        Picker picker = new Picker.Builder()
+                                .id(programStage.getUId())
+                                .name("Choose section")
+                                .build();
 
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
@@ -263,8 +266,12 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                             for (ProgramStageSection section : stageSections) {
                                 formSections.add(new FormSection(
                                         section.getUId(), section.getDisplayName()));
-                                picker.addChild(Picker.create(
-                                        section.getUId(), section.getDisplayName(), picker));
+                                picker.addChild(
+                                        new Picker.Builder()
+                                                .id(section.getUId())
+                                                .name(section.getDisplayName())
+                                                .parent(picker)
+                                                .build());
                             }
                         }
 
