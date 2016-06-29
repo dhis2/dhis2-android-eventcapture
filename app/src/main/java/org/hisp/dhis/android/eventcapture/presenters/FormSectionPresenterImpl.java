@@ -22,10 +22,13 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -50,6 +53,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     private CompositeSubscription subscription;
 
     private LocationProvider locationProvider;
+    private boolean gettingLocation = false;
 
     public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
@@ -67,6 +71,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     public void attachView(View view) {
         isNull(view, "View must not be null");
         formSectionView = (FormSectionView) view;
+        if (gettingLocation) {
+            formSectionView.setLocationButtonState(false);
+        }
     }
 
     @Override
@@ -180,31 +187,72 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 }));
     }
 
+    private void viewSetLocation(Location location) {
+        if (formSectionView != null) {
+            formSectionView.setLocation(location);
+        }
+    }
+
     @Override
     public void subscribeToLocations() {
+        gettingLocation = true;
         locationProvider.locations()
+                .timeout(2L, TimeUnit.MINUTES)
+                .buffer(2L, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Location>() {
-                    @Override
-                    public void call(Location location) {
-                        System.out.println("Got location: " + location);
-
-                        // See the wiki on
-                        if (formSectionView != null) {
-                            formSectionView.setLocation(location);
+                .subscribe(
+                        new Action1<List<Location>>() {
+                            @Override
+                            public void call(List<Location> locations) {
+                                if (!locations.isEmpty() && !(locations.get(0) == null)) {
+                                    Location currentLocation = locations.get(0);
+                                    Location bestLocation = currentLocation;
+                                    float accuracyAverage = currentLocation.getAccuracy();
+                                    //go over the locations and find the best + keep average
+                                    for (int i = 1; i < locations.size(); i++) {
+                                        currentLocation = locations.get(i);
+                                        accuracyAverage += currentLocation.getAccuracy();
+                                        if (locationProvider.isBetterLocation(currentLocation, bestLocation)) {
+                                            bestLocation = currentLocation;
+                                        }
+                                    }
+                                    accuracyAverage = accuracyAverage / locations.size();
+                                    // if accuracy doesn't improve and we have more than one, we have the best estimate.
+                                    if (Math.round(accuracyAverage)
+                                            == Math.round(bestLocation.getAccuracy())
+                                            && locations.size() > 1) {
+                                        viewSetLocation(bestLocation);
+                                        locationProvider.stopUpdates();
+                                        gettingLocation = false;
+                                    }
+                                }
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                if (throwable instanceof TimeoutException) {
+                                    logger.d(TAG, "Rx subscribeToLocaitons() timed out.");
+                                } else {
+                                    logger.e(TAG, "subscribeToLocations() rx call :" + throwable);
+                                }
+                                viewSetLocation(null);
+                                locationProvider.stopUpdates();
+                                gettingLocation = false;
+                            }
+                        },
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                logger.d(TAG, "onComplete");
+                                viewSetLocation(null);
+                                locationProvider.stopUpdates();
+                                gettingLocation = false;
+                            }
                         }
-                        //TODO: evaluate location before picking one.
-                        // time for 33 sec untill you can get the stable location.??
-                        locationProvider.stopUpdates();
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        logger.e(TAG, "subscribeToLocations() rx call :" + throwable);
-                    }
-                });
-        locationProvider.requestLocation(); ///?
+                );
+        locationProvider.requestLocation();
     }
 
     @Override

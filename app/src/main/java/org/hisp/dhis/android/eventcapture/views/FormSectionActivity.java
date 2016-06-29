@@ -215,25 +215,41 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     }
 
     public void setLocation(Location location) {
-        double longitude = location.getLongitude();
-        double latitude = location.getLatitude();
+        setLocationButtonState(true);
+        if (location != null) {
+            double longitude = location.getLongitude();
+            double latitude = location.getLatitude();
 
-        //re-enable the location fields and location button if disabled
-        locationIcon.setVisibility(View.VISIBLE);
-        locationIconCancel.setVisibility(View.GONE);
-        locationProgressBar.setVisibility(View.GONE);
-        editTextLatitude.setEnabled(true);
-        editTextLongitude.setEnabled(true);
-        locationButtonLayout.setClickable(true);
-
-        if (longitude != 0.0 && latitude != 0.0) {
-            editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
-            editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
+            if (longitude != 0.0 && latitude != 0.0) {
+                editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
+                editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
+            }
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void setLocationButtonState(boolean enabled) {
+        if (enabled) {
+            //re-enable the location fields and location button
+            locationIcon.setVisibility(View.VISIBLE);
+            locationIconCancel.setVisibility(View.GONE);
+            locationProgressBar.setVisibility(View.GONE);
+            editTextLatitude.setEnabled(true);
+            editTextLongitude.setEnabled(true);
+            locationButtonLayout.setClickable(true);
+        } else {
+            // disable it:
+            locationIcon.setVisibility(View.GONE);
+            locationIconCancel.setVisibility(View.VISIBLE);
+            locationProgressBar.setVisibility(View.VISIBLE);
+            editTextLatitude.setEnabled(false);
+            editTextLongitude.setEnabled(false);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_REQUEST_CODE) {
             List<String> permissionsList = Arrays.asList(permissions);
@@ -242,7 +258,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 Log.d(TAG, "onRequestPermissionsResult: permission is granged");
                 // don't do anything
             } else if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_DENIED) {
-                Toast.makeText(FormSectionActivity.this, R.string.gps_permission_denied, Toast.LENGTH_SHORT).show();
+                Toast.makeText(FormSectionActivity.this,
+                        R.string.gps_permission_denied, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -253,7 +270,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     public void setupLocationPermissions() {
         Log.d(TAG, "setupLocationPermissions() called with: " + "");
         if (Build.VERSION.SDK_INT > 22 &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
 
             String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
             ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE);
@@ -322,12 +340,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         if (linearLayoutCoordinates.getVisibility() == View.INVISIBLE ||
                 linearLayoutCoordinates.getVisibility() == View.GONE) {
             linearLayoutCoordinates.setVisibility(View.VISIBLE);
+            setupLocationCallback();
         }
-
         if (!isEmpty(latitude)) {
             editTextLatitude.setText(latitude);
         }
-
         if (!isEmpty(longitude)) {
             editTextLongitude.setText(longitude);
         }
@@ -385,12 +402,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             }
         });
 
-        setupLocationButtonLayoutCallback();
-    }
-
-    private void setupLocationButtonLayoutCallback() {
         // since coordinates are optional, initially they should be hidden
         //linearLayoutCoordinates.setVisibility(View.GONE);
+        setupLocationCallback();
+    }
+
+    private void setupLocationCallback() {
         locationButtonLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -399,26 +416,20 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 
                     //we have permission ?
-                    if (Build.VERSION.SDK_INT < 23 || ActivityCompat.checkSelfPermission(v.getContext(),
-                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT < 23 ||
+                            ActivityCompat.checkSelfPermission(v.getContext(),
+                                    Manifest.permission.ACCESS_FINE_LOCATION)
+                                    == PackageManager.PERMISSION_GRANTED) {
                         //either if init or after cancel click:
                         if (locationIcon.getVisibility() == View.VISIBLE
                                 || locationIconCancel.getVisibility() == View.GONE) {
                             // request location:
+                            setLocationButtonState(false);
                             formSectionPresenter.subscribeToLocations();
-                            locationIcon.setVisibility(View.GONE);
-                            locationIconCancel.setVisibility(View.VISIBLE);
-                            locationProgressBar.setVisibility(View.VISIBLE);
-                            editTextLatitude.setEnabled(false);
-                            editTextLongitude.setEnabled(false);
                         } else {
                             //cancel the location request:
+                            setLocationButtonState(true);
                             formSectionPresenter.stopLocationUpdates();
-                            locationIconCancel.setVisibility(View.GONE);
-                            locationProgressBar.setVisibility(View.GONE);
-                            locationIcon.setVisibility(View.VISIBLE);
-                            editTextLatitude.setEnabled(true);
-                            editTextLongitude.setEnabled(true);
                         }
                     } else {
                         //don't have permissions, set them up !

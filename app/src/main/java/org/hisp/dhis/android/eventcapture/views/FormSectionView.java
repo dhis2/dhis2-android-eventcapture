@@ -32,4 +32,6 @@ public interface FormSectionView extends View {
     void showEventStatus(Event.EventStatus eventStatus);
 
     void setLocation(Location location);
+
+    void setLocationButtonState(boolean enabled);
 }
