@@ -401,8 +401,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         });
 
         // since coordinates are optional, initially they should be hidden
-        //linearLayoutCoordinates.setVisibility(View.GONE);
-        setupLocationCallback();
+        linearLayoutCoordinates.setVisibility(View.GONE);
     }
 
     private void setupLocationCallback() {
