@@ -224,6 +224,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
                 editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
             }
+        } else {
+            Toast.makeText(this, R.string.gps_no_coordinates, Toast.LENGTH_LONG).show();
         }
     }
 
