@@ -77,7 +77,7 @@
     <!-- GPS status and permissions strings: -->
     <string name="title_gps_disabled">Location settings</string>
     <string name="gps_disabled">"Location services are disabled. Do you want to go to settings menu?"</string>
-    <string name="gps_no_coordinates">"Location unavailable."</string>
+    <string name="gps_no_coordinates">"Cannot determine location."</string>
     <string name="settings_option">Settings</string>
 
     <string name="gps_permission_denied">Location permission is denied for this app.</string>
