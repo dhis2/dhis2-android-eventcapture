@@ -205,27 +205,28 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         new Action1<List<Location>>() {
                             @Override
                             public void call(List<Location> locations) {
-                                if (!locations.isEmpty() && !(locations.get(0) == null)) {
-                                    Location currentLocation = locations.get(0);
-                                    Location bestLocation = currentLocation;
-                                    float accuracyAverage = currentLocation.getAccuracy();
-                                    //go over the locations and find the best + keep average
-                                    for (int i = 1; i < locations.size(); i++) {
-                                        currentLocation = locations.get(i);
-                                        accuracyAverage += currentLocation.getAccuracy();
-                                        if (locationProvider.isBetterLocation(currentLocation, bestLocation)) {
-                                            bestLocation = currentLocation;
-                                        }
+                                if (locations.isEmpty() || locations.get(0) == null) {
+                                    return;
+                                }
+                                Location currentLocation = locations.get(0);
+                                Location bestLocation = currentLocation;
+                                float accuracyAverage = currentLocation.getAccuracy();
+                                //go over the locations and find the best + keep average
+                                for (int i = 1; i < locations.size(); i++) {
+                                    currentLocation = locations.get(i);
+                                    accuracyAverage += currentLocation.getAccuracy();
+                                    if (locationProvider.isBetterLocation(currentLocation, bestLocation)) {
+                                        bestLocation = currentLocation;
                                     }
-                                    accuracyAverage = accuracyAverage / locations.size();
-                                    // if accuracy doesn't improve and we have more than one, we have the best estimate.
-                                    if (Math.round(accuracyAverage)
-                                            == Math.round(bestLocation.getAccuracy())
-                                            && locations.size() > 1) {
-                                        viewSetLocation(bestLocation);
-                                        locationProvider.stopUpdates();
-                                        gettingLocation = false;
-                                    }
+                                }
+                                accuracyAverage = accuracyAverage / locations.size();
+                                // if accuracy doesn't improve and we have more than one, we have the best estimate.
+                                if (Math.round(accuracyAverage)
+                                        == Math.round(bestLocation.getAccuracy())
+                                        && locations.size() > 1) {
+                                    gettingLocation = false;
+                                    viewSetLocation(bestLocation);
+                                    locationProvider.stopUpdates();
                                 }
                             }
                         },
@@ -237,15 +238,18 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                 } else {
                                     logger.e(TAG, "subscribeToLocations() rx call :" + throwable);
                                 }
+                                gettingLocation = false;
+                                viewSetLocation(null);
+                                locationProvider.stopUpdates();
                             }
                         },
                         new Action0() {
                             @Override
                             public void call() {
                                 logger.d(TAG, "onComplete");
+                                gettingLocation = false;
                                 viewSetLocation(null);
                                 locationProvider.stopUpdates();
-                                gettingLocation = false;
                             }
                         }
                 );
