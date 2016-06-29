@@ -110,7 +110,9 @@
                             android:hint="@string/latitude"
                             android:padding="8dp"
                             android:textSize="@dimen/text_size_medium"
-                            app:font="@string/font_name_light"/>
+                            app:font="@string/font_name_light"
+                            android:enabled="false"
+                            android:singleLine="true"/>
 
                         <org.hisp.dhis.client.sdk.ui.views.FontEditText
                             android:id="@+id/edittext_longitude"
@@ -123,7 +125,9 @@
                             android:hint="@string/longitude"
                             android:padding="8dp"
                             android:textSize="@dimen/text_size_medium"
-                            app:font="@string/font_name_light"/>
+                            app:font="@string/font_name_light"
+                            android:enabled="false"
+                            android:singleLine="true"/>
 
                     </LinearLayout>
 

@@ -237,9 +237,6 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                 } else {
                                     logger.e(TAG, "subscribeToLocations() rx call :" + throwable);
                                 }
-                                viewSetLocation(null);
-                                locationProvider.stopUpdates();
-                                gettingLocation = false;
                             }
                         },
                         new Action0() {

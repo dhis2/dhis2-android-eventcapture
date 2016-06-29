@@ -234,16 +234,12 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             locationIcon.setVisibility(View.VISIBLE);
             locationIconCancel.setVisibility(View.GONE);
             locationProgressBar.setVisibility(View.GONE);
-            editTextLatitude.setEnabled(true);
-            editTextLongitude.setEnabled(true);
             locationButtonLayout.setClickable(true);
         } else {
             // disable it:
             locationIcon.setVisibility(View.GONE);
             locationIconCancel.setVisibility(View.VISIBLE);
             locationProgressBar.setVisibility(View.VISIBLE);
-            editTextLatitude.setEnabled(false);
-            editTextLongitude.setEnabled(false);
         }
     }
 
