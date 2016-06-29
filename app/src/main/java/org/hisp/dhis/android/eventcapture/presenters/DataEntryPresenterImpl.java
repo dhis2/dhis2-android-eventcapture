@@ -349,11 +349,16 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         if (dataElement.getOptionSet() != null) {
             List<Option> options = dataElement.getOptionSet().getOptions();
 
-            Picker picker = Picker.create(dataElement.getDisplayName());
+            Picker picker = new Picker.Builder()
+                    .hint(dataElement.getDisplayName())
+                    .build();
             if (options != null && !options.isEmpty()) {
                 for (Option option : options) {
-                    Picker childPicker = Picker.create(
-                            option.getCode(), option.getDisplayName(), picker);
+                    Picker childPicker = new Picker.Builder()
+                            .id(option.getCode())
+                            .name(option.getDisplayName())
+                            .parent(picker)
+                            .build();
                     picker.addChild(childPicker);
 
                     if (option.getCode().equals(dataValue.getValue())) {
