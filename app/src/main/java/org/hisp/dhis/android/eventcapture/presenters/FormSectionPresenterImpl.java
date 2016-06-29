@@ -197,7 +197,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     public void subscribeToLocations() {
         gettingLocation = true;
         locationProvider.locations()
-                .timeout(2L, TimeUnit.MINUTES)
+                .timeout(31L, TimeUnit.SECONDS)
                 .buffer(2L, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
