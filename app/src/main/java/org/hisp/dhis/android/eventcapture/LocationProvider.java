@@ -11,4 +11,6 @@ public interface LocationProvider {
     void requestLocation();
 
     void stopUpdates();
+
+    boolean isBetterLocation(Location location, Location currentBestLocation);
 }
