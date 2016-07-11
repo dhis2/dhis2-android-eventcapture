@@ -155,6 +155,17 @@ public class SyncWrapper {
     }
 
     public Observable<Boolean> checkIfSyncIsNeeded() {
+
+        if (eventInteractor == null) {
+            // no eventInteractor exists - return false (i.e. sync is not needed)
+            return Observable.create(new DefaultOnSubscribe<Boolean>() {
+                @Override
+                public Boolean call() {
+                    return false;
+                }
+            });
+        }
+
         EnumSet<Action> updateActions = EnumSet.of(Action.TO_POST, Action.TO_UPDATE);
         return eventInteractor.listByActions(updateActions)
                 .switchMap(new Func1<List<Event>, Observable<Boolean>>() {
