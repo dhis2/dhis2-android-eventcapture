@@ -39,6 +39,7 @@ import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -52,6 +53,8 @@ import rx.schedulers.Schedulers;
 
 public class SyncWrapper {
 
+    private final SyncDateWrapper syncDateWrapper;
+
     // metadata
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
@@ -61,10 +64,13 @@ public class SyncWrapper {
 
     public SyncWrapper(UserOrganisationUnitInteractor userOrganisationUnitInteractor,
                        UserProgramInteractor userProgramInteractor,
-                       EventInteractor eventInteractor) {
+                       EventInteractor eventInteractor,
+                       SyncDateWrapper syncDateWrapper
+    ) {
         this.userOrganisationUnitInteractor = userOrganisationUnitInteractor;
         this.userProgramInteractor = userProgramInteractor;
         this.eventInteractor = eventInteractor;
+        this.syncDateWrapper = syncDateWrapper;
     }
 
     public Observable<List<Program>> syncMetaData() {
@@ -76,6 +82,9 @@ public class SyncWrapper {
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
+                        if (syncDateWrapper != null) {
+                            syncDateWrapper.setLastSyncedNow();
+                        }
                         return programs;
                     }
                 });
@@ -88,9 +97,11 @@ public class SyncWrapper {
                     public Observable<List<Event>> call(List<Event> events) {
                         Set<String> uids = ModelUtils.toUidSet(events);
                         if (uids != null && !uids.isEmpty()) {
+                            if (syncDateWrapper != null) {
+                                syncDateWrapper.setLastSyncedNow();
+                            }
                             return eventInteractor.sync(uids);
                         }
-
                         return Observable.empty();
                     }
                 });

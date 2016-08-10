@@ -187,7 +187,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                     public void call(List<Program> programs) {
                         isSyncing = false;
                         hasSyncedBefore = true;
-                        syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
