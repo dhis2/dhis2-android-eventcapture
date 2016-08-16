@@ -113,7 +113,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     ReportEntityAdapter reportEntityAdapter;
     View bottomSheetHeaderView;
     private AlertDialog alertDialog;
-    private Map<String, Pair<String, Boolean>> reportEntityLabelFilters;
     private AlertDialog filterDialog;
 
     private static String getOrganisationUnitUid(List<Picker> pickers) {
@@ -322,7 +321,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
     @Override
     public void setReportEntityLabelFilters(HashMap<String, Pair<String, Boolean>> filters) {
-        this.reportEntityLabelFilters = filters;
         reportEntityAdapter.notifyFiltersChanged(filters);
     }
 

@@ -57,6 +57,7 @@ import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.utils.Logger;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -94,6 +95,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     private SelectorView selectorView;
     private boolean isSyncing;
     private HashMap reportEntityDataElementFilter;
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     public SelectorPresenterImpl(UserOrganisationUnitInteractor interactor,
                                  UserProgramInteractor userProgramInteractor,
@@ -459,6 +461,10 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
+            dataElementToValueMap.put("Event date",
+                    event.getEventDate().toString(DateTimeFormat.forPattern(DATE_FORMAT)));
+            dataElementToValueMap.put("Status", event.getStatus().toString());
+
             reportEntities.add(
                     new ReportEntity(
                             event.getUId(),
@@ -486,6 +492,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                 map.put(dataElement.getUId(), new Pair<String, Boolean>(name, defaultViewSetting));
             }
         }
+
+        map.put("Event date", new Pair<String, Boolean>("Event date", true));
+        map.put("Status", new Pair<String, Boolean>("Status", true));
 
         return map;
     }
