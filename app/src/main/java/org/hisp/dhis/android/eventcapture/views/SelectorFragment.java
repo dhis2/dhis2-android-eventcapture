@@ -60,6 +60,7 @@ import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
+import org.hisp.dhis.android.eventcapture.model.DataElementFilter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
@@ -72,10 +73,11 @@ import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -500,13 +502,24 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
             final HashMap<String, Pair<String, Boolean>> filters = reportEntityAdapter.getReportEntityDataElementFilters();
             final String[] filterKeys = filters.keySet().toArray(new String[0]);
-            final String[] filterNames = new String[filters.size()];
-            final boolean[] dataElementCheckedState = new boolean[filters.size()];
+
+            ArrayList<DataElementFilter> sortedFilters = new ArrayList<>();
 
             for (int i = 0; i < filterKeys.length; i++) {
                 Pair<String, Boolean> nameValuePair = filters.get(filterKeys[i]);
-                filterNames[i] = nameValuePair.first;
-                dataElementCheckedState[i] = nameValuePair.second;
+                sortedFilters.add(new DataElementFilter(filterKeys[i], nameValuePair.first, nameValuePair.second));
+            }
+
+            Collections.sort(sortedFilters);
+
+            final String[] filterNames = new String[filters.size()];
+            final boolean[] dataElementCheckedState = new boolean[filters.size()];
+
+            for (int i = 0; i < sortedFilters.size(); i++) {
+                DataElementFilter filter = sortedFilters.get(i);
+                filterKeys[i] = filter.getDataElementId();
+                filterNames[i] = filter.getDataElementLabel();
+                dataElementCheckedState[i] = filter.isShow();
             }
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setMultiChoiceItems(
