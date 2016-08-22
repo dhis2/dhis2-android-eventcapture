@@ -60,7 +60,6 @@ import android.widget.Toast;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
-import org.hisp.dhis.client.sdk.android.dataelement.DataElementFilter;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
@@ -69,6 +68,7 @@ import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityIn
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -319,7 +319,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     }
 
     @Override
-    public void setReportEntityLabelFilters(ArrayList<DataElementFilter> filters) {
+    public void setReportEntityLabelFilters(ArrayList<ReportEntityFilter> filters) {
         reportEntityAdapter.notifyFiltersChanged(filters);
     }
 
@@ -497,14 +497,14 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
         if (filterDialog == null || !filterDialog.isShowing()) {
 
-            final ArrayList<DataElementFilter> filters = reportEntityAdapter.getReportEntityDataElementFilters();
+            final ArrayList<ReportEntityFilter> filters = reportEntityAdapter.getReportEntityReportEntityFilters();
 
             final String[] filterKeys = new String[filters.size()];
             final String[] filterNames = new String[filters.size()];
             final boolean[] dataElementCheckedState = new boolean[filters.size()];
 
             for (int i = 0; i < filters.size(); i++) {
-                DataElementFilter filter = filters.get(i);
+                ReportEntityFilter filter = filters.get(i);
                 filterKeys[i] = filter.getDataElementId();
                 filterNames[i] = filter.getDataElementLabel();
                 dataElementCheckedState[i] = filter.show();
@@ -524,7 +524,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
                         public void onClick(DialogInterface dialog, int which) {
                             boolean valuesHaveChanged = false;
                             for (int i = 0; i < filters.size(); i++) {
-                                DataElementFilter filter = filters.get(i);
+                                ReportEntityFilter filter = filters.get(i);
                                 if (filter.show() != dataElementCheckedState[i]) {
                                     valuesHaveChanged = true;
                                     filters.get(i).setShow(dataElementCheckedState[i]);
@@ -585,8 +585,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
     private boolean filtersExist() {
         return reportEntityAdapter != null &&
-                reportEntityAdapter.getReportEntityDataElementFilters() != null &&
-                !reportEntityAdapter.getReportEntityDataElementFilters().isEmpty();
+                reportEntityAdapter.getReportEntityReportEntityFilters() != null &&
+                !reportEntityAdapter.getReportEntityReportEntityFilters().isEmpty();
 
     }
 

@@ -30,7 +30,7 @@ package org.hisp.dhis.android.eventcapture.views;
 
 import android.support.annotation.StringDef;
 
-import org.hisp.dhis.client.sdk.android.dataelement.DataElementFilter;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
@@ -68,7 +68,7 @@ public interface SelectorView extends View {
 
     String getPickerLabel(@PickerLabelId String pickerLabelId);
 
-    void setReportEntityLabelFilters(ArrayList<DataElementFilter> filters);
+    void setReportEntityLabelFilters(ArrayList<ReportEntityFilter> filters);
 
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
