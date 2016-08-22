@@ -1,30 +1,43 @@
 package org.hisp.dhis.android.eventcapture.views;
 
-
+import android.Manifest;
 import android.app.Activity;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.FormComponent;
@@ -41,21 +54,25 @@ import org.joda.time.DateTimeComparator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
 
+import fr.castorflex.android.circularprogressbar.CircularProgressBar;
+
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
-
 
 // TODO check if configuration changes are handled properly
 public class FormSectionActivity extends AppCompatActivity implements FormSectionView {
     private static final String ARG_EVENT_UID = "arg:eventUid";
     private static final String ARG_IS_EVENT_NEW = "arg:isEventNew";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final int LOCATION_REQUEST_CODE = 42;
+    private static final String TAG = FormSectionActivity.class.getSimpleName();
 
     @Inject
     FormSectionPresenter formSectionPresenter;
@@ -68,6 +85,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     LinearLayout linearLayoutCoordinates;
     EditText editTextLatitude;
     EditText editTextLongitude;
+    AppCompatImageView locationIcon;
+    AppCompatImageView locationIconCancel;
+    CircularProgressBar locationProgressBar;
+    FrameLayout locationButtonLayout;
 
     // section tabs and view pager
     TabLayout tabLayout;
@@ -75,6 +96,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
     FloatingActionButton fabComplete;
 
     FilterableDialogFragment sectionDialogFragment;
+    AlertDialog alertDialog;
 
     public static void navigateToNewEvent(Activity activity, String eventUid) {
         navigateTo(activity, eventUid, true);
@@ -146,18 +168,24 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
         // start building the form
         formSectionPresenter.createDataEntryForm(getEventUid());
+
+        setupLocationPermissions();
     }
 
     @Override
-    protected void onResume() {
+    protected void onStart() {
         formSectionPresenter.attachView(this);
-        super.onResume();
+        super.onStart();
     }
 
     @Override
-    protected void onPause() {
+    protected void onStop() {
+        //don't leak the dialog
+        if (alertDialog != null) {
+            alertDialog.dismiss();
+        }
         formSectionPresenter.detachView();
-        super.onPause();
+        super.onStop();
     }
 
     @Override
@@ -183,6 +211,68 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void setLocation(Location location) {
+        setLocationButtonState(true);
+        if (location != null) {
+            double longitude = location.getLongitude();
+            double latitude = location.getLatitude();
+
+            if (longitude != 0.0 && latitude != 0.0) {
+                editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
+                editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
+            }
+        } else {
+            Toast.makeText(this, R.string.gps_no_coordinates, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void setLocationButtonState(boolean enabled) {
+        if (enabled) {
+            //re-enable the location fields and location button
+            locationIcon.setVisibility(View.VISIBLE);
+            locationIconCancel.setVisibility(View.GONE);
+            locationProgressBar.setVisibility(View.GONE);
+            locationButtonLayout.setClickable(true);
+        } else {
+            // disable it:
+            locationIcon.setVisibility(View.GONE);
+            locationIconCancel.setVisibility(View.VISIBLE);
+            locationProgressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            List<String> permissionsList = Arrays.asList(permissions);
+            int at = permissionsList.indexOf(Manifest.permission.ACCESS_FINE_LOCATION);
+            if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "onRequestPermissionsResult: permission is granged");
+                // don't do anything
+            } else if (at >= 0 && grantResults[at] == PackageManager.PERMISSION_DENIED) {
+                Toast.makeText(FormSectionActivity.this,
+                        R.string.gps_permission_denied, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Initialize the location permissions.
+     */
+    public void setupLocationPermissions() {
+        Log.d(TAG, "setupLocationPermissions() called with: " + "");
+        if (Build.VERSION.SDK_INT > 22 &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+            String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE);
         }
     }
 
@@ -248,12 +338,11 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         if (linearLayoutCoordinates.getVisibility() == View.INVISIBLE ||
                 linearLayoutCoordinates.getVisibility() == View.GONE) {
             linearLayoutCoordinates.setVisibility(View.VISIBLE);
+            setupLocationCallback();
         }
-
         if (!isEmpty(latitude)) {
             editTextLatitude.setText(latitude);
         }
-
         if (!isEmpty(longitude)) {
             editTextLongitude.setText(longitude);
         }
@@ -309,7 +398,10 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         linearLayoutCoordinates = (LinearLayout) findViewById(R.id.linearlayout_coordinates);
         editTextLatitude = (EditText) findViewById(R.id.edittext_latitude);
         editTextLongitude = (EditText) findViewById(R.id.edittext_longitude);
-
+        locationIcon = (AppCompatImageView) findViewById(R.id.imagevew_location);
+        locationIconCancel = (AppCompatImageView) findViewById(R.id.imagevew_location_cancel);
+        locationProgressBar = (CircularProgressBar) findViewById(R.id.progress_bar_circular_location);
+        locationButtonLayout = (FrameLayout) findViewById(R.id.button_location_layout);
 
         // set on click listener to text view report date
         textViewReportDate.setOnClickListener(new View.OnClickListener() {
@@ -321,6 +413,61 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
 
         // since coordinates are optional, initially they should be hidden
         linearLayoutCoordinates.setVisibility(View.GONE);
+    }
+
+    private void setupLocationCallback() {
+        locationButtonLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LocationManager locationManager = (LocationManager) getSystemService(
+                        Context.LOCATION_SERVICE);
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+
+                    //we have permission ?
+                    if (Build.VERSION.SDK_INT < 23 ||
+                            ActivityCompat.checkSelfPermission(v.getContext(),
+                                    Manifest.permission.ACCESS_FINE_LOCATION)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                        //either if init or after cancel click:
+                        if (locationIcon.getVisibility() == View.VISIBLE
+                                || locationIconCancel.getVisibility() == View.GONE) {
+                            // request location:
+                            setLocationButtonState(false);
+                            formSectionPresenter.subscribeToLocations();
+                        } else {
+                            //cancel the location request:
+                            setLocationButtonState(true);
+                            formSectionPresenter.stopLocationUpdates();
+                        }
+                    } else {
+                        //don't have permissions, set them up !
+                        setupLocationPermissions();
+                    }
+                } else {
+                    showGpsDialog();
+                }
+            }
+        });
+    }
+
+    public void showGpsDialog() {
+        alertDialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.title_gps_disabled)
+                .setMessage(R.string.gps_disabled)
+                .setPositiveButton(R.string.settings_option, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton(R.string.cancel_option, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .create();
+
+        alertDialog.show();
     }
 
     private void setupViewPager() {
@@ -354,7 +501,6 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                                 }
                             })
                             .show();
-
                 } else {
                     completeEvent();
                     Snackbar.make(coordinatorLayout, getString(R.string.complete), Snackbar.LENGTH_LONG)

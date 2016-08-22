@@ -57,6 +57,12 @@ public class AppModule implements DefaultAppModule {
 
     @Provides
     @Singleton
+    public LocationProvider providesLocationProvider(Context context, Logger logger) {
+        return new LocationProviderImpl(context, logger);
+    }
+
+    @Provides
+    @Singleton
     @Override
     public Context providesContext() {
         return application;

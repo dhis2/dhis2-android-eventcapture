@@ -321,9 +321,10 @@ public class UserModule implements DefaultUserModule {
     public SyncWrapper provideSyncWrapper(
             @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
             @Nullable UserProgramInteractor userProgramInteractor,
-            @Nullable EventInteractor eventInteractor) {
+            @Nullable EventInteractor eventInteractor,
+            @Nullable SyncDateWrapper syncDateWrapper) {
 
-        return new SyncWrapper(userOrganisationUnitInteractor, userProgramInteractor, eventInteractor);
+        return new SyncWrapper(userOrganisationUnitInteractor, userProgramInteractor, eventInteractor, syncDateWrapper);
     }
 
     @Provides

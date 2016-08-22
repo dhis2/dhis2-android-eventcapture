@@ -1,5 +1,6 @@
 package org.hisp.dhis.android.eventcapture.views;
 
+import android.location.Location;
 import android.support.annotation.StringDef;
 
 import org.hisp.dhis.client.sdk.models.event.Event;
@@ -43,4 +44,8 @@ public interface FormSectionView extends View {
     })
     @interface FormSectionLabelId {
     }
+
+    void setLocation(Location location);
+
+    void setLocationButtonState(boolean enabled);
 }

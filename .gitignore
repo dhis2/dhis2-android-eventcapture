@@ -27,6 +27,7 @@ build
 
 # Android
 *.apk
+captures
 
 # Secret keys
 secrets.properties

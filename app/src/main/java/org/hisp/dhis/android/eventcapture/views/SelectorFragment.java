@@ -47,6 +47,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -616,17 +617,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            int rightPadding;
-
-            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                // state is expanded. move header out from below the FAB
-                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default) + getFabSize() + getResources().getDimensionPixelSize(R.dimen.keyline_default);
-                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
-                setBottomSheetHeaderPadding(rightPadding);
-            } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
-                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
-                setBottomSheetHeaderPadding(rightPadding);
+            try {
+                int defaultPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    // state is expanded. move header out from below the FAB
+                    setBottomSheetHeaderPadding(defaultPadding + getFabSize() + defaultPadding);
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    setBottomSheetHeaderPadding(defaultPadding);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to retrieve Resources. Probable cause: Activity no longer in " +
+                        "view or Fragment is not attached", e);
             }
         }
 
