@@ -38,7 +38,6 @@ import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeComparator;
-import org.joda.time.LocalDate;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -266,6 +265,17 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             fabComplete.setVisibility(View.VISIBLE);
             fabComplete.setActivated(Event.EventStatus.COMPLETED.equals(eventStatus));
         }
+    }
+
+    @Override
+    public String getFormSectionLabel(@FormSectionLabelId String formSectionLabelId) {
+        switch (formSectionLabelId) {
+            case FormSectionView.ID_CHOOSE_SECTION: {
+                return getString(R.string.choose_section);
+            }
+        }
+
+        return null;
     }
 
     private void attachListenerToExistingFragment() {
