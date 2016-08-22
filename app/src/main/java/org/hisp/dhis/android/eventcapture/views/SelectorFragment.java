@@ -73,6 +73,7 @@ import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -498,7 +499,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
         if (filterDialog == null || !filterDialog.isShowing()) {
 
             final ArrayList<ReportEntityFilter> filters = reportEntityAdapter.getReportEntityReportEntityFilters();
-
+            Collections.sort(filters);
             final String[] filterKeys = new String[filters.size()];
             final String[] filterNames = new String[filters.size()];
             final boolean[] dataElementCheckedState = new boolean[filters.size()];
@@ -532,6 +533,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
                             }
                             if (valuesHaveChanged) {
+                                Collections.sort(filters);
                                 reportEntityAdapter.notifyFiltersChanged(filters);
                                 selectorPresenter.setReportEntityDataElementFilters(
                                         getProgramUid(), filters);
