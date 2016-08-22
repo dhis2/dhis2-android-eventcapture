@@ -86,7 +86,6 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 .map(new Func1<Event, Event>() {
                     @Override
                     public Event call(Event event) {
-
                         // TODO consider refactoring rules-engine logic out of map function)
                         // synchronously initializing rule engine
                         rxRuleEngine.init(eventUid).toBlocking().first();
@@ -249,10 +248,16 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         List<ProgramStageSection> stageSections = programStageSectionInteractor
                                 .list(programStage).toBlocking().first();
 
-                        // TODO remove hardcoded prompt
+                        String chooseSectionPrompt = null;
+                        if (formSectionView != null) {
+                            chooseSectionPrompt = formSectionView.getFormSectionLabel(
+                                    FormSectionView.ID_CHOOSE_SECTION);
+                        }
+
+                        // fetching prompt from resources
                         Picker picker = new Picker.Builder()
                                 .id(programStage.getUId())
-                                .name("Choose section")
+                                .name(chooseSectionPrompt)
                                 .build();
 
                         // transform sections
