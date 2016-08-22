@@ -1,13 +1,18 @@
 package org.hisp.dhis.android.eventcapture.views;
 
+import android.support.annotation.StringDef;
+
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.FormSection;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 public interface FormSectionView extends View {
+    String ID_CHOOSE_SECTION = "chooseSection";
 
     /**
      * Should be called in cases when ProgramStage
@@ -17,6 +22,7 @@ public interface FormSectionView extends View {
 
     /**
      * Tells view to render form sections
+     *
      * @param formSections List of FormSections
      */
     void showFormSections(List<FormSection> formSections);
@@ -28,4 +34,13 @@ public interface FormSectionView extends View {
     void showCoordinatesPicker(String latitude, String longitude);
 
     void showEventStatus(Event.EventStatus eventStatus);
+
+    String getFormSectionLabel(@FormSectionLabelId String formSectionLabel);
+
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({
+            ID_CHOOSE_SECTION
+    })
+    @interface FormSectionLabelId {
+    }
 }
