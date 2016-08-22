@@ -41,7 +41,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
@@ -60,8 +59,8 @@ import android.widget.Toast;
 
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.android.eventcapture.R;
-import org.hisp.dhis.android.eventcapture.model.DataElementFilter;
 import org.hisp.dhis.android.eventcapture.presenters.SelectorPresenter;
+import org.hisp.dhis.client.sdk.android.dataelement.DataElementFilter;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter;
 import org.hisp.dhis.client.sdk.ui.adapters.PickerAdapter.OnPickerListChangeListener;
@@ -74,8 +73,6 @@ import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -322,7 +319,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     }
 
     @Override
-    public void setReportEntityLabelFilters(HashMap<String, Pair<String, Boolean>> filters) {
+    public void setReportEntityLabelFilters(ArrayList<DataElementFilter> filters) {
         reportEntityAdapter.notifyFiltersChanged(filters);
     }
 
@@ -500,26 +497,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
         if (filterDialog == null || !filterDialog.isShowing()) {
 
-            final HashMap<String, Pair<String, Boolean>> filters = reportEntityAdapter.getReportEntityDataElementFilters();
-            final String[] filterKeys = filters.keySet().toArray(new String[0]);
+            final ArrayList<DataElementFilter> filters = reportEntityAdapter.getReportEntityDataElementFilters();
 
-            ArrayList<DataElementFilter> sortedFilters = new ArrayList<>();
-
-            for (int i = 0; i < filterKeys.length; i++) {
-                Pair<String, Boolean> nameValuePair = filters.get(filterKeys[i]);
-                sortedFilters.add(new DataElementFilter(filterKeys[i], nameValuePair.first, nameValuePair.second));
-            }
-
-            Collections.sort(sortedFilters);
-
+            final String[] filterKeys = new String[filters.size()];
             final String[] filterNames = new String[filters.size()];
             final boolean[] dataElementCheckedState = new boolean[filters.size()];
 
-            for (int i = 0; i < sortedFilters.size(); i++) {
-                DataElementFilter filter = sortedFilters.get(i);
+            for (int i = 0; i < filters.size(); i++) {
+                DataElementFilter filter = filters.get(i);
                 filterKeys[i] = filter.getDataElementId();
                 filterNames[i] = filter.getDataElementLabel();
-                dataElementCheckedState[i] = filter.isShow();
+                dataElementCheckedState[i] = filter.show();
             }
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setMultiChoiceItems(
@@ -534,15 +522,20 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
                     setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            for (int i = 0; i < dataElementCheckedState.length; i++) {
-                                filters.put(
-                                        filterKeys[i],
-                                        new Pair<String, Boolean>(filterNames[i], dataElementCheckedState[i]));
-                            }
+                            boolean valuesHaveChanged = false;
+                            for (int i = 0; i < filters.size(); i++) {
+                                DataElementFilter filter = filters.get(i);
+                                if (filter.show() != dataElementCheckedState[i]) {
+                                    valuesHaveChanged = true;
+                                    filters.get(i).setShow(dataElementCheckedState[i]);
+                                }
 
-                            reportEntityAdapter.notifyFiltersChanged(filters);
-                            selectorPresenter.setReportEntityDataElementFilters(
-                                    getProgramUid(), filters);
+                            }
+                            if (valuesHaveChanged) {
+                                reportEntityAdapter.notifyFiltersChanged(filters);
+                                selectorPresenter.setReportEntityDataElementFilters(
+                                        getProgramUid(), filters);
+                            }
                         }
                     });
 

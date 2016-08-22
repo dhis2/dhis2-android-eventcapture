@@ -28,13 +28,12 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
-import android.support.v4.util.Pair;
-
+import org.hisp.dhis.client.sdk.android.dataelement.DataElementFilter;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.Presenter;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface SelectorPresenter extends Presenter {
@@ -52,5 +51,5 @@ public interface SelectorPresenter extends Presenter {
 
     void handleError(final Throwable throwable);
 
-    void setReportEntityDataElementFilters(String programId, HashMap<String, Pair<String, Boolean>> filters);
+    void setReportEntityDataElementFilters(String programId, ArrayList<DataElementFilter> filters);
 }
