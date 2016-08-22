@@ -26,7 +26,6 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
-import rx.subjects.BehaviorSubject;
 import rx.subjects.ReplaySubject;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
