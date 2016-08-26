@@ -30,7 +30,6 @@ package org.hisp.dhis.android.eventcapture.presenters;
 
 import org.hisp.dhis.android.eventcapture.model.SyncWrapper;
 import org.hisp.dhis.android.eventcapture.views.SelectorView;
-import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
@@ -54,6 +53,7 @@ import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
 import org.hisp.dhis.client.sdk.utils.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -458,9 +458,9 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
-            dataElementToValueMap.put(ReportEntityFilter.EVENT_DATE_KEY,
+            dataElementToValueMap.put(Event.EVENT_DATE_KEY,
                     event.getEventDate().toString(DateTimeFormat.forPattern(DATE_FORMAT)));
-            dataElementToValueMap.put(ReportEntityFilter.STATUS_KEY, event.getStatus().toString());
+            dataElementToValueMap.put(Event.STATUS_KEY, event.getStatus().toString());
 
             reportEntities.add(
                     new ReportEntity(
@@ -477,10 +477,10 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
         ArrayList<ReportEntityFilter> defaultFilters = new ArrayList<>();
 
-        defaultFilters.add(new ReportEntityFilter(ReportEntityFilter.EVENT_DATE_KEY,
-                ReportEntityFilter.EVENT_DATE_LABEL, true));
-        defaultFilters.add(new ReportEntityFilter(ReportEntityFilter.STATUS_KEY,
-                ReportEntityFilter.STATUS_LABEL, true));
+        defaultFilters.add(new ReportEntityFilter(Event.EVENT_DATE_KEY,
+                Event.EVENT_DATE_LABEL, true));
+        defaultFilters.add(new ReportEntityFilter(Event.STATUS_KEY,
+                Event.STATUS_LABEL, true));
 
         if (dataElements != null && !dataElements.isEmpty()) {
             for (ProgramStageDataElement programStageDataElement : dataElements) {
