@@ -9,12 +9,10 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
-import org.hisp.dhis.client.sdk.core.common.network.UserCredentials;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.optionset.Option;
 import org.hisp.dhis.client.sdk.models.optionset.OptionSet;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleActionType;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
@@ -50,8 +48,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
-import rx.functions.Func3;
-import rx.functions.Func4;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -120,7 +116,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     }
 
     @Override
-    public void createDataEntryFormStage(String eventId, String programStageId) {
+    public void createDataEntryFormStage(final String eventId, final String programStageId) {
         logger.d(TAG, "ProgramStageId: " + programStageId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -132,30 +128,26 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 .toBlocking().first().getUsername();
 
         subscription = new CompositeSubscription();
-        subscription.add(saveTrackedEntityDataValues());
-        subscription.add(initRulesEngine(username, eventId));
-
-        subscription.add(Observable.zip(
-                eventInteractor.get(eventId),
-                stageInteractor.get(programStageId),
-                currentUserInteractor.userCredentials(),
-                rxRulesEngine.observable(),
-                new Func4<Event, ProgramStage, UserCredentials, List<RuleEffect>,
-                        SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
-
+        subscription.add(engine().switchMap(
+                new Func1<List<FormEntityAction>, Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>>() {
                     @Override
-                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
-                            Event event, ProgramStage stage, UserCredentials creds, List<RuleEffect> effects) {
+                    public Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>> call(
+                            final List<FormEntityAction> formEntityActions) {
+                        return Observable.zip(eventInteractor.get(eventId), stageInteractor.get(programStageId),
+                                new Func2<Event, ProgramStage, SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
 
-                        List<ProgramStageDataElement> dataElements =
-                                dataElementInteractor.list(stage).toBlocking().first();
-                        String username = creds.getUsername();
+                                    @Override
+                                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
+                                            Event event, ProgramStage stage) {
 
-                        List<FormEntity> formEntities = transformDataElements(
-                                username, event, dataElements);
-                        List<FormEntityAction> formEntityActions = transformRuleEffects(effects);
+                                        List<ProgramStageDataElement> dataElements =
+                                                dataElementInteractor.list(stage).toBlocking().first();
+                                        List<FormEntity> formEntities = transformDataElements(
+                                                username, event, dataElements);
 
-                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                    }
+                                });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -173,10 +165,13 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
                 }));
+
+        subscription.add(saveTrackedEntityDataValues());
+        subscription.add(subscribeToEngine());
     }
 
     @Override
-    public void createDataEntryFormSection(String eventId, String programStageSectionId) {
+    public void createDataEntryFormSection(final String eventId, final String programStageSectionId) {
         logger.d(TAG, "ProgramStageSectionId: " + programStageSectionId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -188,31 +183,31 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 .toBlocking().first().getUsername();
 
         subscription = new CompositeSubscription();
-        subscription.add(saveTrackedEntityDataValues());
-        subscription.add(initRulesEngine(username, eventId));
-
-        subscription.add(Observable.zip(eventInteractor.get(eventId),
-                sectionInteractor.get(programStageSectionId), rxRulesEngine.observable(),
-                new Func3<Event, ProgramStageSection, List<RuleEffect>,
-                        SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
-
+        subscription.add(engine().switchMap(
+                new Func1<List<FormEntityAction>, Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>>() {
                     @Override
-                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
-                            Event event, ProgramStageSection stageSection, List<RuleEffect> effects) {
-                        List<ProgramStageDataElement> dataElements = dataElementInteractor
-                                .list(stageSection).toBlocking().first();
+                    public Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>> call(
+                            final List<FormEntityAction> formEntityActions) {
+                        return Observable.zip(eventInteractor.get(eventId), sectionInteractor.get(programStageSectionId),
+                                new Func2<Event, ProgramStageSection, SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
 
-                        // sort ProgramStageDataElements by sortOrder
-                        if (dataElements != null) {
-                            Collections.sort(dataElements,
-                                    ProgramStageDataElement.SORT_ORDER_COMPARATOR);
-                        }
+                                    @Override
+                                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
+                                            Event event, ProgramStageSection stageSection) {
+                                        List<ProgramStageDataElement> dataElements = dataElementInteractor
+                                                .list(stageSection).toBlocking().first();
 
-                        List<FormEntity> formEntities = transformDataElements(
-                                username, event, dataElements);
-                        List<FormEntityAction> formEntityActions = transformRuleEffects(effects);
+                                        // sort ProgramStageDataElements by sortOrder
+                                        if (dataElements != null) {
+                                            Collections.sort(dataElements,
+                                                    ProgramStageDataElement.SORT_ORDER_COMPARATOR);
+                                        }
 
-                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                        List<FormEntity> formEntities = transformDataElements(
+                                                username, event, dataElements);
+                                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                    }
+                                });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -230,35 +225,23 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
                 }));
+
+        subscription.add(saveTrackedEntityDataValues());
+        subscription.add(subscribeToEngine());
     }
 
-    private Subscription initRulesEngine(final String username, final String eventId) {
+    private Observable<List<FormEntityAction>> engine() {
         return rxRulesEngine.observable()
-                .switchMap(new Func1<List<RuleEffect>, Observable<List<FormEntityAction>>>() {
+                .map(new Func1<List<RuleEffect>, List<FormEntityAction>>() {
                     @Override
-                    public Observable<List<FormEntityAction>> call(List<RuleEffect> ruleEffects) {
-                        logger.d(TAG, "RuleEffects are emitted: " +
-                                System.identityHashCode(ruleEffects));
-
-                        // seamlessly trying to save event and pass
-                        // formEntityActions observable down to subscriber
-                        Observable<List<FormEntityAction>> formEntityActionsObservable =
-                                Observable.just(transformRuleEffects(ruleEffects));
-
-                        // using zip in order to make sure that ruleEffects are successfully applied
-                        // to event in database, only then pass formEntityActions down in the chain
-                        // in order to apply them to view
-                        return Observable.zip(
-                                applyRuleEffects(username, eventId, ruleEffects), formEntityActionsObservable,
-                                new Func2<Boolean, List<FormEntityAction>, List<FormEntityAction>>() {
-                                    @Override
-                                    public List<FormEntityAction> call(Boolean isSuccess, List<FormEntityAction> actions) {
-                                        return actions;
-                                    }
-                                });
+                    public List<FormEntityAction> call(List<RuleEffect> effects) {
+                        return transformRuleEffects(effects);
                     }
-                })
-                .subscribeOn(Schedulers.computation())
+                });
+    }
+
+    private Subscription subscribeToEngine() {
+        return engine().subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<FormEntityAction>>() {
                     @Override
@@ -271,55 +254,6 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                     @Override
                     public void call(Throwable throwable) {
                         logger.e(TAG, "Failed to calculate rules", throwable);
-                    }
-                });
-    }
-
-    private Observable<Boolean> applyRuleEffects(
-            final String username, final String eventId, final List<RuleEffect> ruleEffects) {
-
-        return eventInteractor.get(eventId)
-                .switchMap(new Func1<Event, Observable<Boolean>>() {
-                    @Override
-                    public Observable<Boolean> call(Event event) {
-                        if (ruleEffects == null || ruleEffects.isEmpty()) {
-                            return Observable.just(true);
-                        }
-
-                        Map<String, TrackedEntityDataValue> dataValueMap = new HashMap<>();
-                        if (event.getDataValues() != null && !event.getDataValues().isEmpty()) {
-                            for (TrackedEntityDataValue entityDataValue : event.getDataValues()) {
-                                dataValueMap.put(entityDataValue.getDataElement(), entityDataValue);
-                            }
-                        }
-
-                        for (RuleEffect ruleEffect : ruleEffects) {
-                            if (ProgramRuleActionType.ASSIGN.equals(
-                                    ruleEffect.getProgramRuleActionType()) &&
-                                    ruleEffect.getDataElement() != null) {
-
-                                TrackedEntityDataValue dataValue = dataValueMap.get(
-                                        ruleEffect.getDataElement().getUId());
-
-                                // it can happen that event does not contain data value for yet
-                                // for given ruleEffect, it means we need to create one
-                                if (dataValue == null) {
-                                    String dataElement = ruleEffect.getDataElement().getUId();
-
-                                    dataValue = new TrackedEntityDataValue();
-                                    dataValue.setDataElement(dataElement);
-                                    dataValue.setStoredBy(username);
-                                    dataValue.setEvent(event);
-
-                                    dataValueMap.put(dataElement, dataValue);
-                                }
-
-                                dataValue.setValue(ruleEffect.getData());
-                            }
-                        }
-
-                        event.setDataValues(new ArrayList<>(dataValueMap.values()));
-                        return eventInteractor.save(event);
                     }
                 });
     }
