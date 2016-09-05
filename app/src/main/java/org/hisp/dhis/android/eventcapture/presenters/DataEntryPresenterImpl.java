@@ -128,7 +128,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 .toBlocking().first().getUsername();
 
         subscription = new CompositeSubscription();
-        subscription.add(engine().switchMap(
+        subscription.add(engine().take(1).switchMap(
                 new Func1<List<FormEntityAction>, Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>>() {
                     @Override
                     public Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>> call(
@@ -183,7 +183,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                 .toBlocking().first().getUsername();
 
         subscription = new CompositeSubscription();
-        subscription.add(engine().switchMap(
+        subscription.add(engine().take(1).switchMap(
                 new Func1<List<FormEntityAction>, Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>>() {
                     @Override
                     public Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>> call(
