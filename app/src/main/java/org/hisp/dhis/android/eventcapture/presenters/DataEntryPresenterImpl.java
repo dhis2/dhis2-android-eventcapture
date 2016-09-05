@@ -9,7 +9,6 @@ import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInteractor;
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
-import org.hisp.dhis.client.sdk.core.common.network.UserCredentials;
 import org.hisp.dhis.client.sdk.models.dataelement.DataElement;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.optionset.Option;
@@ -48,7 +47,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func4;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -117,7 +116,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
     }
 
     @Override
-    public void createDataEntryFormStage(String eventId, String programStageId) {
+    public void createDataEntryFormStage(final String eventId, final String programStageId) {
         logger.d(TAG, "ProgramStageId: " + programStageId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -125,31 +124,30 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             subscription = null;
         }
 
+        final String username = currentUserInteractor.userCredentials()
+                .toBlocking().first().getUsername();
+
         subscription = new CompositeSubscription();
-        subscription.add(saveTrackedEntityDataValues());
-        subscription.add(initRulesEngine());
-
-        subscription.add(Observable.zip(
-                eventInteractor.get(eventId),
-                stageInteractor.get(programStageId),
-                currentUserInteractor.userCredentials(),
-                rxRulesEngine.observable(),
-                new Func4<Event, ProgramStage, UserCredentials, List<RuleEffect>,
-                        SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
-
+        subscription.add(engine().take(1).switchMap(
+                new Func1<List<FormEntityAction>, Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>>() {
                     @Override
-                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
-                            Event event, ProgramStage stage, UserCredentials creds, List<RuleEffect> effects) {
+                    public Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>> call(
+                            final List<FormEntityAction> formEntityActions) {
+                        return Observable.zip(eventInteractor.get(eventId), stageInteractor.get(programStageId),
+                                new Func2<Event, ProgramStage, SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
 
-                        List<ProgramStageDataElement> dataElements =
-                                dataElementInteractor.list(stage).toBlocking().first();
-                        String username = creds.getUsername();
+                                    @Override
+                                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
+                                            Event event, ProgramStage stage) {
 
-                        List<FormEntity> formEntities = transformDataElements(
-                                username, event, dataElements);
-                        List<FormEntityAction> formEntityActions = transformRuleEffects(effects);
+                                        List<ProgramStageDataElement> dataElements =
+                                                dataElementInteractor.list(stage).toBlocking().first();
+                                        List<FormEntity> formEntities = transformDataElements(
+                                                username, event, dataElements);
 
-                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                    }
+                                });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -167,10 +165,13 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
                 }));
+
+        subscription.add(saveTrackedEntityDataValues());
+        subscription.add(subscribeToEngine());
     }
 
     @Override
-    public void createDataEntryFormSection(String eventId, String programStageSectionId) {
+    public void createDataEntryFormSection(final String eventId, final String programStageSectionId) {
         logger.d(TAG, "ProgramStageSectionId: " + programStageSectionId);
 
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -178,36 +179,35 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             subscription = null;
         }
 
+        final String username = currentUserInteractor.userCredentials()
+                .toBlocking().first().getUsername();
+
         subscription = new CompositeSubscription();
-        subscription.add(saveTrackedEntityDataValues());
-        subscription.add(initRulesEngine());
-
-        subscription.add(Observable.zip(
-                eventInteractor.get(eventId), sectionInteractor.get(programStageSectionId),
-                currentUserInteractor.userCredentials(), rxRulesEngine.observable(),
-                new Func4<Event, ProgramStageSection, UserCredentials, List<RuleEffect>,
-                        SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
-
+        subscription.add(engine().take(1).switchMap(
+                new Func1<List<FormEntityAction>, Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>>>() {
                     @Override
-                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
-                            Event event, ProgramStageSection stageSection, UserCredentials creds,
-                            List<RuleEffect> effects) {
-                        List<ProgramStageDataElement> dataElements = dataElementInteractor
-                                .list(stageSection).toBlocking().first();
+                    public Observable<SimpleEntry<List<FormEntity>, List<FormEntityAction>>> call(
+                            final List<FormEntityAction> formEntityActions) {
+                        return Observable.zip(eventInteractor.get(eventId), sectionInteractor.get(programStageSectionId),
+                                new Func2<Event, ProgramStageSection, SimpleEntry<List<FormEntity>, List<FormEntityAction>>>() {
 
-                        // sort ProgramStageDataElements by sortOrder
-                        if (dataElements != null) {
-                            Collections.sort(dataElements,
-                                    ProgramStageDataElement.SORT_ORDER_COMPARATOR);
-                        }
+                                    @Override
+                                    public SimpleEntry<List<FormEntity>, List<FormEntityAction>> call(
+                                            Event event, ProgramStageSection stageSection) {
+                                        List<ProgramStageDataElement> dataElements = dataElementInteractor
+                                                .list(stageSection).toBlocking().first();
 
-                        String username = creds.getUsername();
+                                        // sort ProgramStageDataElements by sortOrder
+                                        if (dataElements != null) {
+                                            Collections.sort(dataElements,
+                                                    ProgramStageDataElement.SORT_ORDER_COMPARATOR);
+                                        }
 
-                        List<FormEntity> formEntities = transformDataElements(
-                                username, event, dataElements);
-                        List<FormEntityAction> formEntityActions = transformRuleEffects(effects);
-
-                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                        List<FormEntity> formEntities = transformDataElements(
+                                                username, event, dataElements);
+                                        return new SimpleEntry<>(formEntities, formEntityActions);
+                                    }
+                                });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -225,19 +225,23 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                         logger.e(TAG, "Something went wrong during form construction", throwable);
                     }
                 }));
+
+        subscription.add(saveTrackedEntityDataValues());
+        subscription.add(subscribeToEngine());
     }
 
-    private Subscription initRulesEngine() {
+    private Observable<List<FormEntityAction>> engine() {
         return rxRulesEngine.observable()
                 .map(new Func1<List<RuleEffect>, List<FormEntityAction>>() {
                     @Override
-                    public List<FormEntityAction> call(List<RuleEffect> ruleEffects) {
-                        logger.d(TAG, "RuleEffects are emitted: " +
-                                System.identityHashCode(ruleEffects));
-                        return transformRuleEffects(ruleEffects);
+                    public List<FormEntityAction> call(List<RuleEffect> effects) {
+                        return transformRuleEffects(effects);
                     }
-                })
-                .subscribeOn(Schedulers.io())
+                });
+    }
+
+    private Subscription subscribeToEngine() {
+        return engine().subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<List<FormEntityAction>>() {
                     @Override
@@ -349,11 +353,16 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         if (dataElement.getOptionSet() != null) {
             List<Option> options = dataElement.getOptionSet().getOptions();
 
-            Picker picker = Picker.create(dataElement.getDisplayName());
+            Picker picker = new Picker.Builder()
+                    .hint(dataElement.getDisplayName())
+                    .build();
             if (options != null && !options.isEmpty()) {
                 for (Option option : options) {
-                    Picker childPicker = Picker.create(
-                            option.getCode(), option.getDisplayName(), picker);
+                    Picker childPicker = new Picker.Builder()
+                            .id(option.getCode())
+                            .name(option.getDisplayName())
+                            .parent(picker)
+                            .build();
                     picker.addChild(childPicker);
 
                     if (option.getCode().equals(dataValue.getValue())) {
@@ -374,84 +383,84 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
             case TEXT: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.TEXT, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case LONG_TEXT: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.LONG_TEXT, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case PHONE_NUMBER: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.TEXT, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case EMAIL: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.TEXT, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case NUMBER: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.NUMBER, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.INTEGER, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER_POSITIVE: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.INTEGER_POSITIVE, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER_NEGATIVE: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.INTEGER_NEGATIVE, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case INTEGER_ZERO_OR_POSITIVE: {
                 FormEntityEditText formEntityEditText = new FormEntityEditText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), InputType.INTEGER_ZERO_OR_POSITIVE, dataValue);
-                formEntityEditText.setValue(dataValue.getValue());
+                formEntityEditText.setValue(dataValue.getValue(), false);
                 formEntityEditText.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityEditText;
             }
             case DATE: {
                 FormEntityDate formEntityDate = new FormEntityDate(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement), dataValue);
-                formEntityDate.setValue(dataValue.getValue());
+                formEntityDate.setValue(dataValue.getValue(), false);
                 formEntityDate.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityDate;
             }
             case BOOLEAN: {
                 FormEntityRadioButtons formEntityRadioButtons = new FormEntityRadioButtons(
                         dataElement.getUId(), getFormEntityLabel(stageDataElement), dataValue);
-                formEntityRadioButtons.setValue(dataValue.getValue());
+                formEntityRadioButtons.setValue(dataValue.getValue(), false);
                 formEntityRadioButtons.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityRadioButtons;
             }
             case TRUE_ONLY: {
                 FormEntityCheckBox formEntityCheckBox = new FormEntityCheckBox(
                         dataElement.getUId(), getFormEntityLabel(stageDataElement), dataValue);
-                formEntityCheckBox.setValue(dataValue.getValue());
+                formEntityCheckBox.setValue(dataValue.getValue(), false);
                 formEntityCheckBox.setOnFormEntityChangeListener(onValueChangedListener);
                 return formEntityCheckBox;
             }
@@ -460,7 +469,8 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
                 FormEntityText formEntityText = new FormEntityText(dataElement.getUId(),
                         getFormEntityLabel(stageDataElement));
-                formEntityText.setValue("Unsupported value type: " + dataElement.getValueType());
+                formEntityText.setValue("Unsupported value type: " +
+                        dataElement.getValueType(), false);
 
                 return formEntityText;
         }

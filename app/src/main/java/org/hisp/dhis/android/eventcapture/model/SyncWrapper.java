@@ -31,27 +31,16 @@ package org.hisp.dhis.android.eventcapture.model;
 import org.hisp.dhis.client.sdk.android.api.utils.DefaultOnSubscribe;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.organisationunit.UserOrganisationUnitInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramStageDataElementInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
-import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
 import org.hisp.dhis.client.sdk.android.program.UserProgramInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
+import org.hisp.dhis.client.sdk.core.program.ProgramFields;
 import org.hisp.dhis.client.sdk.models.common.state.Action;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
-import org.hisp.dhis.client.sdk.models.program.ProgramRule;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
-import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
-import org.hisp.dhis.client.sdk.models.program.ProgramStage;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
-import org.hisp.dhis.client.sdk.models.program.ProgramStageSection;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -64,77 +53,39 @@ import rx.schedulers.Schedulers;
 
 public class SyncWrapper {
 
+    private final SyncDateWrapper syncDateWrapper;
+
     // metadata
     private final UserOrganisationUnitInteractor userOrganisationUnitInteractor;
     private final UserProgramInteractor userProgramInteractor;
-    private final ProgramStageInteractor programStageInteractor;
-    private final ProgramStageSectionInteractor programStageSectionInteractor;
-    private final ProgramStageDataElementInteractor programStageDataElementInteractor;
-
-    // program rules
-    private final ProgramRuleInteractor programRuleInteractor;
-    private final ProgramRuleActionInteractor programRuleActionInteractor;
-    private final ProgramRuleVariableInteractor programRuleVariableInteractor;
 
     // data
     private final EventInteractor eventInteractor;
 
     public SyncWrapper(UserOrganisationUnitInteractor userOrganisationUnitInteractor,
                        UserProgramInteractor userProgramInteractor,
-                       ProgramStageInteractor programStageInteractor,
-                       ProgramStageSectionInteractor programStageSectionInteractor,
-                       ProgramStageDataElementInteractor programStageDataElementInteractor,
-                       ProgramRuleInteractor programRuleInteractor,
-                       ProgramRuleActionInteractor programRuleActionInteractor,
-                       ProgramRuleVariableInteractor programRuleVariableInteractor,
-                       EventInteractor eventInteractor) {
+                       EventInteractor eventInteractor,
+                       SyncDateWrapper syncDateWrapper
+    ) {
         this.userOrganisationUnitInteractor = userOrganisationUnitInteractor;
         this.userProgramInteractor = userProgramInteractor;
-        this.programStageInteractor = programStageInteractor;
-        this.programStageSectionInteractor = programStageSectionInteractor;
-        this.programStageDataElementInteractor = programStageDataElementInteractor;
-        this.programRuleInteractor = programRuleInteractor;
-        this.programRuleActionInteractor = programRuleActionInteractor;
-        this.programRuleVariableInteractor = programRuleVariableInteractor;
         this.eventInteractor = eventInteractor;
+        this.syncDateWrapper = syncDateWrapper;
     }
 
-    public Observable<List<ProgramStageDataElement>> syncMetaData() {
-        return Observable.zip(
-                userOrganisationUnitInteractor.pull(),
-                userProgramInteractor.pull(),
+    public Observable<List<Program>> syncMetaData() {
+        Set<ProgramType> programTypes = new HashSet<>();
+        programTypes.add(ProgramType.WITHOUT_REGISTRATION);
+
+        return Observable.zip(userOrganisationUnitInteractor.pull(),
+                userProgramInteractor.pull(ProgramFields.DESCENDANTS, programTypes),
                 new Func2<List<OrganisationUnit>, List<Program>, List<Program>>() {
                     @Override
                     public List<Program> call(List<OrganisationUnit> units, List<Program> programs) {
-                        return programs;
-                    }
-                })
-                .map(new Func1<List<Program>, List<ProgramStageDataElement>>() {
-                    @Override
-                    public List<ProgramStageDataElement> call(List<Program> programs) {
-                        List<Program> programsWithoutRegistration = new ArrayList<>();
-
-                        if (programs != null && !programs.isEmpty()) {
-                            for (Program program : programs) {
-                                if (ProgramType.WITHOUT_REGISTRATION
-                                        .equals(program.getProgramType())) {
-                                    programsWithoutRegistration.add(program);
-                                }
-                            }
+                        if (syncDateWrapper != null) {
+                            syncDateWrapper.setLastSyncedNow();
                         }
-
-                        List<ProgramStage> programStages =
-                                loadProgramStages(programsWithoutRegistration);
-                        List<ProgramStageSection> programStageSections =
-                                loadProgramStageSections(programStages);
-                        List<ProgramRule> programRules =
-                                loadProgramRules(programsWithoutRegistration);
-                        List<ProgramRuleAction> programRuleActions =
-                                loadProgramRuleActions(programRules);
-                        List<ProgramRuleVariable> programRuleVariables =
-                                loadProgramRuleVariables(programsWithoutRegistration);
-
-                        return loadProgramStageDataElements(programStages, programStageSections);
+                        return programs;
                     }
                 });
     }
@@ -146,15 +97,28 @@ public class SyncWrapper {
                     public Observable<List<Event>> call(List<Event> events) {
                         Set<String> uids = ModelUtils.toUidSet(events);
                         if (uids != null && !uids.isEmpty()) {
+                            if (syncDateWrapper != null) {
+                                syncDateWrapper.setLastSyncedNow();
+                            }
                             return eventInteractor.sync(uids);
                         }
-
                         return Observable.empty();
                     }
                 });
     }
 
     public Observable<Boolean> checkIfSyncIsNeeded() {
+
+        if (eventInteractor == null) {
+            // no eventInteractor exists - return false (i.e. sync is not needed)
+            return Observable.create(new DefaultOnSubscribe<Boolean>() {
+                @Override
+                public Boolean call() {
+                    return false;
+                }
+            });
+        }
+
         EnumSet<Action> updateActions = EnumSet.of(Action.TO_POST, Action.TO_UPDATE);
         return eventInteractor.listByActions(updateActions)
                 .switchMap(new Func1<List<Event>, Observable<Boolean>>() {
@@ -173,82 +137,15 @@ public class SyncWrapper {
     public Observable<List<Event>> backgroundSync() {
         return syncMetaData()
                 .subscribeOn(Schedulers.io())
-                .switchMap(new Func1<List<ProgramStageDataElement>, Observable<List<Event>>>() {
+                .switchMap(new Func1<List<Program>, Observable<List<Event>>>() {
                     @Override
-                    public Observable<List<Event>> call(List<ProgramStageDataElement> programStageDataElements) {
-                        if (programStageDataElements != null) {
+                    public Observable<List<Event>> call(List<Program> programs) {
+                        if (programs != null) {
                             return syncData();
                         }
+
                         return Observable.empty();
                     }
                 });
     }
-
-    private List<ProgramStage> loadProgramStages(List<Program> programs) {
-        Set<String> stageUids = new HashSet<>();
-
-        for (Program program : programs) {
-            Set<String> programStageUids = ModelUtils.toUidSet(
-                    program.getProgramStages());
-            stageUids.addAll(programStageUids);
-        }
-        return programStageInteractor.pull(stageUids).toBlocking().first();
-    }
-
-    private List<ProgramStageSection> loadProgramStageSections(List<ProgramStage> stages) {
-        Set<String> sectionUids = new HashSet<>();
-        if (stages != null) {
-            for (ProgramStage programStage : stages) {
-                Set<String> stageSectionUids = ModelUtils.toUidSet(
-                        programStage.getProgramStageSections());
-                sectionUids.addAll(stageSectionUids);
-            }
-        }
-        return programStageSectionInteractor.pull(sectionUids).toBlocking().first();
-    }
-
-    private List<ProgramStageDataElement> loadProgramStageDataElements(
-            List<ProgramStage> stages, List<ProgramStageSection> programStageSections) {
-
-        Set<String> dataElementUids = new HashSet<>();
-
-        if (stages != null) {
-            for (ProgramStage programStage : stages) {
-                Set<String> stageDataElementUids = ModelUtils.toUidSet(
-                        programStage.getProgramStageDataElements());
-                dataElementUids.addAll(stageDataElementUids);
-            }
-        }
-        if (programStageSections != null) {
-            for (ProgramStageSection programStageSection : programStageSections) {
-                Set<String> stageSectionElements = ModelUtils.toUidSet(
-                        programStageSection.getProgramStageDataElements());
-                dataElementUids.addAll(stageSectionElements);
-            }
-        }
-
-        return programStageDataElementInteractor.pull(dataElementUids).toBlocking().first();
-    }
-
-    private List<ProgramRule> loadProgramRules(List<Program> programs) {
-        return programRuleInteractor.pull(programs).toBlocking().first();
-    }
-
-    private List<ProgramRuleAction> loadProgramRuleActions(List<ProgramRule> programRules) {
-        Set<String> programRuleActionUids = new HashSet<>();
-
-        if (programRules != null && !programRules.isEmpty()) {
-            for (ProgramRule programRule : programRules) {
-                programRuleActionUids.addAll(
-                        ModelUtils.toUidSet(programRule.getProgramRuleActions()));
-            }
-        }
-
-        return programRuleActionInteractor.pull(programRuleActionUids).toBlocking().first();
-    }
-
-    private List<ProgramRuleVariable> loadProgramRuleVariables(List<Program> programs) {
-        return programRuleVariableInteractor.pull(programs).toBlocking().first();
-    }
-
 }

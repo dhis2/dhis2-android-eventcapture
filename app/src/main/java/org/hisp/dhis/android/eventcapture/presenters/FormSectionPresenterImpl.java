@@ -1,5 +1,8 @@
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import android.location.Location;
+
+import org.hisp.dhis.android.eventcapture.LocationProvider;
 import org.hisp.dhis.android.eventcapture.model.RxRulesEngine;
 import org.hisp.dhis.android.eventcapture.views.FormSectionView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
@@ -19,17 +22,19 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
-
 
 // TODO cache metadata and data in memory
 public class FormSectionPresenterImpl implements FormSectionPresenter {
@@ -47,14 +52,18 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     private FormSectionView formSectionView;
     private CompositeSubscription subscription;
 
+    private LocationProvider locationProvider;
+    private boolean gettingLocation = false;
+
     public FormSectionPresenterImpl(ProgramStageInteractor programStageInteractor,
                                     ProgramStageSectionInteractor stageSectionInteractor,
                                     EventInteractor eventInteractor, RxRulesEngine rxRuleEngine,
-                                    Logger logger) {
+                                    LocationProvider locationProvider, Logger logger) {
         this.programStageInteractor = programStageInteractor;
         this.programStageSectionInteractor = stageSectionInteractor;
         this.eventInteractor = eventInteractor;
         this.rxRuleEngine = rxRuleEngine;
+        this.locationProvider = locationProvider;
         this.logger = logger;
     }
 
@@ -62,6 +71,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     public void attachView(View view) {
         isNull(view, "View must not be null");
         formSectionView = (FormSectionView) view;
+        if (gettingLocation) {
+            formSectionView.setLocationButtonState(false);
+        }
     }
 
     @Override
@@ -86,7 +98,6 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 .map(new Func1<Event, Event>() {
                     @Override
                     public Event call(Event event) {
-
                         // TODO consider refactoring rules-engine logic out of map function)
                         // synchronously initializing rule engine
                         rxRuleEngine.init(eventUid).toBlocking().first();
@@ -175,6 +186,80 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                 }));
     }
 
+    private void viewSetLocation(Location location) {
+        if (formSectionView != null) {
+            formSectionView.setLocation(location);
+        }
+    }
+
+    @Override
+    public void subscribeToLocations() {
+        gettingLocation = true;
+        locationProvider.locations()
+                .timeout(31L, TimeUnit.SECONDS)
+                .buffer(2L, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        new Action1<List<Location>>() {
+                            @Override
+                            public void call(List<Location> locations) {
+                                if (locations.isEmpty() || locations.get(0) == null) {
+                                    return;
+                                }
+                                Location currentLocation = locations.get(0);
+                                Location bestLocation = currentLocation;
+                                float accuracyAverage = currentLocation.getAccuracy();
+                                //go over the locations and find the best + keep average
+                                for (int i = 1; i < locations.size(); i++) {
+                                    currentLocation = locations.get(i);
+                                    accuracyAverage += currentLocation.getAccuracy();
+                                    if (locationProvider.isBetterLocation(currentLocation, bestLocation)) {
+                                        bestLocation = currentLocation;
+                                    }
+                                }
+                                accuracyAverage = accuracyAverage / locations.size();
+                                // if accuracy doesn't improve and we have more than one, we have the best estimate.
+                                if (Math.round(accuracyAverage)
+                                        == Math.round(bestLocation.getAccuracy())
+                                        && locations.size() > 1) {
+                                    gettingLocation = false;
+                                    viewSetLocation(bestLocation);
+                                    locationProvider.stopUpdates();
+                                }
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                if (throwable instanceof TimeoutException) {
+                                    logger.d(TAG, "Rx subscribeToLocaitons() timed out.");
+                                } else {
+                                    logger.e(TAG, "subscribeToLocations() rx call :" + throwable);
+                                }
+                                gettingLocation = false;
+                                viewSetLocation(null);
+                                locationProvider.stopUpdates();
+                            }
+                        },
+                        new Action0() {
+                            @Override
+                            public void call() {
+                                logger.d(TAG, "onComplete");
+                                gettingLocation = false;
+                                viewSetLocation(null);
+                                locationProvider.stopUpdates();
+                            }
+                        }
+                );
+        locationProvider.requestLocation();
+    }
+
+    @Override
+    public void stopLocationUpdates() {
+        locationProvider.stopUpdates();
+    }
+
     private Subscription saveEvent(final Event event) {
         return eventInteractor.save(event)
                 .subscribeOn(Schedulers.io())
@@ -249,8 +334,17 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                         List<ProgramStageSection> stageSections = programStageSectionInteractor
                                 .list(programStage).toBlocking().first();
 
-                        // TODO remove hardcoded prompt
-                        Picker picker = Picker.create(programStage.getUId(), "Choose section");
+                        String chooseSectionPrompt = null;
+                        if (formSectionView != null) {
+                            chooseSectionPrompt = formSectionView.getFormSectionLabel(
+                                    FormSectionView.ID_CHOOSE_SECTION);
+                        }
+
+                        // fetching prompt from resources
+                        Picker picker = new Picker.Builder()
+                                .id(programStage.getUId())
+                                .name(chooseSectionPrompt)
+                                .build();
 
                         // transform sections
                         List<FormSection> formSections = new ArrayList<>();
@@ -263,8 +357,12 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                             for (ProgramStageSection section : stageSections) {
                                 formSections.add(new FormSection(
                                         section.getUId(), section.getDisplayName()));
-                                picker.addChild(Picker.create(
-                                        section.getUId(), section.getDisplayName(), picker));
+                                picker.addChild(
+                                        new Picker.Builder()
+                                                .id(section.getUId())
+                                                .name(section.getDisplayName())
+                                                .parent(picker)
+                                                .build());
                             }
                         }
 

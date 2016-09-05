@@ -32,12 +32,13 @@ public class FormModule {
     @Provides
     @PerActivity
     public RxRulesEngine providesRuleEngine(
+            @Nullable CurrentUserInteractor currentUserInteractor,
             @Nullable ProgramRuleInteractor programRuleInteractor,
             @Nullable ProgramRuleActionInteractor programRuleActionInteractor,
             @Nullable ProgramRuleVariableInteractor programRuleVariableInteractor,
             @Nullable EventInteractor eventInteractor, Logger logger) {
-        return new RxRulesEngine(programRuleInteractor, programRuleActionInteractor,
-                programRuleVariableInteractor, eventInteractor, logger);
+        return new RxRulesEngine(currentUserInteractor, programRuleInteractor,
+                programRuleActionInteractor, programRuleVariableInteractor, eventInteractor, logger);
     }
 
     @Provides
@@ -45,9 +46,10 @@ public class FormModule {
     public FormSectionPresenter providesFormSectionPresenter(
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
-            @Nullable EventInteractor eventInteractor, RxRulesEngine rxRulesEngine, Logger logger) {
+            @Nullable EventInteractor eventInteractor, RxRulesEngine rxRulesEngine,
+            LocationProvider locationProvider, Logger logger) {
         return new FormSectionPresenterImpl(programStageInteractor,
-                stageSectionInteractor, eventInteractor, rxRulesEngine, logger);
+                stageSectionInteractor, eventInteractor, rxRulesEngine, locationProvider, logger);
     }
 
     @Provides

@@ -58,6 +58,7 @@ import org.joda.time.DateTime;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -181,12 +182,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         subscription.add(syncWrapper.syncMetaData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                .subscribe(new Action1<List<Program>>() {
                     @Override
-                    public void call(List<ProgramStageDataElement> stageDataElements) {
+                    public void call(List<Program> programs) {
                         isSyncing = false;
                         hasSyncedBefore = true;
-                        syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
@@ -271,8 +271,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         Observable<List<ProgramStageDataElement>> stageDataElements =
                                 programStageDataElementInteractor.list(stages.get(0));
 
-                        return Observable.zip(
-                                stageDataElements, eventInteractor.list(orgUnit, program),
+                        return Observable.zip(stageDataElements, eventInteractor.list(orgUnit, program),
                                 new Func2<List<ProgramStageDataElement>, List<Event>, List<ReportEntity>>() {
 
                                     @Override
@@ -406,16 +405,30 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
+
+        // preventing additional work
+        if (events == null || events.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // sort events by eventDate
+        Collections.sort(events, Event.DATE_COMPARATOR);
+        Collections.reverse(events);
+
+        // retrieve state map for given events
+        // it is done synchronously
+        Map<Long, State> stateMap = eventInteractor.map(events)
+                .toBlocking().first();
         List<ProgramStageDataElement> filteredElements =
                 filterProgramStageDataElements(dataElements);
         List<ReportEntity> reportEntities = new ArrayList<>();
-        for (Event event : events) {
 
+        for (Event event : events) {
             // status of event
             ReportEntity.Status status;
-            // TODO remove hack
             // get state of event from database
-            State state = eventInteractor.get(event).toBlocking().first();
+            State state = stateMap.get(event.getId());
+            // State state = eventInteractor.get(event).toBlocking().first();
 
             logger.d(TAG, "State action for event " + event + " is " + state.getAction());
             switch (state.getAction()) {
@@ -447,7 +460,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             ArrayList<String> dataElementLabels = new ArrayList<>();
 
             for (ProgramStageDataElement filteredElement : filteredElements) {
-
                 DataElement dataElement = filteredElement.getDataElement();
 
                 String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
@@ -462,8 +474,8 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             }
 
             reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));
-
         }
+
         return reportEntities;
     }
 
@@ -510,14 +522,18 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             selectorView.showNoOrganisationUnitsError();
         }
 
-        Picker rootPicker = Picker.create(chooseOrganisationUnit);
+        Picker rootPicker = new Picker.Builder()
+                .hint(chooseOrganisationUnit)
+                .build();
         for (String unitKey : organisationUnitMap.keySet()) {
-
-            // Creating organisation unit picker items
+            // creating organisation unit picker items
             OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
-            Picker organisationUnitPicker = Picker.create(
-                    organisationUnit.getUId(), organisationUnit.getDisplayName(),
-                    chooseProgram, rootPicker);
+            Picker organisationUnitPicker = new Picker.Builder()
+                    .id(organisationUnit.getUId())
+                    .name(organisationUnit.getDisplayName())
+                    .hint(chooseProgram)
+                    .parent(rootPicker)
+                    .build();
 
             if (organisationUnit.getPrograms() != null && !organisationUnit.getPrograms().isEmpty()) {
                 for (Program program : organisationUnit.getPrograms()) {
@@ -525,8 +541,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
                             .equals(assignedProgram.getProgramType())) {
-                        Picker programPicker = Picker.create(assignedProgram.getUId(),
-                                assignedProgram.getDisplayName(), organisationUnitPicker);
+                        Picker programPicker = new Picker.Builder()
+                                .id(assignedProgram.getUId())
+                                .name(assignedProgram.getDisplayName())
+                                .parent(organisationUnitPicker)
+                                .build();
                         organisationUnitPicker.addChild(programPicker);
                     }
                 }
@@ -534,7 +553,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             rootPicker.addChild(organisationUnitPicker);
         }
 
-        //Set saved selections or default ones :
+        // set saved selections or default ones:
         if (sessionPreferences.getSelectedPickerUid(0) != null) {
             traverseAndSetSavedSelection(rootPicker);
         } else {
