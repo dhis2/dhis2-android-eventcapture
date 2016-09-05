@@ -1,3 +1,10 @@
+# 0.5.5
+
+ - Fixed bug related to evaluation of program rules across the whole event
+ - Improved syncing of metadata by reducing amount of calls to API
+
+----
+
 # 0.5.1
  
  - Back button in Settings and Profile returns user to main screen (Events) instead of closing app.
