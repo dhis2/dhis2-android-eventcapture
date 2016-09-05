@@ -4,13 +4,16 @@ import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramRuleActionInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramRuleInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramRuleVariableInteractor;
+import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.utils.ModelUtils;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramRule;
 import org.hisp.dhis.client.sdk.models.program.ProgramRuleAction;
+import org.hisp.dhis.client.sdk.models.program.ProgramRuleActionType;
 import org.hisp.dhis.client.sdk.models.program.ProgramRuleVariable;
+import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
 import org.hisp.dhis.client.sdk.rules.RuleEffect;
 import org.hisp.dhis.client.sdk.rules.RuleEngine;
 import org.hisp.dhis.client.sdk.utils.Logger;
@@ -26,7 +29,6 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
-import rx.subjects.BehaviorSubject;
 import rx.subjects.ReplaySubject;
 import rx.subjects.Subject;
 import rx.subscriptions.CompositeSubscription;
@@ -34,6 +36,7 @@ import rx.subscriptions.CompositeSubscription;
 public class RxRulesEngine {
     private static final String TAG = RxRulesEngine.class.getSimpleName();
 
+    private final CurrentUserInteractor currentUserInteractor;
     private final ProgramRuleVariableInteractor programRuleVariableInteractor;
     private final ProgramRuleInteractor programRuleInteractor;
     private final ProgramRuleActionInteractor programRuleActionInteractor;
@@ -50,10 +53,12 @@ public class RxRulesEngine {
     private final Logger logger;
     private CompositeSubscription subscription;
 
-    public RxRulesEngine(ProgramRuleInteractor programRuleInteractor,
+    public RxRulesEngine(CurrentUserInteractor currentUserInteractor,
+                         ProgramRuleInteractor programRuleInteractor,
                          ProgramRuleActionInteractor programRuleActionInteractor,
                          ProgramRuleVariableInteractor programRuleVariableInteractor,
                          EventInteractor eventInteractor, Logger logger) {
+        this.currentUserInteractor = currentUserInteractor;
         this.programRuleVariableInteractor = programRuleVariableInteractor;
         this.programRuleInteractor = programRuleInteractor;
         this.programRuleActionInteractor = programRuleActionInteractor;
@@ -117,18 +122,34 @@ public class RxRulesEngine {
             subscription = new CompositeSubscription();
         }
 
+        final String username = currentUserInteractor.userCredentials()
+                .toBlocking().first().getUsername();
         subscription.add(eventInteractor.get(currentEvent.getUId())
-                .map(new Func1<Event, List<RuleEffect>>() {
+                .switchMap(new Func1<Event, Observable<List<RuleEffect>>>() {
                     @Override
-                    public List<RuleEffect> call(Event event) {
+                    public Observable<List<RuleEffect>> call(Event event) {
                         logger.d(TAG, "Reloaded event: " + currentEvent.getUId());
 
                         currentEvent = event;
                         eventsMap.put(event.getUId(), event);
 
                         logger.d(TAG, "calculating rule effects");
-                        return ruleEngine.execute(currentEvent,
-                                new ArrayList<>(eventsMap.values()));
+                        // final Observable<List<RuleEffect>> ruleEffects = Observable.just();
+                        List<RuleEffect> ruleEffects = ruleEngine.execute(
+                                currentEvent, new ArrayList<>(eventsMap.values()));
+
+                        // using zip in order to make sure that ruleEffects are successfully applied
+                        // to event in database, only then pass formEntityActions down in the chain
+                        // in order to apply them to view
+                        Observable<Boolean> applyEffects = applyRuleEffects(
+                                event, username, ruleEffects);
+                        return Observable.zip(applyEffects, Observable.just(ruleEffects),
+                                new Func2<Boolean, List<RuleEffect>, List<RuleEffect>>() {
+                                    @Override
+                                    public List<RuleEffect> call(Boolean isSuccess, List<RuleEffect> effects) {
+                                        return effects;
+                                    }
+                                });
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -196,6 +217,55 @@ public class RxRulesEngine {
                         }
 
                         return variables;
+                    }
+                });
+    }
+
+
+    private Observable<Boolean> applyRuleEffects(
+            final Event event, final String username, final List<RuleEffect> ruleEffects) {
+        return Observable.just(event)
+                .switchMap(new Func1<Event, Observable<Boolean>>() {
+                    @Override
+                    public Observable<Boolean> call(Event event) {
+                        if (ruleEffects == null || ruleEffects.isEmpty()) {
+                            return Observable.just(true);
+                        }
+
+                        Map<String, TrackedEntityDataValue> dataValueMap = new HashMap<>();
+                        if (event.getDataValues() != null && !event.getDataValues().isEmpty()) {
+                            for (TrackedEntityDataValue entityDataValue : event.getDataValues()) {
+                                dataValueMap.put(entityDataValue.getDataElement(), entityDataValue);
+                            }
+                        }
+
+                        for (RuleEffect ruleEffect : ruleEffects) {
+                            if (ProgramRuleActionType.ASSIGN.equals(
+                                    ruleEffect.getProgramRuleActionType()) &&
+                                    ruleEffect.getDataElement() != null) {
+
+                                TrackedEntityDataValue dataValue = dataValueMap.get(
+                                        ruleEffect.getDataElement().getUId());
+
+                                // it can happen that event does not contain data value for yet
+                                // for given ruleEffect, it means we need to create one
+                                if (dataValue == null) {
+                                    String dataElement = ruleEffect.getDataElement().getUId();
+
+                                    dataValue = new TrackedEntityDataValue();
+                                    dataValue.setDataElement(dataElement);
+                                    dataValue.setStoredBy(username);
+                                    dataValue.setEvent(event);
+
+                                    dataValueMap.put(dataElement, dataValue);
+                                }
+
+                                dataValue.setValue(ruleEffect.getData());
+                            }
+                        }
+
+                        event.setDataValues(new ArrayList<>(dataValueMap.values()));
+                        return eventInteractor.save(event);
                     }
                 });
     }

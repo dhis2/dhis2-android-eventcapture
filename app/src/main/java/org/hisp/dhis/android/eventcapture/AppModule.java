@@ -34,7 +34,7 @@ import android.content.Context;
 import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandlerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppModule;

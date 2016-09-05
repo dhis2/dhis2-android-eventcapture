@@ -32,12 +32,13 @@ public class FormModule {
     @Provides
     @PerActivity
     public RxRulesEngine providesRuleEngine(
+            @Nullable CurrentUserInteractor currentUserInteractor,
             @Nullable ProgramRuleInteractor programRuleInteractor,
             @Nullable ProgramRuleActionInteractor programRuleActionInteractor,
             @Nullable ProgramRuleVariableInteractor programRuleVariableInteractor,
             @Nullable EventInteractor eventInteractor, Logger logger) {
-        return new RxRulesEngine(programRuleInteractor, programRuleActionInteractor,
-                programRuleVariableInteractor, eventInteractor, logger);
+        return new RxRulesEngine(currentUserInteractor, programRuleInteractor,
+                programRuleActionInteractor, programRuleVariableInteractor, eventInteractor, logger);
     }
 
     @Provides

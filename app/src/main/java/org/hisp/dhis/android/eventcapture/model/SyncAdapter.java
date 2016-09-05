@@ -11,7 +11,7 @@ import android.util.Log;
 import org.hisp.dhis.android.eventcapture.EventCaptureApp;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 
 import java.util.List;

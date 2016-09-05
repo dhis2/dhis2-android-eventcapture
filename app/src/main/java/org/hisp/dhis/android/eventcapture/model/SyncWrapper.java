@@ -39,7 +39,7 @@ import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.organisationunit.OrganisationUnit;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
-import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 
 import java.util.EnumSet;
 import java.util.HashSet;

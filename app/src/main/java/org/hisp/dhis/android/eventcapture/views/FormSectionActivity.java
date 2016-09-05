@@ -356,6 +356,17 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
         }
     }
 
+    @Override
+    public String getFormSectionLabel(@FormSectionLabelId String formSectionLabelId) {
+        switch (formSectionLabelId) {
+            case FormSectionView.ID_CHOOSE_SECTION: {
+                return getString(R.string.choose_section);
+            }
+        }
+
+        return null;
+    }
+
     private void attachListenerToExistingFragment() {
         FilterableDialogFragment dialogFragment = (FilterableDialogFragment)
                 getSupportFragmentManager().findFragmentByTag(FilterableDialogFragment.TAG);
