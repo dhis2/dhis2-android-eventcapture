@@ -46,10 +46,10 @@ import org.hisp.dhis.client.sdk.models.program.ProgramStage;
 import org.hisp.dhis.client.sdk.models.program.ProgramStageDataElement;
 import org.hisp.dhis.client.sdk.models.program.ProgramType;
 import org.hisp.dhis.client.sdk.models.trackedentity.TrackedEntityDataValue;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.AppError;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.views.View;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
@@ -60,6 +60,7 @@ import org.joda.time.format.DateTimeFormat;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,12 +183,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
         subscription.add(syncWrapper.syncMetaData()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ProgramStageDataElement>>() {
+                .subscribe(new Action1<List<Program>>() {
                     @Override
-                    public void call(List<ProgramStageDataElement> stageDataElements) {
+                    public void call(List<Program> programs) {
                         isSyncing = false;
                         hasSyncedBefore = true;
-                        syncDateWrapper.setLastSyncedNow();
 
                         if (selectorView != null) {
                             selectorView.hideProgressBar();
@@ -272,8 +272,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                         Observable<List<ProgramStageDataElement>> stageDataElements =
                                 programStageDataElementInteractor.list(stages.get(0));
 
-                        return Observable.zip(
-                                stageDataElements, eventInteractor.list(orgUnit, program),
+                        return Observable.zip(stageDataElements, eventInteractor.list(orgUnit, program),
                                 new Func2<List<ProgramStageDataElement>, List<Event>, List<ReportEntity>>() {
 
                                     @Override
@@ -421,15 +420,28 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
     private List<ReportEntity> transformEvents(List<ProgramStageDataElement> dataElements,
                                                List<Event> events) {
+
+        // preventing additional work
+        if (events == null || events.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // sort events by eventDate
+        Collections.sort(events, Event.DATE_COMPARATOR);
+        Collections.reverse(events);
+
+        // retrieve state map for given events
+        // it is done synchronously
+        Map<Long, State> stateMap = eventInteractor.map(events)
+                .toBlocking().first();
         List<ReportEntity> reportEntities = new ArrayList<>();
 
         for (Event event : events) {
-
             // status of event
             ReportEntity.Status status;
-            // TODO remove hack
             // get state of event from database
-            State state = eventInteractor.get(event).toBlocking().first();
+            State state = stateMap.get(event.getId());
+            // State state = eventInteractor.get(event).toBlocking().first();
 
             logger.d(TAG, "State action for event " + event + " is " + state.getAction());
             switch (state.getAction()) {
@@ -458,6 +470,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
+//<<<<<<< HEAD
             dataElementToValueMap.put(Event.EVENT_DATE_KEY,
                     event.getEventDate().toString(DateTimeFormat.forPattern(DATE_FORMAT)));
             dataElementToValueMap.put(Event.STATUS_KEY, event.getStatus().toString());
@@ -467,8 +480,28 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                             event.getUId(),
                             status,
                             dataElementToValueMap));
-        }
+//=======
+        /*    ArrayList<String> dataElementLabels = new ArrayList<>();
 
+            for (ProgramStageDataElement filteredElement : filteredElements) {
+                DataElement dataElement = filteredElement.getDataElement();
+
+                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
+                        dataElementToValueMap.get(dataElement.getUId()) : "none";
+
+                String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
+                        dataElement.getDisplayFormName() : dataElement.getDisplayName();
+
+                String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
+                        dataElementName, value);
+
+                dataElementLabels.add(dataElementLabel);
+
+            }
+
+            reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));*/
+//>>>>>>> develop
+        }
         return reportEntities;
     }
 
@@ -528,14 +561,18 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             selectorView.showNoOrganisationUnitsError();
         }
 
-        Picker rootPicker = Picker.create(chooseOrganisationUnit);
+        Picker rootPicker = new Picker.Builder()
+                .hint(chooseOrganisationUnit)
+                .build();
         for (String unitKey : organisationUnitMap.keySet()) {
-
-            // Creating organisation unit picker items
+            // creating organisation unit picker items
             OrganisationUnit organisationUnit = organisationUnitMap.get(unitKey);
-            Picker organisationUnitPicker = Picker.create(
-                    organisationUnit.getUId(), organisationUnit.getDisplayName(),
-                    chooseProgram, rootPicker);
+            Picker organisationUnitPicker = new Picker.Builder()
+                    .id(organisationUnit.getUId())
+                    .name(organisationUnit.getDisplayName())
+                    .hint(chooseProgram)
+                    .parent(rootPicker)
+                    .build();
 
             if (organisationUnit.getPrograms() != null && !organisationUnit.getPrograms().isEmpty()) {
                 for (Program program : organisationUnit.getPrograms()) {
@@ -543,8 +580,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
                     if (assignedProgram != null && ProgramType.WITHOUT_REGISTRATION
                             .equals(assignedProgram.getProgramType())) {
-                        Picker programPicker = Picker.create(assignedProgram.getUId(),
-                                assignedProgram.getDisplayName(), organisationUnitPicker);
+                        Picker programPicker = new Picker.Builder()
+                                .id(assignedProgram.getUId())
+                                .name(assignedProgram.getDisplayName())
+                                .parent(organisationUnitPicker)
+                                .build();
                         organisationUnitPicker.addChild(programPicker);
                     }
                 }
@@ -552,7 +592,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             rootPicker.addChild(organisationUnitPicker);
         }
 
-        //Set saved selections or default ones :
+        // set saved selections or default ones:
         if (sessionPreferences.getSelectedPickerUid(0) != null) {
             traverseAndSetSavedSelection(rootPicker);
         } else {

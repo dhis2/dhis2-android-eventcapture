@@ -45,9 +45,10 @@ public class FormModule {
     public FormSectionPresenter providesFormSectionPresenter(
             @Nullable ProgramStageInteractor programStageInteractor,
             @Nullable ProgramStageSectionInteractor stageSectionInteractor,
-            @Nullable EventInteractor eventInteractor, RxRulesEngine rxRulesEngine, Logger logger) {
+            @Nullable EventInteractor eventInteractor, RxRulesEngine rxRulesEngine,
+            LocationProvider locationProvider, Logger logger) {
         return new FormSectionPresenterImpl(programStageInteractor,
-                stageSectionInteractor, eventInteractor, rxRulesEngine, logger);
+                stageSectionInteractor, eventInteractor, rxRulesEngine, locationProvider, logger);
     }
 
     @Provides

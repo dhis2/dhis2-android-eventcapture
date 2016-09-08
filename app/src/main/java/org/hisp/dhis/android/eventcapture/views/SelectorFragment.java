@@ -48,6 +48,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -69,6 +70,7 @@ import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
+import org.hisp.dhis.client.sdk.ui.views.AbsAnimationListener;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
@@ -88,30 +90,39 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
     private static final String STATE_IS_REFRESHING = "state:isRefreshing";
-    public static final String LAYOUT_MANAGER_KEY = "LAYOUT_MANAGER_KEY";
+    private static final String LAYOUT_MANAGER_KEY = "LAYOUT_MANAGER_KEY";
+
     @Inject
     SelectorPresenter selectorPresenter;
+
     @Inject
     Logger logger;
+
     // button which is shown only in case when all pickers are set
     FloatingActionButton createEventButton;
     OnCreateEventButtonClickListener onCreateEventButtonClickListener;
+
     // pull-to-refresh
     SwipeRefreshLayout swipeRefreshLayout;
     BottomSheetBehavior<CardView> bottomSheetBehavior;
+
     // bottom sheet layout
     CoordinatorLayout coordinatorLayout;
     CardView bottomSheetView;
+
     // selected organisation unit, program and entity count
     TextView selectedOrganisationUnit;
     TextView selectedProgram;
+
     // list of pickers
     RecyclerView pickerRecyclerView;
     PickerAdapter pickerAdapter;
+
     // list of events
     RecyclerView reportEntityRecyclerView;
     ReportEntityAdapter reportEntityAdapter;
     View bottomSheetHeaderView;
+
     private AlertDialog alertDialog;
     private AlertDialog filterDialog;
 
@@ -404,7 +415,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     }
 
     private void setupReportEntityRecyclerView(View view, Bundle savedInstanceState) {
-
         reportEntityRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerview_events);
 
         setupAdapter();
@@ -489,7 +499,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
             case R.id.action_filter:
                 showFilterDialog();
                 break;
-
         }
         return false;
     }
@@ -530,7 +539,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
                                     valuesHaveChanged = true;
                                     filters.get(i).setShow(dataElementCheckedState[i]);
                                 }
-
                             }
                             if (valuesHaveChanged) {
                                 Collections.sort(filters);
@@ -589,7 +597,6 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
         return reportEntityAdapter != null &&
                 reportEntityAdapter.getReportEntityReportEntityFilters() != null &&
                 !reportEntityAdapter.getReportEntityReportEntityFilters().isEmpty();
-
     }
 
     /* check if organisation unit and program are selected */
@@ -708,17 +715,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
         @Override
         public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            int rightPadding;
-
-            if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                // state is expanded. move header out from below the FAB
-                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default) + getFabSize() + getResources().getDimensionPixelSize(R.dimen.keyline_default);
-                logger.d(TAG, "Bottom sheet expanded. Header padding: " + rightPadding + " px");
-                setBottomSheetHeaderPadding(rightPadding);
-            } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                rightPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
-                logger.d(TAG, "Bottom sheet is collapsed. Header padding: " + rightPadding + " px");
-                setBottomSheetHeaderPadding(rightPadding);
+            try {
+                int defaultPadding = getResources().getDimensionPixelSize(R.dimen.keyline_default);
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    // state is expanded. move header out from below the FAB
+                    setBottomSheetHeaderPadding(defaultPadding + getFabSize() + defaultPadding);
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    setBottomSheetHeaderPadding(defaultPadding);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to retrieve Resources. Probable cause: Activity no longer in " +
+                        "view or Fragment is not attached", e);
             }
         }
 

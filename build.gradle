@@ -33,8 +33,8 @@ ext {
             minSdkVersion    : 15,
             compileSdkVersion: 23,
             targetSdkVersion : 23,
-            versionCode      : 21,
-            versionName      : "0.5.0.2"
+            versionCode      : 22,
+            versionName      : "0.5.1"
     ]
     libraries = [
             // dhis libs
@@ -43,7 +43,7 @@ ext {
             // android libs
             supportVersion          : "23.4.0",
             rxAndroidVersion        : "1.1.0",
-            dbFlowVersion           : "3.0.0-beta5",
+            dbFlowVersion           : "3.0.1",
             progressBarVersion      : "1.2.0",
             smoothProgressBarVersion: "1.1.0",
             crashlyticsVersion      : "2.5.5",

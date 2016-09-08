@@ -50,7 +50,7 @@ import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInte
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManagerImpl;
@@ -79,7 +79,6 @@ import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
 @Module
 public class UserModule implements DefaultUserModule {
-
     private final String authority;
     private final String accountType;
 
@@ -90,6 +89,7 @@ public class UserModule implements DefaultUserModule {
     public UserModule(String serverUrl, String authority, String accountType) {
         this.authority = authority;
         this.accountType = accountType;
+
         if (!isEmpty(serverUrl)) {
             // it can throw exception in case if configuration has failed
             Configuration configuration = new Configuration(serverUrl);
@@ -116,6 +116,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.me().organisationUnits();
         }
+
         return null;
     }
 
@@ -126,6 +127,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.me().programs();
         }
+
         return null;
     }
 
@@ -136,6 +138,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.programStages();
         }
+
         return null;
     }
 
@@ -146,6 +149,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.programStageSections();
         }
+
         return null;
     }
 
@@ -156,6 +160,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.programStageDataElements();
         }
+
         return null;
     }
 
@@ -166,6 +171,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.organisationUnits();
         }
+
         return null;
     }
 
@@ -176,6 +182,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.programs();
         }
+
         return null;
     }
 
@@ -186,6 +193,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.optionSets();
         }
+
         return null;
     }
 
@@ -196,6 +204,7 @@ public class UserModule implements DefaultUserModule {
         if (D2.isConfigured()) {
             return D2.events();
         }
+
         return null;
     }
 
@@ -245,6 +254,7 @@ public class UserModule implements DefaultUserModule {
 
     @Provides
     @PerUser
+    @Override
     public LauncherPresenter providesLauncherPresenter(
             @Nullable CurrentUserInteractor accountInteractor) {
         return new LauncherPresenterImpl(accountInteractor);
@@ -252,6 +262,7 @@ public class UserModule implements DefaultUserModule {
 
     @Provides
     @PerUser
+    @Override
     public LoginPresenter providesLoginPresenter(
             @Nullable CurrentUserInteractor accountInteractor,
             ApiExceptionHandler apiExceptionHandler, Logger logger) {
@@ -259,12 +270,16 @@ public class UserModule implements DefaultUserModule {
     }
 
 
+    @Provides
+    @PerUser
     @Override
     public SettingsPresenter providesSettingsPresenter(AppPreferences appPreferences,
                                                        DefaultAppAccountManager appAccountManager) {
         return new SettingsPresenterImpl(appPreferences, appAccountManager);
     }
 
+    @Provides
+    @PerUser
     @Override
     public DefaultAppAccountManager providesAppAccountManager(Context context,
                                                               AppPreferences appPreferences,
@@ -306,19 +321,10 @@ public class UserModule implements DefaultUserModule {
     public SyncWrapper provideSyncWrapper(
             @Nullable UserOrganisationUnitInteractor userOrganisationUnitInteractor,
             @Nullable UserProgramInteractor userProgramInteractor,
-            @Nullable ProgramStageInteractor programStageInteractor,
-            @Nullable ProgramStageSectionInteractor programStageSectionInteractor,
-            @Nullable ProgramStageDataElementInteractor programStageDataElementInteractor,
-            @Nullable ProgramRuleInteractor programRuleInteractor,
-            @Nullable ProgramRuleActionInteractor programRuleActionInteractor,
-            @Nullable ProgramRuleVariableInteractor programRuleVariableInteractor,
-            @Nullable EventInteractor eventInteractor) {
+            @Nullable EventInteractor eventInteractor,
+            @Nullable SyncDateWrapper syncDateWrapper) {
 
-        return new SyncWrapper(
-                userOrganisationUnitInteractor, userProgramInteractor,
-                programStageInteractor, programStageSectionInteractor,
-                programStageDataElementInteractor, programRuleInteractor,
-                programRuleActionInteractor, programRuleVariableInteractor, eventInteractor);
+        return new SyncWrapper(userOrganisationUnitInteractor, userProgramInteractor, eventInteractor, syncDateWrapper);
     }
 
     @Provides
@@ -338,12 +344,4 @@ public class UserModule implements DefaultUserModule {
                 eventInteractor, sessionPreferences, syncDateWrapper, syncWrapper,
                 apiExceptionHandler, logger);
     }
-
-    @Provides
-    @PerUser
-    public SettingsPresenter provideSettingsPresenter(
-            AppPreferences appPreferences, DefaultAppAccountManager appAccountManager) {
-        return new SettingsPresenterImpl(appPreferences, appAccountManager);
-    }
-
 }

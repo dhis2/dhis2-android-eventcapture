@@ -34,7 +34,7 @@ import android.content.Context;
 import org.hisp.dhis.client.sdk.android.api.utils.LoggerImpl;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
 import org.hisp.dhis.client.sdk.ui.AppPreferencesImpl;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandlerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppModule;
@@ -53,6 +53,12 @@ public class AppModule implements DefaultAppModule {
 
     public AppModule(Application application) {
         this.application = application;
+    }
+
+    @Provides
+    @Singleton
+    public LocationProvider providesLocationProvider(Context context, Logger logger) {
+        return new LocationProviderImpl(context, logger);
     }
 
     @Provides
