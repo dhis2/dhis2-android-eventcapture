@@ -470,7 +470,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             Map<String, String> dataElementToValueMap =
                     mapDataElementToValue(event.getDataValues());
 
-//<<<<<<< HEAD
             dataElementToValueMap.put(Event.EVENT_DATE_KEY,
                     event.getEventDate().toString(DateTimeFormat.forPattern(DATE_FORMAT)));
             dataElementToValueMap.put(Event.STATUS_KEY, event.getStatus().toString());
@@ -480,27 +479,6 @@ public class SelectorPresenterImpl implements SelectorPresenter {
                             event.getUId(),
                             status,
                             dataElementToValueMap));
-//=======
-        /*    ArrayList<String> dataElementLabels = new ArrayList<>();
-
-            for (ProgramStageDataElement filteredElement : filteredElements) {
-                DataElement dataElement = filteredElement.getDataElement();
-
-                String value = !isEmpty(dataElementToValueMap.get(dataElement.getUId())) ?
-                        dataElementToValueMap.get(dataElement.getUId()) : "none";
-
-                String dataElementName = !isEmpty(dataElement.getDisplayFormName()) ?
-                        dataElement.getDisplayFormName() : dataElement.getDisplayName();
-
-                String dataElementLabel = String.format(Locale.getDefault(), "%s: %s",
-                        dataElementName, value);
-
-                dataElementLabels.add(dataElementLabel);
-
-            }
-
-            reportEntities.add(new ReportEntity(event.getUId(), status, dataElementLabels));*/
-//>>>>>>> develop
         }
         return reportEntities;
     }
