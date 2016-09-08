@@ -504,10 +504,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
     }
 
     private void showFilterDialog() {
-
         if (filterDialog == null || !filterDialog.isShowing()) {
 
-            final ArrayList<ReportEntityFilter> filters = reportEntityAdapter.getReportEntityReportEntityFilters();
+            final ArrayList<ReportEntityFilter> filters = reportEntityAdapter.getReportEntityFilters();
             Collections.sort(filters);
             final String[] filterKeys = new String[filters.size()];
             final String[] filterNames = new String[filters.size()];
@@ -540,12 +539,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
                                     filters.get(i).setShow(dataElementCheckedState[i]);
                                 }
                             }
-                            if (valuesHaveChanged) {
-                                Collections.sort(filters);
-                                reportEntityAdapter.notifyFiltersChanged(filters);
-                                selectorPresenter.setReportEntityDataElementFilters(
-                                        getProgramUid(), filters);
-                            }
+
+                            Collections.sort(filters);
+                            reportEntityAdapter.notifyFiltersChanged(filters);
+                            selectorPresenter.setReportEntityDataElementFilters(
+                                    getProgramUid(), filters);
                         }
                     });
 
@@ -595,8 +593,8 @@ public class SelectorFragment extends BaseFragment implements SelectorView,
 
     private boolean filtersExist() {
         return reportEntityAdapter != null &&
-                reportEntityAdapter.getReportEntityReportEntityFilters() != null &&
-                !reportEntityAdapter.getReportEntityReportEntityFilters().isEmpty();
+                reportEntityAdapter.getReportEntityFilters() != null &&
+                !reportEntityAdapter.getReportEntityFilters().isEmpty();
     }
 
     /* check if organisation unit and program are selected */
