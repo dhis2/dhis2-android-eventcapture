@@ -487,24 +487,21 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             List<ProgramStageDataElement> dataElements) {
 
         ArrayList<ReportEntityFilter> defaultFilters = new ArrayList<>();
-
-        defaultFilters.add(new ReportEntityFilter(Event.EVENT_DATE_KEY,
-                Event.EVENT_DATE_LABEL, true));
-        defaultFilters.add(new ReportEntityFilter(Event.STATUS_KEY,
-                Event.STATUS_LABEL, true));
+        defaultFilters.add(new ReportEntityFilter(Event.EVENT_DATE_KEY, Event.EVENT_DATE_LABEL, true));
+        defaultFilters.add(new ReportEntityFilter(Event.STATUS_KEY, Event.STATUS_LABEL, true));
 
         if (dataElements != null && !dataElements.isEmpty()) {
             for (ProgramStageDataElement programStageDataElement : dataElements) {
-
                 DataElement dataElement = programStageDataElement.getDataElement();
-                String dataElementName = dataElement.getFormName() != null ?
-                        dataElement.getFormName() : dataElement.getDisplayName();
+                String dataElementName = dataElement.getFormName();
+                //if getFormName is empty use getDisplayName instead:
+                if (dataElementName == null || dataElementName.isEmpty()) {
+                    dataElementName = dataElement.getDisplayName();
+                }
                 boolean defaultViewSetting = programStageDataElement.isDisplayInReports();
-
                 defaultFilters.add(new ReportEntityFilter(dataElement.getUId(), dataElementName, defaultViewSetting));
             }
         }
-
         return defaultFilters;
     }
 
