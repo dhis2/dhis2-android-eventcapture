@@ -28,10 +28,12 @@
 
 package org.hisp.dhis.android.eventcapture.presenters;
 
+import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.Presenter;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface SelectorPresenter extends Presenter {
@@ -48,4 +50,6 @@ public interface SelectorPresenter extends Presenter {
     void onPickersSelectionsChanged(List<Picker> pickerList);
 
     void handleError(final Throwable throwable);
+
+    void setReportEntityDataElementFilters(String programId, ArrayList<ReportEntityFilter> filters);
 }

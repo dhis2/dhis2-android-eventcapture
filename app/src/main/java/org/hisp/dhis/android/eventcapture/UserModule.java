@@ -50,7 +50,6 @@ import org.hisp.dhis.client.sdk.android.trackedentity.TrackedEntityDataValueInte
 import org.hisp.dhis.client.sdk.android.user.CurrentUserInteractor;
 import org.hisp.dhis.client.sdk.core.common.network.Configuration;
 import org.hisp.dhis.client.sdk.ui.AppPreferences;
-import org.hisp.dhis.client.sdk.ui.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.ApiExceptionHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManager;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultAppAccountManagerImpl;
@@ -58,6 +57,7 @@ import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandler;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultNotificationHandlerImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.DefaultUserModule;
 import org.hisp.dhis.client.sdk.ui.bindings.commons.SessionPreferences;
+import org.hisp.dhis.client.sdk.ui.bindings.commons.SyncDateWrapper;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenter;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.HomePresenterImpl;
 import org.hisp.dhis.client.sdk.ui.bindings.presenters.LauncherPresenter;
@@ -268,7 +268,6 @@ public class UserModule implements DefaultUserModule {
             ApiExceptionHandler apiExceptionHandler, Logger logger) {
         return new LoginPresenterImpl(accountInteractor, apiExceptionHandler, logger);
     }
-
 
     @Provides
     @PerUser

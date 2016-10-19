@@ -31,6 +31,7 @@ package org.hisp.dhis.android.eventcapture.views;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -68,9 +69,13 @@ import org.hisp.dhis.client.sdk.ui.adapters.ReportEntityAdapter.OnReportEntityIn
 import org.hisp.dhis.client.sdk.ui.fragments.BaseFragment;
 import org.hisp.dhis.client.sdk.ui.models.Picker;
 import org.hisp.dhis.client.sdk.ui.models.ReportEntity;
+import org.hisp.dhis.client.sdk.ui.models.ReportEntityFilter;
+import org.hisp.dhis.client.sdk.ui.views.AbsAnimationListener;
 import org.hisp.dhis.client.sdk.ui.views.DividerDecoration;
 import org.hisp.dhis.client.sdk.utils.Logger;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -79,7 +84,8 @@ import javax.inject.Inject;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 import static org.hisp.dhis.client.sdk.utils.StringUtils.isEmpty;
 
-public class SelectorFragment extends BaseFragment implements SelectorView {
+public class SelectorFragment extends BaseFragment implements SelectorView,
+        Toolbar.OnMenuItemClickListener {
     private static final String TAG = SelectorFragment.class.getSimpleName();
     private static final int ORG_UNIT_PICKER_ID = 0;
     private static final int PROGRAM_UNIT_PICKER_ID = 1;
@@ -116,7 +122,9 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     RecyclerView reportEntityRecyclerView;
     ReportEntityAdapter reportEntityAdapter;
     View bottomSheetHeaderView;
-    AlertDialog alertDialog;
+
+    private AlertDialog alertDialog;
+    private AlertDialog filterDialog;
 
     private static String getOrganisationUnitUid(List<Picker> pickers) {
         if (pickers != null && !pickers.isEmpty() &&
@@ -253,6 +261,23 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         }
     }
 
+    @Override
+    public void showFilterOptionItem(boolean showItem) {
+
+        if (getParentToolbar() == null || getParentToolbar().getMenu() == null) {
+            // no menu to alter
+            return;
+        }
+
+        if (showItem) {
+            getParentToolbar().getMenu().clear();
+            getParentToolbar().inflateMenu(R.menu.menu_refresh_filter);
+        } else {
+            getParentToolbar().getMenu().clear();
+            getParentToolbar().inflateMenu(R.menu.menu_refresh);
+        }
+    }
+
     private boolean reportEntitiesIsEmpty() {
         return reportEntityAdapter == null || reportEntityAdapter.getItemCount() == 0;
     }
@@ -306,6 +331,11 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
     }
 
     @Override
+    public void setReportEntityLabelFilters(ArrayList<ReportEntityFilter> filters) {
+        reportEntityAdapter.notifyFiltersChanged(filters);
+    }
+
+    @Override
     public boolean onBackPressed() {
         if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -324,12 +354,7 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         if (getParentToolbar() != null) {
             getParentToolbar().inflateMenu(R.menu.menu_refresh);
             getParentToolbar().setNavigationIcon(buttonDrawable);
-            getParentToolbar().setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    return SelectorFragment.this.onMenuItemClick(item);
-                }
-            });
+            getParentToolbar().setOnMenuItemClickListener(this);
         }
     }
 
@@ -463,16 +488,77 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
         FormSectionActivity.navigateToExistingEvent(getActivity(), reportEntity.getId());
     }
 
-    private boolean onMenuItemClick(MenuItem item) {
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
         logger.d(SelectorFragment.class.getSimpleName(), "onMenuItemClick()");
 
         switch (item.getItemId()) {
-            case R.id.action_refresh: {
+            case R.id.action_refresh:
                 selectorPresenter.sync();
                 return true;
-            }
+            case R.id.action_filter:
+                showFilterDialog();
+                break;
         }
         return false;
+    }
+
+    private void showFilterDialog() {
+        if (filterDialog == null || !filterDialog.isShowing()) {
+
+            final ArrayList<ReportEntityFilter> filters = reportEntityAdapter.getReportEntityFilters();
+            Collections.sort(filters);
+            final String[] filterKeys = new String[filters.size()];
+            final String[] filterNames = new String[filters.size()];
+            final boolean[] dataElementCheckedState = new boolean[filters.size()];
+
+            for (int i = 0; i < filters.size(); i++) {
+                ReportEntityFilter filter = filters.get(i);
+                filterKeys[i] = filter.getDataElementId();
+                filterNames[i] = filter.getDataElementLabel();
+                dataElementCheckedState[i] = filter.show();
+            }
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getContext()).setMultiChoiceItems(
+                    filterNames,
+                    dataElementCheckedState,
+                    new DialogInterface.OnMultiChoiceClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+
+                        }
+                    }).
+                    setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            boolean valuesHaveChanged = false;
+                            for (int i = 0; i < filters.size(); i++) {
+                                ReportEntityFilter filter = filters.get(i);
+                                if (filter.show() != dataElementCheckedState[i]) {
+                                    valuesHaveChanged = true;
+                                    filters.get(i).setShow(dataElementCheckedState[i]);
+                                }
+                            }
+
+                            Collections.sort(filters);
+                            reportEntityAdapter.notifyFiltersChanged(filters);
+                            selectorPresenter.setReportEntityDataElementFilters(
+                                    getProgramUid(), filters);
+                        }
+                    });
+
+            filterDialog = builder.create();
+            filterDialog.setTitle(R.string.filter_data_elements);
+            filterDialog.show();
+        }
+    }
+
+    private String getProgramUid() {
+        if (pickerAdapter != null && pickerAdapter.getData() != null) {
+            return getProgramUid(pickerAdapter.getData());
+        }
+
+        return "";
     }
 
     /* change visibility of floating action button*/
@@ -498,7 +584,17 @@ public class SelectorFragment extends BaseFragment implements SelectorView {
 
         updateLabels(pickers);
 
+        if (!filtersExist()) {
+            showFilterOptionItem(false);
+        }
+
         selectorPresenter.onPickersSelectionsChanged(pickers);
+    }
+
+    private boolean filtersExist() {
+        return reportEntityAdapter != null &&
+                reportEntityAdapter.getReportEntityFilters() != null &&
+                !reportEntityAdapter.getReportEntityFilters().isEmpty();
     }
 
     /* check if organisation unit and program are selected */
