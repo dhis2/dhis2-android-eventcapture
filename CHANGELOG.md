@@ -1,3 +1,8 @@
+# 0.5.7
+ - Fixed bug related to order of options and data elements within data entry screen
+
+----
+
 # 0.5.6
 
  - Ability to choose data elements which should be displayed within

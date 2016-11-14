@@ -142,6 +142,10 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
 
                                         List<ProgramStageDataElement> dataElements =
                                                 dataElementInteractor.list(stage).toBlocking().first();
+
+                                        if(dataElements != null) {
+                                            Collections.sort(dataElements, ProgramStageDataElement.SORT_ORDER_COMPARATOR);
+                                        }
                                         List<FormEntity> formEntities = transformDataElements(
                                                 username, event, dataElements);
 
@@ -200,7 +204,7 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
                                         // sort ProgramStageDataElements by sortOrder
                                         if (dataElements != null) {
                                             Collections.sort(dataElements,
-                                                    ProgramStageDataElement.SORT_ORDER_COMPARATOR);
+                                                    ProgramStageDataElement.SORT_ORDER_WITHIN_PROGRAM_STAGE_SECTION_COMPARATOR);
                                         }
 
                                         List<FormEntity> formEntities = transformDataElements(
@@ -352,6 +356,10 @@ public class DataEntryPresenterImpl implements DataEntryPresenter {
         // need to process it regardless of data-element value type
         if (dataElement.getOptionSet() != null) {
             List<Option> options = dataElement.getOptionSet().getOptions();
+
+            if(options != null) {
+                Collections.sort(options, Option.SORT_ORDER_COMPARATOR);
+            }
 
             Picker picker = new Picker.Builder()
                     .hint(dataElement.getDisplayName())
