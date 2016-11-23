@@ -33,8 +33,8 @@ ext {
             minSdkVersion    : 15,
             compileSdkVersion: 24,
             targetSdkVersion : 24,
-            versionCode      : 25,
-            versionName      : "0.5.7"
+            versionCode      : 26,
+            versionName      : "0.5.8"
     ]
     libraries = [
             // dhis libs
