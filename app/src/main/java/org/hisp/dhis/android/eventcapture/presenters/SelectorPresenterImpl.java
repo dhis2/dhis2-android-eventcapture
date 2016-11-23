@@ -438,7 +438,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
         for (Event event : events) {
             // status of event
-            ReportEntity.Status status;
+            ReportEntity.SyncStatus status;
             // get state of event from database
             State state = stateMap.get(event.getId());
             // State state = eventInteractor.get(event).toBlocking().first();
@@ -446,19 +446,19 @@ public class SelectorPresenterImpl implements SelectorPresenter {
             logger.d(TAG, "State action for event " + event + " is " + state.getAction());
             switch (state.getAction()) {
                 case SYNCED: {
-                    status = ReportEntity.Status.SENT;
+                    status = ReportEntity.SyncStatus.SENT;
                     break;
                 }
                 case TO_POST: {
-                    status = ReportEntity.Status.TO_POST;
+                    status = ReportEntity.SyncStatus.TO_POST;
                     break;
                 }
                 case TO_UPDATE: {
-                    status = ReportEntity.Status.TO_UPDATE;
+                    status = ReportEntity.SyncStatus.TO_UPDATE;
                     break;
                 }
                 case ERROR: {
-                    status = ReportEntity.Status.ERROR;
+                    status = ReportEntity.SyncStatus.ERROR;
                     break;
                 }
                 default: {
@@ -472,7 +472,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
             dataElementToValueMap.put(Event.EVENT_DATE_KEY,
                     event.getEventDate().toString(DateTimeFormat.forPattern(DATE_FORMAT)));
-            dataElementToValueMap.put(Event.STATUS_KEY, event.getStatus().toString());
+            dataElementToValueMap.put(Event.EVENT_STATUS, event.getStatus().toString());
 
             reportEntities.add(
                     new ReportEntity(
@@ -488,7 +488,7 @@ public class SelectorPresenterImpl implements SelectorPresenter {
 
         ArrayList<ReportEntityFilter> defaultFilters = new ArrayList<>();
         defaultFilters.add(new ReportEntityFilter(Event.EVENT_DATE_KEY, Event.EVENT_DATE_LABEL, true));
-        defaultFilters.add(new ReportEntityFilter(Event.STATUS_KEY, Event.STATUS_LABEL, true));
+        defaultFilters.add(new ReportEntityFilter(Event.EVENT_STATUS, Event.STATUS_LABEL, true));
 
         if (dataElements != null && !dataElements.isEmpty()) {
             for (ProgramStageDataElement programStageDataElement : dataElements) {
