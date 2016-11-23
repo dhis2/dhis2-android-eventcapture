@@ -34,6 +34,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 import static org.hisp.dhis.client.sdk.utils.Preconditions.isNull;
 
 // TODO cache metadata and data in memory
@@ -196,7 +197,7 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
     public void subscribeToLocations() {
         gettingLocation = true;
         locationProvider.locations()
-                .timeout(31L, TimeUnit.SECONDS)
+                .timeout(21L, TimeUnit.SECONDS)
                 .buffer(2L, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -247,7 +248,6 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                             public void call() {
                                 logger.d(TAG, "onComplete");
                                 gettingLocation = false;
-                                viewSetLocation(null);
                                 locationProvider.stopUpdates();
                             }
                         }
