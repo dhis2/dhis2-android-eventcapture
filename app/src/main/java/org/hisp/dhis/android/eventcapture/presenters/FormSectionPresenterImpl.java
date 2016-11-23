@@ -8,6 +8,7 @@ import org.hisp.dhis.android.eventcapture.views.FormSectionView;
 import org.hisp.dhis.client.sdk.android.event.EventInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageInteractor;
 import org.hisp.dhis.client.sdk.android.program.ProgramStageSectionInteractor;
+import org.hisp.dhis.client.sdk.models.common.Coordinates;
 import org.hisp.dhis.client.sdk.models.event.Event;
 import org.hisp.dhis.client.sdk.models.program.Program;
 import org.hisp.dhis.client.sdk.models.program.ProgramStage;
@@ -193,8 +194,35 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
         }
     }
 
+    private void saveEventCoordinates(final String eventUid, final Coordinates coordinates) {
+        if (subscription != null && !subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = null;
+        }
+
+        subscription = new CompositeSubscription();
+        subscription.add(eventInteractor.get(eventUid)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Event>() {
+                    @Override
+                    public void call(Event event) {
+                        isNull(event, String.format("Event with uid %s does not exist", eventUid));
+
+                        event.setCoordinate(coordinates);
+
+                        subscription.add(saveEvent(event));
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        logger.e(TAG, null, throwable);
+                    }
+                }));
+    }
+
     @Override
-    public void subscribeToLocations() {
+    public void subscribeToLocations(final String eventUid) {
         gettingLocation = true;
         locationProvider.locations()
                 .timeout(21L, TimeUnit.SECONDS)
@@ -226,6 +254,9 @@ public class FormSectionPresenterImpl implements FormSectionPresenter {
                                         && locations.size() > 1) {
                                     gettingLocation = false;
                                     viewSetLocation(bestLocation);
+                                    saveEventCoordinates(eventUid,
+                                            new Coordinates(currentLocation.getLatitude(),
+                                                    currentLocation.getLongitude()));
                                     locationProvider.stopUpdates();
                                 }
                             }

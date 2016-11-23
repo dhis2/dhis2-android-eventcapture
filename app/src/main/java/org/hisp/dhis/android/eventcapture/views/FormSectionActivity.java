@@ -221,8 +221,8 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
             double latitude = location.getLatitude();
 
             if (longitude != 0.0 && latitude != 0.0) {
-                editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
-                editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
+                editTextLatitude.setText(String.format(Locale.getDefault(), "%1$,.6f", latitude));
+                editTextLongitude.setText(String.format(Locale.getDefault(), "%1$,.6f", longitude));
             }
         } else {
             Toast.makeText(this, R.string.gps_no_coordinates, Toast.LENGTH_LONG).show();
@@ -433,7 +433,7 @@ public class FormSectionActivity extends AppCompatActivity implements FormSectio
                                 || locationIconCancel.getVisibility() == View.GONE) {
                             // request location:
                             setLocationButtonState(false);
-                            formSectionPresenter.subscribeToLocations();
+                            formSectionPresenter.subscribeToLocations(getEventUid());
                         } else {
                             //cancel the location request:
                             setLocationButtonState(true);
