@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="app_name">DHIS2 Event Capture</string>
+  <string name="drawer_item_events">Eventos</string>
+  <string name="filter_title">Filtro</string>
+  <string name="filter_sections">Secções de filtro</string>
+  <string name="option_confirm">Ok</string>
+  <string name="warning_logout_body">Será desconectado e quaisquer files que tenham sido gravados neste dispositivo para a visualização offline serão apagados</string>
+  <string name="warning_logout_header">Tem a certeza?</string>
+  <string name="warning_logout_confirm">Terminar a sessão</string>
+  <string name="warning_logout_dismiss">fechar</string>
+  <string name="title_error">Erro</string>
+  <string name="title_error_unexpected">Erro inesperado</string>
+  <string name="error_not_found">O servidor não foi encontrado.</string>
+  <string name="error_unauthorized">Utilizador ou senha inválidos.</string>
+  <string name="delete">Apagar</string>
+  <string name="delete_report_entity_dialog_title">Apagar este evento?</string>
+  <string name="delete_report_entity_dialog_message">O evento será perdido para sempre. Terá de criar um novo evento e reintroduzir mais informação.</string>
+  <string name="report_entity_deletion_error">Não é possível apagar evento</string>
+  <string name="undo">Desfazer</string>
+  <string name="complete">Terminado</string>
+  <string name="incomplete">Incompleto</string>
+  <string name="sync_complete_notification_title">Sincronização completa</string>
+  <string name="sync_complete_notification_content">Os seus dados do DHIS2 foram sincronizados</string>
+  <string name="sync_failed_notification_title">A Sincronização falhou</string>
+  <string name="sync_failed_notification_content">Os seus dados do DHIS2 não foram sincronizados</string>
+  <string name="sync_in_progress_notification_title">A sincronizar...</string>
+  <string name="sync_in_progress_notification_content">Os seus dados DHIS2 estão sendo sincronizados</string>
+  <string name="authority">org.hisp.dhis.android.eventcapture.model.provider</string>
+  <string name="account_type">org.hisp.dhis.android.eventcapture</string>
+</resources>
