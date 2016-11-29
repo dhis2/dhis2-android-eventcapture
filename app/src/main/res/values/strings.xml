@@ -26,7 +26,7 @@
 ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">DHIS2 Event Capture</string>
 
     <!-- Navigation drawer strings -->
