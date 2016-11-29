@@ -24,6 +24,6 @@
   <string name="sync_complete_notification_content">Os seus dados do DHIS2 foram sincronizados</string>
   <string name="sync_failed_notification_title">A Sincronização falhou</string>
   <string name="sync_failed_notification_content">Os seus dados do DHIS2 não foram sincronizados</string>
-  <string name="sync_in_progress_notification_title">A sincronizar...</string>
+  <string name="sync_in_progress_notification_title">A sincronizar…</string>
   <string name="sync_in_progress_notification_content">Os seus dados DHIS2 estão sendo sincronizados</string>
 </resources>
