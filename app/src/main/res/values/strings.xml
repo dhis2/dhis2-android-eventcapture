@@ -26,7 +26,7 @@
 ~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">DHIS2 Event Capture</string>
 
     <!-- Navigation drawer strings -->
@@ -70,7 +70,7 @@
     <string name="sync_in_progress_notification_title">Syncing</string>
     <string name="sync_in_progress_notification_content">Your DHIS2 data is synchronizing</string>
 
-    <!-- Account and Authority strings used by Android system Account Manager-->
+    <!-- Account and Authority strings used by Android system Account Manager. These attributes should _NOT_ be translated-->
     <string name="authority">org.hisp.dhis.android.eventcapture.model.provider</string>
     <string name="account_type">org.hisp.dhis.android.eventcapture</string>
 

@@ -11,7 +11,7 @@ public interface FormSectionPresenter extends Presenter {
 
     void saveEventStatus(String eventUid, Event.EventStatus eventStatus);
 
-    void subscribeToLocations();
+    void subscribeToLocations(String eventUid);
 
     void stopLocationUpdates();
 }
