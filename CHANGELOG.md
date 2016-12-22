@@ -1,3 +1,8 @@
+# 0.6.0
+ - Fixed an issue related to memory management
+
+----
+
 # 0.5.7
  - Fixed bug related to order of options and data elements within data entry screen
 
