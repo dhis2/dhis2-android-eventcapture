@@ -158,6 +158,11 @@ public class SelectorPresenterImpl implements SelectorPresenter {
     public void detachView() {
         selectorView.hideProgressBar();
         selectorView = null;
+
+        if (!subscription.isUnsubscribed()) {
+            subscription.unsubscribe();
+            subscription = new CompositeSubscription();
+        }
     }
 
     @Override
