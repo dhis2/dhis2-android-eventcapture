@@ -1,5 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+  <string name="drawer_item_events">Händelser</string>
+  <string name="filter_title">Filter</string>
+  <string name="filter_sections">Filtrera sektioner</string>
+  <string name="option_confirm">OK</string>
   <string name="warning_logout_body">Du kommer att loggas ut och alla filer som har sparats på enheten för visning offline kommer att raderas.</string>
   <string name="warning_logout_header">Är du säker?</string>
   <string name="warning_logout_confirm">Logga ut</string>
@@ -8,10 +12,23 @@
   <string name="title_error_unexpected">Oväntat fel</string>
   <string name="error_not_found">Servern hittades inte.</string>
   <string name="error_unauthorized">Fel användarnamn eller lösenord.</string>
+  <string name="delete">Ta bort</string>
+  <string name="delete_report_entity_dialog_title">Ta bort den här händelsen?</string>
+  <string name="delete_report_entity_dialog_message">"Händelsen kommer att förloras för alltid. Du måste skapa en ny händelse och mata in all information igen. "</string>
+  <string name="report_entity_deletion_error">Kunde inte ta bort händelsen</string>
+  <string name="undo">Ångra</string>
+  <string name="complete">Komplett</string>
+  <string name="incomplete">Ofullständig</string>
   <string name="sync_complete_notification_title">Synkroniseringen är klar</string>
   <string name="sync_complete_notification_content">Din DHIS2 data har synkroniserats</string>
   <string name="sync_failed_notification_title">Synkroniseringen misslyckades</string>
   <string name="sync_failed_notification_content">Din DHIS2 data har inte synkroniseras</string>
   <string name="sync_in_progress_notification_title">Synkronisering genomförs</string>
   <string name="sync_in_progress_notification_content">Din DHIS2 data synkroniseras</string>
+  <string name="filter_data_elements">Välj elementer för att visa</string>
+  <string name="title_gps_disabled">Platsinställningar</string>
+  <string name="gps_disabled">Läge tjänster inaktiveras. Vill du gå till inställningar-menyn?</string>
+  <string name="gps_no_coordinates">Kan inte bestämma plats.</string>
+  <string name="settings_option">Inställningar</string>
+  <string name="gps_permission_denied">Läge tillstånd nekas för denna app.</string>
 </resources>
