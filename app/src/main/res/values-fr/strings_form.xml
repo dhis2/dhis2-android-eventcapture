@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="organisation_unit">Unité d\'organisation</string>
+  <string name="program">Programme</string>
+  <string name="none">aucun</string>
+  <string name="choose_report_date">Choisir date de rapport</string>
+  <string name="latitude">Latitude</string>
+  <string name="longitude">Longitude</string>
+</resources>

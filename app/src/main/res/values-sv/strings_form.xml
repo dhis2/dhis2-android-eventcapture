@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+  <string name="organisation_unit">Organisationsenhet</string>
+  <string name="program">Program</string>
+  <string name="none">inga</string>
+  <string name="choose_report_date">Välj en rapportdatum</string>
+  <string name="latitude">Latitud</string>
+  <string name="longitude">Longitud</string>
+</resources>
