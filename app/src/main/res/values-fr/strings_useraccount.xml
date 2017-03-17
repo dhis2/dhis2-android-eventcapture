@@ -1,2 +1,18 @@
 <?xml version='1.0' encoding='utf-8'?>
-<resources/>
+<resources>
+  <string name="first_name">Prénom</string>
+  <string name="surname">Nom de famille</string>
+  <string name="gender">Genre</string>
+  <string name="gender_male">Masculin</string>
+  <string name="gender_female">Féminin</string>
+  <string name="gender_other">Autre</string>
+  <string name="birthday">Date de naissance</string>
+  <string name="introduction">Introduction</string>
+  <string name="education">Éducation</string>
+  <string name="employer">Employeur</string>
+  <string name="interests">Intérêts</string>
+  <string name="job_title">Titre de poste</string>
+  <string name="languages">Langues</string>
+  <string name="email">Adresse e-mail</string>
+  <string name="phone_number">Numéro de téléphone</string>
+</resources>

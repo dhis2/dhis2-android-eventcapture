@@ -1,2 +1,31 @@
 <?xml version='1.0' encoding='utf-8'?>
-<resources/>
+<resources>
+  <string name="app_name">Saisie d\'évènements DHIS2</string>
+  <string name="drawer_item_events">Évènements</string>
+  <string name="filter_title">Filtrer</string>
+  <string name="filter_sections">Filtrer les sections</string>
+  <string name="option_confirm">Ok</string>
+  <string name="warning_logout_body">Vous serez deconnecté et toutes les données enregistrées sur cet appareil pour visualisation hors connexion seront supprimées.</string>
+  <string name="warning_logout_header">Êtes-vous certain ?</string>
+  <string name="warning_logout_confirm">Déconnexion</string>
+  <string name="warning_logout_dismiss">fermer</string>
+  <string name="title_error">Erreur</string>
+  <string name="title_error_unexpected">Erreur imprévue</string>
+  <string name="error_not_found">Serveur introuvable.</string>
+  <string name="error_unauthorized">Nom d\'utilisateur ou mot de passe incorrect.</string>
+  <string name="delete">Supprimer</string>
+  <string name="delete_report_entity_dialog_title">Supprimer cet évènement?</string>
+  <string name="delete_report_entity_dialog_message">Cet évènement sera définitivement supprimé. Vous devrez créer un nouvel évènement et resaisir les informations.</string>
+  <string name="report_entity_deletion_error">Impossible de supprimer l\'évènement</string>
+  <string name="undo">Annuler</string>
+  <string name="complete">Terminé</string>
+  <string name="incomplete">Incomplet</string>
+  <string name="sync_complete_notification_title">Synchronisation terminée.</string>
+  <string name="sync_complete_notification_content">Vos données DHIS2 ont été synchronisées</string>
+  <string name="sync_failed_notification_title">La synchronisation a échoué</string>
+  <string name="sync_failed_notification_content">Vos données DHIS2 n\'ont pas été synchronisés</string>
+  <string name="sync_in_progress_notification_title">Synchronisation</string>
+  <string name="sync_in_progress_notification_content">Synchronisation de vos données DHIS2</string>
+  <string name="authority">org.hisp.dhis.android.eventcapture.model.provider</string>
+  <string name="account_type">org.hisp.dhis.android.eventcapture</string>
+</resources>
