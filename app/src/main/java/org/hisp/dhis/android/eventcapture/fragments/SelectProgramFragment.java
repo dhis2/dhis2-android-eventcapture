@@ -44,6 +44,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.dialogs.ItemStatusDialogFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
@@ -208,5 +209,16 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             case 1:
                 mRegisterEventButton.show();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG, true);
+        }
+
+        return true;
     }
 }
