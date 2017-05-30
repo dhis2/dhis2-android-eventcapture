@@ -200,8 +200,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         }
         if (id == org.hisp.dhis.android.sdk.R.id.action_about) {
             mNavigationHandler.switchFragment(
-                    new AboutUsFragment(), org.hisp.dhis
-                            .android.sdk.ui.fragments.AboutUsFragment.TAG, true);
+                    new AboutUsFragment(), AboutUsFragment.TAG, true);
         }
 
         return super.onOptionsItemSelected(item);
