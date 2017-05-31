@@ -26,3 +26,6 @@ build
 
 #Android
 *.apk
+
+# last commit file
+app/src/main/res/raw/lastcommit.txt
