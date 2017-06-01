@@ -43,6 +43,7 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.dialogs.ItemStatusDialogFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
@@ -57,7 +58,6 @@ import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
 import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
 import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
-import org.hisp.dhis.android.sdk.ui.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
@@ -203,7 +203,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                     new AboutUsFragment(), AboutUsFragment.TAG, true);
         }
 
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     public void showStatusDialog(BaseSerializableModel model) {
