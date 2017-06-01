@@ -198,14 +198,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             mNavigationHandler.switchFragment(
                     new SettingsFragment(), SettingsFragment.TAG, true);
             return true;
-        }
-        if (id == org.hisp.dhis.android.sdk.R.id.action_about) {
+        } else if (id == org.hisp.dhis.android.sdk.R.id.action_about) {
             mNavigationHandler.switchFragment(
                     new AboutUsFragment(), AboutUsFragment.TAG, true);
             return true;
         }
 
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     public void showStatusDialog(BaseSerializableModel model) {
