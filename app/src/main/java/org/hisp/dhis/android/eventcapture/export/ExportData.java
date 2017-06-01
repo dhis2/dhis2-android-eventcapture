@@ -55,36 +55,6 @@ public class ExportData {
 
     private Context mContext;
 
-    public static String getCommitHash(Context context) {
-        String stringCommit;
-        //Check if lastcommit.txt file exist, and if not exist show as unavailable.
-        int layoutId = context.getResources().getIdentifier("lastcommit", "raw",
-                context.getPackageName());
-        if (layoutId == 0) {
-            stringCommit = "";
-        } else {
-            InputStream commit = context.getResources().openRawResource(layoutId);
-            stringCommit = convertFromInputStreamToString(commit).toString();
-        }
-        return stringCommit;
-    }
-
-    public static StringBuilder convertFromInputStreamToString(InputStream inputStream) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        try {
-            BufferedReader r = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            String line;
-            while ((line = r.readLine()) != null) {
-                stringBuilder.append(line + "\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return stringBuilder;
-    }
-
     /**
      * This method create the dump and returns the intent
      */
@@ -108,6 +78,36 @@ public class ExportData {
             return null;
         }
         return createEmailIntent(activity, compressedFile);
+    }
+
+    private static String getCommitHash(Context context) {
+        String stringCommit;
+        //Check if lastcommit.txt file exist, and if not exist show as unavailable.
+        int layoutId = context.getResources().getIdentifier("lastcommit", "raw",
+                context.getPackageName());
+        if (layoutId == 0) {
+            stringCommit = "";
+        } else {
+            InputStream commit = context.getResources().openRawResource(layoutId);
+            stringCommit = convertFromInputStreamToString(commit).toString();
+        }
+        return stringCommit;
+    }
+
+    private static StringBuilder convertFromInputStreamToString(InputStream inputStream) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        try {
+            BufferedReader r = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            String line;
+            while ((line = r.readLine()) != null) {
+                stringBuilder.append(line + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return stringBuilder;
     }
 
     /**
