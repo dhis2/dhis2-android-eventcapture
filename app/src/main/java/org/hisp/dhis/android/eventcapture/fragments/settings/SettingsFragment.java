@@ -38,8 +38,12 @@ import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
+import com.squareup.otto.Subscribe;
+
 import org.hisp.dhis.android.eventcapture.export.ExportData;
 import org.hisp.dhis.android.sdk.R;
+import org.hisp.dhis.android.sdk.events.LoadingMessageEvent;
+import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.ui.views.FontButton;
 import org.hisp.dhis.android.sdk.ui.views.FontCheckBox;
 
@@ -114,4 +118,14 @@ public class SettingsFragment extends
         }
     }
 
+    @Subscribe
+    public void onSynchronizationFinishedEvent(final UiEvent event)
+    {
+        super.onSynchronizationFinishedEvent(event);
+    }
+
+    @Subscribe
+    public void onLoadingMessageEvent(final LoadingMessageEvent event) {
+        super.onLoadingMessageEvent(event);
+    }
 }
