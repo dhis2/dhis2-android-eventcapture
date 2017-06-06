@@ -32,7 +32,6 @@ package org.hisp.dhis.android.eventcapture.fragments;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -44,23 +43,21 @@ import com.squareup.otto.Subscribe;
 
 import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.dialogs.ItemStatusDialogFragment;
+import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.events.UiEvent;
-import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceItemRow;
-import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
-import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
-import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
+import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
-import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
 import org.hisp.dhis.android.sdk.ui.adapters.EventAdapter;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis.android.sdk.ui.fragments.dataentry.DataEntryFragment;
+import org.hisp.dhis.android.sdk.ui.fragments.eventdataentry.EventDataEntryFragment;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.ui.views.FloatingActionButton;
 import org.hisp.dhis.android.sdk.utils.UiUtils;
 import org.hisp.dhis.android.sdk.utils.api.ProgramType;
@@ -193,6 +190,23 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             }
         }
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == org.hisp.dhis.android.sdk.R.id.action_settings) {
+            mNavigationHandler.switchFragment(
+                    new SettingsFragment(), SettingsFragment.TAG, true);
+            return true;
+        } else if (id == org.hisp.dhis.android.sdk.R.id.action_about) {
+            mNavigationHandler.switchFragment(
+                    new AboutUsFragment(), AboutUsFragment.TAG, true);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     public void showStatusDialog(BaseSerializableModel model) {
 
         ItemStatusDialogFragment fragment = ItemStatusDialogFragment.newInstance(model);

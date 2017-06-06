@@ -85,6 +85,16 @@
 
         <!-- Specify the next screen after SplashScreen if user already logged in -->
         <meta-data android:name="nextClassName" android:value="org.hisp.dhis.android.eventcapture.MainActivity" />
+
+        <provider
+            android:name="org.hisp.dhis.android.eventcapture.export.DBProvider"
+            android:authorities="org.hisp.dhis.android.eventcapture.export.ExportData"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

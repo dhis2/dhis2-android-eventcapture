@@ -36,17 +36,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import org.hisp.dhis.android.eventcapture.fragments.SelectProgramFragment;
-import org.hisp.dhis.android.sdk.controllers.DhisController;
 import org.hisp.dhis.android.sdk.controllers.DhisService;
 import org.hisp.dhis.android.sdk.controllers.LoadingController;
 import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
+import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.persistence.preferences.ResourceType;
 import org.hisp.dhis.android.sdk.ui.activities.INavigationHandler;
-import org.hisp.dhis.android.sdk.ui.activities.LoginActivity;
 import org.hisp.dhis.android.sdk.ui.activities.OnBackPressedListener;
-import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
 import org.hisp.dhis.android.sdk.ui.fragments.loading.LoadingFragment;
-import org.hisp.dhis.android.sdk.utils.UiUtils;
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
@@ -87,8 +84,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     }
 
     public void loadInitialData() {
-        String message = getString(org.hisp.dhis.android.sdk.R.string.finishing_up);
-        UiUtils.postProgressMessage(message);
         DhisService.loadInitialData(MainActivity.this);
     }
 
