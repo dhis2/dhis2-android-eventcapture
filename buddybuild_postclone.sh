@@ -8,5 +8,5 @@ sh ${gitPath}/generate_last_commit.sh
 
 # Use event capture SDK branch
 cd sdk
-git checkout legacy-event
+git checkout 2.22-legacy
 cd -
