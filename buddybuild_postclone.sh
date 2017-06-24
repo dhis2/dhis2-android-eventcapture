@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Definitions
 gitPath=$(git rev-parse --show-toplevel)
@@ -10,3 +10,6 @@ sh ${gitPath}/generate_last_commit.sh
 cd sdk
 git checkout legacy-event
 cd -
+
+echo "Generate Test Coverage Report:"
+./gradlew build jacocoTestReport assembleAndroidTest
