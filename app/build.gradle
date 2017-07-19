@@ -38,8 +38,8 @@ android {
         applicationId "org.hisp.dhis.android.eventcapture"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 24
-        versionName "0.3.6"
+        versionCode 25
+        versionName "0.3.7"
     }
     buildTypes {
         release {
