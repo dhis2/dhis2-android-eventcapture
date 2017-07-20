@@ -33,6 +33,7 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
+import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
@@ -174,7 +175,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
 
         if (elementsToShow.isEmpty()) {
-            eventItem.setFirstItem(getEventDateString(event));
+            eventItem.setFirstItem(getEventDateString(context, event));
         }
 
         for (int i = 0; i < 3; i++) {
@@ -228,8 +229,8 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         return eventItem;
     }
 
-    private String getEventDateString(Event event){
-        String dateString = "Invalid date format";
+    private String getEventDateString(Context context, Event event){
+        String dateString = context.getString(R.string.invalid_date_format);
         DateTimeFormatter formatter = null;
         DateTime dt;
         if (dateFormatIsValid(event.getEventDate(), Event.EVENT_DATETIME_FORMAT)) {

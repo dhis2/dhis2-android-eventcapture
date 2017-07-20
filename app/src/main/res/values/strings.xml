@@ -40,4 +40,5 @@
     <string name="error_exporting_data">"Error metadata could not be exported."</string>
     <string name="export_data_name">Export database</string>
     <string name="developers_settings">Developers options</string>
+    <string name="invalid_date_format">"Invalid date format"</string>
 </resources>
