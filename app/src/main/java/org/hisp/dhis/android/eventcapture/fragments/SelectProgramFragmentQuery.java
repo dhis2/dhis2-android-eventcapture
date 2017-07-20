@@ -36,21 +36,23 @@ import com.raizlabs.android.dbflow.sql.language.Select;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
-import org.hisp.dhis.android.sdk.persistence.models.DataElement;
-import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
-import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.hisp.dhis.android.sdk.persistence.loaders.Query;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
-import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.persistence.models.DataElement;
 import org.hisp.dhis.android.sdk.persistence.models.DataValue;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.persistence.models.Option;
+import org.hisp.dhis.android.sdk.persistence.models.OptionSet;
 import org.hisp.dhis.android.sdk.persistence.models.Program;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStage;
 import org.hisp.dhis.android.sdk.persistence.models.ProgramStageDataElement;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventItemRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.EventRow;
+import org.hisp.dhis.android.sdk.ui.adapters.rows.events.TrackedEntityInstanceColumnNamesRow;
+import org.hisp.dhis.android.sdk.ui.fragments.selectprogram.SelectProgramFragmentForm;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,6 +115,10 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                 }
             }
         }
+        if (elementsToShow.isEmpty()) {
+            columnNames.setFirstItem(context.getResources().getString(
+                    org.hisp.dhis.android.sdk.R.string.eventDate));
+        }
         eventEventRows.add(columnNames);
         List<Event> events = TrackerController.getEvents(
                 mOrgUnitId, mProgramId
@@ -167,9 +173,21 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             eventItem.setStatus(OnRowClick.ITEM_STATUS.OFFLINE);
         }
 
+        if (elementsToShow.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(Event.EVENT_DATE_FORMAT);
+            DateTime dt = formatter.parseDateTime(event.getEventDate());
+            eventItem.setFirstItem(dt.toLocalDate().toString());
+        }
         for (int i = 0; i < 3; i++) {
             if (i >= elementsToShow.size()) {
                 break;
+            }
+            if (i == 0) {
+                eventItem.setFirstItem("");
+            } else if (i == 1) {
+                eventItem.setSecondItem("");
+            } else if (i == 2) {
+                eventItem.setThirdItem("");
             }
             String dataElementUid = elementsToShow.get(i);
             if (dataElementUid != null) {
