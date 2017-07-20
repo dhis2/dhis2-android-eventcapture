@@ -29,9 +29,13 @@
 
 package org.hisp.dhis.android.eventcapture;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -48,10 +52,20 @@ import org.hisp.dhis.android.sdk.ui.fragments.loading.LoadingFragment;
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
     private OnBackPressedListener mBackPressedListener;
+    private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
+        if (!hasPermissionLocation) {
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_ACCESS_FINE_LOCATION);
+        }
+
         setContentView(R.layout.activity_main);
 
         LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
