@@ -33,6 +33,7 @@ import android.content.Context;
 
 import com.raizlabs.android.dbflow.sql.language.Select;
 
+import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
 import org.hisp.dhis.android.sdk.controllers.tracker.TrackerController;
 import org.hisp.dhis.android.sdk.events.OnRowClick;
@@ -174,10 +175,9 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
 
         if (elementsToShow.isEmpty()) {
-            DateTimeFormatter formatter = DateTimeFormat.forPattern(Event.EVENT_DATE_FORMAT);
-            DateTime dt = formatter.parseDateTime(event.getEventDate());
-            eventItem.setFirstItem(dt.toLocalDate().toString());
+            eventItem.setFirstItem(getEventDateString(context, event));
         }
+
         for (int i = 0; i < 3; i++) {
             if (i >= elementsToShow.size()) {
                 break;
@@ -227,6 +227,33 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             }
         }
         return eventItem;
+    }
+
+    private String getEventDateString(Context context, Event event){
+        String dateString = context.getString(R.string.invalid_date_format);
+        DateTimeFormatter formatter = null;
+        DateTime dt;
+        if (dateFormatIsValid(event.getEventDate(), Event.EVENT_DATETIME_FORMAT)) {
+            formatter = DateTimeFormat.forPattern(Event.EVENT_DATETIME_FORMAT);
+        } else if (dateFormatIsValid(event.getEventDate(), Event.EVENT_DATE_FORMAT)){
+            formatter = DateTimeFormat.forPattern(Event.EVENT_DATE_FORMAT);
+        }
+        if (formatter != null) {
+            dt = formatter.parseDateTime(event.getEventDate());
+            dateString = dt.toLocalDate().toString();
+        }
+
+        return dateString;
+    }
+
+    private boolean dateFormatIsValid(String date, String format){
+        try {
+            DateTimeFormatter formatter = DateTimeFormat.forPattern(format);
+            formatter.parseDateTime(date);
+            return true;
+        } catch (IllegalArgumentException exception){
+            return false;
+        }
     }
 
     private DataValue getDataValue(Event event, String dataElement) {
