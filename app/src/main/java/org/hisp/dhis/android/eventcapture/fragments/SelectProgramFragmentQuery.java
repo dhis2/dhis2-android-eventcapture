@@ -121,7 +121,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                     org.hisp.dhis.android.sdk.R.string.eventDate));
         }
         eventEventRows.add(columnNames);
-        List<Event> events = TrackerController.getEvents(
+        List<Event> events = TrackerController.getNotDeletedEvents(
                 mOrgUnitId, mProgramId
         );
         if (isListEmpty(events)) {

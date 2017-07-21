@@ -97,10 +97,6 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         }
         else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
         {
-
-            if( !(itemRow.getStatus().equals(OnRowClick.ITEM_STATUS.SENT))) // if not sent to server, present dialog to user
-            {
-
                 UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
                         getActivity().getString(R.string.warning_delete_unsent_tei),
                         getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
@@ -108,16 +104,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                itemRow.getmEvent().delete();
+                                itemRow.getmEvent().setStatus(Event.STATUS_DELETED);
+                                itemRow.getmEvent().save();
                                 dialog.dismiss();
+
                             }
                         });
-            }
-            else
-            {
-                //if sent to server, be able to soft delete without annoying the user
-                itemRow.getmEvent().delete();
-            }
         }
         return true;
     }
