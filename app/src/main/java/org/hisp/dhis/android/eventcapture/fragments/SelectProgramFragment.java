@@ -45,7 +45,6 @@ import org.hisp.dhis.android.eventcapture.R;
 import org.hisp.dhis.android.eventcapture.fragments.dialogs.ItemStatusDialogFragment;
 import org.hisp.dhis.android.eventcapture.fragments.settings.SettingsFragment;
 import org.hisp.dhis.android.sdk.controllers.metadata.MetaDataController;
-import org.hisp.dhis.android.sdk.events.OnRowClick;
 import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
@@ -98,7 +97,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
         {
                 UiUtils.showConfirmDialog(getActivity(), getActivity().getString(R.string.confirm),
-                        getActivity().getString(R.string.warning_delete_unsent_tei),
+                        getActivity().getString(R.string.warning_delete_event),
                         getActivity().getString(R.string.delete), getActivity().getString(R.string.cancel),
                         (R.drawable.ic_event_error),
                         new DialogInterface.OnClickListener() {
