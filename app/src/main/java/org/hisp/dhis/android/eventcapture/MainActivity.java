@@ -53,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     public final static String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
     private OnBackPressedListener mBackPressedListener;
-    private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,14 +67,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
         }
 
         setContentView(R.layout.activity_main);
-
-        boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
-        if (!hasPermissionLocation) {
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_ACCESS_FINE_LOCATION);
-        }
 
         LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
         LoadingController.enableLoading(this, ResourceType.OPTIONSETS);
