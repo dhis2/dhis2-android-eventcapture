@@ -121,7 +121,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                     org.hisp.dhis.android.sdk.R.string.eventDate));
         }
         eventEventRows.add(columnNames);
-        List<Event> events = TrackerController.getEvents(
+        List<Event> events = TrackerController.getNotDeletedEvents(
                 mOrgUnitId, mProgramId
         );
         if (isListEmpty(events)) {
@@ -177,17 +177,11 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         if (elementsToShow.isEmpty()) {
             eventItem.setFirstItem(getEventDateString(context, event));
         }
+        eventItem.setElementsToShow(elementsToShow.size());
 
         for (int i = 0; i < 3; i++) {
             if (i >= elementsToShow.size()) {
                 break;
-            }
-            if (i == 0) {
-                eventItem.setFirstItem("");
-            } else if (i == 1) {
-                eventItem.setSecondItem("");
-            } else if (i == 2) {
-                eventItem.setThirdItem("");
             }
             String dataElementUid = elementsToShow.get(i);
             if (dataElementUid != null) {

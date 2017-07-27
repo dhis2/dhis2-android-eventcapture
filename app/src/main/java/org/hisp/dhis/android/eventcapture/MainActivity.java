@@ -51,8 +51,8 @@ import org.hisp.dhis.android.sdk.ui.fragments.loading.LoadingFragment;
 
 public class MainActivity extends AppCompatActivity implements INavigationHandler {
     public final static String TAG = MainActivity.class.getSimpleName();
-    private OnBackPressedListener mBackPressedListener;
     private static final int REQUEST_ACCESS_FINE_LOCATION = 1;
+    private OnBackPressedListener mBackPressedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
