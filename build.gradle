@@ -24,7 +24,7 @@ allprojects {
 
 ext {
     // SDK version.
-    versionCode = 3
+    versionCode = 4
     versionName = "0.3.8"
 
     // Compilation configuration.
