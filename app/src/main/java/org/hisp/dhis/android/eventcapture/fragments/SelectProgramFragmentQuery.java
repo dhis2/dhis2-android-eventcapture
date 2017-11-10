@@ -245,7 +245,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
             DateTimeFormatter formatter = DateTimeFormat.forPattern(format);
             formatter.parseDateTime(date);
             return true;
-        } catch (IllegalArgumentException exception){
+        } catch (Exception exception){
             return false;
         }
     }

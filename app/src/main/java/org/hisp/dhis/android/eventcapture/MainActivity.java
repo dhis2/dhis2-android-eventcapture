@@ -94,11 +94,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     @Override
     public void onResume() {
         super.onResume();
-        loadInitialData();
-    }
-
-    public void loadInitialData() {
-        DhisService.loadInitialData(MainActivity.this);
     }
 
     public void showLoadingFragment() {

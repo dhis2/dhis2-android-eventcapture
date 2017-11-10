@@ -90,7 +90,7 @@
 
         <provider
             android:name="org.hisp.dhis.android.eventcapture.export.DBProvider"
-            android:authorities="org.hisp.dhis.android.eventcapture.export.ExportData"
+            android:authorities="${applicationId}.export.ExportData"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
