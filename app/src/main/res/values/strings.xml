@@ -30,7 +30,7 @@
 
 <resources>
 
-    <string name="app_name">DHIS 2 Event Capture (dev)</string>
+    <string name="app_name">DHIS 2 Event Capture</string>
     <string name="register_new_event">Register new event</string>
 
     <string name="status_sent_description">This item has been successfully synchronized with the server.</string>
