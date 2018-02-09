@@ -9,7 +9,7 @@ sh ${gitPath}/generate_last_commit.sh
 # Use event capture SDK branch
 cd sdk
 
-git checkout legacy-event
+git checkout event-capture
 cd -
 
 echo "Generate Test Coverage Report:"
