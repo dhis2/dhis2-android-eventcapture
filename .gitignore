@@ -1,33 +1,31 @@
-# Eclipse
+#Eclipse
 .project
 .classpath
 .settings
 
-# IntelliJ IDEA
+#IntelliJ IDEA
 .idea
 *.iml
 *.ipr
 *.iws
 out
 
-# Ant
+#Ant
 build.xml
 local.properties
 proguard.cfg
-
-# Gradle
+#Gradle
 .gradle
 build
 
-# OSX
+#OSX
 .DS_Store
 
-# Windows
+#Windows
 *.db
 
-# Android
+#Android
 *.apk
-captures
 
-# Secret keys
-secrets.properties
+# last commit file
+app/src/main/res/raw/lastcommit.txt

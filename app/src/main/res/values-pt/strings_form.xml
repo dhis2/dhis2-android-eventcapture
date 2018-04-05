@@ -1,9 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-  <string name="organisation_unit">Unidade Organizacional</string>
-  <string name="program">Programa</string>
-  <string name="none">nenhum</string>
-  <string name="choose_report_date">Escolha a data do relatório</string>
-  <string name="latitude">Latitude</string>
-  <string name="longitude">Longitude</string>
-</resources>

@@ -1,86 +1,44 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-~ Copyright (c) 2016, University of Oslo
-~
-~ All rights reserved.
-~ Redistribution and use in source and binary forms, with or without
-~ modification, are permitted provided that the following conditions are met:
-~ Redistributions of source code must retain the above copyright notice, this
-~ list of conditions and the following disclaimer.
-~
-~ Redistributions in binary form must reproduce the above copyright notice,
-~ this list of conditions and the following disclaimer in the documentation
-~ and/or other materials provided with the distribution.
-~ Neither the name of the HISP project nor the names of its contributors may
-~ be used to endorse or promote products derived from this software without
-~ specific prior written permission.
-~
-~ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-~ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-~ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-~ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-~ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-~ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-~ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-~ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-~ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ * Copyright (c) 2015, University of Oslo
+  ~  * All rights reserved.
+  ~  *
+  ~  * Redistribution and use in source and binary forms, with or without
+  ~  * modification, are permitted provided that the following conditions are met:
+  ~  * Redistributions of source code must retain the above copyright notice, this
+  ~  * list of conditions and the following disclaimer.
+  ~  *
+  ~  * Redistributions in binary form must reproduce the above copyright notice,
+  ~  * this list of conditions and the following disclaimer in the documentation
+  ~  * and/or other materials provided with the distribution.
+  ~  * Neither the name of the HISP project nor the names of its contributors may
+  ~  * be used to endorse or promote products derived from this software without
+  ~  * specific prior written permission.
+  ~  *
+  ~  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ~  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  ~  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ~  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+  ~  * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  ~  * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  ~  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ~  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ~  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  ~  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ~  */
+  -->
 
-<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string name="app_name">DHIS2 Event Capture</string>
+<resources>
 
-    <!-- Navigation drawer strings -->
-    <string name="drawer_item_events">Events</string>
+    <string name="app_name">DHIS 2 Event Capture (dev)</string>
+    <string name="register_new_event">Register new event</string>
 
-    <string name="filter_title">Filter</string>
-    <string name="filter_sections">Filter sections</string>
-    <string name="option_confirm">Ok</string>
+    <string name="status_sent_description">This item has been successfully synchronized with the server.</string>
+    <string name="status_offline_description">This item has not yet been synchronized with the server.</string>
+    <string name="status_error_description">Something went wrong. Please, try to re-upload event or contact administrator.</string>
 
-    <!-- Logout warning dialog: -->
-    <string name="warning_logout_body">
-        You will be logged out and any files that have been saved on this device for
-        offline viewing will be deleted.
-    </string>
-    <string name="warning_logout_header">Are you sure?</string>
-    <string name="warning_logout_confirm">Log out</string>
-    <string name="warning_logout_dismiss">close</string>
-
-    <!-- Error/warning messages -->
-    <string name="title_error">Error</string>
-    <string name="title_error_unexpected">Unexpected error</string>
-    <string name="error_not_found">Server not found.</string>
-    <string name="error_unauthorized">Wrong username or password.</string>
-
-    <!-- Delete Event confirmation dialog -->
-    <string name="delete">Delete</string>
-    <string name="delete_report_entity_dialog_title">Delete this event?</string>
-    <string name="delete_report_entity_dialog_message">The event will be lost forever. You will have to create a new event and re-enter any information.</string>
-    <string name="report_entity_deletion_error">Unable to delete Event</string>
-
-    <!-- Data entry screen prompts -->
-    <string name="undo">Undo</string>
-    <string name="complete">Complete</string>
-    <string name="incomplete">Incomplete</string>
-
-    <!-- Syncing -->
-    <string name="sync_complete_notification_title">Sync complete</string>
-    <string name="sync_complete_notification_content">Your DHIS2 data has been synchronized</string>
-    <string name="sync_failed_notification_title">Sync failed</string>
-    <string name="sync_failed_notification_content">Your DHIS2 data has not been synchronized</string>
-    <string name="sync_in_progress_notification_title">Syncing</string>
-    <string name="sync_in_progress_notification_content">Your DHIS2 data is synchronizing</string>
-
-    <!-- Account and Authority strings used by Android system Account Manager. These attributes should _NOT_ be translated-->
-    <string name="authority">org.hisp.dhis.android.eventcapture.model.provider</string>
-    <string name="account_type">org.hisp.dhis.android.eventcapture</string>
-
-    <string name="filter_data_elements">Select elements to show</string>
-    <!-- GPS status and permissions strings: -->
-    <string name="title_gps_disabled">Location settings</string>
-    <string name="gps_disabled">"Location services are disabled. Do you want to go to settings menu?"</string>
-    <string name="gps_no_coordinates">"Cannot determine location."</string>
-    <string name="settings_option">Settings</string>
-
-    <string name="gps_permission_denied">Location permission is denied for this app.</string>
-
+    <string name="error_exporting_data">"Error metadata could not be exported."</string>
+    <string name="export_data_name">Export database</string>
+    <string name="developers_settings">Developers options</string>
+    <string name="invalid_date_format">"Invalid date format"</string>
 </resources>
