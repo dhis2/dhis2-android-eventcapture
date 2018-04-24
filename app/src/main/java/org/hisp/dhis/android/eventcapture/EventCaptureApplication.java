@@ -31,7 +31,11 @@ package org.hisp.dhis.android.eventcapture;
 
 import android.app.Activity;
 
+import com.crashlytics.android.Crashlytics;
+
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * @author Simen Skogly Russnes on 20.02.15.
@@ -41,5 +45,11 @@ public class EventCaptureApplication extends Dhis2Application {
     @Override
     public Class<? extends Activity> getMainActivity() {
         return new MainActivity().getClass();
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Fabric.with(this, new Crashlytics());
     }
 }
