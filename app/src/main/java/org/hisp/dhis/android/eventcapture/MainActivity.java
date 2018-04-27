@@ -40,7 +40,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import org.hisp.dhis.android.eventcapture.fragments.SelectProgramFragment;
-import org.hisp.dhis.android.sdk.controllers.DhisService;
 import org.hisp.dhis.android.sdk.controllers.LoadingController;
 import org.hisp.dhis.android.sdk.controllers.PeriodicSynchronizerController;
 import org.hisp.dhis.android.sdk.persistence.Dhis2Application;
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         boolean hasPermissionLocation = (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED);
         if (!hasPermissionLocation) {
@@ -65,7 +63,6 @@ public class MainActivity extends AppCompatActivity implements INavigationHandle
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_ACCESS_FINE_LOCATION);
         }
-
         setContentView(R.layout.activity_main);
 
         LoadingController.enableLoading(this, ResourceType.ASSIGNEDPROGRAMS);
