@@ -29,6 +29,12 @@
 
 apply plugin: 'com.android.application'
 apply plugin: 'jacoco-android'
+apply plugin: 'io.fabric'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.fabric.io/public' }
+}
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -38,8 +44,8 @@ android {
         applicationId "org.hisp.dhis.android.eventcapture"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 30
-        versionName "0.5.0"
+        versionCode 31
+        versionName "0.5.1"
     }
     buildTypes {
         release {
@@ -59,6 +65,9 @@ android {
 
 dependencies {
     compile project(':core')
+    compile('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
+        transitive = true;
+    }
 }
 
 android {
