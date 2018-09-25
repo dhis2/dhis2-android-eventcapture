@@ -91,16 +91,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
         if(item.getTitle().toString().equals(getResources().getString(R.string.go_to_dataentry_fragment)))
         {
-            if(mState.getCategoryOptionComboId()==null){
-                mNavigationHandler.switchFragment(EventDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId()
-                        , MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                        itemRow.getmEvent().getLocalId()), TAG,  true);
-            }else {
-                CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
-                mNavigationHandler.switchFragment(EventDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId()
-                        , MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                        categoryOptionCombo.getCategoryCombo(), categoryOptionCombo.getCategoryOption(),itemRow.getmEvent().getLocalId()), TAG,  true);
-            }
+            CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
+            mNavigationHandler.switchFragment(EventDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId()
+                    , MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
+                    categoryOptionCombo.getCategoryOption(),itemRow.getmEvent().getLocalId()), TAG,  true);
+
         }
         else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
         {
@@ -159,19 +154,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
             DataEntryFragment fragment;
-            if(mState.getCategoryOptionComboId()==null) {
-                fragment = EventDataEntryFragment.newInstance(
-                        mState.getOrgUnitId(), mState.getProgramId(),
-                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                        eventClick.getItem().getLocalId());
-            }else{
-                CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
-                fragment = EventDataEntryFragment.newInstance(
-                        mState.getOrgUnitId(), mState.getProgramId(),
-                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                        categoryOptionCombo.getCategoryCombo(), categoryOptionCombo.getCategoryOption(),
-                        eventClick.getItem().getLocalId());
-            }
+            CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
+            fragment = EventDataEntryFragment.newInstance(
+                    mState.getOrgUnitId(), mState.getProgramId(),
+                    MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
+                     categoryOptionCombo.getCategoryOption(),
+                    eventClick.getItem().getLocalId());
             mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
         } else {
             showStatusDialog(eventClick.getItem());
@@ -188,18 +176,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         switch (view.getId()) {
             case R.id.register_new_event: {
                 DataEntryFragment fragment2;
-                if(mState.getCategoryOptionComboId()==null){
-                    fragment2 = EventDataEntryFragment.newInstance(
-                            mState.getOrgUnitId(), mState.getProgramId(),
-                            MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid());
-                }else{
-                    CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
-                    fragment2 = EventDataEntryFragment.newInstance(
-                            mState.getOrgUnitId(), mState.getProgramId(),
-                            MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                            categoryOptionCombo.getCategoryCombo(), categoryOptionCombo.getCategoryOption()
-                    );
-                }
+                CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
+                fragment2 = EventDataEntryFragment.newInstance(
+                        mState.getOrgUnitId(), mState.getProgramId(),
+                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
+                        categoryOptionCombo.getCategoryOption()
+                );
                 mNavigationHandler.switchFragment(
                         fragment2, DataEntryFragment.TAG, true
                 );

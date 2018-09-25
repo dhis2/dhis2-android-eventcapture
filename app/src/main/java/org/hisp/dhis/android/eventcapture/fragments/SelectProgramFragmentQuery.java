@@ -124,14 +124,8 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
         }
         eventEventRows.add(columnNames);
         List<Event> events;
-        if(selectedProgram.getCategoryCombo()==null) {
-            events = TrackerController.getNotDeletedEvents(
-                    mOrgUnitId, mProgramId
-            );
-        }else{
-            events = TrackerController.getNotDeletedEvents(
-                    mOrgUnitId, mProgramId, MetaDataController.getCategoryOptionCombo(mCategoryOptionComboId).getCategoryOption());
-        }
+        events = TrackerController.getNotDeletedEvents(
+                mOrgUnitId, mProgramId, MetaDataController.getCategoryOptionCombo(mCategoryOptionComboId).getCategoryOption());
         if (isListEmpty(events)) {
             return fragmentForm;
         }
