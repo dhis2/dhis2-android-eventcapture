@@ -68,10 +68,12 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
     private static final String TAG = SelectProgramFragmentQuery.class.getSimpleName();
     private final String mOrgUnitId;
     private final String mProgramId;
+    private final String mCategoryOptionComboId;
 
-    public SelectProgramFragmentQuery(String orgUnitId, String programId) {
+    public SelectProgramFragmentQuery(String orgUnitId, String programId, String categoryOptionComboId) {
         mOrgUnitId = orgUnitId;
         mProgramId = programId;
+        mCategoryOptionComboId = categoryOptionComboId;
     }
 
     @Override
@@ -121,9 +123,15 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
                     org.hisp.dhis.android.sdk.R.string.eventDate));
         }
         eventEventRows.add(columnNames);
-        List<Event> events = TrackerController.getNotDeletedEvents(
-                mOrgUnitId, mProgramId
-        );
+        List<Event> events;
+        if(selectedProgram.getCategoryCombo()==null) {
+            events = TrackerController.getNotDeletedEvents(
+                    mOrgUnitId, mProgramId
+            );
+        }else{
+            events = TrackerController.getNotDeletedEvents(
+                    mOrgUnitId, mProgramId, MetaDataController.getCategoryOptionCombo(mCategoryOptionComboId).getCategoryOption());
+        }
         if (isListEmpty(events)) {
             return fragmentForm;
         }
@@ -150,6 +158,7 @@ class SelectProgramFragmentQuery implements Query<SelectProgramFragmentForm> {
 
         Collections.sort(events, new EventComparator());
         for (Event event : events) {
+            event.setAttributeCC(selectedProgram.getCategoryComboUId());
             eventEventRows.add(createEventItem(context,
                     event, elementsToShow, dataElementMap, failedEventIds));
         }
