@@ -49,6 +49,7 @@ import org.hisp.dhis.android.sdk.events.OnTrackerItemClick;
 import org.hisp.dhis.android.sdk.events.UiEvent;
 import org.hisp.dhis.android.sdk.persistence.loaders.DbLoader;
 import org.hisp.dhis.android.sdk.persistence.models.BaseSerializableModel;
+import org.hisp.dhis.android.sdk.persistence.models.CategoryOptionCombo;
 import org.hisp.dhis.android.sdk.persistence.models.Event;
 import org.hisp.dhis.android.sdk.persistence.models.FailedItem;
 import org.hisp.dhis.android.sdk.ui.adapters.AbsAdapter;
@@ -90,9 +91,11 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
 
         if(item.getTitle().toString().equals(getResources().getString(R.string.go_to_dataentry_fragment)))
         {
-            mNavigationHandler.switchFragment(EventDataEntryFragment.newInstance(mState.getOrgUnitId(),mState.getProgramId()
-            , MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                    itemRow.getmEvent().getLocalId()), TAG, true);
+            CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
+            mNavigationHandler.switchFragment(EventDataEntryFragment.newInstance(mState.getOrgUnitId(), mState.getProgramId()
+                    , MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
+                    categoryOptionCombo.getCategoryOption(),itemRow.getmEvent().getLocalId()), TAG,  true);
+
         }
         else if(item.getTitle().toString().equals(getResources().getString(org.hisp.dhis.android.sdk.R.string.delete)))
         {
@@ -141,7 +144,7 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
             modelsToTrack.add(FailedItem.class);
             return new DbLoader<>(
                     getActivity().getBaseContext(), modelsToTrack,
-                    new SelectProgramFragmentQuery(mState.getOrgUnitId(), mState.getProgramId()));
+                    new SelectProgramFragmentQuery(mState.getOrgUnitId(), mState.getProgramId(), mState.getCategoryOptionComboId()));
         }
         return null;
     }
@@ -150,11 +153,13 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     @SuppressWarnings("unused")
     public void onItemClick(OnTrackerItemClick eventClick) {
         if (eventClick.isOnDescriptionClick()) {
-            DataEntryFragment fragment = EventDataEntryFragment.newInstance(
+            DataEntryFragment fragment;
+            CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
+            fragment = EventDataEntryFragment.newInstance(
                     mState.getOrgUnitId(), mState.getProgramId(),
                     MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
-                    eventClick.getItem().getLocalId()
-            );
+                     categoryOptionCombo.getCategoryOption(),
+                    eventClick.getItem().getLocalId());
             mNavigationHandler.switchFragment(fragment, DataEntryFragment.TAG, true);
         } else {
             showStatusDialog(eventClick.getItem());
@@ -170,9 +175,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.register_new_event: {
-                DataEntryFragment fragment2 = EventDataEntryFragment.newInstance(
+                DataEntryFragment fragment2;
+                CategoryOptionCombo categoryOptionCombo = MetaDataController.getCategoryOptionCombo(mState.getCategoryOptionComboId());
+                fragment2 = EventDataEntryFragment.newInstance(
                         mState.getOrgUnitId(), mState.getProgramId(),
-                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid()
+                        MetaDataController.getProgram(mState.getProgramId()).getProgramStages().get(0).getUid(),
+                        categoryOptionCombo.getCategoryOption()
                 );
                 mNavigationHandler.switchFragment(
                         fragment2, DataEntryFragment.TAG, true
@@ -204,14 +212,12 @@ public class SelectProgramFragment extends org.hisp.dhis.android.sdk.ui.fragment
         fragment.show(getChildFragmentManager());
     }
 
-    protected void handleViews(int level) {
+    protected void showEventButton(boolean show) {
         mAdapter.swapData(null);
-        switch (level) {
-            case 0:
-                mRegisterEventButton.hide();
-                break;
-            case 1:
-                mRegisterEventButton.show();
+        if (show) {
+            mRegisterEventButton.show();
+        } else {
+            mRegisterEventButton.hide();
         }
     }
 }
